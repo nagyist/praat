@@ -27,16 +27,16 @@ autoStringSet GuiFileSelect_getInfileNames (GuiWindow optionalParent, conststrin
 	autoStringSet me = StringSet_create ();
 	#if gtk
 		static structMelderFolder folder { };
-		GuiObject dialog = gtk_file_chooser_dialog_new (Melder_peek32to8 (title), nullptr, GTK_FILE_CHOOSER_ACTION_OPEN,
-				GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, nullptr);
+		GuiObject dialog = gtk_file_chooser_native_new (Melder_peek32to8 (title), nullptr, GTK_FILE_CHOOSER_ACTION_OPEN,
+				"_Open", "_Cancel");
 		Melder_assert (dialog);
 		if (optionalParent)
-			gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (optionalParent -> d_gtkWindow));
+			gtk_native_dialog_set_transient_for (GTK_NATIVE_DIALOG (dialog), GTK_WINDOW (optionalParent -> d_gtkWindow));
 		gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER (dialog), allowMultipleFiles);
 		if (MelderFolder_isNull (& folder))   // first time?
 			Melder_getCurrentFolder (& folder);
 		gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (dialog), MelderFolder_peekPath8 (& folder));
-		if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
+		if (gtk_native_dialog_run (GTK_NATIVE_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
 			char *infolderName_utf8 = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (dialog));
 			if (infolderName_utf8) {
 				conststring32 infolderName = Melder_peek8to32 (infolderName_utf8);   // dangle
@@ -51,7 +51,7 @@ autoStringSet GuiFileSelect_getInfileNames (GuiWindow optionalParent, conststrin
 			}
 			g_slist_free (infileNames_list);
 		}
-		gtk_widget_destroy (GTK_WIDGET (dialog));
+		gtk_native_dialog_destroy (GTK_NATIVE_DIALOG (dialog));
 		setlocale (LC_ALL, "C");
 	#elif motif
 		static OPENFILENAMEW openFileName;   // TODO: replace with Common Item Dialog API (since Vista)
@@ -128,21 +128,21 @@ autostring32 GuiFileSelect_getOutfileName (GuiWindow optionalParent, conststring
 	autostring32 outfileName;
 	#if gtk
 		static structMelderFile file;
-		GuiObject dialog = gtk_file_chooser_dialog_new (Melder_peek32to8 (title), nullptr, GTK_FILE_CHOOSER_ACTION_SAVE,
-				GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, nullptr);
+		GuiObject dialog = gtk_file_chooser_native_new (Melder_peek32to8 (title), nullptr, GTK_FILE_CHOOSER_ACTION_SAVE,
+				"_Save", "_Cancel");
 		if (optionalParent)
-			gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (optionalParent -> d_gtkWindow));
+			gtk_native_dialog_set_transient_for (GTK_NATIVE_DIALOG (dialog), GTK_WINDOW (optionalParent -> d_gtkWindow));
 		gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (dialog), true);
 		if (! MelderFile_isNull (& file))
 			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (dialog), MelderFile_peekPath8 (& file));
 		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (dialog), Melder_peek32to8 (defaultName));
-		if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
+		if (gtk_native_dialog_run (GTK_NATIVE_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
 			char *outfileName_utf8 = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
 			outfileName = Melder_8to32 (outfileName_utf8);
 			g_free (outfileName_utf8);
 			Melder_pathToFile (outfileName.get(), & file);
 		}
-		gtk_widget_destroy (GTK_WIDGET (dialog));
+		gtk_native_dialog_destroy (GTK_NATIVE_DIALOG (dialog));
 		setlocale (LC_ALL, "C");
 	#elif motif
 		OPENFILENAMEW openFileName;
@@ -192,19 +192,19 @@ autostring32 GuiFileSelect_getFolderName (GuiWindow optionalParent, conststring3
 	autostring32 folderName;
 	#if gtk
 		static structMelderFile file;
-		GuiObject dialog = gtk_file_chooser_dialog_new (Melder_peek32to8 (title), nullptr, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-				GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, "Choose", GTK_RESPONSE_ACCEPT, nullptr);
+		GuiObject dialog = gtk_file_chooser_native_new (Melder_peek32to8 (title), nullptr, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+					"Ch_oose", "_Cancel");
 		if (optionalParent)
-			gtk_window_set_transient_for (GTK_WINDOW (dialog), GTK_WINDOW (optionalParent -> d_gtkWindow));
+			gtk_native_dialog_set_transient_for (GTK_NATIVE_DIALOG (dialog), GTK_WINDOW (optionalParent -> d_gtkWindow));
 		if (! MelderFile_isNull (& file))
 			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (dialog), MelderFile_peekPath8 (& file));
-		if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
+		if (gtk_native_dialog_run (GTK_NATIVE_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
 			char *folderName_utf8 = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
 			folderName = Melder_8to32 (folderName_utf8);
 			g_free (folderName_utf8);
 			Melder_pathToFile (folderName.get(), & file);
 		}
-		gtk_widget_destroy (GTK_WIDGET (dialog));
+		gtk_native_dialog_destroy (GTK_NATIVE_DIALOG (dialog));
 		setlocale (LC_ALL, "C");
 	#elif motif
 		static WCHAR fullFileNameW [3000+2];
