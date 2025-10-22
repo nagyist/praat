@@ -80,13 +80,14 @@ void structSoundFrames :: initCommon (kSound_windowShape windowShape, bool avera
 
 VEC structSoundFrames :: getFrame (integer iframe) {
 	const double midTime = t1 + (iframe - 1) * dt;
-	integer currentSample = Sampled_xToNearestIndex (inputSound, midTime - 0.5 * physicalAnalysisWidth); // approximation
+	integer startSample = Sampled_xToNearestIndex (inputSound, midTime - 0.5 * physicalAnalysisWidth); // approximation
 	const integer numberOfChannels = inputSound -> ny;
 	VEC powerspectrum = powerSpectrum.get(); // instead of always using the .get()
 	if (wantPowerSpectrum)
 		powerspectrum  <<=  0.0;
 	for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
-		VEC soundChannel = inputSound -> z.row (ichannel), frameChannel = frameAsSound -> z.row(ichannel);
+		VEC soundChannel = inputSound -> z.row (ichannel), frameChannel = frameAsSound -> z.row (ichannel);
+		integer currentSample = startSample;
 		for (integer i = 1; i <= soundFrame.size; i ++, currentSample ++)
 			frameChannel [i] = (( currentSample > 0 && currentSample <= inputSound -> nx) ? soundChannel [currentSample] : 0.0 );
 
