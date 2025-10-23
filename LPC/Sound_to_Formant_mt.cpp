@@ -112,7 +112,7 @@ void Sound_into_Formant_burg (constSound me, mutableLPC intermediateLPC, mutable
 	const double samplingPeriod = intermediateLPC -> samplingPeriod;
 	MelderThread_PARALLELIZE (outputFormant -> nx, thresholdNumberOfFramesPerThread)
 		autoSoundFrames soundFrames = SoundFrames_create (me, intermediateLPC, effectiveAnalysisWidth,
-			kSound_windowShape::GAUSSIAN_2, false, true, false, 0_integer);
+			kSound_windowShape::GAUSSIAN_2, false, false, 0_integer);
 		integer info;
 		autoVEC aa = raw_VEC (order);
 		autoVEC b1 = raw_VEC (soundFrames -> soundFrameSize);
@@ -158,7 +158,7 @@ void Sound_and_LPC_into_Formant (constSound inputSound, constLPC inputLPC, mutab
 	const double samplingPeriod = inputLPC -> samplingPeriod;
 	MelderThread_PARALLELIZE (outputFormant -> nx, thresholdNumberOfFramesPerThread)
 		autoSoundFrames soundFrames = SoundFrames_create (inputSound, intermediateLPC, effectiveAnalysisWidth,
-			kSound_windowShape::GAUSSIAN_2, false, true, false, 0_integer);
+			kSound_windowShape::GAUSSIAN_2, false, false, 0_integer);
 		integer info;
 		autoRobustLPCWorkspace ws = RobustLPCWorkspace_create (inputLPC, inputSound, intermediateLPC,
 			effectiveAnalysisWidth, kSound_windowShape :: GAUSSIAN_2, k_stdev, itermax, tol, wantlocation);
