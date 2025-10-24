@@ -6,7 +6,7 @@
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -21,29 +21,6 @@
 #include "PowerCepstrum.h"
 #include "PowerCepstrogram.h"
 #include "Sound.h"
-#include "SoundFrameIntoSampledFrame.h"
-
-Thing_define (SoundFrameIntoPowerCepstrogramFrame, SoundFrameIntoSampledFrame) {
-	
-	PowerCepstrogram outputPowerCepstrogram;
-	autoPowerCepstrum powerCepstrum;
-
-	void initBasicSoundFrameIntoPowerCepstrogramFrame (constSound input, mutablePowerCepstrogram output, 
-		double effectiveAnalysisWidth, kSound_windowShape windowShape);
-	
-	void copyBasic (constSampledFrameIntoSampledFrame other)
-		override;
-		
-	void initHeap ()
-		override;
-
-	bool inputFrameIntoOutputFrame (integer currentFrame)
-		override;
-
-	void saveOutputFrame (integer iframe)
-		override;
-	
-};
 
 autoPowerCepstrogram Sound_to_PowerCepstrogram (constSound me, double pitchFloor, double dt, double maximumFrequency,
 	double preEmphasisFrequency);

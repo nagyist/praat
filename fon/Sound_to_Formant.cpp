@@ -322,12 +322,9 @@ static autoFormant Sound_to_Formant_any_inplace (Sound me, double dt_in, integer
 	integer maximumFrameLength = nsamp_window;
 
 	MelderThread_PARALLELIZE (numberOfFrames, 3)
-
-	auto frameBuffer = raw_VEC (maximumFrameLength);
-	auto coefficients = raw_VEC (numberOfPoles);   // superfluous if which==2, but nobody uses that anyway
-
+		auto frameBuffer = raw_VEC (maximumFrameLength);
+		auto coefficients = raw_VEC (numberOfPoles);   // superfluous if which==2, but nobody uses that anyway
 	MelderThread_FOR (iframe) {
-
 		const double t = Sampled_indexToX (thee.get(), iframe);
 		const integer leftSample = Sampled_xToLowIndex (me, t);
 		const integer rightSample = leftSample + 1;
@@ -370,7 +367,6 @@ static autoFormant Sound_to_Formant_any_inplace (Sound me, double dt_in, integer
 				U" out of ", numberOfFrames, U" frames"
 			);
 		}
-
 	} MelderThread_ENDFOR
 
 	Formant_sort (thee.get());

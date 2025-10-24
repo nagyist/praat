@@ -130,11 +130,9 @@ autoSpectrogram Sound_to_Spectrogram_e (
 		autoMelderProgress progress (U"Sound to Spectrogram...");
 
 		MelderThread_PARALLELIZE (numberOfTimes, 15)
-
-		autoVEC data = zero_VEC (nsampFFT);
-		autoVEC spectrum = zero_VEC (half_nsampFFT + 1);
-		autoNUMFourierTable fftTable = NUMFourierTable_create (nsampFFT);
-
+			autoVEC data = zero_VEC (nsampFFT);
+			autoVEC spectrum = zero_VEC (half_nsampFFT + 1);
+			autoNUMFourierTable fftTable = NUMFourierTable_create (nsampFFT);
 		MelderThread_FOR (iframe) {
 			const double t = Sampled_indexToX (thee.get(), iframe);
 			const integer leftSample = Sampled_xToLowIndex (me, t), rightSample = leftSample + 1;

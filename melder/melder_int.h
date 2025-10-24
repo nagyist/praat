@@ -113,18 +113,20 @@ inline integer Melder_iroundUpToPowerOfTwo (integer n) {
 	n |= n >> 4;   // copy the four highest 1-bits to their right
 	n |= n >> 8;   // copy the eight highest 1-bits to their right
 	n |= n >> 16;   // copy the 16 highest 1-bits to their right
-	if (sizeof (integer) > 4)
+	if constexpr (sizeof (integer) > 4)
 		n |= (n >> 16) >> 16;   // copy the 32 highest 1-bits to their right ("n >> 32" would give a compiler warning on 32-bit platforms)
 	n += 1;
 	return n;
 }
 
 inline integer integer_abs (integer n) {
-	Melder_assert (sizeof (integer) == sizeof (long) || sizeof (integer) == sizeof (long long));
-	if (sizeof (integer) == sizeof (long))
+	static_assert (sizeof (integer) == sizeof (long) || sizeof (integer) == sizeof (long long));
+	if constexpr (sizeof (integer) == sizeof (long))
 		return labs ((long_not_integer) n);
-	else // sizeof (integer) == sizeof (long long)
+	else {
+		static_assert (sizeof (integer) == sizeof (long long));
 		return llabs (n);
+	}
 }
 
 struct MelderIntegerRange {

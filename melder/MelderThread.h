@@ -214,17 +214,14 @@ void MelderThread_run (
 				autoMelderProgress progress (U"Sound to Pitch...");
 
 				MelderThread_PARALLELIZE (numberOfFrames, 5, false)
-
-				autoMAT frame = zero_MAT (my ny, ...);
-				autoNUMFourierTable fftTable = NUMFourierTable_create (...);
-				autoVEC ac = zero_VEC (...);
-				autoVEC rbuffer = zero_VEC (...);
-				double *r = & rbuffer [...];
-				autoINTVEC imax = zero_INTVEC (maxnCandidates);
-				autoVEC localMean = zero_VEC (my ny);
-
+					autoMAT frame = zero_MAT (my ny, ...);
+					autoNUMFourierTable fftTable = NUMFourierTable_create (...);
+					autoVEC ac = zero_VEC (...);
+					autoVEC rbuffer = zero_VEC (...);
+					double *r = & rbuffer [...];
+					autoINTVEC imax = zero_INTVEC (maxnCandidates);
+					autoVEC localMean = zero_VEC (my ny);
 				MelderThread_FOR (iframe) {
-
 					Pitch_Frame pitchFrame = & thy frames [iframe];
 					Sound_into_PitchFrame (me, pitchFrame, maxnCandidates,
 						window.get(), windowR.get(),
@@ -239,7 +236,6 @@ void MelderThread_run (
 							U" out of ", numberOfFrames, U" frames"
 						);
 					}
-
 				} MelderThread_ENDFOR
 
 				Melder_progress (0.95, U"Sound to Pitch: path finder");

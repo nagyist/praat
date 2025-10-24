@@ -153,10 +153,10 @@ void VECsmooth_gaussian_inplace (VECVU const& in_out, double sigma, NUMFourierTa
 	*/
 	const double b = 2.0 * NUMpi * sigma * NUMpi * sigma ;
 	for (integer k = 2; k <= (fftTable -> n + 1) / 2; k ++) {
-		const double f = (k - 1) /  (double) fftTable -> n;
+		const double f = (k - 1) / (double) fftTable -> n;
 		const double weight = exp (- b * f * f);
-		smooth [k * 2 - 2] *= weight; // re
-		smooth [k * 2 - 1] *= weight; // im
+		smooth [k * 2 - 2] *= weight;   // re
+		smooth [k * 2 - 1] *= weight;   // im
 	}
 	if (fftTable -> n % 2 == 0)
 		smooth [fftTable -> n] *= exp (- b * 1 / 2  * 1 / 2);

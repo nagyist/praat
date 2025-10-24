@@ -449,7 +449,7 @@ static void PowerCepstrum_smooth_inplaceGaussian (mutablePowerCepstrum me, doubl
 		const double numberOfQuefrencyBins = quefrencyAveragingWindow / my dx;
 		if (numberOfQuefrencyBins > 1.0) {
 			/*
-				Applying  two Gaussians after another is associative: (G(s2)*(G(s1)*f) = (G(s2)*G(s1))*f.
+				Applying two Gaussians after another is associative: (G(s2)*(G(s1)*f) = (G(s2)*G(s1))*f.
 				G(s2) * G(s1) = G(s), where s^2=s1^2+s2^2
 			*/
 			const double numberOfSigmasInWindow = 4.0;

@@ -17,7 +17,6 @@
 */
 
 #include "SampledIntoSampled.h"
-#include "MelderThread.h"
 #include "Sound.h"
 #include "Sound_and_LPC.h"
 
@@ -29,15 +28,12 @@ void SampledIntoSampled_mt (SampledFrameIntoSampledFrame frameIntoFrame, integer
 	/* TODO: put non-thread-specific code here (in the separate functions), such as window creation */
 
 	MelderThread_PARALLELIZE (numberOfFrames, thresholdNumberOfFramesPerThread)
-
-	ClassInfo classInfo = frameIntoFrame -> classInfo;
-	autoSampledFrameIntoSampledFrame current =
-			Thing_newFromClass (classInfo).static_cast_move <structSampledFrameIntoSampledFrame>();
-	current -> copyBasic (frameIntoFrame);
-	current -> initHeap ();
-
+		ClassInfo classInfo = frameIntoFrame -> classInfo;
+		autoSampledFrameIntoSampledFrame current =
+				Thing_newFromClass (classInfo).static_cast_move <structSampledFrameIntoSampledFrame>();
+		current -> copyBasic (frameIntoFrame);
+		current -> initHeap ();
 	MelderThread_FOR (iframe) {
-
 		if (MelderThread_IS_MASTER) {
 			const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
 			Melder_progress (0.98 * estimatedProgress,
@@ -48,7 +44,6 @@ void SampledIntoSampled_mt (SampledFrameIntoSampledFrame frameIntoFrame, integer
 		current -> getInputFrame (iframe);
 		current -> inputFrameIntoOutputFrame (iframe);
 		current -> saveOutputFrame (iframe);
-
 	} MelderThread_ENDFOR
 }
 

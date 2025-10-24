@@ -439,24 +439,21 @@ autoPitch Sound_to_Pitch_any (Sound me,
 			Melder_casual (U"channel frame time pitch");
 
 		MelderThread_PARALLELIZE (numberOfFrames, 5)
-
-		autoMAT frame;
-		autoNUMFourierTable fftTable;
-		autoVEC ac;
-		if (method >= FCC_NORMAL) {   // cross-correlation
-			frame = zero_MAT (my ny, nsamp_window);
-		} else {   // autocorrelation
-			fftTable = NUMFourierTable_create (nsampFFT);
-			frame = zero_MAT (my ny, nsampFFT);
-			ac = zero_VEC (nsampFFT);
-		}
-		autoVEC rbuffer = zero_VEC (2 * nsamp_window + 1);
-		double *r = & rbuffer [1 + nsamp_window];
-		autoINTVEC imax = zero_INTVEC (maxnCandidates);
-		autoVEC localMean = zero_VEC (my ny);
-
+			autoMAT frame;
+			autoNUMFourierTable fftTable;
+			autoVEC ac;
+			if (method >= FCC_NORMAL) {   // cross-correlation
+				frame = zero_MAT (my ny, nsamp_window);
+			} else {   // autocorrelation
+				fftTable = NUMFourierTable_create (nsampFFT);
+				frame = zero_MAT (my ny, nsampFFT);
+				ac = zero_VEC (nsampFFT);
+			}
+			autoVEC rbuffer = zero_VEC (2 * nsamp_window + 1);
+			double *r = & rbuffer [1 + nsamp_window];
+			autoINTVEC imax = zero_INTVEC (maxnCandidates);
+			autoVEC localMean = zero_VEC (my ny);
 		MelderThread_FOR (iframe) {
-
 			Pitch_Frame pitchFrame = & thy frames [iframe];
 			const double time = Sampled_indexToX (thee.get(), iframe);
 			if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
@@ -476,7 +473,6 @@ autoPitch Sound_to_Pitch_any (Sound me,
 			);
 			if (MelderThread_TRACING)
 				Melder_casual (MelderThread_CHANNEL, U" ", iframe, U" ", time, U" ", pitchFrame -> candidates [1]. frequency);
-
 		} MelderThread_ENDFOR
 
 		Melder_progress (0.95, U"Sound to Pitch: path finder");

@@ -2351,7 +2351,7 @@ void praat_run () {
 	Melder_assert (Melder_iroundUpToPowerOfTwo (131071) == 131072);
 	Melder_assert (Melder_iroundUpToPowerOfTwo (131072) == 131072);
 	Melder_assert (Melder_iroundUpToPowerOfTwo (131073) == 262144);
-	if (sizeof (integer) == 4) {
+	if constexpr (sizeof (integer) == 4) {
 		Melder_assert (Melder_iroundUpToPowerOfTwo (1073741823) == 1073741824);   // 2^30 - 1
 		Melder_assert (Melder_iroundUpToPowerOfTwo (1073741824) == 1073741824);   // 2^30
 		Melder_assert (Melder_iroundUpToPowerOfTwo (1073741825) == 0);   // 2^30 + 1

@@ -129,9 +129,9 @@ void LPC_into_LineSpectralFrequencies (constLPC inputLPC, mutableLineSpectralFre
 
 	MelderThread_PARALLELIZE (numberOfFrames, thresholdNumberOfFramesPerThread)
 
-	autoPolynomial gsum = Polynomial_create (-2.0, 2.0, numberOfCoefficients);   // large enough
-	autoPolynomial gdif = Polynomial_create (-2.0, 2.0, numberOfCoefficients);
-	autoRoots roots = Roots_create ((numberOfCoefficients + 1) / 2);
+		autoPolynomial gsum = Polynomial_create (-2.0, 2.0, numberOfCoefficients);   // large enough
+		autoPolynomial gdif = Polynomial_create (-2.0, 2.0, numberOfCoefficients);
+		autoRoots roots = Roots_create ((numberOfCoefficients + 1) / 2);
 
 	MelderThread_FOR (iframe) {
 
@@ -207,6 +207,7 @@ void LineSpectralFrequencies_into_LPC (constLineSpectralFrequencies me, mutableL
 	SampledIntoSampled_requireEqualDomainsAndSampling (me, outputLPC);
 	const integer numberOfFrames = my nx, thresholdNumberOfFramesPerThread = 40;
 	autoMelderProgress progress (U"LineSpectralFrequencies_into_LPC...");
+
 	MelderThread_PARALLELIZE (numberOfFrames, thresholdNumberOfFramesPerThread)
 		autoPolynomial fs = Polynomial_create (-1.0, 1.0, my maximumNumberOfFrequencies + 2);
 		autoPolynomial fa = Polynomial_create (-1.0, 1.0, my maximumNumberOfFrequencies + 2);
@@ -255,7 +256,6 @@ void LineSpectralFrequencies_into_LPC (constLineSpectralFrequencies me, mutableL
 		*/
 		for (integer i = 1; i <= fs -> numberOfCoefficients - 2; i ++)
 			a [lsfFrame -> numberOfFrequencies - i + 1] = 0.5 * (fs -> coefficients [i + 1] + fa -> coefficients [i + 1]);
-
 	} MelderThread_ENDFOR
 }
 
