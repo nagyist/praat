@@ -255,7 +255,7 @@ void Demo_waitForInput (Interpreter interpreter) {
 					[theReferenceToTheOnlyDemoEditor -> windowForm -> d_cocoaShell   displayIfNeeded];
 					Graphics_updateWs (theReferenceToTheOnlyDemoEditor -> graphics.get());   // make sure that even texts will be drawn
 					NSEvent *nsEvent = [NSApp
-						nextEventMatchingMask: NSAnyEventMask
+						nextEventMatchingMask: NSEventMaskAny
 						untilDate: [NSDate distantPast]
 						inMode: NSDefaultRunLoopMode
 						dequeue: YES

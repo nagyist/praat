@@ -64,7 +64,8 @@ Command-line input		argv[1]		argv[2]		argv[3]		remarks
 static autostring32 runAny_STR (
 	conststring32 procedureMessageName,
 	conststring32 command,   // it's either this one...
-	conststring32 executableFileName, integer narg, char32 ** args   // ... or these three
+	conststring32 executableFileName, integer narg, char32 ** args,   // ... or these three
+	bool collectStdout
 ) {
 	if (! command)
 		command = U"";
@@ -73,7 +74,9 @@ static autostring32 runAny_STR (
 	*/
 	#if defined (macintosh) || defined (UNIX)
 		int stdoutPipe [2], stderrPipe [2];
-		if (pipe (stdoutPipe) == -1 || pipe (stderrPipe) == -1)
+		if (collectStdout && pipe (stdoutPipe) == -1)
+			Melder_throw (procedureMessageName, U": cannot start system command <<", command, U">> (“pipe error”).");
+		if (pipe (stderrPipe) == -1)
 			Melder_throw (procedureMessageName, U": cannot start system command <<", command, U">> (“pipe error”).");
 	#elif defined (_WIN32)
 		HANDLE stdoutReadPipe = NULL, stdoutWritePipe = NULL, stderrReadPipe = NULL, stderrWritePipe = NULL;
@@ -81,10 +84,9 @@ static autostring32 runAny_STR (
 		securityAttributes. nLength = sizeof (SECURITY_ATTRIBUTES);
 		securityAttributes. bInheritHandle = TRUE;
 		securityAttributes. lpSecurityDescriptor = NULL;
-		if (
-			! CreatePipe (& stdoutReadPipe, & stdoutWritePipe, & securityAttributes, 0) ||
-			! CreatePipe (& stderrReadPipe, & stderrWritePipe, & securityAttributes, 0)
-		)
+		if (collectStdout && ! CreatePipe (& stdoutReadPipe, & stdoutWritePipe, & securityAttributes, 0))
+			Melder_throw (procedureMessageName, U": cannot start system command <<", command, U">> (“pipe error”).");
+		if (! CreatePipe (& stderrReadPipe, & stderrWritePipe, & securityAttributes, 0))
 			Melder_throw (procedureMessageName, U": cannot start system command <<", command, U">> (“pipe error”).");
 	#endif
 	/*
@@ -102,13 +104,15 @@ static autostring32 runAny_STR (
 			/*
 				We are in the child process.
 			*/
-			while ((dup2 (stdoutPipe [1], STDOUT_FILENO) == -1) && (errno == EINTR)) {   // attach stdout write pipe to child process
+			while (collectStdout && (dup2 (stdoutPipe [1], STDOUT_FILENO) == -1) && (errno == EINTR)) {   // attach stdout write pipe to child process
 			}
 			while ((dup2 (stderrPipe [1], STDERR_FILENO) == -1) && (errno == EINTR)) {   // attach stderr write pipe to child process
 			}
-			close (stdoutPipe [1]);
+			if (collectStdout) {
+				close (stdoutPipe [1]);
+				close (stdoutPipe [0]);
+			}
 			close (stderrPipe [1]);
-			close (stdoutPipe [0]);
 			close (stderrPipe [0]);
 			if (executableFileName) {
 				autostring8vector args8 (narg + 2);
@@ -155,7 +159,10 @@ static autostring32 runAny_STR (
 		memset (& siStartInfo, 0, sizeof (siStartInfo));
 		siStartInfo. cb = sizeof (siStartInfo);
 		siStartInfo. dwFlags = STARTF_USESTDHANDLES;
-		siStartInfo. hStdOutput = stdoutWritePipe;   // attach stdout write pipe to child process
+		if (collectStdout)
+			siStartInfo. hStdOutput = stdoutWritePipe;   // attach stdout write pipe to child process
+		else
+			siStartInfo. hStdOutput = GetStdHandle (STD_OUTPUT_HANDLE);   // TODO: make this work in the Windows console, not just in Cygwin and MSYS
 		siStartInfo. hStdError = stderrWritePipe;   // attach stderr write pipe to child process
 		PROCESS_INFORMATION piProcInfo;
 		memset (& piProcInfo, 0, sizeof (piProcInfo));
@@ -208,10 +215,12 @@ static autostring32 runAny_STR (
 		Close the write pipes; no longer should anything be written to them.
 	*/
 	#if defined (macintosh) || defined (UNIX)
-		close (stdoutPipe [1]);
+		if (collectStdout)
+			close (stdoutPipe [1]);
 		close (stderrPipe [1]);
 	#elif defined (_WIN32)
-		CloseHandle (stdoutWritePipe);
+		if (collectStdout)
+			CloseHandle (stdoutWritePipe);
 		CloseHandle (stderrWritePipe);
 	#endif
 	/*
@@ -219,29 +228,30 @@ static autostring32 runAny_STR (
 	*/
 	autoMelderString stdout_string, stderr_string;
 	char buffer8 [1+4096];
-	for (;;) {
-		#if defined (macintosh) || defined (UNIX)
-			ssize_t count = read (stdoutPipe [0], buffer8, 4096);
-		#elif defined (_WIN32)
-			DWORD count;
-			BOOL success = ReadFile (stdoutReadPipe, buffer8, 4096, & count, NULL);
-			Melder_killReturns_inplace (buffer8);
-		#endif
-		if (count == 0)   // on Windows, this has to go before the success test
-			break;
-		#if defined (macintosh) || defined (UNIX)
-			if (count == -1) {
-				if (errno == EINTR)
-					continue;
-				Melder_throw (procedureMessageName, U": error while handling child process output.");
-			}
-		#elif defined (_WIN32)
-			if (! success)
-				Melder_throw (procedureMessageName, U": error while handling child process output.");
-		#endif
-		buffer8 [count] = '\0';
-		MelderString_append (& stdout_string, Melder_peek8to32 (buffer8));
-	}
+	if (collectStdout)
+		for (;;) {
+			#if defined (macintosh) || defined (UNIX)
+				ssize_t count = read (stdoutPipe [0], buffer8, 4096);
+			#elif defined (_WIN32)
+				DWORD count;
+				BOOL success = ReadFile (stdoutReadPipe, buffer8, 4096, & count, NULL);
+				Melder_killReturns_inplace (buffer8);
+			#endif
+			if (count == 0)   // on Windows, this has to go before the success test
+				break;
+			#if defined (macintosh) || defined (UNIX)
+				if (count == -1) {
+					if (errno == EINTR)
+						continue;
+					Melder_throw (procedureMessageName, U": error while handling child process output.");
+				}
+			#elif defined (_WIN32)
+				if (! success)
+					Melder_throw (procedureMessageName, U": error while handling child process output.");
+			#endif
+			buffer8 [count] = '\0';
+			MelderString_append (& stdout_string, Melder_peek8to32 (buffer8));
+		}
 	for (;;) {
 		#if defined (macintosh) || defined (UNIX)
 			ssize_t count = read (stderrPipe [0], buffer8, 4096);
@@ -269,10 +279,12 @@ static autostring32 runAny_STR (
 		Close the read pipes, which are no longer needed.
 	*/
 	#if defined (macintosh) || defined (UNIX)
-		close (stdoutPipe [0]);
+		if (collectStdout)
+			close (stdoutPipe [0]);
 		close (stderrPipe [0]);
 	#elif defined (_WIN32)
-		CloseHandle (stdoutReadPipe);
+		if (collectStdout)
+			CloseHandle (stdoutReadPipe);
 		CloseHandle (stderrReadPipe);
 	#endif
 	/*
@@ -298,20 +310,20 @@ static autostring32 runAny_STR (
 		CloseHandle (piProcInfo. hProcess);
 		CloseHandle (piProcInfo. hThread);
 	#endif
-	return Melder_dup (stdout_string.string);
+	return collectStdout ? Melder_dup (stdout_string.string) : autostring32 ();
 }
 
 autostring32 runSystem_STR (conststring32 command) {
-	return runAny_STR (U"runSystem$", command, nullptr, 0, nullptr);
+	return runAny_STR (U"runSystem$", command, nullptr, 0, nullptr, true);
 }
 void Melder_runSystem (conststring32 command) {
-	(void) runAny_STR (U"runSystem", command, nullptr, 0, nullptr);
+	(void) runAny_STR (U"runSystem", command, nullptr, 0, nullptr, false);
 }
 autostring32 runSubprocess_STR (conststring32 executableFileName, integer narg, char32 ** args) {
-	return runAny_STR (U"runSubprocess$", nullptr, executableFileName, narg, args);
+	return runAny_STR (U"runSubprocess$", nullptr, executableFileName, narg, args, true);
 }
 void Melder_runSubprocess (conststring32 executableFileName, integer narg, char32 ** args) {
-	(void) runAny_STR (U"runSubprocess", nullptr, executableFileName, narg, args);
+	(void) runAny_STR (U"runSubprocess", nullptr, executableFileName, narg, args, false);
 }
 
 /* End of file melder_sysenv.cpp */

@@ -145,7 +145,7 @@ typedef struct structPraatObjects {   // read-only (for interface files)
 	static constexpr integer MAXNUM_DATA_CLASSES = 1000;
 	integer numberOfSelected [1 + MAXNUM_DATA_CLASSES];   // for each (readable) class
 	integer totalBeingCreated;
-	integer uniqueId;
+	integer sequentialUniqueIdOfLatestObjectInList;
 	void reset () {
 		for (integer iobject = our n; iobject >= 1; iobject --) {
 			our list [iobject]. name. reset();

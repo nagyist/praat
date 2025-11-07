@@ -398,12 +398,12 @@ void praat_newWithFile (autoDaata me, MelderFile file, conststring32 myName) {
 	integer IOBJECT = ++ theCurrentPraatObjects -> n;
 	Melder_assert (FULL_NAME == nullptr);
 	theCurrentPraatObjects -> list [IOBJECT]. name = Melder_dup_f (name.string);   // all right to crash if out of memory
-	++ theCurrentPraatObjects -> uniqueId;
+	++ theCurrentPraatObjects -> sequentialUniqueIdOfLatestObjectInList;
 
 	if (! theCurrentPraatApplication -> batch)   // put a new object on the screen, at the bottom of the list
 		GuiList_insertItem (
 			praatList_objects,
-			Melder_cat (theCurrentPraatObjects -> uniqueId, U". ", name.string),
+			Melder_cat (theCurrentPraatObjects -> sequentialUniqueIdOfLatestObjectInList, U". ", name.string),
 			theCurrentPraatObjects -> n
 		);
 	CLASS = my classInfo;
@@ -415,7 +415,7 @@ void praat_newWithFile (autoDaata me, MelderFile file, conststring32 myName) {
 		MelderFile_copy (file, & theCurrentPraatObjects -> list [IOBJECT]. file);
 	else
 		MelderFile_setToNull (& theCurrentPraatObjects -> list [IOBJECT]. file);
-	ID = theCurrentPraatObjects -> uniqueId;
+	ID = theCurrentPraatObjects -> sequentialUniqueIdOfLatestObjectInList;
 	theCurrentPraatObjects -> list [IOBJECT]. isBeingCreated = true;
 	Thing_setName (OBJECT, givenName.string);
 	theCurrentPraatObjects -> totalBeingCreated ++;

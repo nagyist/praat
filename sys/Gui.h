@@ -137,6 +137,8 @@ constexpr bool theCommandKeyIsToTheLeftOfTheOptionKey =
 	@interface GuiCocoaShell : NSWindow <GuiCocoaAny>
 		- (void) setDistinctiveBackGround;   // slightly darker than Tahoe's background, in order to still see text widgets
 	@end
+	@interface GuiCocoaShellDelegate : NSObject <NSWindowDelegate>
+	@end
 	@interface GuiCocoaTextField : NSTextField <GuiCocoaAny> @end
 	@interface GuiCocoaTextView : NSTextView <GuiCocoaAny, NSTextViewDelegate> @end
 #elif motif

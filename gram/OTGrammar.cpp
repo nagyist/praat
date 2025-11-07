@@ -4,7 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -313,8 +313,8 @@ void OTGrammar_sort (OTGrammar me) {
 			/*
 				Sort primarily by disharmony.
 			*/
-			if (ci -> disharmony > cj -> disharmony)
-				return true;
+			if (ci -> disharmony > cj -> disharmony)   // already in descending order?
+				return true;   // yes, already in descending order
 			if (ci -> disharmony < cj -> disharmony)
 				return false;
 			/*
@@ -326,9 +326,9 @@ void OTGrammar_sort (OTGrammar me) {
 	for (integer icons = 1; icons <= my numberOfConstraints; icons ++) {
 		OTGrammarConstraint constraint = & my constraints [my index [icons]];
 		constraint -> tiedToTheLeft = ( icons > 1 &&
-			my constraints [my index [icons - 1]]. disharmony == constraint -> disharmony );
+				my constraints [my index [icons - 1]]. disharmony == constraint -> disharmony );
 		constraint -> tiedToTheRight = ( icons < my numberOfConstraints &&
-			my constraints [my index [icons + 1]]. disharmony == constraint -> disharmony );
+				my constraints [my index [icons + 1]]. disharmony == constraint -> disharmony );
 	}
 }
 
@@ -336,7 +336,7 @@ void OTGrammar_newDisharmonies (OTGrammar me, double spreading) {
 	for (integer icons = 1; icons <= my numberOfConstraints; icons ++) {
 		OTGrammarConstraint constraint = & my constraints [icons];
 		constraint -> disharmony = constraint -> ranking + NUMrandomGauss (0, spreading)
-			/*NUMrandomUniform (-spreading, spreading)*/;
+				/*NUMrandomUniform (-spreading, spreading)*/;
 	}
 	OTGrammar_sort (me);
 }

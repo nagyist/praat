@@ -105,9 +105,9 @@ void Graphics_init (Graphics me, int resolution) {
 		Melder_fatal (U"Unsupported resolution ", resolution, U" dpi.");
 	}
 	my d_x1DC = my d_x1DCmin = 0;
-	my d_x2DC = my d_x2DCmax = 32767;
+	my d_x2DC = my d_x2DCmax = 324000;   // enough for 60-inch wide canvases at 5400 dpi
 	my d_y1DC = my d_y1DCmin = 0;
-	my d_y2DC = my d_y2DCmax = 32767;
+	my d_y2DC = my d_y2DCmax = 324000;   // enough for 60-inch high canvases at 5400 dpi
 	my d_x1WC = my d_x1NDC = my d_x1wNDC = 0.0;
 	my d_x2WC = my d_x2NDC = my d_x2wNDC = 1.0;
 	my d_y1WC = my d_y1NDC = my d_y1wNDC = 0.0;

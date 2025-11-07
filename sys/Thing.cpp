@@ -30,8 +30,8 @@ void structThing :: v1_info () {
 }
 
 /*
- * Instead of the Thing_implement macro.
- */
+	Instead of the Thing_implement macro.
+*/
 struct structClassInfo theClassInfo_Thing = {
 	U"Thing",
 	nullptr,   // no parent class
@@ -226,10 +226,10 @@ conststring32 Thing_messageNameAndAddress (Thing me) {
 		ibuffer = 0;
 	if (my name)
 		MelderString_copy (& buffers [ibuffer], my classInfo -> className, U"-",
-			Melder_pointer (me), U"-“", my name.get(), U"”");
+				Melder_pointer (me), U"-“", my name.get(), U"”");
 	else
 		MelderString_copy (& buffers [ibuffer], my classInfo -> className, U"-",
-			Melder_pointer (me));
+				Melder_pointer (me));
 	return buffers [ibuffer].string;
 }
 

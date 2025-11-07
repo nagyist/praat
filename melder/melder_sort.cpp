@@ -1,6 +1,6 @@
 /* melder_sort.cpp
  *
- * Copyright (C) 1992-2011,2015,2017-2022 Paul Boersma
+ * Copyright (C) 1992-2011,2015,2017-2022,2024,2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,9 +50,9 @@ void sort_e_VEC_inout (VEC const& x) {
 
 void sort_VEC_inout (VEC const& x) {
 	std::sort (x.begin(), x.end(),
-			   [] (double first, double last) {
-				   return first < last;
-			   }
+		[] (double first, double last) {
+			return first < last;
+		}
 	);
 }
 

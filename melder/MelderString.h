@@ -2,11 +2,11 @@
 #define _melder_string_h_
 /* MelderString.h
  *
- * Copyright (C) 1992-2023 Paul Boersma
+ * Copyright (C) 1992-2023,2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -53,7 +53,7 @@ void _private_MelderString_expand (MelderString *me, int64 sizeNeeded);   // inc
 void MelderString_ncopy (MelderString *me, conststring32 sourceOrNull, int64 n);
 void MelderString_nappend (MelderString *me, conststring32 sourceOrNull, integer n);
 
-inline void MelderString__appendOneStringElement (MelderString *me, conststring32 string) {
+inline void _private_MelderString__appendOneStringElement (MelderString *me, conststring32 string) {
 	if (string) {
 		const char32 *newEndOfStringLocation = stp32cpy (& my string [my length], string);   // this will append a null character
 		my length = newEndOfStringLocation - & my string [0];
@@ -74,7 +74,7 @@ void MelderString_append (MelderString *me, const Arg... arg) {
 	if (sizeNeeded > my bufferSize)
 		_private_MelderString_expand (me, sizeNeeded);
 	(// fold
-		MelderString__appendOneStringElement (me, MelderArg { arg }. _arg)
+		_private_MelderString__appendOneStringElement (me, MelderArg { arg }. _arg)
 				, ...
 	);
 }
@@ -93,7 +93,7 @@ void MelderString_copy (MelderString *me, const Arg... arg) {
 	my length = 0;
 	my string [0] = U'\0';   // maintain invariant
 	(// fold
-		MelderString__appendOneStringElement (me, MelderArg { arg }. _arg)
+		_private_MelderString__appendOneStringElement (me, MelderArg { arg }. _arg)
 				, ...
 	);
 }

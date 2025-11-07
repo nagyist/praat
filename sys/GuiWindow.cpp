@@ -183,6 +183,8 @@ GuiWindow GuiWindow_create (int x, int y, int width, int height, int minimumWidt
 			styleMask: NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask
 			backing: NSBackingStoreBuffered
 			defer: false];
+		//GuiCocoaShellDelegate *delegate = [[GuiCocoaShellDelegate alloc] init];
+		//my d_cocoaShell. delegate = delegate;
 		if (Melder_debug == 55)
 			Melder_casual (U"\t\tGuiCocoaShell-", Melder_pointer (my d_cocoaShell), U" init in ", Thing_messageNameAndAddress (me.get()));
 		[my d_cocoaShell   setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];

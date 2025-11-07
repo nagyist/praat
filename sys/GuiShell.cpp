@@ -98,6 +98,24 @@ Thing_implement (GuiShell, GuiForm, 0);
 			[self   setBackgroundColor: [NSColor   colorWithCalibratedWhite: 0.85   alpha: 1.0]];   // not dynamic
 	}
 	@end
+	@implementation GuiCocoaShellDelegate
+	- (void) windowWillEnterFullScreen: (NSNotification *) notification {
+		//TRACE
+		trace (1);
+	}
+	- (void) windowDidEnterFullScreen: (NSNotification *) notification {
+		//TRACE
+		trace (1);
+	}
+	- (void) windowWillExitFullScreen: (NSNotification *) notification {
+		//TRACE
+		trace (1);
+	}
+	- (void) windowDidExitFullScreen: (NSNotification *) notification {
+		//TRACE
+		trace (1);
+	}
+	@end
 #endif
 
 void structGuiShell :: v9_destroy () noexcept {

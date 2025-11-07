@@ -167,6 +167,9 @@ Thing_define (Interpreter, Thing) {
 	std::unordered_map <std::u32string, autoInterpreterVariable> variablesMap;
 	bool running, stopped;
 
+	autovector <mutablestring32> lines;   // not autostringvector, because the elements are reference copies
+	integer lineNumber = 0;
+
 	kInterpreter_ReturnType returnType;   // automatically initialized as kInterpreter_ReturnType::VOID_
 	bool returnedBoolean;
 	autostring32 returnedString;

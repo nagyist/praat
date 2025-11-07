@@ -46,60 +46,60 @@
 #include "SlopeSelector_enums.h"
 
 static void randomInteger_INTVEC_inout (INTVEC iv, integer ilow, integer ihigh) {
-    for (integer i = 1; i <= iv.size; i ++)
-        iv [i] = NUMrandomInteger (ilow, ihigh);
+	for (integer i = 1; i <= iv.size; i ++)
+		iv [i] = NUMrandomInteger (ilow, ihigh);
 }
 
 Thing_implement (SlopeSelector, Daata, 1);
 
 void structSlopeSelector :: newDataPoints (constVEC const& x, constVEC const& y) {
-    Melder_assert (x.size == y.size);
-    Melder_assert (x.size == numberOfPoints);
-    xp = x;
-    yp = y;
+	Melder_assert (x.size == y.size);
+	Melder_assert (x.size == numberOfPoints);
+	xp = x;
+	yp = y;
 }
 
 void structSlopeSelector :: getSlopeAndIntercept_leastSquares (double &slope, double& intercept) {
-    const double xsum = NUMsum (xp);
-    const double xmean = xsum / numberOfPoints;
-    longdouble variance = 0.0;
+	const double xsum = NUMsum (xp);
+	const double xmean = xsum / numberOfPoints;
+	longdouble variance = 0.0;
 	slope = 0;
-    for (integer i = 1; i <= numberOfPoints; i ++) {
-        const double ti = xp [i] - xmean;
-        variance += ti * ti;
-        slope += ti * yp [i];
-    }
-    slope /= variance;
+	for (integer i = 1; i <= numberOfPoints; i ++) {
+		const double ti = xp [i] - xmean;
+		variance += ti * ti;
+		slope += ti * yp [i];
+	}
+	slope /= variance;
 	const double ysum  = NUMsum (yp);
 	intercept = (ysum - xsum * slope) / numberOfPoints;
 }
 
 double structSlopeSelector :: getIntercept (double slope) {
 	buffer.resize (numberOfPoints);
-    for (integer i = 1; i <= numberOfPoints; i ++) {
-        buffer [i] = yp [i] - slope * xp [i];
+	for (integer i = 1; i <= numberOfPoints; i ++) {
+		buffer [i] = yp [i] - slope * xp [i];
 	}
-    return (num::NUMquantile_e (buffer.get(), 0.5));
+	return (num::NUMquantile_e (buffer.get(), 0.5));
 }
 
 double structSlopeSelector :: getSlope_Siegel () {
-    integer numberOfMedians = 0;
+	integer numberOfMedians = 0;
 	/* reuse buffer*/
 	buffer.resize (buffer._capacity);
 	const integer siegelSize = numberOfPoints - 1;
 	VEC siegelSlopes = buffer.part (1, siegelSize);
 	VEC siegelMedians = buffer.part (siegelSize + 1, 2 * siegelSize);
-    for (integer i = 1; i <= numberOfPoints; i ++) {
-        integer iline = 0;
-        for (integer j = 1; j <= numberOfPoints; j ++) {
-            if (i != j)
-                siegelSlopes [++ iline] = (yp [i] - yp [j]) / (xp [i] - xp [j]);
-        }
-        Melder_assert (iline == siegelSize);
-        siegelMedians [++ numberOfMedians] = num::NUMquantile_e (siegelSlopes, 0.5);
-    }
-    Melder_assert (numberOfMedians == numberOfPoints);
-    return num::NUMquantile_e (siegelMedians, 0.5);
+	for (integer i = 1; i <= numberOfPoints; i ++) {
+		integer iline = 0;
+		for (integer j = 1; j <= numberOfPoints; j ++) {
+			if (i != j)
+				siegelSlopes [++ iline] = (yp [i] - yp [j]) / (xp [i] - xp [j]);
+		}
+		Melder_assert (iline == siegelSize);
+		siegelMedians [++ numberOfMedians] = num::NUMquantile_e (siegelSlopes, 0.5);
+	}
+	Melder_assert (numberOfMedians == numberOfPoints);
+	return num::NUMquantile_e (siegelMedians, 0.5);
 }
 
 /*
@@ -119,14 +119,14 @@ double structSlopeSelector :: getSlope_Siegel () {
 
 */
 void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1th) {
-    try {
+	try {
 		const integer maxNumberOfIntervalCrossings = numberOfPoints * (numberOfPoints - 1) / 2;
-        const integer krt = Melder_iroundDown (/* 1.5 */ sqrt (sampleSize)); // smaller than in the paper
+		const integer krt = Melder_iroundDown (/* 1.5 */ sqrt (sampleSize)); // smaller than in the paper
 		const double sampleSize_real = sampleSize;
-        integer currentNumberOfIntervalCrossings = maxNumberOfIntervalCrossings;
-        integer numberOfCrossingsAtLowX = 0, numberOfCrossingsAtLowXPrevious = 0;
-        integer numberOfCrossingsAtHighX = maxNumberOfIntervalCrossings, numberOfCrossingsAtHighXPrevious = maxNumberOfIntervalCrossings;
-        integer kappa = k, ilow, ihigh;
+		integer currentNumberOfIntervalCrossings = maxNumberOfIntervalCrossings;
+		integer numberOfCrossingsAtLowX = 0, numberOfCrossingsAtLowXPrevious = 0;
+		integer numberOfCrossingsAtHighX = maxNumberOfIntervalCrossings, numberOfCrossingsAtHighXPrevious = maxNumberOfIntervalCrossings;
+		integer kappa = k, ilow, ihigh;
 		structExtendedCrossing lowXPrevious, lowX = {- std::numeric_limits<double>::infinity(), 0, 0};
 		
 		auto approximatelyEqual = [&] (double lhs, double rhs, double numericalEqualityPrecision) {
@@ -137,30 +137,30 @@ void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1
 			return std::fabs(lhs - rhs) <= numericalEqualityPrecision * std::fmax(std::fabs(lhs), std::fabs(rhs));
 		};
 		
-        auto getSlopes = [&] (integer numberOfSlopes) {
-            Melder_assert (numberOfSlopes <= maximumContractionSize);
-            xslopes.resize (numberOfSlopes);
-            for (integer j = 1, i = 1; i <= numberOfSlopes; i ++, j += 2) {
+		auto getSlopes = [&] (integer numberOfSlopes) {
+			Melder_assert (numberOfSlopes <= maximumContractionSize);
+			xslopes.resize (numberOfSlopes);
+			for (integer j = 1, i = 1; i <= numberOfSlopes; i ++, j += 2) {
 				ilow  = currentInversions [j];
 				ihigh = currentInversions [j + 1];
-                const integer ipoint = numberOfPoints + 1 - ilow;		// ilow
-                const integer jpoint = numberOfPoints + 1 - ihigh;		// ihigh;
-                xslopes [i].real = (yp [ipoint] - yp [jpoint]) / (xp [ipoint] - xp [jpoint]);	// the slope
+				const integer ipoint = numberOfPoints + 1 - ilow;		// ilow
+				const integer jpoint = numberOfPoints + 1 - ihigh;		// ihigh;
+				xslopes [i].real = (yp [ipoint] - yp [jpoint]) / (xp [ipoint] - xp [jpoint]);	// the slope
 				xslopes [i].low  = ilow;
 				xslopes [i].high = ihigh;
-            }
-        };
+			}
+		};
 
-        auto getPermutationAtX = [&](structExtendedCrossing& x, mutablePermutation p) {
-            for (integer iline = 1; iline <= numberOfPoints; iline ++) {
-                const integer ipoint = numberOfPoints + 1 - iline;
-                xcrossings [iline].real = x.real * xp [ipoint] - yp [ipoint]; // the dual line's y-value
-                xcrossings [iline].low = iline; // k or l
+		auto getPermutationAtX = [&](structExtendedCrossing& x, mutablePermutation p) {
+			for (integer iline = 1; iline <= numberOfPoints; iline ++) {
+				const integer ipoint = numberOfPoints + 1 - iline;
+				xcrossings [iline].real = x.real * xp [ipoint] - yp [ipoint]; // the dual line's y-value
+				xcrossings [iline].low = iline; // k or l
 				xcrossings [iline].high = x.high; // j
-                p -> p [iline] = iline;
-            }
-            std::sort (p -> p.begin(), p -> p.end(),
-                [&] (integer& leftLineNumber, integer& rightLineNumber) {
+				p -> p [iline] = iline;
+			}
+			std::sort (p -> p.begin(), p -> p.end(),
+				[&] (integer& leftLineNumber, integer& rightLineNumber) {
 					const structExtendedCrossing& lhs = xcrossings [leftLineNumber];
 					const structExtendedCrossing& rhs = xcrossings [rightLineNumber];
 					// Y[k]<Y[l]= if y[k]!=y[l] then (y[k]<y[l]) else (if k<l then (j>l) else (j<k))
@@ -169,9 +169,9 @@ void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1
 					return r;
 				}
 			);
-            return inversionCounter -> getNumberOfInversions (p);
-        };
-		
+			return inversionCounter -> getNumberOfInversions (p);
+		};
+
 		
 		/*
 			In Matoušek's paper the following loop has to be run until the currentNumberOfIntervalCrossings <= samplingSize.
@@ -180,20 +180,20 @@ void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1
 			'getSelectedInversionsNotInOther' is by far the most computational expensive part in the loop.
 			Reducing the number of iterations of this loop therefore saves more time than calculating somewhat more slopes.
 		*/
-        numberOfTries = 0;
+		numberOfTries = 0;
 		currentInversions.resize (2 * sampleSize);
 		sortedRandomCrossingCodes.resize (sampleSize); // during the loop
-        while (currentNumberOfIntervalCrossings > std::min (maximumContractionSize, maxNumberOfIntervalCrossings)) { // sampleSize*10
+		while (currentNumberOfIntervalCrossings > std::min (maximumContractionSize, maxNumberOfIntervalCrossings)) { // sampleSize*10
 
-            /*
-                Pick a random sample of size sampleSize from the intersections in the interval (lowX, highX)
-                and store these in the vector 'currentInversions'.
-                The first time we have the maximum number of slopes in our interval (-inf, +inf) and
-                therefore the current inversions can be sampled directly.
-                In the other cases we have n' < n(n-1)/2 slopes and pick sampleSize random numbers from the 
-                interval [1,n']. We then search the corresponding slopes in O(n log(n)) time.
-            */
-            if (numberOfTries == 0) {
+			/*
+				Pick a random sample of size sampleSize from the intersections in the interval (lowX, highX)
+				and store these in the vector 'currentInversions'.
+				The first time we have the maximum number of slopes in our interval (-inf, +inf) and
+				therefore the current inversions can be sampled directly.
+				In the other cases we have n' < n(n-1)/2 slopes and pick sampleSize random numbers from the
+				interval [1,n']. We then search the corresponding slopes in O(n log(n)) time.
+			*/
+			if (numberOfTries == 0) {
  				for (integer i = 1; i <= sampleSize; i ++) {
 					const integer irandom = NUMrandomInteger (1_integer, currentNumberOfIntervalCrossings);
 					getInversionFromCode (irandom, ilow, ihigh);
@@ -201,34 +201,34 @@ void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1
 					currentInversions [2 * i    ] = ihigh;
 				}
 			} else {
-                randomInteger_INTVEC_inout (sortedRandomCrossingCodes.get(), 1_integer, currentNumberOfIntervalCrossings);
-                sort_INTVEC_inout (sortedRandomCrossingCodes.get());
-                inversionCounter -> getSelectedInversionsNotInOther (
-                    lineRankingAtHighX.get(), inverseOfLineRankingAtLowX.get(), sortedRandomCrossingCodes.get(), currentInversions.get()
-                );
-            }
+				randomInteger_INTVEC_inout (sortedRandomCrossingCodes.get(), 1_integer, currentNumberOfIntervalCrossings);
+				sort_INTVEC_inout (sortedRandomCrossingCodes.get());
+				inversionCounter -> getSelectedInversionsNotInOther (
+					lineRankingAtHighX.get(), inverseOfLineRankingAtLowX.get(), sortedRandomCrossingCodes.get(), currentInversions.get()
+				);
+			}
 
-            getSlopes (sampleSize);
+			getSlopes (sampleSize);
 
-            const double kappar = sampleSize_real / currentNumberOfIntervalCrossings * (k - numberOfCrossingsAtLowX);
-            kappa = std::max (1_integer, Melder_iroundDown (kappar));
-            const integer kb = std::max (1_integer, kappa - krt);
-            const integer ke = std::min (sampleSize, kappa + krt);
+			const double kappar = sampleSize_real / currentNumberOfIntervalCrossings * (k - numberOfCrossingsAtLowX);
+			kappa = std::max (1_integer, Melder_iroundDown (kappar));
+			const integer kb = std::max (1_integer, kappa - krt);
+			const integer ke = std::min (sampleSize, kappa + krt);
 			lowXPrevious = lowX;
 			lowX = num::NUMget_kth (xslopes.get(), kb);
 			structExtendedCrossing highX = num::NUMget_kth (xslopes.get(), ke);
 			trace (U"lowX:", lowX.real, U" highX:", highX.real);
-            /*
-                We have one of the following five situations for k, when lpX & hpX are the previous interval borders,
-                lowX & highX the current interval borders and nlow and nhigh the number of inversions at the
-                current borders.
-                   |                               |
-			lowXPrevious                     highXPrevious
-							|             |
-						   lowX (?==?)  highX
-						   nlow         nhigh
-                       k    k      k      k    k
-                      (1)  (2)    (3)    (4)  (5)
+			/*
+				We have one of the following five situations for k, when lpX & hpX are the previous interval borders,
+				lowX & highX the current interval borders and nlow and nhigh the number of inversions at the
+				current borders.
+					     |                                |
+					lowXPrevious                     highXPrevious
+					                |             |
+					              lowX (?==?)  highX
+					              nlow         nhigh
+					          k    k      k      k    k
+					         (1)  (2)    (3)    (4)  (5)
 				(1) k < nlow, we make lowX the new upper border
 				(2) k == nlow, we know that kth == lowX
 				(3) nlow < k < nhigh , next
@@ -239,11 +239,11 @@ void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1
 				numberOfCrossingsAtLowXPrevious = numberOfCrossingsAtLowX;
 				lineRankingAtLowXPrevious -> p.get()  <<=  lineRankingAtLowX -> p.get();
 			}
-            numberOfCrossingsAtLowX = getPermutationAtX (lowX, lineRankingAtLowX.get());
+			numberOfCrossingsAtLowX = getPermutationAtX (lowX, lineRankingAtLowX.get());
 			trace (U"k:", k, U" kb:", kb, U" ke:", ke, U" ss:", sampleSize, U" ", numberOfCrossingsAtLowX, U" tries:", numberOfTries);
 			if (k < numberOfCrossingsAtLowX) { // (1) interval lp, lc
-                Permutations_swap (lineRankingAtHighX.get(), lineRankingAtLowX.get());			// first set lineRankingAtHighX
-                numberOfCrossingsAtHighX = numberOfCrossingsAtLowX;
+				Permutations_swap (lineRankingAtHighX.get(), lineRankingAtLowX.get());			// first set lineRankingAtHighX
+				numberOfCrossingsAtHighX = numberOfCrossingsAtLowX;
 				trace (U"k<l ", lowX.real, U" ", lowX.low, U" ", highX.real, U" ", highX.low);
 				Permutations_swap (lineRankingAtLowX.get(), lineRankingAtLowXPrevious.get());	// then lineRankingAtLowX
 				numberOfCrossingsAtLowX = numberOfCrossingsAtLowXPrevious;
@@ -294,26 +294,25 @@ void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1
 				}
 				Permutation_invert_into (lineRankingAtLowX.get(), inverseOfLineRankingAtLowX.get());
 			}
-            currentNumberOfIntervalCrossings = numberOfCrossingsAtHighX - numberOfCrossingsAtLowX;
-            ++ numberOfTries;
-			if (numberOfTries > maximumNumberOfTries) { // escape 
+			currentNumberOfIntervalCrossings = numberOfCrossingsAtHighX - numberOfCrossingsAtLowX;
+			++ numberOfTries;
+			if (numberOfTries > maximumNumberOfTries) { // escape
 				getSlope_Siegel ();
 				return;
 			}
-        }
-        /*
-            Finish with the remaining inversions. (We don't need the xcrossings anymore.)
-         */
-        sortedRandomCrossingCodes.resize (currentNumberOfIntervalCrossings);
-        currentInversions.resize (2 * currentNumberOfIntervalCrossings);
-        for (integer i = 1; i <= currentNumberOfIntervalCrossings; i ++)
-            sortedRandomCrossingCodes [i] = i;
-        (void) inversionCounter -> getSelectedInversionsNotInOther (lineRankingAtHighX.get(),
-            inverseOfLineRankingAtLowX.get(), sortedRandomCrossingCodes.get(), currentInversions.get()
-        );
-        Melder_assert (currentNumberOfIntervalCrossings == inversionCounter -> numberOfInversionsRegistered);
-        getSlopes (currentNumberOfIntervalCrossings);
-        kappa = k - numberOfCrossingsAtLowX;
+		}
+		/*
+			Finish with the remaining inversions. (We don't need the xcrossings anymore.)
+		*/
+		sortedRandomCrossingCodes.resize (currentNumberOfIntervalCrossings);
+		currentInversions.resize (2 * currentNumberOfIntervalCrossings);
+		for (integer i = 1; i <= currentNumberOfIntervalCrossings; i ++)
+			sortedRandomCrossingCodes [i] = i;
+		(void) inversionCounter -> getSelectedInversionsNotInOther (lineRankingAtHighX.get(),
+				inverseOfLineRankingAtLowX.get(), sortedRandomCrossingCodes.get(), currentInversions.get());
+		Melder_assert (currentNumberOfIntervalCrossings == inversionCounter -> numberOfInversionsRegistered);
+		getSlopes (currentNumberOfIntervalCrossings);
+		kappa = k - numberOfCrossingsAtLowX;
 		if (kappa > 0) { // or should we avoid this situation
 			num::NUMselect (xslopes.get(), kappa);
 			kth = xslopes [kappa].real;
@@ -323,59 +322,59 @@ void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1
 		for (integer i = kappa + 2; i <= currentNumberOfIntervalCrossings; i ++)
 			if (xslopes [i].real < kp1th)
 				kp1th = xslopes [i].real;
-    } catch (MelderError) {
-        Melder_throw (U"kth slope could not be selected.");
-    }
+	} catch (MelderError) {
+		Melder_throw (U"kth slope could not be selected.");
+	}
 }
 
 double structSlopeSelector :: slopeQuantile_TheilSen (double factor) {
-    const integer numberOfLines = xp.size * (xp.size - 1) / 2;
-    const double place = factor * numberOfLines + 0.5;
-    const integer left = Melder_clipped (1_integer, Melder_ifloor (place), numberOfLines);
-    Melder_assert (numberOfLines - 1 >= 1);
+	const integer numberOfLines = xp.size * (xp.size - 1) / 2;
+	const double place = factor * numberOfLines + 0.5;
+	const integer left = Melder_clipped (1_integer, Melder_ifloor (place), numberOfLines);
+	Melder_assert (numberOfLines - 1 >= 1);
 	double kleft, kright;
-    getKth_TheilSen (left, kleft, kright);
-    const double dif = kright - kleft;
-    if (dif == 0.0)
-        return kleft;
-    return kleft + (place - left) * dif;
+	getKth_TheilSen (left, kleft, kright);
+	const double dif = kright - kleft;
+	if (dif == 0.0)
+		return kleft;
+	return kleft + (place - left) * dif;
 }
 
 double structSlopeSelector :: getSlope_TheilSen () {
-    return slopeQuantile_TheilSen (0.5);
+	return slopeQuantile_TheilSen (0.5);
 }
 
 // buffer.size == xp.size * (xp.size - 1) / 2
 double structSlopeSelector :: slopeQuantile_orderNSquaredWithBuffer (double factor, VEC const& buffer) {
-    const integer numberOfLines = xp.size * (xp.size - 1) / 2;
-    Melder_assert (numberOfLines == buffer.size);
-    integer index = 0;
-    for (integer i = 1; i < xp.size; i ++)
-        for (integer j = i + 1; j <= xp.size; j ++)
-            buffer [++ index] = (yp [j] - yp [i]) / (xp [j] - xp [i]);
-    Melder_assert (index == numberOfLines);
-    const double medianSlope = num::NUMquantile_e (buffer, factor);
-    return medianSlope;
+	const integer numberOfLines = xp.size * (xp.size - 1) / 2;
+	Melder_assert (numberOfLines == buffer.size);
+	integer index = 0;
+	for (integer i = 1; i < xp.size; i ++)
+		for (integer j = i + 1; j <= xp.size; j ++)
+			buffer [++ index] = (yp [j] - yp [i]) / (xp [j] - xp [i]);
+	Melder_assert (index == numberOfLines);
+	const double medianSlope = num::NUMquantile_e (buffer, factor);
+	return medianSlope;
 }
 
 void SlopeSelector_init (SlopeSelector me, integer numberOfPoints) {
 	my numberOfPoints = numberOfPoints;
-    my sampleSize = my numberOfPoints;
-    my maximumContractionSize = 5 * my numberOfPoints;
+	my sampleSize = my numberOfPoints;
+	my maximumContractionSize = 5 * my numberOfPoints;
 	my maximumNumberOfTries = 20;
 
-    my sortedRandomCrossingCodes = raw_INTVEC (my maximumContractionSize);
+	my sortedRandomCrossingCodes = raw_INTVEC (my maximumContractionSize);
 	my inversionsSize = 2 * my maximumContractionSize;
-    my currentInversions = raw_INTVEC (my inversionsSize);
+	my currentInversions = raw_INTVEC (my inversionsSize);
 	my xslopes = newvectorraw <structExtendedCrossing> (my maximumContractionSize);
 	my buffer = raw_VEC (my maximumContractionSize);
 	my xcrossings = newvectorraw <structExtendedCrossing> (my numberOfPoints);
-    my lineRankingAtLowX = Permutation_create (my numberOfPoints, true); // 1..n
-    my lineRankingAtHighX = Permutation_reverse (my lineRankingAtLowX.get(), 0, 0);  // n..1
-    my lineRankingAtLowXPrevious = Permutation_create (my numberOfPoints, true); // 1..n
-    my lineRankingAtHighXPrevious = Permutation_reverse (my lineRankingAtLowX.get(), 0, 0);  // n..1
-    my inverseOfLineRankingAtLowX = Permutation_create (my numberOfPoints, true); // 1..n
-    my inversionCounter = PermutationInversionCounter_create (my numberOfPoints);
+	my lineRankingAtLowX = Permutation_create (my numberOfPoints, true); // 1..n
+	my lineRankingAtHighX = Permutation_reverse (my lineRankingAtLowX.get(), 0, 0);  // n..1
+	my lineRankingAtLowXPrevious = Permutation_create (my numberOfPoints, true); // 1..n
+	my lineRankingAtHighXPrevious = Permutation_reverse (my lineRankingAtLowX.get(), 0, 0);  // n..1
+	my inverseOfLineRankingAtLowX = Permutation_create (my numberOfPoints, true); // 1..n
+	my inversionCounter = PermutationInversionCounter_create (my numberOfPoints);
 }
 
 autoSlopeSelector SlopeSelector_create (integer numberOfPoints) {
@@ -402,8 +401,8 @@ autoSlopeSelector SlopeSelector_create (constVEC const& x, constVEC const& y) {
 }
 
 void SlopeSelectorTheilSen_getMedianSlope (SlopeSelector me, double& slope, double& intercept) {
-    slope = my slopeQuantile (0.5);
-    intercept = my getIntercept (slope);
+	slope = my slopeQuantile (0.5);
+	intercept = my getIntercept (slope);
 }
 
 void SlopeSelector_getSlopeAndIntercept (SlopeSelector me, double &slope, double &intercept, kSlopeSelector_method method) {
@@ -435,8 +434,8 @@ void special50 () { // gets stucck because needs > maximumNumberOfTries
 	//double slope = sls -> getSlope_TheilSen ();
 }
 /*
-    22/2/2025
-    Old: n² slopes, sort, NUMquantile(0.5)
+	22/2/2025
+	Old: n² slopes, sort, NUMquantile(0.5)
 	New: Matoušek (1991) O(n log(n)) ?
 	n  ntries   tTS      tSiegel      tOld    tOld/tTS  tOld/tSiegel SlopeOld/Siegel
 	10    0   8.3446e-06 1.3589e-05 9.2983e-06 *0.6140*   0.8974    1.0057
@@ -448,37 +447,37 @@ void special50 () { // gets stucck because needs > maximumNumberOfTries
 	10000 4   0.7233     0.2095     1.7015     *3.4526*   0.4251    0.9996
 */
 void timeSlopeSelection () {
-    try {
-        Melder_clearInfo ();
-        autoINTVEC sizes {10_integer, 50_integer, 100_integer, 500_integer, 1000_integer, 5000_integer, 10000_integer};
-        MelderInfo_write (U"Old: n² slopes, sort, NUMquantile(0.5)\n"
-            "New: Matoušek (1991) O(n log(n))\n"
-        );
+	try {
+		Melder_clearInfo ();
+		autoINTVEC sizes {10_integer, 50_integer, 100_integer, 500_integer, 1000_integer, 5000_integer, 10000_integer};
+		MelderInfo_write (U"Old: n² slopes, sort, NUMquantile(0.5)\n"
+			"New: Matoušek (1991) O(n log(n))\n"
+		);
 		special50();
 		oneSpecial();
 		
-        MelderInfo_writeLine (U"n ntries tTS tSiegel tOld tOld/tTS tOld/tSiegel SlopeOld/Siegel");
-        for (integer isize = 1; isize <= sizes.size; isize ++) {
-            double slope = 1.0, b = 4.0, stddev = 0.1, factor = 0.5;
-            const integer n = sizes [isize];
-            const integer maxNumberOfLines = n * (n - 1) / 2;
-            autoVEC x = from_to_count_VEC (0.0, 10.0, n);
-            autoVEC y = randomGauss_VEC (n, b, stddev);
-            for (integer i = 1; i <= n; i ++)
-                y[i] += slope * x[i];
+		MelderInfo_writeLine (U"n ntries tTS tSiegel tOld tOld/tTS tOld/tSiegel SlopeOld/Siegel");
+		for (integer isize = 1; isize <= sizes.size; isize ++) {
+			double slope = 1.0, b = 4.0, stddev = 0.1, factor = 0.5;
+			const integer n = sizes [isize];
+			const integer maxNumberOfLines = n * (n - 1) / 2;
+			autoVEC x = from_to_count_VEC (0.0, 10.0, n);
+			autoVEC y = randomGauss_VEC (n, b, stddev);
+			for (integer i = 1; i <= n; i ++)
+				y[i] += slope * x[i];
 			autoSlopeSelector sls =  SlopeSelector_create (x.get(), y.get());
-            autoVEC buffer = raw_VEC (maxNumberOfLines);
-            Melder_stopwatch ();
-            const double slope1 = sls -> slopeQuantile_orderNSquaredWithBuffer (factor, buffer.get());
-            const double t1 = Melder_stopwatch ();
-            const double slope2 = sls -> slopeQuantile_TheilSen (factor);
-            const double t2 = Melder_stopwatch ();
-            const integer ntries = sls -> numberOfTries;
-            Melder_assert (slope1 == slope2);
-            Melder_stopwatch ();
-            const double slope3 = sls -> getSlope_Siegel ();
-            const double t3 = Melder_stopwatch ();
-            MelderInfo_writeLine (n, U" ", ntries, U" ", t1, U" ", t2, U" ", t3, U" *", t1 / t2, U"*", U" ", t1 / t3, U" ", slope1/slope3);
+			autoVEC buffer = raw_VEC (maxNumberOfLines);
+			Melder_stopwatch ();
+			const double slope1 = sls -> slopeQuantile_orderNSquaredWithBuffer (factor, buffer.get());
+			const double t1 = Melder_stopwatch ();
+			const double slope2 = sls -> slopeQuantile_TheilSen (factor);
+			const double t2 = Melder_stopwatch ();
+			const integer ntries = sls -> numberOfTries;
+			Melder_assert (slope1 == slope2);
+			Melder_stopwatch ();
+			const double slope3 = sls -> getSlope_Siegel ();
+			const double t3 = Melder_stopwatch ();
+			MelderInfo_writeLine (n, U" ", ntries, U" ", t1, U" ", t2, U" ", t3, U" *", t1 / t2, U"*", U" ", t1 / t3, U" ", slope1/slope3);
 			/* corner cases with many equal slopes */
 			
 			MelderInfo_writeLine (U"\n\n\n");
@@ -495,10 +494,10 @@ void timeSlopeSelection () {
 				MelderInfo_writeLine (U"slope:", slope, U" TS:", slope4, U" ", fabs ((slope4 - slope) / slope));
 				//Melder_assert (fabs ((slope4 - slope) / slope) < 1e-12);
 			}
-        }
-        MelderInfo_close ();
-    } catch (MelderError) {
-        Melder_throw (U"");
-    }
+		}
+		MelderInfo_close ();
+	} catch (MelderError) {
+		Melder_throw (U"");
+	}
 }
 /* End of file SlopeSelector.cpp */
