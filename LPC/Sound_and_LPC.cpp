@@ -706,8 +706,7 @@ autoRobustLPCWorkspace RobustLPCWorkspace_create (constLPC inputLPC, constSound 
 {
 	try {
 		autoRobustLPCWorkspace me = Thing_new (RobustLPCWorkspace);
-		my init (inputLPC, inputSound, outputLPC, effectiveAnalysisWidth, windowShape, 
-				k_stdev, itermax, tol, wantlocation);
+		my init (inputLPC, inputSound, outputLPC, effectiveAnalysisWidth, windowShape, k_stdev, itermax, tol, wantlocation);
 		my wantScale = true; // explicit
 		return me;
 	} catch (MelderError) {
