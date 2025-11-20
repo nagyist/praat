@@ -320,7 +320,7 @@ void PowerCepstrum_draw (constPowerCepstrum me, Graphics g, double qmin, double 
 void PowerCepstrum_fitTrendLine (PowerCepstrum me, double qstartFit, double qendFit, double *out_slope, double *out_intercept, kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod) {
 	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me, qstartFit, qendFit, lineType, fitMethod);
 	workspace -> getSlopeAndIntercept ();
-	if (out_slope) 
+	if (out_slope)
 		*out_slope = workspace -> slope;
 	if (out_intercept)
 		*out_intercept = workspace -> intercept;
