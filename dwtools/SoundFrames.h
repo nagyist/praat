@@ -21,7 +21,6 @@
 //#include "melder.h"
 #include "NUMFourier.h"
 #include "Sound_extensions.h"
-//#include "SampledFrameIntoSampledFrame.h"
 #include "Spectrum.h"
 
 inline integer getSoundFrameSize_odd (double approximatePhysicalAnalysisWidth, double samplingPeriod) {
@@ -37,23 +36,23 @@ inline integer getSoundFrameSize (double physicalAnalysisWidth, double samplingP
 }
 
 inline double getPhysicalAnalysisWidth (double effectiveAnalysisWidth, kSound_windowShape windowShape) {
-	const double physicalAnalysisWidth = ( windowShape == kSound_windowShape::RECTANGULAR ||
+	const double physicalAnalysisWidth = (
+		windowShape == kSound_windowShape::RECTANGULAR ||
 		windowShape == kSound_windowShape::TRIANGULAR || windowShape == kSound_windowShape::HAMMING ||
-		windowShape == kSound_windowShape::HANNING ? effectiveAnalysisWidth : 2.0 * effectiveAnalysisWidth )
-	;
+		windowShape == kSound_windowShape::HANNING ? effectiveAnalysisWidth : 2.0 * effectiveAnalysisWidth
+	);
 	return physicalAnalysisWidth;
 }
 
 Thing_define (SoundFrames, Thing) {
 
 	constSound inputSound;
-	double t1, dt;
-	integer numberOfFrames;
+	mutableSampled output;
 	double physicalAnalysisWidth;			// depends on the effectiveAnalysiswidth and the window window shape
 	integer soundFrameSize; 				// determined by the physicalAnalysisWidth and the samplingFrequency of the Sound
 	autoSound frameAsSound;					// the (possibly multichannel) frame as a Sound
 	autoVEC windowFunction;					// the actual window used of size soundFrameSize
-	autoVEC soundFrame;						// conveniance: average of the channels
+	autoVEC soundFrame;						// convenience: average of the channels
 	kSound_windowShape windowShape;			// Type: Rectangular, triangular, hamming, etc..
 	bool subtractChannelMean = true;		// if true, the frame mean of each channel will be subtracted before windowing
 
@@ -64,15 +63,17 @@ private:
 public:
 	
 	/*
-		Calculate the sampling from the input parameters
+		Calculate the output sampling from the input parameters,
+		this is the default case
 	*/
 	void init (constSound input, double effectiveAnalysisWidth, double timeStep,
 		kSound_windowShape windowShape, bool subtractChannelMean);
 	
 	/*
-		Initialise the object and use the sampling (x1, dx, nx) of the Sampled.
+		In special cases we need the sampling (x1, dx, nx) of the output Sampled:
+		like for the FormantPath.
 	*/
-	void initForSampled (constSound input, constSampled output, double effectiveAnalysisWidth,
+	void initForSampled (constSound input, mutableSampled output, double effectiveAnalysisWidth,
 		kSound_windowShape windowShape, bool subtractChannelMean);
 	
 	Sound getFrame (integer iframe);
@@ -80,7 +81,7 @@ public:
 	VEC getMonoFrame (integer iframe);
 };
 
-autoSoundFrames SoundFrames_createForSampled (constSound input, constSampled output, double effectiveAnalysisWidth,
+autoSoundFrames SoundFrames_createForSampled (constSound input, mutableSampled output, double effectiveAnalysisWidth,
 	kSound_windowShape windowShape, bool subtractChannelMean);
 
 autoSoundFrames SoundFrames_create (constSound input, double effectiveAnalysisWidth, double timeStep,

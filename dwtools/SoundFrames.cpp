@@ -28,19 +28,17 @@ void structSoundFrames :: init (constSound input, double effectiveAnalysisWidth,
 	if (timeStep == 0.0) {
 		// calculate output_dt
 	}
-	our dt = timeStep;
-	Sampled_shortTermAnalysis (inputSound, physicalAnalysisWidth, dt, & our numberOfFrames, & our t1);
+	output -> dx = timeStep;
+	Sampled_shortTermAnalysis (inputSound, physicalAnalysisWidth, output -> dx, & output -> nx, & output -> x1);
 	initCommon (windowShape, subtractChannelMean);
 }
 	
-void structSoundFrames :: initForSampled (constSound input, constSampled output, double effectiveAnalysisWidth,
+void structSoundFrames :: initForSampled (constSound input, mutableSampled output, double effectiveAnalysisWidth,
 	kSound_windowShape windowShape, bool subtractChannelMean)
 {
 	Melder_assert (input -> xmin == output -> xmin && input -> xmax == output -> xmax);
 	our inputSound = input;
-	our t1 = output -> x1;
-	our numberOfFrames = output -> nx;
-	our dt = output -> dx;
+	our output = output;
 	our physicalAnalysisWidth = getPhysicalAnalysisWidth (effectiveAnalysisWidth, windowShape);	
 	initCommon (windowShape, subtractChannelMean);
 }
@@ -59,7 +57,7 @@ void structSoundFrames :: initCommon (kSound_windowShape windowShape, bool subtr
 }
 
 Sound structSoundFrames :: getFrame (integer iframe) {
-	const double midTime = t1 + (iframe - 1) * dt;
+	const double midTime = Sampled_indexToX (output, iframe);
 	integer startSample = Sampled_xToNearestIndex (inputSound, midTime - 0.5 * physicalAnalysisWidth); // approximation
 	const integer numberOfChannels = inputSound -> ny;
 	for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
@@ -69,10 +67,8 @@ Sound structSoundFrames :: getFrame (integer iframe) {
 			frameChannel [i] = (( currentSample > 0 && currentSample <= inputSound -> nx) ? soundChannel [currentSample] : 0.0 );
 
 		if (subtractChannelMean)
-			for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
-				double mean;
-				centre_VEC_inout (frameChannel, & mean);
-			}
+			centre_VEC_inout (frameChannel, nullptr);
+
 		frameChannel  *=  windowFunction.get();
 	}
 
@@ -86,7 +82,7 @@ VEC structSoundFrames :: getMonoFrame (integer iframe) {
 	return soundFrame.get();
 }
 
-autoSoundFrames SoundFrames_createForSampled (constSound input, constSampled output, double effectiveAnalysisWidth,
+autoSoundFrames SoundFrames_createForSampled (constSound input, mutableSampled output, double effectiveAnalysisWidth,
 	kSound_windowShape windowShape, bool subtractFrameMean)
 {
 	try {
