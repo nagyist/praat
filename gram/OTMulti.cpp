@@ -1,10 +1,10 @@
 /* OTMulti.cpp
  *
- * Copyright (C) 2005-2024 Paul Boersma
+ * Copyright (C) 2005-2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -258,7 +258,7 @@ int OTMulti_compareCandidates (OTMulti me, integer icand1, integer icand2) {
 		if (disharmony1 > disharmony2)
 			return +1;   // candidate 2 is better than candidate 1
 	} else {
-		Melder_fatal (U"Unimplemented decision strategy.");
+		Melder_crash (U"Unimplemented decision strategy.");
 	}
 	return 0;   // none of the comparisons found a difference between the two candidates; hence, they are equally good
 }
@@ -294,7 +294,7 @@ static void _OTMulti_fillInHarmonies (OTMulti me, conststring32 form1, conststri
 				disharmony += constraintDisharmony * marks [icons];
 			}
 		} else {
-			Melder_fatal (U"_OTMulti_fillInHarmonies: unimplemented decision strategy.");
+			Melder_crash (U"_OTMulti_fillInHarmonies: unimplemented decision strategy.");
 		}
 		candidate -> harmony = - disharmony;
 	}

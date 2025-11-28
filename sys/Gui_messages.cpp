@@ -305,7 +305,7 @@ static void * gui_monitor (double progress, conststring32 message) {
 #define theMessageFund_SIZE  100'000
 static char * theMessageFund = nullptr;
 
-static void gui_fatal (conststring32 message) {
+static void gui_crash (conststring32 message) {
 	free (theMessageFund);
 	Melder_casual (U"PRAAT CRASH MESSAGE:\n", message, U"\n(END OF PRAAT CRASH MESSAGE)");
 	#if gtk
@@ -435,7 +435,7 @@ void Gui_injectMessageProcs (GuiWindow parent) {
 	theMessageFund = (char *) malloc (theMessageFund_SIZE);
 	assert (theMessageFund);
 	Melder_topShell = parent;
-	Melder_setCrashProc (gui_fatal);
+	Melder_setCrashProc (gui_crash);
 	Melder_setErrorProc (gui_error);
 	Melder_setWarningProc (gui_warning);
 	Melder_setProgressProc (gui_progress);

@@ -275,7 +275,7 @@ autoPointProcess Sound_Pitch_to_PointProcess_cc (Sound sound, Pitch pitch) {
 				Our first point is near this middle.
 			*/
 			if (isundef (f0middle)) {
-				Melder_fatal (U"Sound_Pitch_to_PointProcess_cc:"
+				Melder_crash (U"Sound_Pitch_to_PointProcess_cc:"
 					U" tleft ", tleft,
 					U", tright ", tright,
 					U", f0middle ", f0middle

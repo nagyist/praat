@@ -61,7 +61,7 @@ type structSoundAnalysisArea :: dynamic_instancePref_pitch_##setting () { \
 		case kSoundAnalysisArea_pitch_analysisMethod::FILTERED_CROSS_CORRELATION: \
 			return our instancePref_pitch_filteredCC_##setting(); \
 		default: \
-			Melder_fatal (U"Unknown pitch analysis method ", (int) our instancePref_pitch_method(), U"."); \
+			Melder_crash (U"Unknown pitch analysis method ", (int) our instancePref_pitch_method(), U"."); \
 	} \
 }
 DEFINE_dynamic_instancePref_pitch (double, floor)
@@ -85,7 +85,7 @@ double structSoundAnalysisArea :: dynamic_instancePref_pitch_ceilingOrTop () {
 		case kSoundAnalysisArea_pitch_analysisMethod::FILTERED_CROSS_CORRELATION:
 			return our instancePref_pitch_filteredCC_top();
 		default:
-			Melder_fatal (U"Unknown pitch analysis method ", (int) our instancePref_pitch_method(), U".");
+			Melder_crash (U"Unknown pitch analysis method ", (int) our instancePref_pitch_method(), U".");
 	}
 }
 
@@ -96,7 +96,7 @@ static double dynamic_instancePref_pitch_attenuationAtTop (SoundAnalysisArea me)
 		case kSoundAnalysisArea_pitch_analysisMethod::FILTERED_CROSS_CORRELATION:
 			return my instancePref_pitch_filteredCC_attenuationAtTop();
 		default:
-			Melder_fatal (U"Unknown pitch analysis method ", (int) my instancePref_pitch_method(), U".");
+			Melder_crash (U"Unknown pitch analysis method ", (int) my instancePref_pitch_method(), U".");
 	}
 }
 static double periodsPerAnalysisWindow (SoundAnalysisArea me) {
@@ -110,7 +110,7 @@ static double periodsPerAnalysisWindow (SoundAnalysisArea me) {
 		case kSoundAnalysisArea_pitch_analysisMethod::FILTERED_CROSS_CORRELATION:
 			return 1.0;
 		default:
-			Melder_fatal (U"Unknown pitch analysis method ", (int) my instancePref_pitch_method(), U".");
+			Melder_crash (U"Unknown pitch analysis method ", (int) my instancePref_pitch_method(), U".");
 	}
 }
 
@@ -205,7 +205,7 @@ static void tryToComputePitch (SoundAnalysisArea me) {
 				my instancePref_pitch_filteredCC_voicedUnvoicedCost()
 			);
 		else
-			Melder_fatal (U"Unknown pitch method ", (int) my instancePref_pitch_method(), U".");
+			Melder_crash (U"Unknown pitch method ", (int) my instancePref_pitch_method(), U".");
 		my d_pitch -> xmin = my startWindow();
 		my d_pitch -> xmax = my endWindow();
 	} catch (MelderError) {

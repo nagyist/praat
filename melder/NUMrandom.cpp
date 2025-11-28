@@ -596,7 +596,7 @@ void NUMrandom_initializeSafelyAndUnpredictably () {
 			case 400: keys [2] = UINT64_C ( 2547444441667548194); keys [3] = UINT64_C ( 7931822093344929483); break;
 			case 401: keys [2] = UINT64_C (17831319740718139641); keys [3] = UINT64_C ( 1702294398737654838); break;
 			case 402: keys [2] = UINT64_C (  994730030552399391); keys [3] = UINT64_C ( 8090595461759216181); break;
-			default: Melder_fatal (U"Thread number too high.");
+			default: Melder_crash (U"Thread number too high.");
 		}
 		keys [4] = (uint64) (int64) getpid ();   // unique between processes that run simultaneously on the same computer
 		keys [5] = ticksSinceBoot;   // some extra randomness

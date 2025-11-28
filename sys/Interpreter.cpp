@@ -931,7 +931,7 @@ void Interpreter_getArgumentsFromDialog (Interpreter me, UiForm dialog) {
 			case Interpreter_COMMENT:
 				break;
 			default:
-				Melder_fatal (U"Unhandled parameter type ", my types [ipar]);
+				Melder_crash (U"Unhandled parameter type ", my types [ipar]);
 		}
 	}
 }

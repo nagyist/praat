@@ -1404,7 +1404,7 @@ static int WavegenFill2(void)
 				//MarkerEvent(marker_type, position, q[2], q[3], out_ptr);
 				//MarkerEvent(marker_type, position, * (int *) & q[2], * ((int *) & q[2] + 1), out_ptr);
 			} else {
-				Melder_fatal (U"(WavegenFill2:) Uninterpretable marker type ", marker_type);
+				Melder_crash (U"(WavegenFill2:) Uninterpretable marker type ", marker_type);
 			}
 			break;
 		} case WCMD_AMPLITUDE:

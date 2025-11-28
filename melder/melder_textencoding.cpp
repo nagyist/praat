@@ -426,7 +426,7 @@ void Melder_8to32_inplace (conststring8 string8, mutablestring32 string32, kMeld
 		while (*p != '\0')
 			*q ++ = Melder_decodeMacRoman [*p ++];
 	} else if (inputEncoding != kMelder_textInputEncoding::UTF8) {
-		Melder_fatal (U"Unknown text input encoding ", (int) inputEncoding, U".");
+		Melder_crash (U"Unknown text input encoding ", (int) inputEncoding, U".");
 	}
 	*q = U'\0';   // closing null character
 	(void) Melder_killReturns_inplaceCHAR <char32> (string32);

@@ -191,7 +191,7 @@ static void phondata_makeNativeEndian (FileInMemory me, FileInMemory manifest) {
 				length *= 4;
 				index += length;
 			} else
-				Melder_fatal (U"Unknown tag ", line [0], U" in phondata_to_bigendian().");
+				Melder_crash (U"Unknown tag ", line [0], U" in phondata_to_bigendian().");
 			Melder_require (index < my d_numberOfBytes ||1,
 				U"Position ", index + 1, U" is larger than file length (", my d_numberOfBytes, U").");
 		}

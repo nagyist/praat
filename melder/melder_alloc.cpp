@@ -73,12 +73,12 @@ void * _Melder_malloc (int64 size) {
 
 void * _Melder_malloc_f (int64 size) {
 	if (size <= 0)
-		Melder_fatal (U"(Melder_malloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
+		Melder_crash (U"(Melder_malloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
 	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if (size > MAXIMUM_ALLOCATION_SIZE_64)
-		Melder_fatal (U"(Melder_malloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
+		Melder_crash (U"(Melder_malloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
 	if (sizeof (size_t) < 8 && size > MAXIMUM_ALLOCATION_SIZE_32)
-		Melder_fatal (U"(Melder_malloc_f:) Cannot allocate ", Melder_bigInteger (size), U" bytes. Use a 64-bit edition of Praat instead?");
+		Melder_crash (U"(Melder_malloc_f:) Cannot allocate ", Melder_bigInteger (size), U" bytes. Use a 64-bit edition of Praat instead?");
 	void *result = malloc ((size_t) size);
 	if (! result) {
 		if (theRainyDayFund) {
@@ -89,7 +89,7 @@ void * _Melder_malloc_f (int64 size) {
 		if (result)
 			Melder_flushError (U"Praat is very low on memory.\nSave your work and quit Praat.\nIf you don't do that, Praat may crash.");
 		else
-			Melder_fatal (U"Out of memory: there is not enough room for another ", Melder_bigInteger (size), U" bytes.");
+			Melder_crash (U"Out of memory: there is not enough room for another ", Melder_bigInteger (size), U" bytes.");
 	}
 	totalNumberOfAllocations += 1;
 	totalAllocationSize += size;
@@ -135,12 +135,12 @@ void * Melder_realloc (void *ptr, int64 size) {
 
 void * Melder_realloc_f (void *ptr, int64 size) {
 	if (size <= 0)
-		Melder_fatal (U"(Melder_realloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
+		Melder_crash (U"(Melder_realloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
 	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if (size > MAXIMUM_ALLOCATION_SIZE_64)
-		Melder_fatal (U"(Melder_realloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
+		Melder_crash (U"(Melder_realloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
 	if (sizeof (size_t) < 8 && size > MAXIMUM_ALLOCATION_SIZE_32)
-		Melder_fatal (U"(Melder_realloc_f:) Cannot allocate ", Melder_bigInteger (size), U" bytes. Use a 64-bit edition of Praat instead?");
+		Melder_crash (U"(Melder_realloc_f:) Cannot allocate ", Melder_bigInteger (size), U" bytes. Use a 64-bit edition of Praat instead?");
 	void *result = realloc (ptr, (size_t) size);   // will not show in the statistics...
 	if (! result) {
 		if (theRainyDayFund) {
@@ -151,7 +151,7 @@ void * Melder_realloc_f (void *ptr, int64 size) {
 		if (result)
 			Melder_flushError (U"Praat is very low on memory.\nSave your work and quit Praat.\nIf you don't do that, Praat may crash.");
 		else
-			Melder_fatal (U"Out of memory. Could not extend room to ", Melder_bigInteger (size), U" bytes.");
+			Melder_crash (U"Out of memory. Could not extend room to ", Melder_bigInteger (size), U" bytes.");
 	}
 	if (! ptr) {   // is it like malloc?
 		totalNumberOfAllocations += 1;
@@ -191,15 +191,15 @@ void * _Melder_calloc (int64 nelem, int64 elsize) {
 
 void * _Melder_calloc_f (int64 nelem, int64 elsize) {
 	if (nelem <= 0)
-		Melder_fatal (U"(Melder_calloc_f:) Can never allocate ", Melder_bigInteger (nelem), U" elements.");
+		Melder_crash (U"(Melder_calloc_f:) Can never allocate ", Melder_bigInteger (nelem), U" elements.");
 	if (elsize <= 0)
-		Melder_fatal (U"(Melder_calloc_f:) Can never allocate elements whose size is ", Melder_bigInteger (elsize), U" bytes.");
+		Melder_crash (U"(Melder_calloc_f:) Can never allocate elements whose size is ", Melder_bigInteger (elsize), U" bytes.");
 	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if ((uint64) nelem > MAXIMUM_ALLOCATION_SIZE_64 / (uint64) elsize)   // guarded casts to unsigned
-		Melder_fatal (U"Can never allocate ", Melder_bigInteger (nelem), U" elements whose sizes are ",
+		Melder_crash (U"Can never allocate ", Melder_bigInteger (nelem), U" elements whose sizes are ",
 				Melder_bigInteger (elsize), U" bytes each.");
 	if (sizeof (size_t) < 8 && (uint64) nelem > MAXIMUM_ALLOCATION_SIZE_32 / (uint64) elsize)
-		Melder_fatal (U"Cannot allocate ", Melder_bigInteger (nelem), U" elements whose sizes are ",
+		Melder_crash (U"Cannot allocate ", Melder_bigInteger (nelem), U" elements whose sizes are ",
 				Melder_bigInteger (elsize), U" bytes each. Use a 64-bit edition of Praat instead?");
 	void *result = calloc ((size_t) nelem, (size_t) elsize);
 	if (! result) {
@@ -211,7 +211,7 @@ void * _Melder_calloc_f (int64 nelem, int64 elsize) {
 		if (result)
 			Melder_flushError (U"Praat is very low on memory.\nSave your work and quit Praat.\nIf you don't do that, Praat may crash.");
 		else
-			Melder_fatal (U"Out of memory: there is not enough room for ", Melder_bigInteger (nelem),
+			Melder_crash (U"Out of memory: there is not enough room for ", Melder_bigInteger (nelem),
 				U" more elements whose sizes are ", Melder_bigInteger (elsize), U" bytes each.");
 	}
 	totalNumberOfAllocations += 1;
@@ -265,9 +265,9 @@ autostring32 Melder_dup_f (conststring32 string /* cattable */) {
 	Melder_assert (numberOfCharactersToCopy < MAXIMUM_ALLOCATION_SIZE);   // there should be no way to get longer strings into Praat
 	const int64 requestedBufferSize = (int64) numberOfCharactersToCopy + 1;
 	if (requestedBufferSize > (int64) MAXIMUM_ALLOCATION_SIZE_64 / (int64) sizeof (char32))
-		Melder_fatal (U"(Melder_dup_f:) Can never allocate ", Melder_bigInteger (requestedBufferSize), U" characters.");
+		Melder_crash (U"(Melder_dup_f:) Can never allocate ", Melder_bigInteger (requestedBufferSize), U" characters.");
 	if (sizeof (size_t) < 8 && requestedBufferSize > (int64) MAXIMUM_ALLOCATION_SIZE_32 / (int64) sizeof (char32))
-		Melder_fatal (U"(Melder_dup_f:) Cannot allocate ", Melder_bigInteger (requestedBufferSize),
+		Melder_crash (U"(Melder_dup_f:) Cannot allocate ", Melder_bigInteger (requestedBufferSize),
 				U" characters. Use a 64-bit edition of Praat instead?");
 	autostring32 result (numberOfCharactersToCopy, true);
 	str32cpy (result.get(), string);

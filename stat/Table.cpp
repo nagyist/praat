@@ -4,7 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -2288,7 +2288,7 @@ autoTable Table_readFromCharacterSeparatedTextFile (MelderFile file, char32 sepa
 				}
 				if (*p == U'\0') {
 					if (irow != numberOfRows)
-						Melder_fatal (U"irow ", irow, U", nrow ", numberOfRows, U", icol ", icol, U", ncol ", numberOfColumns);
+						Melder_crash (U"irow ", irow, U", nrow ", numberOfRows, U", icol ", icol, U", ncol ", numberOfColumns);
 					if (icol != numberOfColumns)
 						Melder_throw (U"Last row incomplete.");
 					if (withinQuotes) {

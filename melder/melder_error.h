@@ -88,14 +88,14 @@ void Melder_flushError (const Arg... arg) {
 
 void Melder_setErrorProc (void (*p_errorProc) (conststring32));
 
-void Melder_fatal_ (const MelderArg&,
+void _private_Melder_crash (const MelderArg&,
 	const MelderArg& = U"", const MelderArg& = U"", const MelderArg& = U"",
 	const MelderArg& = U"", const MelderArg& = U"", const MelderArg& = U"",
 	const MelderArg& = U"", const MelderArg& = U"", const MelderArg& = U"",
 	const MelderArg& = U"", const MelderArg& = U"", const MelderArg& = U""
 );
 
-#define Melder_fatal(...)  do { Melder_fatal_ (__VA_ARGS__); abort (); } while (0)
+#define Melder_crash(...)  do { _private_Melder_crash (__VA_ARGS__); abort (); } while (0)
 
 void Melder_setCrashProc (void (*p_crashProc) (conststring32));
 

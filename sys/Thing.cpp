@@ -62,7 +62,7 @@ static integer theNumberOfReadableClasses = 0;
 static ClassInfo theReadableClasses [1 + 1000];
 static void _Thing_addOneReadableClass (ClassInfo readableClass) {
 	if (++ theNumberOfReadableClasses > 1000)
-		Melder_fatal (U"(Thing_recognizeClassesByName:) Too many (1001) readable classes.");
+		Melder_crash (U"(Thing_recognizeClassesByName:) Too many (1001) readable classes.");
 	theReadableClasses [theNumberOfReadableClasses] = readableClass;
 	readableClass -> sequentialUniqueIdOfReadableClass = theNumberOfReadableClasses;
 }
@@ -183,7 +183,7 @@ bool Thing_isSubclass (ClassInfo klas, ClassInfo ancestor) {
 
 bool Thing_isa (Thing me, ClassInfo klas) {
 	if (! me)
-		Melder_fatal (U"(Thing_isa:) Found null object.");
+		Melder_crash (U"(Thing_isa:) Found null object.");
 	return Thing_isSubclass (my classInfo, klas);
 }
 

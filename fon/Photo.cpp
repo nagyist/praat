@@ -440,7 +440,7 @@ static void _Photo_cellArrayOrImage (Photo me, Graphics g, double xmin, double x
 	Sampled_getWindowSamples    (me, xmin - 0.49999 * my dx, xmax + 0.49999 * my dx, & ixmin, & ixmax);
 	SampledXY_getWindowSamplesY (me, ymin - 0.49999 * my dy, ymax + 0.49999 * my dy, & iymin, & iymax);
 	if (ixmin > ixmax || iymin > iymax) {
-		Melder_fatal (U"ixmin ", ixmin, U" ixmax ", ixmax, U" iymin ", iymin, U" iymax ", iymax);
+		Melder_crash (U"ixmin ", ixmin, U" ixmax ", ixmax, U" iymin ", iymin, U" iymax ", iymax);
 		return;
 	}
 	if (xmin >= xmax || ymin >= ymax)

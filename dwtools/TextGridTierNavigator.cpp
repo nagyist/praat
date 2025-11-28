@@ -479,7 +479,7 @@ void TextGridTierNavigator_getMatchDomain (TextGridTierNavigator me, kMatchDomai
 		startTime = my v_getStartTime (afterIndex);
 		endTime = my v_getEndTime (afterIndex);
 	} else
-		Melder_fatal (U"Unknown domain ", (integer) matchDomain);
+		Melder_crash (U"Unknown domain ", (integer) matchDomain);
 	if (out_startTime)
 		*out_startTime = startTime;
 	if (out_endTime)

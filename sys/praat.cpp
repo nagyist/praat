@@ -190,7 +190,7 @@ integer praat_numberOfSelected (ClassInfo klas) {
 		return theCurrentPraatObjects -> totalSelection;
 	integer readableClassId = klas -> sequentialUniqueIdOfReadableClass;
 	if (readableClassId == 0)
-		Melder_fatal (U"No sequential unique ID for class ", klas -> className, U" (numberOfSelected).");
+		Melder_crash (U"No sequential unique ID for class ", klas -> className, U" (numberOfSelected).");
 	return theCurrentPraatObjects -> numberOfSelected [readableClassId];
 }
 
@@ -224,7 +224,7 @@ void praat_select (integer IOBJECT) {
 	Melder_assert (object);
 	integer readableClassId = object -> classInfo -> sequentialUniqueIdOfReadableClass;
 	if (readableClassId == 0)
-		Melder_fatal (U"No sequential unique ID for class ", object -> classInfo -> className, U" (selectObject).");
+		Melder_crash (U"No sequential unique ID for class ", object -> classInfo -> className, U" (selectObject).");
 	theCurrentPraatObjects -> numberOfSelected [readableClassId] += 1;
 	if (! theCurrentPraatApplication -> batch && ! Melder_backgrounding)
 		GuiList_selectItem (praatList_objects, IOBJECT);
@@ -1387,7 +1387,7 @@ static bool tryToSwitchToRunningPraat (bool foundTheOpenOption, bool foundTheSen
 				return false;   // event not sent correctly
 			return true;   // we did send an event to a running non-identical Praat successfully
 		} else {
-			Melder_fatal (U"Unknown Apple Event version.");
+			Melder_crash (U"Unknown Apple Event version.");
 		}
 	#elif defined (UNIX)
 		autofile f;
@@ -2233,7 +2233,7 @@ void praat_run () {
 	{
 		int64 dummy = 1000000000000;
 		if (! str32equ (Melder_integer (dummy), U"1000000000000"))
-			Melder_fatal (U"The number 1000000000000 is mistakenly written on this machine as ", dummy, U".");
+			Melder_crash (U"The number 1000000000000 is mistakenly written on this machine as ", dummy, U".");
 	}
 	{ uint32 dummy = 0xffffffff;
 		Melder_assert ((int64) dummy == 4294967295LL);

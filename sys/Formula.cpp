@@ -1060,7 +1060,7 @@ static void parsePowerFactor () {
 			newparse (NUMBER_); parsenumber (n);
 			newparse (symbol);
 		} else {
-			Melder_fatal (U"Formula:parsePowerFactor (indexed variable): No '['; cannot happen.");
+			Melder_crash (U"Formula:parsePowerFactor (indexed variable): No '['; cannot happen.");
 		}
 		parse [iparse]. content.string = var;
 		return;
@@ -5417,7 +5417,7 @@ static void do_combine_VEC () {
 				for (integer icol = 1; icol <= arg->numericMatrix.ncol; icol ++)
 					result [++ elementIterator] = arg->numericMatrix [irow] [icol];
 		} else {
-			Melder_fatal (U"do_combine_VEC should never arrive here.");
+			Melder_crash (U"do_combine_VEC should never arrive here.");
 		}
 	}
 	pushNumericVector (result.move());
@@ -9325,7 +9325,7 @@ CASE_NUM_WITH_TENSORS (LOG10_, do_log10)
 			programPointer ++;
 		} // endwhile
 		if (stackPointer != 1)
-			Melder_fatal (U"Formula: stackpointer ends at ", stackPointer, U" instead of 1.");
+			Melder_crash (U"Formula: stackpointer ends at ", stackPointer, U" instead of 1.");
 		/*
 			Move the result from the stack to `result`.
 		*/

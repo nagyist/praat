@@ -1,10 +1,10 @@
 /* TextEditor.cpp
  *
- * Copyright (C) 1997-2024 Paul Boersma, 2010 Franz Brausse
+ * Copyright (C) 1997-2025 Paul Boersma, 2010 Franz Brausse
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -443,7 +443,7 @@ static bool getSelectedLines (TextEditor me, integer *firstLine, integer *lastLi
 	Melder_assert (left >= 0);
 	Melder_assert (left <= right);
 	if (right > textLength)
-		Melder_fatal (U"The end of the selection is at position ", right,
+		Melder_crash (U"The end of the selection is at position ", right,
 			U", which is beyond the end of the text, which is at position ", textLength, U".");
 	integer i = 0;
 	*firstLine = 1;

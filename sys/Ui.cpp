@@ -1,10 +1,10 @@
 /* Ui.cpp
  *
- * Copyright (C) 1992-2024 Paul Boersma
+ * Copyright (C) 1992-2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -71,7 +71,7 @@ static conststring32 formatNumericMatrix (constMAT cells, kUi_realMatrixFormat f
 				MelderString_append (& buffer, U" }");
 			}
 		} break; case kUi_realMatrixFormat::UNDEFINED: {
-			Melder_fatal (U"Unknown numeric matrix format.");
+			Melder_crash (U"Unknown numeric matrix format.");
 		}
 	}
 	return buffer.string;
@@ -146,7 +146,7 @@ static conststring32 formatStringArray (constSTRVEC strings, kUi_stringArrayForm
 				MelderString_append (& buffer, U" }");
 			}
 		} break; case kUi_stringArrayFormat::UNDEFINED: {
-			Melder_fatal (U"Unknown string array format.");
+			Melder_crash (U"Unknown string array format.");
 		}
 	}
 	return buffer.string;
@@ -381,7 +381,7 @@ static void UiField_widgetToValue (UiField me) {
 						my realVectorValue = copy_VEC (result);
 					}
 				} break; case kUi_realVectorFormat::UNDEFINED: {
-					Melder_fatal (U"Unknown real vector format.");
+					Melder_crash (U"Unknown real vector format.");
 				}
 			}
 			if (my type == _kUiField_type::POSITIVEVECTOR_)
@@ -413,7 +413,7 @@ static void UiField_widgetToValue (UiField me) {
 							U"Element ", i, U" of vector “", my name.get(), U"” is ", result [i], U" but should be a whole number.");
 					}
 				} break; case kUi_integerVectorFormat::UNDEFINED: {
-					Melder_fatal (U"Unknown integer vector format.");
+					Melder_crash (U"Unknown integer vector format.");
 				}
 			}
 			if (my type == _kUiField_type::NATURALVECTOR_)
@@ -441,7 +441,7 @@ static void UiField_widgetToValue (UiField me) {
 						my numericMatrixValue = copy_MAT (result);
 					}
 				} break; case kUi_realMatrixFormat::UNDEFINED: {
-					Melder_fatal (U"Unknown matrix format.");
+					Melder_crash (U"Unknown matrix format.");
 				}
 			}
 			if (my numericMatrixVariable)
@@ -477,7 +477,7 @@ static void UiField_widgetToValue (UiField me) {
 						}
 					}
 				} break; case kUi_stringArrayFormat::UNDEFINED: {
-					Melder_fatal (U"Unknown string array format.");
+					Melder_crash (U"Unknown string array format.");
 				}
 			}
 			if (my stringArrayVariable)
@@ -2537,7 +2537,7 @@ void UiForm_parseStringE (EditorCommand cmd, integer narg, Stackel args, constst
 }
 
 static void fatalField (UiForm dia) {
-	Melder_fatal (U"Wrong field in command window “", dia -> name.get(), U"”.");
+	Melder_crash (U"Wrong field in command window “", dia -> name.get(), U"”.");
 }
 
 void UiForm_setReal (UiForm me, double *p_variable, double value) {
@@ -2575,7 +2575,7 @@ void UiForm_setReal (UiForm me, double *p_variable, double value) {
 			return;
 		}
 	}
-	Melder_fatal (U"Real field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Real field not found in command window “", my name.get(), U"”.");
 }
 
 void UiForm_setRealAsString (UiForm me, double *p_variable, conststring32 stringValue) {
@@ -2599,7 +2599,7 @@ void UiForm_setRealAsString (UiForm me, double *p_variable, conststring32 string
 			return;
 		}
 	}
-	Melder_fatal (U"Real field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Real field not found in command window “", my name.get(), U"”.");
 }
 
 void UiForm_setInteger (UiForm me, integer *p_variable, integer value) {
@@ -2634,7 +2634,7 @@ void UiForm_setInteger (UiForm me, integer *p_variable, integer value) {
 			return;
 		}
 	}
-	Melder_fatal (U"Integer field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Integer field not found in command window “", my name.get(), U"”.");
 }
 
 void UiForm_setIntegerAsString (UiForm me, integer *p_variable, conststring32 stringValue /* cattable */) {
@@ -2668,7 +2668,7 @@ void UiForm_setIntegerAsString (UiForm me, integer *p_variable, conststring32 st
 			return;
 		}
 	}
-	Melder_fatal (U"Integer field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Integer field not found in command window “", my name.get(), U"”.");
 }
 
 void UiForm_setBoolean (UiForm me, bool *p_variable, bool value) {
@@ -2690,7 +2690,7 @@ void UiForm_setBoolean (UiForm me, bool *p_variable, bool value) {
 			return;
 		}
 	}
-	Melder_fatal (U"Boolean field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Boolean field not found in command window “", my name.get(), U"”.");
 }
 
 void UiForm_setOption (UiForm me, int *p_variable, int value) {
@@ -2722,7 +2722,7 @@ void UiForm_setOption (UiForm me, int *p_variable, int value) {
 			return;
 		}
 	}
-	Melder_fatal (U"Option field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Option field not found in command window “", my name.get(), U"”.");
 }
 
 void UiForm_setOptionAsString (UiForm me, int *p_variable, conststring32 stringValue) {
@@ -2764,7 +2764,7 @@ void UiForm_setOptionAsString (UiForm me, int *p_variable, conststring32 stringV
 			return;
 		}
 	}
-	Melder_fatal (U"Option field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Option field not found in command window “", my name.get(), U"”.");
 }
 
 void UiForm_setString (UiForm me, conststring32 *p_variable, conststring32 value /* cattable */) {
@@ -2801,7 +2801,7 @@ void UiForm_setString (UiForm me, conststring32 *p_variable, conststring32 value
 			return;
 		}
 	}
-	Melder_fatal (U"Text field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Text field not found in command window “", my name.get(), U"”.");
 }
 
 void UiForm_setColourAsGreyValue (UiForm me, MelderColour *p_variable, double greyValue) {
@@ -2823,7 +2823,7 @@ void UiForm_setColourAsGreyValue (UiForm me, MelderColour *p_variable, double gr
 			return;
 		}
 	}
-	Melder_fatal (U"Colour field not found in command window “", my name.get(), U"”.");
+	Melder_crash (U"Colour field not found in command window “", my name.get(), U"”.");
 }
 
 static UiField findField (UiForm me, conststring32 fieldName) {
@@ -2866,7 +2866,7 @@ double UiForm_getReal_check (UiForm me, conststring32 fieldName) {
 integer UiForm_getInteger (UiForm me, conststring32 fieldName) {
 	UiField field = findField (me, fieldName);
 	if (! field)
-		Melder_fatal (U"(UiForm_getInteger:) No field “", fieldName, U"” in command window “", my name.get(), U"”.");
+		Melder_crash (U"(UiForm_getInteger:) No field “", fieldName, U"” in command window “", my name.get(), U"”.");
 	switch (field -> type)
 	{
 		case _kUiField_type::INTEGER_:
@@ -2916,7 +2916,7 @@ integer UiForm_getInteger_check (UiForm me, conststring32 fieldName) {
 char32 * UiForm_getString (UiForm me, conststring32 fieldName) {
 	UiField field = findField (me, fieldName);
 	if (! field)
-		Melder_fatal (U"(UiForm_getString:) No field “", fieldName, U"” in command window “", my name.get(), U"”.");
+		Melder_crash (U"(UiForm_getString:) No field “", fieldName, U"” in command window “", my name.get(), U"”.");
 	switch (field -> type)
 	{
 		case _kUiField_type::WORD_:
@@ -2989,7 +2989,7 @@ char32 * UiForm_getString_check (UiForm me, conststring32 fieldName) {
 VEC UiForm_getRealVector (UiForm me, conststring32 fieldName) {
 	UiField field = findField (me, fieldName);
 	if (! field)
-		Melder_fatal (U"(UiForm_getRealVector:) No field “", fieldName, U"” in command window “", my name.get(), U"”.");
+		Melder_crash (U"(UiForm_getRealVector:) No field “", fieldName, U"” in command window “", my name.get(), U"”.");
 	switch (field -> type)
 	{
 		case _kUiField_type::REALVECTOR_:
@@ -3009,7 +3009,7 @@ VEC UiForm_getRealVector (UiForm me, conststring32 fieldName) {
 INTVEC UiForm_getIntegerVector (UiForm me, conststring32 fieldName) {
 	UiField field = findField (me, fieldName);
 	if (! field)
-		Melder_fatal (U"(UiForm_getIntegerVector:) No field “", fieldName, U"” in command window “", my name.get(), U"”.");
+		Melder_crash (U"(UiForm_getIntegerVector:) No field “", fieldName, U"” in command window “", my name.get(), U"”.");
 	switch (field -> type)
 	{
 		case _kUiField_type::INTEGERVECTOR_:

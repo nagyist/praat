@@ -1095,7 +1095,7 @@ autostring32 MelderFile_readText (MelderFile file, autostring8 *string8) {
 					} else if (kar1 <= 0xFFFF) {
 						text [i] = (const char32) kar1;   // convert up without sign extension
 					} else {
-						Melder_fatal (U"MelderFile_readText: unsigned short greater than 0xFFFF: should not occur.");
+						Melder_crash (U"MelderFile_readText: unsigned short greater than 0xFFFF: should not occur.");
 					}
 				}
 			}

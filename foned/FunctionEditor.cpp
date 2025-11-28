@@ -58,7 +58,7 @@ static bool group_equalDomain (double tmin, double tmax) {
 static void updateScrollBar (FunctionEditor me) {
 /* We cannot call this immediately after creation. */
 	if (my endWindow - my startWindow > my tmax - my tmin)
-		Melder_fatal (U"updateScrollBar: the window runs from ", my startWindow, U" to ", my endWindow, U" ", my v_format_units_long (),
+		Melder_crash (U"updateScrollBar: the window runs from ", my startWindow, U" to ", my endWindow, U" ", my v_format_units_long (),
 			 	U", but the whole domain runs only from ", my tmin, U" to ", my tmax, U" ", my v_format_units_long (), U".");
 	const double slider_size = Melder_clippedLeft (1.0, (my endWindow - my startWindow) / (my tmax - my tmin) * maximumScrollBarValue - 1.0);
 	Melder_assert (maximumScrollBarValue - slider_size >= 1.0);

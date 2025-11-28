@@ -592,7 +592,7 @@ autoSound Sounds_convolve (constSound me, constSound thee, kSounds_convolve_scal
 			//case kSounds_convolve_signalOutsideTimeDomain_PERIODIC: {
 				// do nothing
 			//} break;
-			default: Melder_fatal (U"Sounds_convolve: unimplemented outside-time-domain strategy ", (int) signalOutsideTimeDomain);
+			default: Melder_crash (U"Sounds_convolve: unimplemented outside-time-domain strategy ", (int) signalOutsideTimeDomain);
 		}
 		switch (scaling) {
 			case kSounds_convolve_scaling::INTEGRAL: {
@@ -609,7 +609,7 @@ autoSound Sounds_convolve (constSound me, constSound thee, kSounds_convolve_scal
 			case kSounds_convolve_scaling::PEAK_099: {
 				Vector_scale (him.get(), 0.99);
 			} break;
-			default: Melder_fatal (U"Sounds_convolve: unimplemented scaling ", (int) scaling);
+			default: Melder_crash (U"Sounds_convolve: unimplemented scaling ", (int) scaling);
 		}
 		return him;
 	} catch (MelderError) {
@@ -675,7 +675,7 @@ autoSound Sounds_crossCorrelate (constSound me, constSound thee, kSounds_convolv
 			//case kSounds_convolve_signalOutsideTimeDomain_PERIODIC: {
 				// do nothing
 			//} break;
-			default: Melder_fatal (U"Sounds_crossCorrelate: unimplemented outside-time-domain strategy ", (int) signalOutsideTimeDomain);
+			default: Melder_crash (U"Sounds_crossCorrelate: unimplemented outside-time-domain strategy ", (int) signalOutsideTimeDomain);
 		}
 		switch (scaling) {
 			case kSounds_convolve_scaling::INTEGRAL: {
@@ -692,7 +692,7 @@ autoSound Sounds_crossCorrelate (constSound me, constSound thee, kSounds_convolv
 			case kSounds_convolve_scaling::PEAK_099: {
 				Vector_scale (him.get(), 0.99);
 			} break;
-			default: Melder_fatal (U"Sounds_crossCorrelate: unimplemented scaling ", (int) scaling);
+			default: Melder_crash (U"Sounds_crossCorrelate: unimplemented scaling ", (int) scaling);
 		}
 		return him;
 	} catch (MelderError) {
@@ -745,7 +745,7 @@ autoSound Sound_autoCorrelate (constSound me, kSounds_convolve_scaling scaling, 
 			//case kSounds_convolve_signalOutsideTimeDomain_PERIODIC: {
 				// do nothing
 			//} break;
-			default: Melder_fatal (U"Sounds_autoCorrelate: unimplemented outside-time-domain strategy ", (int) signalOutsideTimeDomain);
+			default: Melder_crash (U"Sounds_autoCorrelate: unimplemented outside-time-domain strategy ", (int) signalOutsideTimeDomain);
 		}
 		switch (scaling) {
 			case kSounds_convolve_scaling::INTEGRAL: {
@@ -762,7 +762,7 @@ autoSound Sound_autoCorrelate (constSound me, kSounds_convolve_scaling scaling, 
 			case kSounds_convolve_scaling::PEAK_099: {
 				Vector_scale (thee.get(), 0.99);
 			} break;
-			default: Melder_fatal (U"Sounds_autoCorrelate: unimplemented scaling ", (int) scaling);
+			default: Melder_crash (U"Sounds_autoCorrelate: unimplemented scaling ", (int) scaling);
 		}
 		return thee;
 	} catch (MelderError) {

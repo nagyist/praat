@@ -526,7 +526,7 @@ static void _GuiNativizeWidget (GuiObject me) {
 				my x, my y, my width, my height, my parent -> window, NULL, theGui.instance, NULL);
 			SetWindowLongPtr (my window, GWLP_USERDATA, (LONG_PTR) me);
 		} break;
-		case xmDrawingAreaWidgetClass: Melder_fatal (U"Should be implemented in GuiDrawingArea."); break;
+		case xmDrawingAreaWidgetClass: Melder_crash (U"Should be implemented in GuiDrawingArea."); break;
 		case xmFormWidgetClass: {
 			my window = CreateWindowEx (0, Melder_peek32toW (theWindowClassName), L"form", WS_CHILD | WS_CLIPSIBLINGS,
 				my x, my y, my width, my height, my parent -> window, NULL, theGui.instance, NULL);
@@ -539,7 +539,7 @@ static void _GuiNativizeWidget (GuiObject me) {
 			//TRACE
 			trace (U"Created window ", Melder_pointer (my window), U" for original RowColumn ", Melder_pointer (me));
 		} break;
-		case xmListWidgetClass: Melder_fatal (U"Should be implemented in GuiList."); break;
+		case xmListWidgetClass: Melder_crash (U"Should be implemented in GuiList."); break;
 		case xmMenuBarWidgetClass: {
 			if (! my shell -> motiff.shell.isDialog && my shell -> nat.shell.menuBar == NULL && my parent -> widgetClass != xmRowColumnWidgetClass) {
 				HMENU bar = CreateMenu ();
@@ -600,7 +600,7 @@ static void _GuiNativizeWidget (GuiObject me) {
 				my nat.menu.handle = CreatePopupMenu ();
 			}
 		} break;
-		case xmLabelWidgetClass: Melder_fatal (U"Should be implemented in GuiLabel."); break;
+		case xmLabelWidgetClass: Melder_crash (U"Should be implemented in GuiLabel."); break;
 		case xmCascadeButtonWidgetClass: {
 			if (my motiff.cascadeButton.inBar) {
 				my nat.entry.handle = my parent -> nat.menu.handle;   // TODO: superfluous?
@@ -612,9 +612,9 @@ static void _GuiNativizeWidget (GuiObject me) {
 				SetWindowFont (my window, theWinGuiNormalLabelFont (), false);
 			}
 		} break;
-		case xmPushButtonWidgetClass: Melder_fatal (U"Should be implemented in GuiButton."); break;
-		case xmTextWidgetClass: Melder_fatal (U"Should be implemented in GuiText."); break;
-		case xmToggleButtonWidgetClass: Melder_fatal (U"Should be implemented in GuiCheckButton and GuiRadioButton."); break;
+		case xmPushButtonWidgetClass: Melder_crash (U"Should be implemented in GuiButton."); break;
+		case xmTextWidgetClass: Melder_crash (U"Should be implemented in GuiText."); break;
+		case xmToggleButtonWidgetClass: Melder_crash (U"Should be implemented in GuiCheckButton and GuiRadioButton."); break;
 		case xmScaleWidgetClass: {
 			my window = CreateWindow (PROGRESS_CLASS, Melder_peek32toW (_GuiWin_expandAmpersands (my name.get())), WS_CHILD | WS_CLIPSIBLINGS,
 				my x, my y, my width, my height, my parent -> window, (HMENU) 1, theGui.instance, NULL);

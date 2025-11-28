@@ -1,10 +1,10 @@
 /* Formant.cpp
  *
- * Copyright (C) 1992-2009,2011,2012,2014-2020,2022-2024 Paul Boersma
+ * Copyright (C) 1992-2009,2011,2012,2014-2020,2022-2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -454,7 +454,7 @@ static double getLocalCost (integer iframe, integer icand, integer itrack, void 
 		return 1e30;
 	Formant_Formant candidate = & frame -> formant [icand];
 	/*if (candidate -> frequency <= 0.0) candidate -> frequency = 0.001;
-		Melder_fatal (U"Weird formant frequency ", candidate -> frequency, U" Hz.")*/;
+		Melder_crash (U"Weird formant frequency ", candidate -> frequency, U" Hz.")*/;
 	Melder_assert (candidate -> bandwidth > 0.0);
 	Melder_assert (itrack > 0 && itrack <= 5);
 	return my dfCost * fabs (candidate -> frequency - my refF [itrack]) +

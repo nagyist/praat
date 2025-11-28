@@ -1,10 +1,10 @@
 /* HyperPage.cpp
  *
- * Copyright (C) 1996-2024 Paul Boersma
+ * Copyright (C) 1996-2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -663,7 +663,7 @@ static void gui_drawingarea_cb_mouse (HyperPage me, GuiDrawingArea_MouseEvent ev
 	for (integer ilink = 1; ilink <= my links.size; ilink ++) {
 		HyperLink link = my links.at [ilink];
 		if (! link)
-			Melder_fatal (U"gui_drawingarea_cb_click: empty link ", ilink, U"/", my links.size, U".");
+			Melder_crash (U"gui_drawingarea_cb_click: empty link ", ilink, U"/", my links.size, U".");
 		if (event -> y > link -> y2DC && event -> y < link -> y1DC && event -> x > link -> x1DC && event -> x < link -> x2DC) {
 			saveHistory (me, my optionalCurrentPageTitle.get());
 			try {

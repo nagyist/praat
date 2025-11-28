@@ -1,10 +1,10 @@
 /* praat_menuCommands.cpp
  *
- * Copyright (C) 1992-2018,2020-2024 Paul Boersma
+ * Copyright (C) 1992-2018,2020-2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -194,7 +194,7 @@ static GuiMenuItem praat_addMenuCommand__ (conststring32 window, conststring32 m
 					*/
 					if (! parentCommand -> callback && parentCommand -> title && parentCommand -> title [0] != U'-') {
 						if (! parentCommand -> button)
-							Melder_fatal (U"No button for ", window, U"/", menu, U"/", title, U".");
+							Melder_crash (U"No button for ", window, U"/", menu, U"/", title, U".");
 						Thing_cast (GuiMenuItem, parentButton_as_GuiMenuItem, parentCommand -> button);
 						parentMenu = parentButton_as_GuiMenuItem -> d_menu;
 					}
@@ -326,7 +326,7 @@ void praat_addMenuCommandScript (conststring32 window, conststring32 menu, const
 					if (parentCommand -> depth == depth - 1) {
 						if (! parentCommand -> callback && parentCommand -> title && parentCommand -> title [0] != U'-') {
 							if (! parentCommand -> button)
-								Melder_fatal (U"No button for ", window, U"/", menu, U"/", title, U".");
+								Melder_crash (U"No button for ", window, U"/", menu, U"/", title, U".");
 							Melder_assert (parentCommand -> button -> classInfo == classGuiMenuItem);
 							parentMenu = (static_cast <GuiMenuItem> (parentCommand -> button)) -> d_menu;
 						}
@@ -454,7 +454,7 @@ void praat_sensitivizeFixedButtonCommand (conststring32 title, bool sensitive) {
 		}
 	}
 	if (! commandFound)
-		Melder_fatal (U"Unkown fixed button <<", title, U">>");
+		Melder_crash (U"Unkown fixed button <<", title, U">>");
 	commandFound -> executable = sensitive;
 	if (! theCurrentPraatApplication -> batch && ! Melder_backgrounding)
 		GuiThing_setSensitive (commandFound -> button, sensitive);

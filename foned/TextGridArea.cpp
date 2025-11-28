@@ -162,7 +162,7 @@ static void insertBoundaryOrPoint (TextGridArea me, integer itier, double t1, do
 				Merge mid with left interval.
 			*/
 			if (interval -> xmin != t1)
-				Melder_fatal (U"Boundary unequal: ", interval -> xmin, U" versus ", t1, U".");
+				Melder_crash (U"Boundary unequal: ", interval -> xmin, U" versus ", t1, U".");
 			interval -> xmax = t2;
 			TextInterval_setText (interval, Melder_cat (interval -> text.get(), midNewInterval -> text.get()));
 		} else if (t2IsABoundary) {
@@ -170,7 +170,7 @@ static void insertBoundaryOrPoint (TextGridArea me, integer itier, double t1, do
 				Merge mid and right interval.
 			*/
 			if (interval -> xmax != t2)
-				Melder_fatal (U"Boundary unequal: ", interval -> xmax, U" versus ", t2, U".");
+				Melder_crash (U"Boundary unequal: ", interval -> xmax, U" versus ", t2, U".");
 			interval -> xmax = t1;
 			Melder_assert (rightNewInterval -> xmin == t2);
 			Melder_assert (rightNewInterval -> xmax == t2);

@@ -1,10 +1,10 @@
 /* melder_ftoa.cpp
  *
- * Copyright (C) 1992-2008,2010-2012,2014-2024 Paul Boersma
+ * Copyright (C) 1992-2008,2010-2012,2014-2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -59,14 +59,14 @@ const char * Melder8_integer (int64 value) {
 				formatString = "%I64d";
 				snprintf (tryBuffer,MAXIMUM_NUMERIC_STRING_LENGTH+1, formatString, 1000000000000LL);
 				if (! strequ (tryBuffer, "1000000000000"))
-					Melder_fatal (U"Found no way to print 64-bit integers on this machine.");
+					Melder_crash (U"Found no way to print 64-bit integers on this machine.");
 			}
 		}
 		const int n = snprintf (buffers8 [ibuffer],MAXIMUM_NUMERIC_STRING_LENGTH+1, formatString, value);
 		Melder_assert (n > 0);
 		Melder_assert (n <= MAXIMUM_NUMERIC_STRING_LENGTH);
 	} else {
-		Melder_fatal (U"Neither long nor long long is 8 bytes on this machine.");
+		Melder_crash (U"Neither long nor long long is 8 bytes on this machine.");
 	}
 	return buffers8 [ibuffer];
 }

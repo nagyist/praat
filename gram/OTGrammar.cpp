@@ -376,7 +376,7 @@ static void _OTGrammar_fillInHarmonies (OTGrammar me, integer itab) {
 				disharmony += constraintDisharmony * marks [icons];
 			}
 		} else {
-			Melder_fatal (U"_OTGrammar_fillInHarmonies: unimplemented decision strategy.");
+			Melder_crash (U"_OTGrammar_fillInHarmonies: unimplemented decision strategy.");
 		}
 		candidate -> harmony = - (double) disharmony;
 	}
@@ -455,7 +455,7 @@ int OTGrammar_compareCandidates (OTGrammar me, integer itab1, integer icand1, in
 		if (disharmony1 > disharmony2)
 			return +1;   // candidate 2 is better than candidate 1
 	} else
-		Melder_fatal (U"Unimplemented decision strategy.");
+		Melder_crash (U"Unimplemented decision strategy.");
 	return 0;   // the two total disharmonies are equal
 }
 
@@ -2476,7 +2476,7 @@ void OTGrammar_removeConstraint (OTGrammar me, conststring32 constraintName) {
 static void OTGrammarTableau_removeCandidate_unstripped (OTGrammarTableau me, integer candidateNumber) {
 	Melder_assert (candidateNumber >= 1);
 	if (candidateNumber > my numberOfCandidates)
-		Melder_fatal (U"icand ", candidateNumber, U", ncand ", my numberOfCandidates);
+		Melder_crash (U"icand ", candidateNumber, U", ncand ", my numberOfCandidates);
 
 	my candidates [candidateNumber]. destroy ();
 	Melder_assert (! my candidates [candidateNumber]. output);   // check leak

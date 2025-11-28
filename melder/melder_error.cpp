@@ -124,7 +124,7 @@ void Melder_flushError () {
 
 static std::mutex theMelder_crash_mutex;   // to guard against simultaneous crashes in multiple threads
 
-void Melder_fatal_ (const MelderArg& arg1,
+void _private_Melder_crash (const MelderArg& arg1,
 	const MelderArg& arg2, const MelderArg& arg3, const MelderArg& arg4,
 	const MelderArg& arg5, const MelderArg& arg6, const MelderArg& arg7,
 	const MelderArg& arg8, const MelderArg& arg9, const MelderArg& arg10,
@@ -150,7 +150,7 @@ void Melder_fatal_ (const MelderArg& arg1,
 	throw MelderError ();
 }
 
-void Melder_assert_ (const char *pathName, int lineNumber, const char *condition) {
+void _private_Melder_assert (const char *pathName, int lineNumber, const char *condition) {
 	/*
 		This function tries to make sure that it allocates no heap memory.
 		Hence, character conversion is done in place rather than with Melder_peek8to32(),

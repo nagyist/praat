@@ -319,7 +319,7 @@ static HENHMETAFILE copyToMetafile (Picture me) {
 	if (! dc)
 		Melder_throw (U"Cannot create Windows metafile.");
 	const int resolution = GetDeviceCaps (dc, LOGPIXELSX);   // Virtual PC: 360; Parallels Desktop: 600
-	//Melder_fatal (U"resolution ", resolution);
+	//Melder_crash (U"resolution ", resolution);
 	if (Melder_debug == 6) {
 		DEVMODE *devMode = * (DEVMODE **) defaultPrinter. hDevMode;
 		MelderInfo_open ();

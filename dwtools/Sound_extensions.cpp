@@ -2557,7 +2557,7 @@ autoSound Sound_reduceNoise (Sound me, double noiseStart, double noiseEnd, doubl
 			if (method == kSoundNoiseReductionMethod::SPECTRAL_SUBTRACTION) {   // spectral subtraction
 				denoisedi = Sound_reduceNoiseBySpectralSubtraction_mono (filtered.get(), noise.get(), windowLength, noiseReduction_dB);
 			} else {
-				Melder_fatal (U"Unknown method in Sound_reduceNoise.");
+				Melder_crash (U"Unknown method in Sound_reduceNoise.");
 			}
 			denoised -> z.row (ichannel)  <<=  denoisedi -> z.row (1);
 		}

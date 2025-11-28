@@ -4,7 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -1079,7 +1079,7 @@ void MelderAudio_play16 (int16 *buffer, integer sampleRate, integer numberOfSamp
 		if (! MelderAudio_hasBeenInitialized) {
 			err = Pa_Initialize ();
 			if (err)
-				Melder_fatal (U"PortAudio does not initialize: ", Melder_peek8to32 (Pa_GetErrorText (err)));
+				Melder_crash (U"PortAudio does not initialize: ", Melder_peek8to32 (Pa_GetErrorText (err)));
 			MelderAudio_hasBeenInitialized = true;
 		}
 		my supports_paComplete = Pa_GetHostApiInfo (Pa_GetDefaultHostApi ()) -> type != paDirectSound &&0;
@@ -1199,7 +1199,7 @@ void MelderAudio_play16 (int16 *buffer, integer sampleRate, integer numberOfSamp
 				Pa_Sleep (10);
 			}
 			if (my samplesPlayed != my numberOfSamples)
-				Melder_fatal (U"Played ", my samplesPlayed, U" instead of ", my numberOfSamples, U" samples.");
+				Melder_crash (U"Played ", my samplesPlayed, U" instead of ", my numberOfSamples, U" samples.");
 			#ifndef linux
 				Pa_AbortStream (my stream);
 			#endif

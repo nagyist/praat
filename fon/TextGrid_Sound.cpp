@@ -231,7 +231,7 @@ again:
 			firstInterval -> xmin = analysis -> xmin;
 			lastInterval  -> xmax = analysis -> xmax;
 			if (lastInterval -> xmax != analysis -> xmax)
-				Melder_fatal (U"analysis ends at ", analysis -> xmax, U", but last interval at ", lastInterval -> xmax, U" seconds");
+				Melder_crash (U"analysis ends at ", analysis -> xmax, U", but last interval at ", lastInterval -> xmax, U" seconds");
 			if (! IntervalTier_check (analysisWordTier))
 				Melder_throw (U"Analysis word tier out of order (2).");
 			IntervalTier analysisPhonemeTier = analysis -> intervalTier_cast (4);
