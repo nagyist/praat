@@ -147,7 +147,7 @@ double OrderedOfString_getFractionDifferent (StringList me, StringList thee) {
 	return my size == 0 ? 0.0 : (double) numberOfDifferences / my size;
 }
 
-integer OrderedOfString_indexOfItem_c (StringList me, conststring32 str) {
+integer OrderedOfString_indexOfItem (StringList me, conststring32 str) {
 	integer index = 0;
 	for (integer i = 1; i <= my size; i ++) {
 		SimpleString mystring = my at [i];

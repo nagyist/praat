@@ -29,12 +29,12 @@
 #include <errno.h>
 
 /*
-	The espeak-ng data files have been written with little-endian byte order. To be able to use these files on big endian hardware
+	The espeak-ng data files have been written with little-endian byte order. To be able to use these files on big-endian hardware
 	we have to change these files as if they were written on a big-endian machine.
 	The following routines were modeled after espeak-phonemedata.c by Jonathan Duddington.
 	A serious bug in his code for the phontab_to_bigendian procedure has been corrected.
 	A better solution would be:
-		espeak-ng should read a little endian int32 as 4 unsigned bytes:
+		espeak-ng should read a little-endian int32 as 4 unsigned bytes:
 			int32 i = (ch[0]<<0) | (ch[1]<<8) | (ch[2]<<16) | (ch[3]<<24);
 		and an int16 (short) as 2 unsigned bytes:
 			int16 i = (ch[0]<<0) | (ch[1]<<8);

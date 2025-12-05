@@ -132,7 +132,7 @@ MAN_END
 MAN_BEGIN (U"HTK parameter file format", U"djmw", 20210311)
 INTRO (U"HTK parameter format files consist of a contiguous sequence of frames preceded by a header. "
 	"Each frame is a vector of either 2-byte integers or 4-byte floats. 2-byte integers are used for "
-	"compressed forms and for vector quantised data. All multi-byte numbers are written as Big-endian numbers.")
+	"compressed forms and for vector quantised data. All multi-byte numbers are written as big-endian numbers.")
 NORMAL (U"The HTK file format header is 12 bytes long and contains the following data:")
 TERM (U"numberOfFrames (4-byte integer)")
 DEFINITION (U"The number of analysis frames in a file")
