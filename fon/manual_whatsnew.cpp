@@ -158,7 +158,7 @@ Latest changes in Praat.
 
 ##6.4.24# (1 December 2024)
 • FormantPath: fixed bug with sampling frequency.
-• Formant measurements: fixed bugs in ”autocorrelation” and “robust” methods.
+• Formant measurements: fixed bugs in “autocorrelation” and “robust” methods.
 • Manual: better support for screens taller than 15 inches.
 • Scripting: support for subtraction and unary minus for tensors.
 • Scripting: removed `sendsocket`.

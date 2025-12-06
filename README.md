@@ -298,7 +298,8 @@ macOS 11 Big Sur, macOS 12 Monterey, and macOS 13 Ventura (and macOS 14 Sonoma n
 Testing on multiple ARM64 platform versions can be done on an older ARM64 Mac,
 using virtual machines with Parallels Desktop. For instance, a 2020 Mac Mini could handle
 macOS 11 Big Sur, macOS 12 Monterey, and macOS 13 Ventura (and macOS 14 Sonoma natively),
-while a 2023 Macbook Pro can do macOS 14 Sonoma or macOS 15 Sequoia natively.
+while a 2023 Macbook Pro can do macOS 14 Sonoma or macOS 15 Sequoia,
+or macOS 26 Tahoe natively.
 
 ### 3.3. Compiling on Linux and other Unixes
 

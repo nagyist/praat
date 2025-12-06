@@ -2,7 +2,7 @@
 #define _Collection_extensions_h_
 /* Collection_extensions.h
  *
- * Copyright (C) 1994-2019,2022 David Weenink, 2015,2018 Paul Boersma
+ * Copyright (C) 1994-2019,2022 David Weenink, 2015,2018,2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ double OrderedOfString_getFractionDifferent (StringList me, StringList thee);
 
 integer OrderedOfString_getNumberOfDifferences (StringList me, StringList thee);
 
-integer OrderedOfString_indexOfItem_c (StringList me, conststring32 str);
+integer OrderedOfString_indexOfItem (StringList me, conststring32 str);
 
 void OrderedOfString_initWithSequentialNumbers (StringList me, integer n);
 
