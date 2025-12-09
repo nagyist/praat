@@ -29,6 +29,12 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.48# (9 December 2025)
+• Linux audio: recognize JACK devices (next to the already recongized ALSA devices).
+• Linux fonts: support for the Charis 7 font, as on macOS and Windows.
+• OTGrammar: non-negative maximum entropy learning.
+• Debug option at start-up from command line, e.g. `--debug=58`.
+
 ##6.4.47# (7 November 2025)
 • ##Sound: To LPC...#: channel averaging by default.
 • @`runSystem` and @`runSubprocess` should not divert a terminal window’s standard output.

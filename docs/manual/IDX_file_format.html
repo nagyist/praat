@@ -29,7 +29,7 @@ IDX file format
 <code>   0x0D: float (4 bytes)<br></code>
 <code>   0x0E: double (8 bytes)<br></code>
 <p>The fourth byte codes the number of dimensions of the vector/matrix: 1 for vectors, 2 for matrices....</p>
-<p>The sizes in each dimension are 4-byte integers (big endian, like in most non-Intel processors).</p>
+<p>The sizes in each dimension are 4-byte integers (big-endian, like in most non-Intel processors).</p>
 <p>The data is stored like in a C array, i.e. the index in the last dimension changes the fastest.</p>
 <h2>Behaviour</h2>
 <p>If the storage format indicates that there are more than 2 dimensions, the resulting Matrix accumulates dimensions 2 and higher in the columns. For example, with three dimensions of size n1, n2 and n3, respectively, the resulting Matrix object will have n1 rows and <i>n2&#215;n3</i> columns.</p>

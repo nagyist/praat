@@ -316,10 +316,23 @@ install the necessary build tools as well as some graphics and sound packages:
     sudo apt install libpulse-dev
     sudo apt install libjack-dev
 
+On Fedora you would do instead:
+
+    sudo dnf install make rsync pkg-config
+    # either:
+        sudo dnf install clang libcxx-devel libcxxabi-devel
+    # or:
+        sudo dnf install gcc g++
+    sudo dnf install gtk3-devel
+    sudo dnf install pulseaudio-libs-devel
+    sudo dnf install alsa-lib-devel
+    sudo dnf install pipewire-jack-audio-connection-kit-devel
+          # i.e. normaly *not* jack-audio-connection-kit-devel
+
 To set up your source tree for Linux, go to Praat's sources directory (where the folders `fon` and `sys` are)
 and type one of the four following commands:
 
-    # on Ubuntu command line (Intel64/AMD64 or ARM64 processor)
+    # on Ubuntu or Fedora command line (Intel64/AMD64 or ARM64 processor)
     # either:
         cp makefiles/makefile.defs.linux.pulse-clang ./makefile.defs
     # or:
