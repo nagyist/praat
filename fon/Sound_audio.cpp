@@ -94,7 +94,7 @@ autoSound Sound_record_fixedTime (int inputSource, double gain, double balance, 
 		#elif defined (raspberrypi)
 			MelderAudio_getInputSoundSystem () == kMelder_inputSoundSystem::JACK_VIA_PORTAUDIO;
 		#else
-			MelderAudio_getInputSoundSystem () == kMelder_inputSoundSystem::ALSA_VIA_PORTAUDIO;
+			MelderAudio_getInputSoundSystem () == kMelder_inputSoundSystem::ALSA_OR_JACK_VIA_PORTAUDIO;
 		#endif
 	PaStream *portaudioStream = nullptr;
 	#if defined (macintosh)
