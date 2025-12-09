@@ -2248,47 +2248,52 @@ double Graphics_textWidth_ps (Graphics me, conststring32 txt, bool useSilipaPS) 
 			g_free (families);
 		#endif
 		const char *trueName;
-		TRACE
 
 		trueName = testFont ("Times");
-		trace (U"True name of Times font: ", Melder_peek8to32 (trueName));
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Times font: ", Melder_peek8to32 (trueName));
 		hasTimes = !! strstr (trueName, "Times") || !! strstr (trueName, "Roman") || !! strstr (trueName, "Serif");
 
 		trueName = testFont ("Helvetica");
-		trace (U"True name of Helvetica font: ", Melder_peek8to32 (trueName));
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Helvetica font: ", Melder_peek8to32 (trueName));
 		hasHelvetica = !! strstr (trueName, "Helvetica") || !! strstr (trueName, "Arial") || !! strstr (trueName, "Sans");
 
 		trueName = testFont ("Courier");
-		trace (U"True name of Courier font: ", Melder_peek8to32 (trueName));
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Courier font: ", Melder_peek8to32 (trueName));
 		hasCourier = !! strstr (trueName, "Courier") || !! strstr (trueName, "Mono");
 
 		trueName = testFont ("Palatino");
-		trace (U"True name of Palatino font: ", Melder_peek8to32 (trueName));
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Palatino font: ", Melder_peek8to32 (trueName));
 		hasPalatino = !! strstr (trueName, "Palatino") || !! strstr (trueName, "Palladio") || !! strstr (trueName, "P052");
 
 		trueName = testFont ("Doulos SIL");
-		trace (U"True name of Doulos SIL font: ", Melder_peek8to32 (trueName));
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Doulos SIL font: ", Melder_peek8to32 (trueName));
 		hasDoulos = !! strstr (trueName, "Doulos");
 
 		trueName = testFont ("Charis");
-		trace (U"True name of Charis font: ", Melder_peek8to32 (trueName));
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Charis font: ", Melder_peek8to32 (trueName));
 		hasCharis = !! strstr (trueName, "Charis");
 
 		if (hasCharis) {
 			hasCharis7 = true;
 		} else {
 			trueName = testFont ("Charis SIL");
-			trace (U"True name of Charis SIL font: ", Melder_peek8to32 (trueName));
+			if (Melder_debug == 58)
+				Melder_casual (U"True name of Charis SIL font: ", Melder_peek8to32 (trueName));
 			hasCharis = !! strstr (trueName, "Charis");
 		}
 
 		hasIpaSerif = hasDoulos || hasCharis;
 		testFont ("Symbol");
 		testFont ("Dingbats");
-		#if 0   /* For debugging: list font availability. */
-			fprintf (Melder_stderr, "times %d helvetica %d courier %d palatino %d doulos %d charis %d\n",
-					hasTimes, hasHelvetica, hasCourier, hasPalatino, hasDoulos, hasCharis);
-		#endif
+		if (Melder_debug == 58)
+			Melder_casual (U"times ", hasTimes, U" helvetica ", hasHelvetica, U" courier ", hasCourier, U" palatino ", hasPalatino,
+					U" doulos ", hasDoulos, U" charis ", hasCharis, U" charis7 ", hasCharis7);
 		inited = true;
 		return true;
 	}
