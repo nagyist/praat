@@ -1138,6 +1138,7 @@ static void printHelp () {
 	MelderInfo_writeLine (U"                   (on Windows, use -8 or -a when you redirect to a pipe or file)");
 	MelderInfo_writeLine (U"  --trace          switch tracing on at start-up (see Praat > Technical > Debug)");
 	MelderInfo_writeLine (U"  --hide-picture   hide the Picture window at start-up");
+	MelderInfo_writeLine (U"  --debug=58       set the Debug option to e.g. 58 at start-up");
 }
 
 #ifdef _WIN32
@@ -1490,6 +1491,9 @@ static void interpretCommandLineArguments (bool weWereStartedFromTheCommandLine,
 			praatP.argumentNumber += 1;
 		} else if (strequ (argv [praatP.argumentNumber], "--hide-picture")) {
 			praatP.commandLineOptions.hidePicture = true;
+			praatP.argumentNumber += 1;
+		} else if (strnequ (argv [praatP.argumentNumber], "--debug=", 8)) {
+			Melder_debug = atoi (argv [praatP.argumentNumber] + 8);
 			praatP.argumentNumber += 1;
 		} else if (strequ (argv [praatP.argumentNumber], "--help")) {
 			MelderInfo_open ();

@@ -1058,7 +1058,7 @@ void MelderAudio_play16 (int16 *buffer, integer sampleRate, integer numberOfSamp
 		#elif defined (raspberrypi)
 			preferences. outputSoundSystem == kMelder_outputSoundSystem::JACK_VIA_PORTAUDIO;
 		#else
-			preferences. outputSoundSystem == kMelder_outputSoundSystem::ALSA_VIA_PORTAUDIO;
+			preferences. outputSoundSystem == kMelder_outputSoundSystem::ALSA_OR_JACK_VIA_PORTAUDIO;
 		#endif
 	my usePulseAudio = ! my usePortAudio;
 

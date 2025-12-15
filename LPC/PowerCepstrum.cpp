@@ -296,7 +296,7 @@ autoPowerCepstrumWorkspace PowerCepstrumWorkspace_create (constPowerCepstrum pow
 		my initWorkspace (powerCepstrum, qminFit, qmaxFit,	trendLineType, fitMethod);
 		return me;
 	} catch (MelderError) {
-		Melder_throw (U"Cannot create PowerCepstrumWorkspace");
+		Melder_throw (U"Cannot create PowerCepstrumWorkspace.");
 	}
 	
 }

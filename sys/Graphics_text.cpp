@@ -37,7 +37,7 @@ extern const char * ipaSerifRegularPS [];
 #if cairo
 	PangoFontMap *thePangoFontMap;
 	PangoContext *thePangoContext;
-	static bool hasTimes, hasHelvetica, hasCourier, hasPalatino, hasDoulos, hasCharis, hasIpaSerif;
+	static bool hasTimes, hasHelvetica, hasCourier, hasPalatino, hasDoulos, hasCharis, hasIpaSerif, hasCharis7;
 #elif gdi
 	#define win_MAXIMUM_FONT_SIZE  500
 	static HFONT fonts [1 + (int) kGraphics_resolution::MAX] [1 + kGraphics_font_JAPANESE] [1+win_MAXIMUM_FONT_SIZE] [1 + Graphics_BOLD_ITALIC];
@@ -145,7 +145,7 @@ extern const char * ipaSerifRegularPS [];
 				font == (int) kGraphics_font::COURIER ? "Courier New" :
 				font == (int) kGraphics_font::PALATINO ? "Palatino" :
 				font == kGraphics_font_IPATIMES ? "Doulos SIL" :
-				font == kGraphics_font_IPAPALATINO ? "Charis SIL" :
+				font == kGraphics_font_IPAPALATINO ? ( hasCharis7 ? "Charis" : "Charis SIL" ) :
 				font == kGraphics_font_DINGBATS ? "Dingbats" : "Serif";
 			fontDescriptions [font] = pango_font_description_from_string (fontFace);
 		}
@@ -636,7 +636,7 @@ static CTFontRef quartz_getFontRef (int font, int size, int style) {
 	CFNumberRef value = CFNumberCreate (nullptr, kCFNumberIntType, & ctStyle);
 	CFIndex numberOfValues = 1;
 	CFDictionaryRef styleDict = CFDictionaryCreate (nullptr, (const void **) & key, (const void **) & value, numberOfValues,
-		& kCFTypeDictionaryKeyCallBacks, & kCFTypeDictionaryValueCallBacks);
+			& kCFTypeDictionaryKeyCallBacks, & kCFTypeDictionaryValueCallBacks);
 	CFRelease (value);
 	CFStringRef keys [2];
 	keys [0] = kCTFontTraitsAttribute;
@@ -645,7 +645,7 @@ static CTFontRef quartz_getFontRef (int font, int size, int style) {
 	CFStringRef cfFont = (CFStringRef) Melder_peek32toCfstring (fontName);
 	void *values [2] = { (void *) styleDict, (void *) cfFont };
 	CFDictionaryRef attributes = CFDictionaryCreate (nullptr, (const void **) & keys, (const void **) & values, 2,
-		& kCFTypeDictionaryKeyCallBacks, & kCFTypeDictionaryValueCallBacks);
+			& kCFTypeDictionaryKeyCallBacks, & kCFTypeDictionaryValueCallBacks);
 	CFRelease (styleDict);
 	CTFontDescriptorRef ctFontDescriptor = CTFontDescriptorCreateWithAttributes (attributes);
 	CFRelease (attributes);
@@ -665,7 +665,7 @@ static CTFontRef quartz_getFontRef (int font, int size, int style) {
 										 } break;
 		case kGraphics_font_SYMBOL:      { [attributes   setObject: @"Symbol"                 forKey: (id) kCTFontNameAttribute]; } break;
 		case kGraphics_font_IPATIMES:    { [attributes   setObject: @"Doulos SIL"             forKey: (id) kCTFontNameAttribute]; } break;
-		case kGraphics_font_IPAPALATINO: { [attributes   setObject: @"Charis SIL"             forKey: (id) kCTFontNameAttribute]; } break;
+		case kGraphics_font_IPAPALATINO: { [attributes   setObject: @"Charis SIL"             forKey: (id) kCTFontNameAttribute]; } break;   DONT USE
 		case kGraphics_font_CHEROKEE:    { [attributes   setObject: @"Plantagenet Cherokee"   forKey: (id) kCTFontNameAttribute]; } break;
 		case kGraphics_font_DINGBATS:    { [attributes   setObject: @"Zapf Dingbats"          forKey: (id) kCTFontNameAttribute]; } break;
 	}
@@ -832,7 +832,8 @@ static void charDraw (Graphics anyGraphics, int xDC, int yDC, _Graphics_widechar
 			#if 1
 				CFStringRef s = CFStringCreateWithBytes (nullptr,
 					(const UInt8 *) codes16, Melder16_length (codes16) * 2,
-					kCFStringEncodingUTF16LE, false);
+					kCFStringEncodingUTF16LE, false
+				);
 				integer length = CFStringGetLength (s);
 			#else
 				NSString *s = [[NSString alloc]   initWithBytes: codes16   length: Melder16_length (codes16) * 2   encoding: NSUTF16LittleEndianStringEncoding];
@@ -978,7 +979,7 @@ static void charSizes (Graphics me, _Graphics_widechar string [], bool measureEa
 				CTFontRef ctFont = theScreenFonts [font] [size] [style];
 				if (! ctFont)
 					theScreenFonts [font] [size] [style] = ctFont =
-						quartz_getFontRef (font, size, style);
+							quartz_getFontRef (font, size, style);
 			#endif
 		}
 		int nchars = 0;
@@ -1028,7 +1029,7 @@ static void charSizes (Graphics me, _Graphics_widechar string [], bool measureEa
 						initWithBytes: codes16
 						length: (NSUInteger) (length * 2)
 						encoding: NSUTF16LittleEndianStringEncoding   // BUG: should be NSUTF16NativeStringEncoding, except that that doesn't exist
-						];
+					];
 
 					CFRange textRange = CFRangeMake (0, (CFIndex) [s length]);
 
@@ -1060,9 +1061,9 @@ static void charSizes (Graphics me, _Graphics_widechar string [], bool measureEa
 					lc -> width = frameSize.width /* * lc -> size / 100.0 */;
 					if (Melder_systemVersion >= 101100) {
 						/*
-						 * If the text ends in a space, CTFramesetterSuggestFrameSizeWithConstraints() ignores the space.
-						 * we correct for this.
-						 */
+							If the text ends in a space, CTFramesetterSuggestFrameSizeWithConstraints() ignores the space.
+							we correct for this.
+						*/
 						if (codes16 [length - 1] == u' ')
 							lc -> width += ( lc->font.integer_ == (int) kGraphics_font::COURIER || lc->style == Graphics_CODE ? 60.0 :
 									next->font.integer_ == (int) kGraphics_font::COURIER || next->style == Graphics_CODE ? 37.5 : 25.0 ) * lc -> size / 100.0;
@@ -1245,7 +1246,7 @@ static void drawOneCell (Graphics me, int xDC, int yDC, _Graphics_widechar lc []
 				{
 					charCodes [nchars] = U'\0';   // ...and flush
 					charDraw (me, xbegin, my yIsZeroAtTheTop ? y - plc -> baseline : y + plc -> baseline,
-						plc, charCodes, nchars, x - xbegin);
+							plc, charCodes, nchars, x - xbegin);
 					nchars = 0;
 					xbegin = x;
 				}
@@ -2214,11 +2215,11 @@ double Graphics_textWidth_ps (Graphics me, conststring32 txt, bool useSilipaPS) 
 		if (! hasPalatino)
 			hasPalatino = [fontNames containsObject: @"Book Antiqua"];
 		hasDoulos = [fontNames containsObject: @"Doulos SIL"];
-		hasCharis = [fontNames containsObject: @"Charis"];   // Charis 7?
+		hasCharis = [fontNames containsObject: @"Charis"];   // try Charis 7
 		if (hasCharis)
 			hasCharis7 = true;
 		else
-			hasCharis = [fontNames containsObject: @"Charis SIL"];   // Charis 6?
+			hasCharis = [fontNames containsObject: @"Charis SIL"];   // try Charis 6
 		hasIpaSerif = hasDoulos || hasCharis;
 		inited = true;
 		return true;
@@ -2247,25 +2248,52 @@ double Graphics_textWidth_ps (Graphics me, conststring32 txt, bool useSilipaPS) 
 			g_free (families);
 		#endif
 		const char *trueName;
+
 		trueName = testFont ("Times");
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Times font: ", Melder_peek8to32 (trueName));
 		hasTimes = !! strstr (trueName, "Times") || !! strstr (trueName, "Roman") || !! strstr (trueName, "Serif");
+
 		trueName = testFont ("Helvetica");
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Helvetica font: ", Melder_peek8to32 (trueName));
 		hasHelvetica = !! strstr (trueName, "Helvetica") || !! strstr (trueName, "Arial") || !! strstr (trueName, "Sans");
+
 		trueName = testFont ("Courier");
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Courier font: ", Melder_peek8to32 (trueName));
 		hasCourier = !! strstr (trueName, "Courier") || !! strstr (trueName, "Mono");
+
 		trueName = testFont ("Palatino");
-		hasPalatino = !! strstr (trueName, "Palatino") || !! strstr (trueName, "Palladio");
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Palatino font: ", Melder_peek8to32 (trueName));
+		hasPalatino = !! strstr (trueName, "Palatino") || !! strstr (trueName, "Palladio") || !! strstr (trueName, "P052");
+
 		trueName = testFont ("Doulos SIL");
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Doulos SIL font: ", Melder_peek8to32 (trueName));
 		hasDoulos = !! strstr (trueName, "Doulos");
-		trueName = testFont ("Charis SIL");
+
+		trueName = testFont ("Charis");
+		if (Melder_debug == 58)
+			Melder_casual (U"True name of Charis font: ", Melder_peek8to32 (trueName));
 		hasCharis = !! strstr (trueName, "Charis");
+
+		if (hasCharis) {
+			hasCharis7 = true;
+		} else {
+			trueName = testFont ("Charis SIL");
+			if (Melder_debug == 58)
+				Melder_casual (U"True name of Charis SIL font: ", Melder_peek8to32 (trueName));
+			hasCharis = !! strstr (trueName, "Charis");
+		}
+
 		hasIpaSerif = hasDoulos || hasCharis;
 		testFont ("Symbol");
 		testFont ("Dingbats");
-		#if 0   /* For debugging: list font availability. */
-			fprintf (Melder_stderr, "times %d helvetica %d courier %d palatino %d doulos %d charis %d\n",
-					hasTimes, hasHelvetica, hasCourier, hasPalatino, hasDoulos, hasCharis);
-		#endif
+		if (Melder_debug == 58)
+			Melder_casual (U"times ", hasTimes, U" helvetica ", hasHelvetica, U" courier ", hasCourier, U" palatino ", hasPalatino,
+					U" doulos ", hasDoulos, U" charis ", hasCharis, U" charis7 ", hasCharis7);
 		inited = true;
 		return true;
 	}
