@@ -1,10 +1,10 @@
 /* SpeechSynthesizer_and_TextGrid.cpp
  *
- * Copyright (C) 2011-2019,2023 David Weenink
+ * Copyright (C) 2011-2019,2023 David Weenink, 2024,2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -28,8 +28,6 @@
 static void IntervalTier_splitInterval (IntervalTier me, double time, conststring32 leftLabel, integer interval, double precision);
 static autoIntervalTier IntervalTier_IntervalTier_cutPartsMatchingLabel (IntervalTier me, IntervalTier thee, conststring32 label, double precision);
 static autoIntervalTier IntervalTiers_patch_noBoundaries (IntervalTier me, IntervalTier thee, conststring32 patchLabel, double precision);
-static autoTable IntervalTiers_to_Table_textAlignmentment (IntervalTier target, IntervalTier source, EditCostsTable costs);
-
 
 static void IntervalTier_checkRange (IntervalTier me, integer startInterval, integer endinterval) {
 	Melder_require (startInterval <= endinterval, 
@@ -741,7 +739,7 @@ static autoStrings IntervalTier_to_Strings_withOriginData (IntervalTier me, INTV
 	}
 }
 
-autoTable IntervalTiers_to_Table_textAlignmentment (IntervalTier target, IntervalTier source, EditCostsTable costs) {
+static autoTable IntervalTiers_to_Table_textAlignment (IntervalTier target, IntervalTier source, EditCostsTable costs) {
 	try {
 		const integer numberOfTargetIntervals = target -> intervals.size;
 		const integer numberOfSourceIntervals = source -> intervals.size;
@@ -754,7 +752,7 @@ autoTable IntervalTiers_to_Table_textAlignmentment (IntervalTier target, Interva
 			EditDistanceTable_setEditCosts (edit.get(), costs);
 			EditDistanceTable_findPath (edit.get(), nullptr);
 		}
-		const integer pathLength = edit -> warpingPath -> pathLength;
+		const integer pathLength = edit -> pathLength;
 		const conststring32 columnNames [] = {
 			U"targetInterval", U"targetText", U"targetStart", U"targetEnd",
 			U"sourceInterval", U"sourceText", U"sourceStart", U"sourceEnd",
@@ -762,8 +760,8 @@ autoTable IntervalTiers_to_Table_textAlignmentment (IntervalTier target, Interva
 		};
 		autoTable thee = Table_createWithColumnNames (pathLength - 1, ARRAY_TO_STRVEC (columnNames));
 		for (integer i = 2; i <= pathLength; i++) {
-			const structPairOfInteger p = edit -> warpingPath -> path [i];
-			const structPairOfInteger p1 = edit -> warpingPath -> path [i - 1];
+			const structPairOfInteger p = edit -> path [i];
+			const structPairOfInteger p1 = edit -> path [i - 1];
 			double targetStart = undefined, targetEnd = undefined;
 			double sourceStart = undefined, sourceEnd = undefined;
 			conststring32 targetText = U"", sourceText = U"";
@@ -824,7 +822,7 @@ autoTable TextGrids_to_Table_textAlignment (TextGrid target, integer ttier, Text
 	try {
 		const IntervalTier targetTier = TextGrid_checkSpecifiedTierIsIntervalTier (target, ttier);
 		const IntervalTier sourceTier = TextGrid_checkSpecifiedTierIsIntervalTier (source, stier);
-		return IntervalTiers_to_Table_textAlignmentment (targetTier, sourceTier, costs);
+		return IntervalTiers_to_Table_textAlignment (targetTier, sourceTier, costs);
 	} catch (MelderError) {
 		Melder_throw (U"No text alignment table created from TextGrids ", target, U" and ", source, U".");
 	}
