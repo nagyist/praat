@@ -2,11 +2,11 @@
 #define _EditDistanceTable_h_
 /* EditDistanceTable.h
  *
- * Copyright (C) 2012,2015-2017 David Weenink
+ * Copyright (C) 2012,2015-2017 David Weenink, 2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -27,25 +27,17 @@
 
 #include "EditDistanceTable_def.h"
 
-autoWarpingPath WarpingPath_create (integer length);
-
-// Search the path for the corresponding axis value. If path is horizontal/vertical
-//  ivar1 and ivar2 will not be equal. The return value is the length of the path segment (ivar2-ivar1 +1)
-integer WarpingPath_getColumnsFromRowIndex (WarpingPath me, integer irow, integer *icol1, integer *icol2);
-
-integer WarpingPath_getRowsFromColumnIndex (WarpingPath me, integer icol, integer *irow1, integer *irow2);
-
-
 autoEditCostsTable EditCostsTable_create (integer targetAlphabetSize, integer sourceAlphabetSize);
-/* The insertion, deletion and substitution costs are specified in this table
- * 1..n-2 target symbols (target alphabet)
- * 1..m-2 source symbols (source alphabet)
- * row n-1 and col m-1 specify no-match symbols
- * cells [n] [1..m-1] specify insertion costs
- * cells [1..n-1] [m] specify deletion costs
- * cell [n-1] [m-1] no-match target == no-match source
- * cell [n] [m] no-match target != no-match source
- */
+/*
+	The insertion, deletion and substitution costs are specified in this table
+	1..n-2 target symbols (target alphabet)
+	1..m-2 source symbols (source alphabet)
+	row n-1 and col m-1 specify no-match symbols
+	cells [n] [1..m-1] specify insertion costs
+	cells [1..n-1] [m] specify deletion costs
+	cell [n-1] [m-1] no-match target == no-match source
+	cell [n] [m] no-match target != no-match source
+*/
 
 void EditCostsTable_setDefaultCosts (EditCostsTable me, double insertionCosts, double deletionCosts, double substitutionCosts);
 

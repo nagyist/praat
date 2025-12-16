@@ -1,5 +1,5 @@
 # data.praat
-# Paul Boersma, 7 November 2025
+# Paul Boersma, 16 December 2025
 # Checks Copy, Equal, Read, Save.
 
 tracing$ = "no"
@@ -96,6 +96,13 @@ tableOfReal2 = Read TableOfReal from headerless spreadsheet file: "kanweg.txt"
 assert objectsAreIdentical: tableOfReal, tableOfReal2
 Remove
 
+appendInfoLine: "EditDistanceTable"
+intentionStrings = Create Strings as characters: "intention"
+executionStrings = Create Strings as characters: "execution"
+selectObject: intentionStrings, executionStrings
+editDistanceTable = To EditDistanceTable
+@test (editDistanceTable)
+
 appendInfoLine: "FFNet"
 Create iris example: 0, 0
 ffnet = selected: "FFNet"
@@ -176,7 +183,7 @@ Set shunting... shunting
 
 procedure selectAll ( )
 	selectObject: sound, pitch, formant, spectrogram, cochleagram, melSpectrogram, barkSpectrogram,
-	... pulses, pitchTier, manipulation, matrix, speaker, grammar, table, tableOfReal,
+	... pulses, pitchTier, manipulation, matrix, speaker, grammar, table, tableOfReal, editDistanceTable,
 	... ffnet, pattern, categories, discriminant, dtw, textgrid, network
 endproc
 procedure readCheckCollectionFile ( )
@@ -211,6 +218,8 @@ procedure readCheckCollectionFile ( )
 	assert objectsAreIdentical: table, table2
 	tableOfReal2 = selected: "TableOfReal"
 	assert objectsAreIdentical: tableOfReal, tableOfReal2
+	editDistanceTable2 = selected: "EditDistanceTable"
+	assert objectsAreIdentical: editDistanceTable, editDistanceTable2
 	ffnet2 = selected: "FFNet"
 	assert objectsAreIdentical: ffnet, ffnet2
 	pattern2 = selected: "Pattern"
@@ -228,7 +237,7 @@ procedure readCheckCollectionFile ( )
 	removeObject: sound2, pitch2, formant2,
 	... spectrogram2, cochleagram2, melSpectrogram2, barkSpectrogram2,
 	... pulses2, pitchTier2,
-	... manipulation2, matrix2, speaker2, grammar2, table2, tableOfReal2,
+	... manipulation2, matrix2, speaker2, grammar2, table2, tableOfReal2, editDistanceTable2,
 	... ffnet2, pattern2, categories2, discriminant2, dtw2, textgrid2, network2
 endproc
 
@@ -250,7 +259,7 @@ Save as binary file: "kanweg.Collection"
 removeObject: sound, pitch, formant,
 ... spectrogram, cochleagram, melSpectrogram, barkSpectrogram,
 ... pulses, pitchTier,
-... manipulation, matrix, speaker, grammar, table, tableOfReal,
+... manipulation, matrix, speaker, grammar, table, tableOfReal, editDistanceTable,
 ... ffnet, pattern, categories, discriminant, dtw, textgrid, network
 deleteFile: "kanweg.Object"
 deleteFile: "kanweg.Collection"
