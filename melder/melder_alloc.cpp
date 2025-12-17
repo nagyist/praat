@@ -56,7 +56,7 @@ void Melder_alloc_init () {
 void * _Melder_malloc (int64 size) {
 	if (size <= 0)
 		Melder_throw (U"Can never allocate ", Melder_bigInteger (size), U" bytes.");
-	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
+	static_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if (size > MAXIMUM_ALLOCATION_SIZE_64)
 		Melder_throw (U"Can never allocate ", Melder_bigInteger (size), U" bytes.");
 	if (sizeof (size_t) < 8 && size > MAXIMUM_ALLOCATION_SIZE_32)
@@ -74,7 +74,7 @@ void * _Melder_malloc (int64 size) {
 void * _Melder_malloc_f (int64 size) {
 	if (size <= 0)
 		Melder_crash (U"(Melder_malloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
-	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
+	static_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if (size > MAXIMUM_ALLOCATION_SIZE_64)
 		Melder_crash (U"(Melder_malloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
 	if (sizeof (size_t) < 8 && size > MAXIMUM_ALLOCATION_SIZE_32)
@@ -109,7 +109,7 @@ void _Melder_free (void **ptr) noexcept {
 void * Melder_realloc (void *ptr, int64 size) {
 	if (size <= 0)
 		Melder_throw (U"Can never allocate ", Melder_bigInteger (size), U" bytes.");
-	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
+	static_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if (size > MAXIMUM_ALLOCATION_SIZE_64)
 		Melder_throw (U"Can never allocate ", Melder_bigInteger (size), U" bytes.");
 	if (sizeof (size_t) < 8 && size > MAXIMUM_ALLOCATION_SIZE_32)
@@ -136,7 +136,7 @@ void * Melder_realloc (void *ptr, int64 size) {
 void * Melder_realloc_f (void *ptr, int64 size) {
 	if (size <= 0)
 		Melder_crash (U"(Melder_realloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
-	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
+	static_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if (size > MAXIMUM_ALLOCATION_SIZE_64)
 		Melder_crash (U"(Melder_realloc_f:) Can never allocate ", Melder_bigInteger (size), U" bytes.");
 	if (sizeof (size_t) < 8 && size > MAXIMUM_ALLOCATION_SIZE_32)
@@ -172,7 +172,7 @@ void * _Melder_calloc (int64 nelem, int64 elsize) {
 		Melder_throw (U"Can never allocate ", Melder_bigInteger (nelem), U" elements.");
 	if (elsize <= 0)
 		Melder_throw (U"Can never allocate elements whose size is ", Melder_bigInteger (elsize), U" bytes.");
-	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
+	static_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if ((uint64) nelem > MAXIMUM_ALLOCATION_SIZE_64 / (uint64) elsize)   // guarded casts to unsigned
 		Melder_throw (U"Can never allocate ", Melder_bigInteger (nelem), U" elements whose sizes are ",
 				Melder_bigInteger (elsize), U" bytes each.");
@@ -194,7 +194,7 @@ void * _Melder_calloc_f (int64 nelem, int64 elsize) {
 		Melder_crash (U"(Melder_calloc_f:) Can never allocate ", Melder_bigInteger (nelem), U" elements.");
 	if (elsize <= 0)
 		Melder_crash (U"(Melder_calloc_f:) Can never allocate elements whose size is ", Melder_bigInteger (elsize), U" bytes.");
-	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
+	static_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	if ((uint64) nelem > MAXIMUM_ALLOCATION_SIZE_64 / (uint64) elsize)   // guarded casts to unsigned
 		Melder_crash (U"Can never allocate ", Melder_bigInteger (nelem), U" elements whose sizes are ",
 				Melder_bigInteger (elsize), U" bytes each.");
@@ -222,7 +222,7 @@ void * _Melder_calloc_f (int64 nelem, int64 elsize) {
 autostring32 Melder_dup (conststring32 string /* cattable */) {
 	if (! string)
 		return autostring32();
-	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
+	static_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	const integer numberOfCharactersToCopy = Melder_length (string);
 	Melder_assert (numberOfCharactersToCopy >= 0);
 	Melder_assert (numberOfCharactersToCopy < MAXIMUM_ALLOCATION_SIZE);   // there should be no way to get longer strings into Praat
@@ -259,7 +259,7 @@ autostring32 Melder_ndup (conststring32 string /* cattable */, const integer num
 autostring32 Melder_dup_f (conststring32 string /* cattable */) {
 	if (! string)
 		return autostring32();
-	Melder_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
+	static_assert (MAXIMUM_ALLOCATION_SIZE < SIZE_MAX);
 	const integer numberOfCharactersToCopy = Melder_length (string);
 	Melder_assert (numberOfCharactersToCopy >= 0);
 	Melder_assert (numberOfCharactersToCopy < MAXIMUM_ALLOCATION_SIZE);   // there should be no way to get longer strings into Praat

@@ -1,6 +1,6 @@
-/* EditDistanceTable.c
+/* EditDistanceTable.cpp
  *
- * Copyright (C) 2012-2020 David Weenink
+ * Copyright (C) 2012-2020,2022 David Weenink, 2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
-
-/*
-  djmw 20120407 First implementation
-*/
 
 #include "EditDistanceTable.h"
 
@@ -41,119 +37,16 @@
 #include "oo_DESCRIPTION.h"
 #include "EditDistanceTable_def.h"
 
-// prototypes
-autoEditCostsTable EditCostsTable_createDefault ();
-
-/* The insertion, deletion and substitution costs are specified in a TableOfReal
- * 1..n-2 target symbols/alphabet
- * 1..m-2 source symbols/alphabet
- * row n-1 and col m-1 specify nomatch symbols
- * cells [n] [1..m-2] specify insertion costs
- * cells [1..n-1] [m] specify deletion costs
- * cell [n-1] [m-1] if nomatch target == nomatch source
- * cell [n] [m] if nomatch target != nomatch source
- */
-
-Thing_implement (WarpingPath, Daata, 0);
-
-autoWarpingPath WarpingPath_create (integer length) {
-	try {
-		autoWarpingPath me = Thing_new (WarpingPath);
-		my path = newvectorzero <structPairOfInteger> (length);
-		my _capacity = my pathLength = length;
-		return me;
-	} catch (MelderError) {
-		Melder_throw (U"WarpPath not created.");
-	}
-}
-
-static void WarpingPath_reset (WarpingPath me) {
-	for (integer i = 1; i <= my _capacity; i ++)
-		my path [i]. x = my path [i]. y = 0;
-	my pathLength = my _capacity;
-}
-
-static void WarpingPath_getPath (WarpingPath me, constINTMAT const& psi, integer iy, integer ix) { // psi [1..nrows] [1..ncols]
-	integer index = my pathLength;
-	my path [index]. x = ix;
-	my path [index]. y = iy;
-	while (! (ix == 0 && iy == 0)) {
-		Melder_assert (ix >= 0 && iy >= 0);
-		if (psi [1 + iy] [1 + ix] == WARPING_fromLeft) {
-			ix --;
-		} else if (psi [1 + iy] [1 + ix] == WARPING_fromBelow) {
-			iy --;
-		} else {   // WARPING_fromDiag
-			ix --;
-			iy --;
-		}
-		my path [-- index]. x = ix;
-		my path [index]. y = iy;
-	}
-	if (index > 1) {
-		integer k = 1;
-		for (integer i = index; i <= my pathLength; i ++) {
-			my path [k ++] = my path [i];
-			my path [i]. x = my path [i]. y = 0;
-		}
-		my pathLength = k - 1;
-	}
-}
-
-static void WarpingPath_shiftPathByOne (WarpingPath me) {
-	for (integer i = 1; i <= my pathLength; i ++) {
-		my path [i]. x ++;
-		my path [i]. y ++;
-	}
-}
-
-integer WarpingPath_getColumnsFromRowIndex (WarpingPath me, integer iy, integer *p_ix1, integer *p_ix2) {
-	integer ix1 = 0, ix2 = 0, numberOfColumns = 0;
-	if (iy > 0) {
-		for (integer i = 1; i <= my pathLength; i ++) {
-			if (my path [i]. y < iy) {
-				continue;
-			} else if (my path [i]. y == iy) {
-				if (ix1 == 0)
-					ix1 = my path [i]. x;
-				ix2 = my path [i]. x;
-			} else {
-				break;
-			}
-		}
-		numberOfColumns = ix2 - ix1 + 1;
-	}
-	if (p_ix1)
-		*p_ix1 = ix1;
-	if (p_ix2)
-		*p_ix2 = ix2;
-	return numberOfColumns;
-}
-
-integer WarpingPath_getRowsFromColumnIndex (WarpingPath me, integer ix, integer *p_iy1, integer *p_iy2) {
-	if (ix <= 0)
-		return 0;
-	integer iy1 = 0, iy2 = 0, numberOfRows = 0;
-	if (ix > 0) {
-		for (integer i = 1; i <= my pathLength; i ++) {
-			if (my path [i]. x < ix) {
-				continue;
-			} else if (my path [i]. x == ix) {
-				if (iy1 == 0)
-					iy1 = my path [i]. y;
-				iy2 = my path [i]. y;
-			} else {
-				break;
-			}
-		}
-		numberOfRows = iy2 - iy1 + 1;
-	}
-	if (p_iy1)
-		*p_iy1 = iy1;
-	if (p_iy2)
-		*p_iy2 = iy2;
-	return numberOfRows;
-}
+/*
+	The insertion, deletion and substitution costs are specified in a TableOfReal
+	1..n-2 target symbols/alphabet
+	1..m-2 source symbols/alphabet
+	row n-1 and col m-1 specify nomatch symbols
+	cells [n] [1..m-2] specify insertion costs
+	cells [1..n-1] [m] specify deletion costs
+	cell [n-1] [m-1] if nomatch target == nomatch source
+	cell [n] [m] if nomatch target != nomatch source
+*/
 
 Thing_implement (EditCostsTable, TableOfReal, 0);
 
@@ -185,13 +78,13 @@ autoEditCostsTable EditCostsTable_create (integer targetAlphabetSize, integer so
 	}
 }
 
-autoEditCostsTable EditCostsTable_createDefault () {
+static autoEditCostsTable EditCostsTable_createDefault () {
 	try {
 		autoEditCostsTable me = EditCostsTable_create (0, 0);
-		my data [1] [1] = 0.0; // default substitution cost (nomatch == nomatch)
-		my data [2] [2] = 2.0; // default substitution cost (nomatch != nomatch)
-		my data [2] [1] = 1.0; // default insertion cost
-		my data [1] [2] = 1.0; // default deletion cost
+		my data [1] [1] = 0.0;   // default substitution cost (nomatch == nomatch)
+		my data [2] [2] = 2.0;   // default substitution cost (nomatch != nomatch)
+		my data [2] [1] = 1.0;   // default insertion cost
+		my data [1] [2] = 1.0;   // default deletion cost
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"Default EditCostsTable not created.");
@@ -343,9 +236,10 @@ autoEditDistanceTable EditDistanceTable_create (Strings target, Strings source) 
 		TableOfReal_setRowLabel (me.get(), 1, U"");
 		for (integer i = 1; i <= numberOfTargetSymbols; i ++)
 			my rowLabels [i + 1] = Melder_dup (target -> strings [i].get());
-		my warpingPath = WarpingPath_create (numberOfTargetSymbols + numberOfSourceSymbols + 1);
+		my path = newvectorzero <structPairOfInteger> (numberOfTargetSymbols + numberOfSourceSymbols + 1);
+		my pathLength = my path.size;   // maintain invariant
 		my editCostsTable = EditCostsTable_createDefault ();
-		EditDistanceTable_findPath (me.get(), 0);
+		EditDistanceTable_findPath (me.get(), nullptr);
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"EditDistanceTable not created.");
@@ -445,8 +339,8 @@ void EditDistanceTable_draw (EditDistanceTable me, Graphics graphics, int iforma
 	const double maxTextWidth = getMaxRowLabelWidth (me, graphics, rowmin, rowmax);
 	double y = 1.0 + 0.1 * lineSpacing;
 	autoBOOLMAT onPath = zero_BOOLMAT (my numberOfRows, my numberOfColumns);
-	for (integer i = 1; i <= my warpingPath -> pathLength; i ++) {
-		const structPairOfInteger poi = my warpingPath -> path [i];
+	for (integer i = 1; i <= my pathLength; i ++) {
+		const structPairOfInteger poi = my path [i];
 		onPath [poi.y] [poi.x] = true;
 	}
 	for (integer irow = my numberOfRows; irow > 0; irow --) {
@@ -493,12 +387,12 @@ void EditDistanceTable_draw (EditDistanceTable me, Graphics graphics, int iforma
 
 void EditDistanceTable_drawEditOperations (EditDistanceTable me, Graphics graphics) {
 	const conststring32 oinsertion = U"i", insertion = U"*", odeletion = U"d", deletion = U"*", osubstitution = U"s", oequal = U"";
-	Graphics_setWindow (graphics, 0.5, my warpingPath -> pathLength - 0.5, 0.0, 1.0); // pathLength-1 symbols
+	Graphics_setWindow (graphics, 0.5, my pathLength - 0.5, 0.0, 1.0);   // pathLength-1 symbols
 	const double lineSpacing = getLineSpacing (graphics);
 	const double ytarget = 1 - lineSpacing, ysource = ytarget - 2 * lineSpacing, yoper = ysource - lineSpacing;
 	Graphics_setTextAlignment (graphics, kGraphics_horizontalAlignment::CENTRE, Graphics_BOTTOM);
-	for (integer i = 2; i <= my warpingPath -> pathLength; i ++) {
-		const structPairOfInteger p = my warpingPath -> path [i], p1 = my warpingPath -> path [i - 1];
+	for (integer i = 2; i <= my pathLength; i ++) {
+		const structPairOfInteger p = my path [i], p1 = my path [i - 1];
 		const double x = i - 1;
 		if (p.x == p1.x) { // insertion
 			Graphics_text (graphics, x, ytarget, my rowLabels [p.y].get());
@@ -530,11 +424,12 @@ autoTableOfReal EditDistanceTable_to_TableOfReal_directions (EditDistanceTable m
 
 void EditDistanceTable_findPath (EditDistanceTable me, autoTableOfReal *out_directions) {
 	try {
-		/* What do we have to do to source to get target?
-		 * Origin [1] [1] is at bottom-left corner
-		 * Target vertical, source horizontal
-		 * Going in the vertical direction is a deletion, horizontal is insertion, diagonal is substitution
-		 */
+		/*
+			What do we have to do to source to get target?
+			The origin [1] [1] is in the bottom-left corner.
+			Target vertical, source horizontal.
+			Going in the vertical direction is a deletion, horizontal is insertion, diagonal is substitution.
+		*/
 		const integer numberOfSources = my numberOfColumns - 1, numberOfTargets = my numberOfRows - 1;
 		autoINTMAT psi = zero_INTMAT (my numberOfRows, my numberOfColumns);
 		autoMAT delta = zero_MAT (my numberOfRows, my numberOfColumns);
@@ -568,11 +463,52 @@ void EditDistanceTable_findPath (EditDistanceTable me, autoTableOfReal *out_dire
 				delta [irow] [icol] = mindist;
 			}
 		}
-		// find minimum distance in last column
-		const integer iy = numberOfTargets, ix = numberOfSources;
-		WarpingPath_reset (my warpingPath.get());
-		WarpingPath_getPath (my warpingPath.get(), psi.get(), iy, ix);
-		WarpingPath_shiftPathByOne (my warpingPath.get());
+
+		/*
+			Reset the path to its maximum length, clearing it to zero.
+		*/
+		my path. resize (my numberOfRows + my numberOfColumns - 1);
+		for (integer i = 1; i <= my path.size; i ++)
+			my path [i]. x = my path [i]. y = 0;
+		my pathLength = my path.size;   // maintain invariant
+
+		/*
+			Compute the shortest path.
+		*/
+		integer iy = numberOfTargets, ix = numberOfSources;
+		integer index = my pathLength;
+		my path [index]. x = ix;
+		my path [index]. y = iy;
+		while (! (ix == 0 && iy == 0)) {
+			Melder_assert (ix >= 0 && iy >= 0);
+			if (psi [1 + iy] [1 + ix] == WARPING_fromLeft) {
+				ix --;
+			} else if (psi [1 + iy] [1 + ix] == WARPING_fromBelow) {
+				iy --;
+			} else {   // WARPING_fromDiag
+				ix --;
+				iy --;
+			}
+			my path [-- index]. x = ix;
+			my path [index]. y = iy;
+		}
+		if (index > 1) {
+			integer k = 1;
+			for (integer i = index; i <= my pathLength; i ++) {
+				my path [k ++] = my path [i];
+				my path [i]. x = my path [i]. y = 0;
+			}
+			my path. resize (k - 1);
+			my pathLength = my path.size;   // maintain invariant
+		}
+
+		/*
+			Shift by 1.
+		*/
+		for (integer i = 1; i <= my pathLength; i ++) {
+			my path [i]. x ++;
+			my path [i]. y ++;
+		}
 
 		my data.all()  <<=  delta.all();
 
