@@ -240,8 +240,8 @@ on Windows 11. Early testing shows that the signature is seen by SmartScreen,
 but that SmartScreen can still block Praat, so that users still have to
 click “Run Anyway” (or “Unblock” under Properties).
 It seems that the card reader for this certificate cannot be used yet for code-signing on ARM64 Windows
-or on MacOS Sonoma/Sequoia, so for the moment we have to fall back on an obsolete Intel64/AMD64 Windows 10 machine
-and are looking for a more robust solution.
+or on MacOS Sonoma/Sequoia/Tahoe, so for the moment we have to fall back
+on an Intel64/AMD64 Windows 10 or 11 machine.
 
 **Testing** on multiple platform versions can be done with virtual machines
 for Windows 7 (64-bit), Windows 8.1 (64-bit), 64-bit Windows 10 (1507, 1803, 22H2) and Windows 11,
@@ -253,14 +253,14 @@ On an ARM64 Mac with Parallels Desktop, you can test only on Windows 11.
 To **build** Praat on the Mac, extract the *praatXXXX_xcodeproj.zip* file
 from [Praat’s latest release](https://github.com/praat/praat.github.io/releases)
 into the folder that contains `sys`, `fon`, `dwtools` and so on (e.g. `~/Dropbox/Praats/src`).
-Then open the project `praat.xcodeproj` in Xcode 16.3 (or later),
+Then open the project `praat.xcodeproj` in Xcode 26.1.1 (or later),
 and edit the Intermediate and Product build paths to something that suits you
 (Xcode -> Settings... -> Locations -> Derived Data -> Advanced... -> Custom -> Absolute,
 then type something after Products, e.g. `~/Dropbox/Praats/bin/macos`,
 as well as something after Intermediates, e.g. `~/builds/mac_intermediates`, then click Done).
 After this preliminary work, choose Build or Run for the target `praat_mac`.
 You can compile with the 14.2 SDK, which will work as far back as macOS 10.11 El Capitan,
-which is our deployment target, and will look good even on macOS 14 Sonoma.
+which is our deployment target, and will look good even on macOS 26 Tahoe.
 
 If you get an error message like “Code Signing Identity xxx does not match any valid, non-expired,
 code-signing certificate in your keychain”, then select the target `praat_mac`, go to Info → Build,
@@ -357,9 +357,9 @@ cairo-gobject, cairo, gio-2.0, pango-1.0, freetype, fontconfig, gobject-2.0, gmo
 gthread-2.0, rt, glib-2.0, asound, jack).
 
 When compiling Praat on an external supercomputer or so, you will not have sound.
-If you do have `libgtk-3-dev` (and its dependencies), do
+If you do have `libgtk-3-dev` or `gtk3-devel` (and its dependencies), do
 
-    # on Ubuntu command line (Intel64/AMD64 or ARM64 processor)
+    # on Ubuntu or Fedora command line (Intel64/AMD64 or ARM64 processor)
     cp makefiles/makefile.defs.linux.silent ./makefile.defs
 
 Then type `make -j12` or so to build the program. If your Unix isn’t Linux,
@@ -370,7 +370,7 @@ freetype, fontconfig, gobject-2.0, gmodule-2.0, gthread-2.0, rt, glib-2.0).
 When compiling Praat for use as a server for commands from your web pages,
 you may not need sound, a GUI, amd graphics. In that case, do
 
-    # on Ubuntu command line (Intel64/AMD64 or ARM64 processor)
+    # on Ubuntu or Fedora command line (Intel64/AMD64 or ARM64 processor)
     # either:
         cp makefiles/makefile.defs.linux.barren-clang ./makefile.defs
     # or:
@@ -385,20 +385,21 @@ If your Unix isn’t Linux, you may have to edit the library names in the makefi
 The above works exactly the same for Intel64/AMD64 and ARM64 processors, with the same makefiles.
 
 **Testing** on multiple platform versions can be done with virtual machines
-for e.g. Ubuntu 20.04, Ubuntu 22.04, Fedora 35, Fedora 37, Mint 20.2,
-Debian GNU Linux 10.10, CentOS 8.4, and CentOS Stream 9, 
+for e.g. Ubuntu 20.04, Ubuntu 22.04, Fedora 35, Fedora 37, Fedora 38, Mint 20.2,
+Debian GNU Linux 10.10, Debian GNU Linux 12, CentOS 8.4, and CentOS Stream 9, 
 for instance on an Intel64 Mac with Parallels Desktop.
-On an ARM64 Mac, we test with virtual machines for Ubuntu 22.04, Fedora 38,
-and Debian GNU Linux 12 ARM64.
+On an ARM64 Mac, we test with virtual machines for Ubuntu 22.04, Ubuntu 22.04,
+Fedora 38, Fedora 40, Fedora 42, and Debian GNU Linux 12 ARM64.
 
 ## 4. Developing Praat on all platforms simultaneously
 
-At the time of writing (5 January 2024), we develop 12 of the 13 Praat editions on a single
+At the time of writing (18 December 2025), we develop 13 of the 15 Praat editions on a single
 computer, which is a 2023 M3 Macbook Pro. The Mac edition is built natively with Xcode,
-the three Windows editions are built via Parallels Desktop 19,
-and the six Linux editions and the two Chromebook editions are built via OrbStack;
-only the Raspberry Pi edition is built separately (on a Raspberry Pi).
-We put all 13 editions into a `bin` folder on Dropbox, so that it is easy to test
+the three Windows editions and the ARM64 Fedora edition are built via Parallels Desktop 26,
+and the six Linux (Ubuntu) editions and the two Chromebook editions are built via OrbStack;
+the Raspberry Pi edition is built separately (on a Raspberry Pi),
+and the Intel64 Fedora edition is built via Parallels Desktop 20 on a 2018 Intel Macbook Pro.
+We put all 15 editions into a `bin` folder on Dropbox, so that it is easy to test
 the Windows and Linux editions on other computers.
 
 In the following we assume that you want to create all of those editions as well.
@@ -499,6 +500,7 @@ assuming that it uses the `bash` shell; please note the subtle but crucial diffe
 between `/Users/yourname` and `/home/yourname`):
 
     # in Ubuntu:/home/yourname/.bash_aliases
+    # in Fedora:/home/yourname/.bashrc.d/bash_aliases
     ORIGINAL_SOURCES="/Users/yourname/Dropbox/Praats/src"
     EXCLUDES='--exclude="*.xcodeproj" --exclude="Icon*" --exclude=".*" --exclude="*kanweg*"'
     alias praat-build="( cd ~/praats &&\
@@ -522,6 +524,7 @@ and 130 seconds (under emulation) for the Intel64/AMD64 edition (optimization le
 To build `praat_barren`, create a folder `praatsb`, and define
 
     # in Ubuntu:~/.bash_aliases
+    # in Fedora:~/.bashrc.d/bash_aliases
     alias praatb-build="( cd ~/praatsb &&\
         rsync -rptvz $ORIGINAL_SOURCES/ $EXCLUDES . &&\
         cp makefiles/makefile.defs.linux.barren-clang makefile.defs &&\
@@ -538,6 +541,7 @@ To build Praat for Chrome64 (64-bit Intel Chromebooks only),
 create a folder `praatc`, and define
 
     # in Ubuntu:~/.bash_aliases
+    # in Fedora:~/.bashrc.d/bash_aliases
     alias praatc-build="( cd ~/praatsc &&\
         rsync -rptvz $ORIGINAL_SOURCES/ EXCLUDES . &&\
         cp makefiles/makefile.defs.chrome64 makefile.defs &&\
@@ -749,7 +753,7 @@ so that you can “upload” the two executables to the Mac with
     praat64-dist
     praat32-dist
 
-The four Linux executables have to be sent from your Ubuntu terminal to your Mac,
+The three Linux executables have to be sent from your Ubuntu terminal to your Mac,
 namely to the folder `~/Dropbox/Praats/bin/linux_intel64` or `~/Dropbox/Praats/bin/linux_arm64`
 (each of which will contain `praat` and `praat_barren`), and to the folder
 `~/Dropbox/Praats/bin/chrome_intel64` or `~/Dropbox/Praats/bin/chrome_arm64`
@@ -766,9 +770,9 @@ On Ubuntu you can define
     alias praatb-dist="praatb-build && rsync -t ~/praatsb/praat_barren /Users/yourname/Dropbox/Praats/bin/linux-arm64"
     alias praatc-dist="praatc-build && rsync -t ~/praatsc/praat /Users/yourname/Dropbox/Praats/bin/chrome-arm64"
 
-so that you can “upload” the four executables to the Mac with
+so that you can “upload” the three executables to the Mac with
 
-    # on Ubuntu command line
+    # on Ubuntu or Fedora command line
     praat-dist
     praatb-dist
     praatc-dist
