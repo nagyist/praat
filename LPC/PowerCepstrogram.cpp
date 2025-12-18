@@ -111,21 +111,6 @@ void PowerCepstrogram_subtractTrend_inplace (mutablePowerCepstrogram me, double 
 	my z = copy_MAT (thy z.get());
 }
 
-void PowerCepstrogram_subtractTrend_inplace_old (PowerCepstrogram me, double qminFit, double qmaxFit, 
-	kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod)
-{
-	try {
-		autoPowerCepstrum thee = PowerCepstrum_create (my ymax, my ny);
-		for (integer icol = 1; icol <= my nx; icol ++) {
-			thy z.row (1)  <<=  my z.column (icol);
-			PowerCepstrum_subtractTrend_inplace (thee.get(), qminFit, qmaxFit, lineType, fitMethod);
-			my z.column (icol)  <<=  thy z.row (1);
-		}
-	} catch (MelderError) {
-		Melder_throw (me, U": no tilt subtracted (inline).");
-	}
-}
-
 autoPowerCepstrogram PowerCepstrogram_subtractTrend (constPowerCepstrogram me, double qminFit, double qmaxFit, kCepstrum_trendType trendLineType, kCepstrum_trendFit fitMethod) {
 	try {
 		autoPowerCepstrogram thee = PowerCepstrogram_create (my xmin, my xmax, my nx, my dx, my x1,
@@ -188,7 +173,7 @@ void PowerCepstrogram_into_Matrix_CPP (PowerCepstrogram me, mutableMatrix thee, 
 		ws -> slopeKnown = true;
 		ws -> getPeakAndPosition ();
 		ws -> getCPP ();
-		thy z [1][iframe] = Sampled_indexToX (thee, iframe);
+		thy z [1] [iframe] = Sampled_indexToX (thee, iframe);
 		thy z [2] [iframe] = ws -> slope;
 		thy z [3] [iframe] = ws -> intercept;
 		thy z [4] [iframe] = ws -> peakdB;
