@@ -37,7 +37,7 @@ After installing MSYS2, we see that a `mingw64` toolchain (for Praat’s Intel64
 and a `mingw32` toolchain (for Praat’s Intel32 edition) are already available.
 Make sure you have installed at least `make`, `gcc`, `g++` and `pkg-config` to make those work.
 To also install a `clangarm64` toolchain (for Praat’s ARM64 edition),
-run `clangarm64.exe` to get a `clangarm64` shell. In that shell, run `pacman -Suy` to update and
+run `clangarm64.exe` to get a `clangarm64` shell. In that shell, run `pacman -Syu` to update and
 `pacman -S mingw-w64-clang-aarch64-clang` to install the build tools package.
 In the same way you can create a `clang64` toolchain and a `clang32` toolchain
 (`pacman -S mingw-w64-clang-x86_64-clang` and `pacman -S mingw-w64-i686-clang`),
@@ -95,10 +95,16 @@ It seems that the card reader for this certificate cannot be used yet for code-s
 or on MacOS Sonoma/Sequoia/Tahoe, so for the moment we have to fall back
 on an Intel64/AMD64 Windows 10 or 11 machine.
 
-**Testing** on multiple platform versions can be done with virtual machines
-for Windows 7 (64-bit), Windows 8.1 (64-bit), 64-bit Windows 10 (1507, 1803, 22H2) and Windows 11,
-for instance on an Intel64 Mac with Parallels Desktop.
-On an ARM64 Mac with Parallels Desktop, you can test only on Windows 11.
+Thorough **testing**, including of the GUI, should ultimately be done on a Windows computer,
+though `runAllTests` can be on a virtual machine on an Intel64 Mac with Parallels Desktop
+(for 64-bit Windows 7, Windows 8.1, Windows 10 and Windows 11),
+or on an ARM64 Mac with Parallels Desktop (for Windows 11 only).
+Here are a couple of issues we observed, though:
+
+- For the Intel32 edition, `runAllTests.praat` doesn’t succeed on (macOS) ARM64 hardware,
+  because of floating-point imprecisions; to test the Intel32 edition, use Intel64 hardware instead.
+- In December 2025, two-finger horizontal scrolling worked correctly in Parallels Desktop
+  but not on a Windows computer; to test the GUI, use a Windows computer instead.
 
 ## 2. Compiling for Macintosh
 
