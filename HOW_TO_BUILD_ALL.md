@@ -62,19 +62,25 @@ add the following definitions into `/home/yourname/.bashrc` (i.e. in your MSYS2 
 so that `bash` will automatically execute them whenever you start your
 MSYS shell or Cygwin terminal (you will need to have installed `rsync` and `make`).
 On our 2023 Mac, the ARM64 edition will be the default,
-but the Intel64/AMD64 and Intel32 versions will also be available;
-as the same `.bashrc` file is shared among all three editions,
+but the Intel64/AMD64 and Intel32 versions will also be available.
+As the same `.bashrc` file is shared among all three editions,
 we use the environment variable `MSYSTEM` to differentiate between the three:
 
     # in MSYS2:~/.bashrc
     if [[ "$MSYSTEM" == "CLANGARM64" ]]; then
-        BUILD_FOLDER="~/praats-arm64"
-        MAKEFILE_DEFS="makefiles/makefile.defs.msys-arm64"
+        BUILD_FOLDER="~/praats-arm64-clang"
+        MAKEFILE_DEFS="makefiles/makefile.defs.msys-clang"
+    elif [[ "$MSYSTEM" == "CLANG64" ]]; then
+        BUILD_FOLDER="~/praats-intel64-clang"
+        MAKEFILE_DEFS="makefiles/makefile.defs.msys-clang"
+    elif [[ "$MSYSTEM" == "CLANG32" ]]; then
+        BUILD_FOLDER="~/praats-intel32-clang"
+        MAKEFILE_DEFS="makefiles/makefile.defs.msys-clang"
     elif [[ "$MSYSTEM" == "MINGW64" ]]; then
-        BUILD_FOLDER="~/praats-intel64"
+        BUILD_FOLDER="~/praats-intel64-gcc"
         MAKEFILE_DEFS="makefiles/makefile.defs.msys-mingw64"
     elif [[ "$MSYSTEM" == "MINGW32" ]]; then
-        BUILD_FOLDER="~/praats-intel32"
+        BUILD_FOLDER="~/praats-intel32-gcc"
         MAKEFILE_DEFS="makefiles/makefile.defs.msys-mingw32"
     fi
     ORIGINAL_SOURCES="/z/Dropbox/Praats/src"
@@ -92,8 +98,12 @@ The cycle from editing Praat on the Mac to running the new version on Windows th
 1. edit and save the source code in Xcode on your Mac;
 2. type `praat-run` on your Windows 11 (under Parallels Desktop on your Mac) in one of the three MSYS2 shells.
 
-On our 2023 Mac, the three builds cost 86 seconds for ARM64,
-212 seconds for Intel64/AMD64 (under emulation), and 390 seconds for Intel32 (also under emulation).
+The set-up of the Praat team is cross-compilation: the same Clang compiler running natively on the ARM64
+processor of our 2023 Mac creates the object files for all three Windows editions
+(for linking, which is fast anyway, the three separate ARM64/Intel64/Intel32 linkers are used).
+As a result, building from scratch costs 100 seconds for ARM64,
+and only 110 seconds for Intel64/AMD64 (which would be 212 seconds under Intel64/AMD64 emulation)
+and 161 seconds for Intel32 (which would be 390 seconds under Intel32 emulation).
 
 ## 3. Linux development set-up
 
@@ -120,7 +130,7 @@ into your `Terminal` after you add the following definitions into
 assuming that it uses the `bash` shell; please note the subtle but crucial difference
 between `/Users/yourname` and `/home/yourname`):
 
-    # in Ubuntu:/home/yourname/.bash_aliases
+    # in Ubuntu|Debian:/home/yourname/.bash_aliases
     # in Fedora:/home/yourname/.bashrc.d/bash_aliases
     ORIGINAL_SOURCES="/Users/yourname/Dropbox/Praats/src"
     EXCLUDES='--exclude="*.xcodeproj" --exclude="Icon*" --exclude=".*" --exclude="*kanweg*"'
@@ -144,7 +154,7 @@ and 130 seconds (under emulation) for the Intel64/AMD64 edition (optimization le
 
 To build `praat_barren`, create a folder `praatsb`, and define
 
-    # in Ubuntu:~/.bash_aliases
+    # in Ubuntu|Debian:~/.bash_aliases
     # in Fedora:~/.bashrc.d/bash_aliases
     alias praatb-build="( cd ~/praatsb &&\
         rsync -rptvz $ORIGINAL_SOURCES/ $EXCLUDES . &&\
@@ -155,13 +165,13 @@ To build `praat_barren`, create a folder `praatsb`, and define
 
 You test `praat_barren` briefly by typing
 
-    # on Ubuntu command line
+    # on Ubuntu|Fedora|Debian command line
     praatb --version
 
 To build Praat for Chrome64 (64-bit Intel Chromebooks only),
 create a folder `praatc`, and define
 
-    # in Ubuntu:~/.bash_aliases
+    # in Ubuntu|Debian:~/.bash_aliases
     # in Fedora:~/.bashrc.d/bash_aliases
     alias praatc-build="( cd ~/praatsc &&\
         rsync -rptvz $ORIGINAL_SOURCES/ EXCLUDES . &&\
@@ -188,7 +198,7 @@ you can do this with the `praatc-build` command.
 Next, you need a way to get the executable `praat` from Mac/Ubuntu to your Chromebook.
 The distributors of Praat do this via an intermediary university computer;
 let’s call this computer-in-the-middle `fon.hum.uva.nl`
-(not coincidentally, that’s the name of the computer that hosts `praat.org`).
+(not coincidentally, that’s the name of one of the computers that host the Praat website).
 If you have an account on that computer (say it’s called `yourname`),
 then you can access that account with `ssh`, and it is best to do that without
 typing your password each time. To accomplish this, type
