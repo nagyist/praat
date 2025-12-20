@@ -150,8 +150,8 @@ The code requires that your compiler supports C99 and C++17.
 
 ## 3. Developing Praat for one platform
 
-See [HOW_TO_BUILD_ONE.md].
+See [HOW_TO_BUILD_ONE.md](HOW_TO_BUILD_ONE.md).
 
 ## 4. Developing Praat on all platforms simultaneously
 
-See [HOW_TO_BUILD_ALL.md].
+See [HOW_TO_BUILD_ALL.md](HOW_TO_BUILD_ALL.md).
