@@ -75,12 +75,14 @@ The meaning of the names of binary files available on GitHub is as follows (edit
 - `praatXXXX_mac7.sit`: StuffIt archive with executable for MacOS 7
 
 ### 1.3. Linux binaries
+- **`praatXXXX_fedora-arm64.tar.gz`: gzipped tarred executable for ARM64 Fedora or Debian Linux (GTK 3)**
+- **`praatXXXX_fedora-intel64.tar.gz`: gzipped tarred executable for Intel64/AMD64 Fedora or Debian Linux (GTK 3)**
 - **`praatXXXX_linux-s390x-barren.tar.gz`: gzipped tarred executable for s390x Linux, without GUI, sound and graphics**
 - **`praatXXXX_linux-s390x.tar.gz`: gzipped tarred executable for s390x Linux (GTK 3)**
-- **`praatXXXX_linux-arm64-barren.tar.gz`: gzipped tarred executable for ARM64 Linux, without GUI, sound and graphics**
-- **`praatXXXX_linux-arm64.tar.gz`: gzipped tarred executable for ARM64 Linux (GTK 3)**
-- **`praatXXXX_linux-intel64-barren.tar.gz`: gzipped tarred executable for Intel64/AMD64 Linux, without GUI, sound and graphics**
-- **`praatXXXX_linux-intel64.tar.gz`: gzipped tarred executable for Intel64/AMD64 Linux (GTK 3)**
+- **`praatXXXX_linux-arm64-barren.tar.gz`: gzipped tarred executable for ARM64 Linux (Ubuntu, Debian...), without GUI, sound and graphics**
+- **`praatXXXX_linux-arm64.tar.gz`: gzipped tarred executable for ARM64 Linux (Ubuntu, Debian...) (GTK 3)**
+- **`praatXXXX_linux-intel64-barren.tar.gz`: gzipped tarred executable for Intel64/AMD64 Linux (Ubuntu, Debian...), without GUI, sound and graphics**
+- **`praatXXXX_linux-intel64.tar.gz`: gzipped tarred executable for Intel64/AMD64 Linux (Ubuntu, Debian...) (GTK 3)**
 - `praatXXXX_linux-arm64-nogui.tar.gz`: gzipped tarred executable for ARM64 Linux, without GUI and sound but with graphics (Cairo and Pango)
 - `praatXXXX_linux-intel64-nogui.tar.gz`: gzipped tarred executable for Intel64/AMD64 Linux, without GUI and sound but with graphics (Cairo and Pango)
 - `praatXXXX_linux64barren.tar.gz`: gzipped tarred executable for Intel64/AMD64 Linux, without GUI, sound and graphics
@@ -294,18 +296,18 @@ and or go (or log in) to App Store Connect, then Business (or Agreements, Tax, a
 using virtual machines with Parallels Desktop. For instance, a 2013 Macbook Pro can handle
 OS X 10.11 El Capitan, 10.12 Sierra, 10.13 High Sierra, macOS 10.14 Mojave, 10.15 Catalina,
 and macOS 11 Big Sur, while a 2018 Macbook Pro can handle macOS 10.14 Mojave, 10.15 Catalina,
-macOS 11 Big Sur, macOS 12 Monterey, and macOS 13 Ventura (and macOS 14 Sonoma natively).
+macOS 11 Big Sur, macOS 12 Monterey, and macOS 14 Sonoma natively.
 Testing on multiple ARM64 platform versions can be done on an older ARM64 Mac,
 using virtual machines with Parallels Desktop. For instance, a 2020 Mac Mini could handle
-macOS 11 Big Sur, macOS 12 Monterey, and macOS 13 Ventura (and macOS 14 Sonoma natively),
-while a 2023 Macbook Pro can do macOS 14 Sonoma or macOS 15 Sequoia,
-or macOS 26 Tahoe natively.
+macOS 11 Big Sur, and macOS 12 Monterey, and macOS 13 Ventura (and macOS 14 Sonoma natively),
+while a 2023 Macbook Pro can do macOS 15 Sequoia, or macOS 26 Tahoe natively.
 
 ### 3.3. Compiling on Linux and other Unixes
 
 To set up the system libraries required for **building** with the Clang or GCC compiler,
 install the necessary build tools as well as some graphics and sound packages:
 
+    # on Ubuntu or Debian command line (Intel64/AMD64 or ARM64 processor)
     sudo apt install make rsync pkg-config
     # either:
         sudo apt install clang libc++-dev libc++abi-dev
@@ -318,6 +320,7 @@ install the necessary build tools as well as some graphics and sound packages:
 
 On Fedora you would do instead:
 
+    # on Fedora command line:
     sudo dnf install make rsync pkg-config
     # either:
         sudo dnf install clang libcxx-devel libcxxabi-devel
@@ -384,12 +387,12 @@ If your Unix isn’t Linux, you may have to edit the library names in the makefi
 
 The above works exactly the same for Intel64/AMD64 and ARM64 processors, with the same makefiles.
 
-**Testing** on multiple platform versions can be done with virtual machines
-for e.g. Ubuntu 20.04, Ubuntu 22.04, Fedora 35, Fedora 37, Fedora 38, Mint 20.2,
-Debian GNU Linux 10.10, Debian GNU Linux 12, CentOS 8.4, and CentOS Stream 9, 
-for instance on an Intel64 Mac with Parallels Desktop.
-On an ARM64 Mac, we test with virtual machines for Ubuntu 22.04, Ubuntu 22.04,
-Fedora 38, Fedora 40, Fedora 42, and Debian GNU Linux 12 ARM64.
+**Testing** on multiple platform versions can be done with virtual machines.
+On an Intel64 Mac with Parallels Desktop 20, we test with virtual machines for
+e.g. Ubuntu 20.04, Ubuntu 22.04, Fedora 38, Mint 20.2,
+Debian GNU Linux 10.10, Debian GNU Linux 12, CentOS 8.4, and CentOS Stream 9.
+On an ARM64 Mac with Parallels Desktop 26, we test with virtual machines for
+e.g. Ubuntu 22.04, Ubuntu 24.04,Fedora 38, Fedora 40, Fedora 42, and Debian GNU Linux 12 ARM64.
 
 ## 4. Developing Praat on all platforms simultaneously
 
