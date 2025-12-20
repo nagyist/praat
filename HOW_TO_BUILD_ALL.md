@@ -12,7 +12,7 @@ i.e. you want to speed up building and testing Praat for all of these editions:
 - Raspberry Pi (ARMv7a processor)
 
 That’s 15 editions. To be able to understand this page, you should be familiar with the ways
-in which the separate editions are built, as described in [HOW_TO_BUILD_ONE.md].
+in which the separate editions are built, as described in [HOW_TO_BUILD_ONE.md](HOW_TO_BUILD_ONE.md).
 
 At the time of writing (18 December 2025), we develop 13 of the 15 Praat editions on a single
 computer, which is a 2023 M3 Macbook Pro: the Mac edition is built natively with Xcode,

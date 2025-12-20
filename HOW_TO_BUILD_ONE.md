@@ -246,4 +246,4 @@ e.g. Ubuntu 22.04, Ubuntu 24.04,Fedora 38, Fedora 40, Fedora 42, and Debian GNU 
 
 ## 4. Developing Praat on all platforms simultaneously
 
-For this, see [HOW_TO_BUILD_ALL.md].
+For this, see [HOW_TO_BUILD_ALL.md](HOW_TO_BUILD_ALL.md).
