@@ -30,7 +30,7 @@ We hope that our example will be useful to you.
 
 Your source code folders, such as `fon` and `sys`,
 will reside in a folder like `~/Dropbox/Praats/src`,
-where you also put `praat.xcodeproj`, as described above in 3.2.
+where you also put `praat.xcodeproj`, as described in section 2 of [HOW_TO_BUILD_ONE.md](HOW_TO_BUILD_ONE.md).
 On our 2023 Mac with Xcode 16.3, building Praat with Command-B or Command-R,
 after cleaning the build folder with Shift-Command-K,
 takes only 56 seconds for the ARM64 part and Intel64 part together (optimization level O3).
@@ -38,7 +38,7 @@ takes only 56 seconds for the ARM64 part and Intel64 part together (optimization
 ## 2. Windows development set-up
 
 On a Windows 10 or Windows 11 computer, you can install MSYS2 or Cygwin,
-and create some `praats` folders, as described above in 3.1.
+and create some `praats` folders, as described in section 1 of [HOW_TO_BUILD_ONE.md](HOW_TO_BUILD_ONE.md).
 
 If you work under Parallels Desktop on an ARM64 Mac,
 you will want MSYS2, because it has an edition for ARM64.
@@ -98,7 +98,7 @@ On our 2023 Mac, the three builds cost 86 seconds for ARM64,
 ## 3. Linux development set-up
 
 On an Ubuntu 20.04 or 22.04 computer, create a folder `praats` in your home folder,
-as described above in 3.3.
+as described in section 3 of [HOW_TO_BUILD_ONE.md](HOW_TO_BUILD_ONE.md).
 
 If you work under Parallels Desktop (19 or later) on an Intel64 Mac,
 choose `Ubuntu 20.04 or 22.04` -> `Configure`,
@@ -338,7 +338,7 @@ The packages will be collected in the directory `~/Praats/www` on the Mac.
 If you follow the location mentioned in the `.xcodeproj` file, the Mac binary will reside
 in a place like `~/Dropbox/Praats/bin/Configuration64`.
 
-After notarizing the Mac binary (see above under 3.2),
+After notarizing the Mac binary (see section 2 of [HOW_TO_BUILD_ONE.md](HOW_TO_BUILD_ONE.md)),
 you include the executable in a `.dmg` disk image, with the following commands:
 
     # on Mac command line
