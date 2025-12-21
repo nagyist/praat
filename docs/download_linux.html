@@ -10,13 +10,15 @@ Downloading Praat for Linux
 is to download Praat from this page. Click on the appropriate compressed archive:</p>
 <dl>
 <dd><b>normal edition</b> (for interactive work as well as scripting):<br>
-&nbsp;- for Intel64/AMD64/x64 (on Ubuntu 22.04 and later): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-intel64.tar.gz">praat6448_linux-intel64.tar.gz</a></b> (9 December 2025; 28.3 MB) &nbsp; <b><-- you probably want this</b><br>
-&nbsp;- for ARM64/AArch64 (on Ubuntu 22.04 and later): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-arm64.tar.gz">praat6448_linux-arm64.tar.gz</a></b> (9 December 2025; 27.2 MB)<br>
+&nbsp;- for Intel64/AMD64/x64 (on Ubuntu 22.04/24.04 or Debian 12/13): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-intel64.tar.gz">praat6448_linux-intel64.tar.gz</a></b> (9 December 2025; 28.3 MB) &nbsp; <b><-- you probably want this</b><br>
+&nbsp;- for Intel64/AMD64/x64 (on Fedora 38–42 or Debian 12/13): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_fedora-intel64.tar.gz">praat6448_fedora-intel64.tar.gz</a></b> (9 December 2025; 28.3 MB) &nbsp; <b><-- or this</b><br>
+&nbsp;- for ARM64/AArch64 (on Ubuntu 22.04/24.04 or Debian 12/13): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-arm64.tar.gz">praat6448_linux-arm64.tar.gz</a></b> (9 December 2025; 27.2 MB)<br>
+&nbsp;- for ARM64/AArch64 (on Fedora 38–42 or Debian 12/13): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_fedora-arm64.tar.gz">praat6448_fedora-arm64.tar.gz</a></b> (9 December 2025; 27.3 MB)<br>
 &nbsp;- for s390x: <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-s390x.tar.gz">praat6448_linux-s390x.tar.gz</a></b> (9 December 2025; 29.0 MB)
 <dd>&nbsp;
 <dd><b>barren server edition</b> (no GUI, no network, no sound, no graphics):<br>
-&nbsp;- for Intel64/AMD64/x64 (on Ubuntu 22.04 and later): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-intel64-barren.tar.gz">praat6448_linux-intel64-barren.tar.gz</a></b> (9 December 2025; 29.0 MB)<br>
-&nbsp;- for ARM64/AArch64 (on Ubuntu 22.04 and later): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-arm64-barren.tar.gz">praat6448_linux-arm64-barren.tar.gz</a></b> (9 December 2025; 27.8 MB)<br>
+&nbsp;- for Intel64/AMD64/x64 (on Ubuntu 22.04/24.04 or Debian 12/13): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-intel64-barren.tar.gz">praat6448_linux-intel64-barren.tar.gz</a></b> (9 December 2025; 29.0 MB)<br>
+&nbsp;- for ARM64/AArch64 (on Ubuntu 22.04/24.04 or Debian 12/13): <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-arm64-barren.tar.gz">praat6448_linux-arm64-barren.tar.gz</a></b> (9 December 2025; 27.8 MB)<br>
 &nbsp;- for s390x: <b><a href="https://github.com/praat/praat/releases/download/v6.4.48/praat6448_linux-s390x-barren.tar.gz">praat6448_linux-s390x-barren.tar.gz</a></b> (9 December 2025; 29.4 MB)
 </dl>
 <p>Unpack with <b>gunzip</b> and <b>tar xvf</b>. This will create the executable file <b>praat</b>.
@@ -31,23 +33,25 @@ or compile it yourself (64-bit or 32-bit) from the <a href="download_sources.htm
 after cd-ing to Praat’s folder.</p>
 <p>If Praat doesn’t start immediately (i.e. it may complain about missing <code>.so</code> files),
 then you may have to install one or more standard (system or audio) libraries on which Praat depends.
-On Ubuntu this may be:</p>
+On Ubuntu or Debian this may be:</p>
 
 <code style="white-space:pre-wrap">   sudo apt install libc++1      # the C++ standard library
    sudo apt install libgtk-3-0      # the graphics toolkit
-   sudo apt install libpulse0       # the Pulse audio server
    sudo apt install libasound2      # the ALSA audio library
-   sudo apt install pipewire-jack   # the Jack audio library (overridden by PipeWire)
-                                    # or perhaps just libjack0
-   sudo apt install libcanberra-gtk-module     # needed only if your system complains about missing this
+   sudo apt install libpulse0       # the Pulse audio server
+   sudo apt install pipewire-jack   # the Jack audio library
+   # on Debian perhaps also:
+       sudo apt install libjack0
+   # on Ubuntu sometimes:
+       sudo apt install libcanberra-gtk-module     # if your system complains about missing this
 </code>
 
 <p>On Fedora, the installs may be:</p>
 
 <code style="white-space:pre-wrap">   sudo dnf install libcxx           # the C++ standard library
-   sudo dnf install llvm-libunwind                      # needed by the C++ standard library
-   sudo dnf install pulseaudio-libs                     # the Pulse audio server
+   sudo dnf install gtk3                                # the graphics toolkit
    sudo dnf install alsa-lib                            # the ALSA audio library
+   sudo dnf install pulseaudio-libs                     # the Pulse audio server
    sudo dnf install pipewire-jack-audio-connection-kit  # the Jack audio library (overridden by PipeWire)
                                                         # i.e. usually *not* jack-audio-connection-kit
 </code>
