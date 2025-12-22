@@ -190,7 +190,8 @@ static void readError () {
 	Melder_throw (U"Error reading bytes from file.");
 }
 
-static autoDaata Sound_readFromKayFile (FILE *f) {
+static autoDaata Sound_readFromKayFile (MelderFile file) {
+	FILE *f = file -> filePointer;
 	uint32 chunkSize = bingetu32LE (f);
 	if (chunkSize & 1)
 		chunkSize += 1;   // round up to even
@@ -230,6 +231,7 @@ static autoDaata Sound_readFromKayFile (FILE *f) {
 		SD chunk.
 	*/
 	autoSound me = Sound_createSimple (numberOfChannels, numberOfSamples / samplingFrequency, samplingFrequency);
+	bool warned = false;
 	for (integer ichan = 1; ichan <= numberOfChannels; ichan ++) {
 		if (fread (data, 1, 4, f) < 4)
 			readError ();
@@ -247,18 +249,41 @@ static autoDaata Sound_readFromKayFile (FILE *f) {
 		}
 		chunkSize = bingetu32LE (f);
 		integer residual = chunkSize - numberOfSamples * 2;
-		if (residual < 0)
-			Melder_throw (U"Incomplete SD chunk: attested size ", chunkSize, U" bytes,"
-				U" announced size ", numberOfSamples * 2, U" bytes. Please report to paul.boersma@uva.nl.");
-
-		for (integer i = 1; i <= numberOfSamples; i ++)
-			my z [ichan] [i] = (double) bingeti16LE (f) / 32768.0;
-		fseek (f, residual, SEEK_CUR);
+		if (residual < 0) {
+			Melder_casual (U"residual: ", residual);
+			if (residual == -2) {
+				if (! warned) {
+					Melder_warning (U"Found one sample less than the Kay sound file ", file, U" promised.");
+					warned = true;
+				}
+				const integer localNumberOfSamples = numberOfSamples + residual / 2;
+				Melder_casual (U"Reading ", localNumberOfSamples, U" samples instead of the promised ", numberOfSamples, U".");
+				if (ichan == 1) {
+					me = Sound_extractPart (me.get(), 0.0, localNumberOfSamples / samplingFrequency, kSound_windowShape::RECTANGULAR, 1.0, true);
+					Melder_assert (my nx == localNumberOfSamples);
+				} else {
+					Melder_require (my nx == localNumberOfSamples,
+							U"Not all channels have the same numbers of samples.");
+				}
+				for (integer i = 1; i <= localNumberOfSamples; i ++)
+					my z [ichan] [i] = (double) bingeti16LE (f) / 32768.0;
+			} else
+				Melder_throw (U"Incomplete SD chunk: attested size ", chunkSize, U" bytes,"
+					U" announced size ", numberOfSamples * 2, U" bytes. Please report to paul.boersma@uva.nl.");
+		} else if (residual > 0) {
+			for (integer i = 1; i <= numberOfSamples; i ++)
+				my z [ichan] [i] = (double) bingeti16LE (f) / 32768.0;
+			fseek (f, residual, SEEK_CUR);   // skip
+		} else {
+			for (integer i = 1; i <= numberOfSamples; i ++)
+				my z [ichan] [i] = (double) bingeti16LE (f) / 32768.0;
+		}
 	}
 	//Melder_casual (ftell (f));
 	return me;
 }
-static autoDaata Sounds_readFromKayNasalityFile (FILE *f) {
+static autoDaata Sounds_readFromKayNasalityFile (MelderFile file) {
+	FILE *f = file -> filePointer;
 	uint32 chunkSize = bingetu32LE (f);
 	if (chunkSize & 1)
 		chunkSize += 1;   // round up to even
@@ -344,10 +369,12 @@ static autoDaata Sounds_readFromKayNasalityFile (FILE *f) {
 				readError ();
 		}
 		chunkSize = bingetu32LE (f);
-		//integer residual = chunkSize - numberOfSamples * 2;
-		//if (residual < 0)
-		//	Melder_throw (U"Incomplete SD chunk: attested size ", chunkSize, U" bytes,"
-		//		U" announced size ", numberOfSamples * 2, U" bytes. Please report to paul.boersma@uva.nl.");
+		#if 0
+			integer residual = chunkSize - numberOfSamples * 2;
+			if (residual < 0)
+				Melder_throw (U"Incomplete SD chunk: attested size ", chunkSize, U" bytes,"
+					U" announced size ", numberOfSamples * 2, U" bytes. Please report to paul.boersma@uva.nl.");
+		#endif
 		autoSound you = Sound_createSimple (1,
 			channelNumbersOfSamples [ichan] / channelSamplingFrequencies [ichan],
 			channelSamplingFrequencies [ichan]
@@ -389,7 +416,8 @@ autoDaata Sound_readFromAnyKayFile (MelderFile file) {
 		/*
 			Read remainder of HEDR or HDR8 or NHDR chunk.
 		*/
-		autoDaata result = ( strnequ (data, "NHDR", 4) ? Sounds_readFromKayNasalityFile (f) : Sound_readFromKayFile (f) );
+		file -> filePointer = f;
+		autoDaata result = ( strnequ (data, "NHDR", 4) ? Sounds_readFromKayNasalityFile (file) : Sound_readFromKayFile (file) );
 		f.close (file);
 		return result;
 	} catch (MelderError) {
