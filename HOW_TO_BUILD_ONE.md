@@ -96,15 +96,15 @@ or on MacOS Sonoma/Sequoia/Tahoe, so for the moment we have to fall back
 on an Intel64/AMD64 Windows 10 or 11 machine.
 
 Thorough **testing**, including of the GUI, should ultimately be done on a Windows computer,
-though `runAllTests` can be on a virtual machine on an Intel64 Mac with Parallels Desktop
+though `runAllTests` will successfully run on a virtual machine on an Intel64 Mac with Parallels Desktop
 (for 64-bit Windows 7, Windows 8.1, Windows 10 and Windows 11),
 or on an ARM64 Mac with Parallels Desktop (for Windows 11 only).
 Here are a couple of issues we observed, though:
 
 - For the Intel32 edition, `runAllTests.praat` doesn’t succeed on (macOS) ARM64 hardware,
   because of floating-point imprecisions; to test the Intel32 edition, use Intel64 hardware instead.
-- In December 2025, two-finger horizontal scrolling worked correctly in Parallels Desktop
-  but not on a Windows computer; to test the GUI, use a Windows computer instead.
+- In December 2025, two-finger horizontal scrolling in the Sound window worked correctly in Parallels Desktop
+  but not on a Windows computer; to reliably test the GUI, use a Windows computer instead.
 
 ## 2. Compiling for Macintosh
 
@@ -188,6 +188,19 @@ On Fedora you would do instead:
     sudo dnf install pipewire-jack-audio-connection-kit-devel
           # i.e. normaly *not* jack-audio-connection-kit-devel
 
+On Centos you would do something like:
+
+    # on Centos command line:
+    sudo dnf install dnf-plugins-core           # Centos-specific preparation
+    sudo dnf config-manager --set-enabled crb   # Centos-specific preparation
+    sudo dnf install epel-release               # Centos-specific preparation
+    sudo dnf install make rsync pkg-config
+	sudo dnf install gcc g++
+    sudo dnf install gtk3-devel
+    sudo dnf install pulseaudio-libs-devel
+    sudo dnf install alsa-lib-devel
+    sudo dnf install pipewire-jack-audio-connection-kit-devel
+
 To set up your source tree for Linux, go to Praat's sources directory (where the folders `fon` and `sys` are)
 and type one of the four following commands:
 
@@ -196,6 +209,9 @@ and type one of the four following commands:
         cp makefiles/makefile.defs.linux.pulse-clang ./makefile.defs
     # or:
         cp makefiles/makefile.defs.linux.pulse-gcc ./makefile.defs
+
+    # on Centos command line (Intel64/AMD64 or ARM64 processor)
+    cp makefiles/makefile.defs.linux.pulse-gcc ./makefile.defs
 
     # on Ubuntu command line (s390x processor)
     cp makefiles/makefile.defs.linux.s390x.pulse ./makefile.defs
@@ -248,7 +264,7 @@ On an Intel64 Mac with Parallels Desktop 20, we test with virtual machines for
 e.g. Ubuntu 20.04, Ubuntu 22.04, Fedora 38, Mint 20.2,
 Debian GNU Linux 10.10, Debian GNU Linux 12, CentOS 8.4, and CentOS Stream 9.
 On an ARM64 Mac with Parallels Desktop 26, we test with virtual machines for
-e.g. Ubuntu 22.04, Ubuntu 24.04,Fedora 38, Fedora 40, Fedora 42, and Debian GNU Linux 12 ARM64.
+e.g. Ubuntu 22.04, Ubuntu 24.04, Fedora 38, Fedora 40, Fedora 42, and Debian GNU Linux 12 ARM64.
 
 ## 4. Developing Praat on all platforms simultaneously
 
