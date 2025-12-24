@@ -29,6 +29,11 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.49# (23 December 2025)
+• Open without error messages or warnings Kay files that have one sample too few or too many.
+• Linux: the standard Linux edition now runs equally well on Ubuntu, Fedora, Debian and Centos.
+• EditDistanceTable: made readable and writable.
+
 ##6.4.48# (9 December 2025)
 • Linux audio: recognize JACK devices (next to the already recongized ALSA devices).
 • Linux fonts: support for the Charis 7 font, as on macOS and Windows.
