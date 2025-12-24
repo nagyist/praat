@@ -19,6 +19,7 @@
 #include "TextGrid_Sound.h"
 #include "Pitch_to_PitchTier.h"
 #include "SpeechSynthesizer_and_TextGrid.h"
+#include "SpeechRecognizer.h"
 #include "LongSound.h"
 
 static bool IntervalTier_check (IntervalTier me) {
@@ -375,6 +376,27 @@ again:
 		}
 	} catch (MelderError) {
 		Melder_throw (me, U" & ", anySound, U": interval not aligned.");
+	}
+}
+
+void TextGrid_Sound_transcribeInterval (
+	const TextGrid me, const Sound sound, integer tierNumber, integer intervalNumber,
+	conststring32 modelName, conststring32 languageName
+) {
+	try {
+		IntervalTier tier = TextGrid_checkSpecifiedTierIsIntervalTier (me, tierNumber);
+		if (intervalNumber < 1 || intervalNumber > tier -> intervals.size)
+			Melder_throw (U"Interval ", intervalNumber, U" does not exist.");
+		TextInterval interval = tier -> intervals.at [intervalNumber];
+		autoSound soundPart = Sound_extractPart(sound, interval -> xmin, interval -> xmax,
+			kSound_windowShape::RECTANGULAR, 1.0, false);
+		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName);
+		autostring32 result = SpeechRecognizer_recognize (speechRecognizer.get (), soundPart.get ());
+		TextInterval_setText (interval, result.get());
+
+	} catch (MelderError) {
+		// anySound for including long sound
+		Melder_throw (me, U" & ", sound, U": interval not transcribed.");
 	}
 }
 

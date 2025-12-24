@@ -19,6 +19,7 @@
 #include "Pitch_AnyTier_to_PitchTier.h"
 #include "SpectrumEditor.h"
 #include "SpeechSynthesizer.h"
+#include "SpeechRecognizer.h"
 #include "SpellingChecker.h"
 #include "Strings_extensions.h"
 #include "TextGridEditor.h"
@@ -551,6 +552,20 @@ DO
 DIRECT (MODIFY_TextGrid_Sound_scaleTimes) {
 	MODIFY_FIRST_OF_ONE_AND_ONE (TextGrid, Sound)
 		Function_scaleXTo (me, your xmin, your xmax);
+	MODIFY_FIRST_OF_ONE_AND_ONE_END
+}
+
+FORM (MODIFY_TextGrid_Sound_transcribeInterval, U"TextGrid & Sound: Transcribe interval", nullptr) {
+	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
+	NATURAL (intervalNumber, STRING_INTERVAL_NUMBER, U"1")
+	LISTNUMSTR (modelIndex, modelName, U"Whisper model", theSpeechRecognizerModelNames (),
+		static_cast<int>(NUMfindFirst (theSpeechRecognizerModelNames (), theSpeechRecognizerDefaultModelName)))
+	LISTNUMSTR (languageIndex, languageName, U"Language", theSpeechRecognizerLanguageNames (),
+		static_cast<int>(NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName)))
+	OK
+DO
+	MODIFY_FIRST_OF_ONE_AND_ONE (TextGrid, Sound)
+		TextGrid_Sound_transcribeInterval(me, you, tierNumber, intervalNumber, modelName, languageName);
 	MODIFY_FIRST_OF_ONE_AND_ONE_END
 }
 
@@ -1769,6 +1784,7 @@ praat_addAction1 (classTextGrid, 0, U"Synthesize", nullptr, 0, nullptr);
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Modify TextGrid", nullptr, 0, nullptr);
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Align interval...", nullptr, 0, MODIFY_TextGrid_Sound_alignInterval);
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Scale times", nullptr, 0, MODIFY_TextGrid_Sound_scaleTimes);
+	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Transcribe interval...", nullptr, 0, MODIFY_TextGrid_Sound_transcribeInterval);
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Modify Sound", nullptr, 0, nullptr);
 	praat_addAction2 (classSound, 1, classTextGrid, 1, U"Clone time domain", nullptr, 0, MODIFY_TextGrid_Sound_cloneTimeDomain);
 	praat_addAction2 (classSpellingChecker, 1, classWordList, 1, U"Replace WordList", nullptr, 0, MODIFY_SpellingChecker_replaceWordList);
