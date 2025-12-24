@@ -25,9 +25,12 @@ Click on the compressed archive for your processor type:</p>
 You can remove the <b>tar</b> file.</p>
 
 <p>Alternatively, you could also simply do <b>sudo apt install praat</b> if you are on Ubuntu or Debian,
-although you may obtain a years-old version.
-Or you may get Praat from <a href="http://packages.debian.org/unstable/science/praat">Debian</a>,
-or compile it yourself (64-bit or 32-bit) from the <a href="download_sources.html">source code</a>.</p>
+although you may obtain a years-old version (Debian 12 has 6.3.07 from February 2023;
+Debian 13 has 6.4.27 from January 2025).
+Recent complete Praat packages for processors not mentioned above (and more complete packages for the processors
+that <i>are</i> mentioned above) are available from <a href="http://packages.debian.org/unstable/science/praat">Debian</a>.
+There is also always the possibility to compile Praat yourself (64-bit or 32-bit)
+from the <a href="download_sources.html">source code</a>.</p>
 
 <hr><h3>2. How to start</h3>
 <p>Praat will work fine wherever it is on your disk; just type <b>./praat</b> into a terminal window
@@ -103,19 +106,7 @@ You may then try to obtain a JACK device by starting Praat via (if you have Pipe
    praat
 </code>
 
-<hr><h3>6. Debian info</h3>
-
-<p>Praat is <a href="https://packages.debian.org/source/sid/praat">included</a> in
-the Debian distribution. To install Praat on your Debian computer, do</p>
-
-<code style="white-space:pre-wrap">   aptitude install praat
-</code>
-
-<p>Recent upstream versions of the Praat package backported to the stable
-and testing distributions of Debian are available in an
-<a href=http://praat.cefala.org>APT repository</a>.</p>
-
-<hr><h3>7. Editions of Praat for older computers or older operating system versions</h3>
+<hr><h3>6. Editions of Praat for older computers or older operating system versions</h3>
 <ul>
 <li>We do not create Praat editions for 32-bit Linux any longer (except for <a href=download_raspberrypi.html>Raspberry Pi</a>).
 The last one is <a href="https://github.com/praat/praat/releases/download/v6.1.15/praat6115_linux32.tar.gz">Praat 6.1.15</a> of 20 May 2020.
