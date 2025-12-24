@@ -12,24 +12,30 @@ such as Ubuntu 22.04 and 24.04, Fedora 38 and 40 and 42, Debian 12 and 13, and C
 Click on the compressed archive for your processor type:</p>
 <dl>
 <dd><b>normal edition</b> (for interactive work as well as scripting):<br>
-&nbsp;- for Intel64/AMD64/x64: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-intel64.tar.gz">praat6449_linux-intel64.tar.gz</a></b> (23 December 2025; 28.3 MB) &nbsp; <b><-- you probably want this</b><br>
-&nbsp;- for ARM64/AArch64: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-arm64.tar.gz">praat6449_linux-arm64.tar.gz</a></b> (23 December 2025; 27.2 MB)<br>
+&nbsp;- for Intel64 (= AMD64, x64): <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-intel64.tar.gz">praat6449_linux-intel64.tar.gz</a></b> (23 December 2025; 28.3 MB) &nbsp; <b><-- you probably want this</b><br>
+&nbsp;- for ARM64 (= AArch64): <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-arm64.tar.gz">praat6449_linux-arm64.tar.gz</a></b> (23 December 2025; 27.2 MB)<br>
 &nbsp;- for s390x: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-s390x.tar.gz">praat6449_linux-s390x.tar.gz</a></b> (23 December 2025; 29.0 MB)
 <dd>&nbsp;
 <dd><b>barren server edition</b> (no GUI, no network, no sound, no graphics):<br>
-&nbsp;- for Intel64/AMD64/x64: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-intel64-barren.tar.gz">praat6449_linux-intel64-barren.tar.gz</a></b> (23 December 2025; 29.0 MB)<br>
-&nbsp;- for ARM64/AArch64: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-arm64-barren.tar.gz">praat6449_linux-arm64-barren.tar.gz</a></b> (23 December 2025; 27.8 MB)<br>
+&nbsp;- for Intel64: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-intel64-barren.tar.gz">praat6449_linux-intel64-barren.tar.gz</a></b> (23 December 2025; 29.0 MB)<br>
+&nbsp;- for ARM64: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-arm64-barren.tar.gz">praat6449_linux-arm64-barren.tar.gz</a></b> (23 December 2025; 27.8 MB)<br>
 &nbsp;- for s390x: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-s390x-barren.tar.gz">praat6449_linux-s390x-barren.tar.gz</a></b> (23 December 2025; 29.4 MB)
 </dl>
 <p>Unpack with <b>gunzip</b> and <b>tar xvf</b>. This will create the executable file <b>praat</b>.
 You can remove the <b>tar</b> file.</p>
 
 <p>Alternatively, you could also simply do <b>sudo apt install praat</b> if you are on Ubuntu or Debian,
-although you may obtain a years-old version (Debian 12 has 6.3.07 from February 2023;
-Debian 13 has 6.4.27 from January 2025).
-Recent complete Praat packages for processors not mentioned above (and more complete packages for the processors
-that <i>are</i> mentioned above) are available from <a href="http://packages.debian.org/unstable/science/praat">Debian</a>.
-There is also always the possibility to compile Praat yourself (64-bit or 32-bit)
+although you may obtain a years-old version:</p>
+<ul>
+<li>Ubuntu 22.04 has Praat 6.2.09 from February 2022
+<li>Debian 12 has Praat 6.3.07 from February 2023
+<li>Ubuntu 24.04 has Praat 6.4.06 from February 2024
+<li>Debian 13 has Praat 6.4.27 from January 2025
+</ul>
+Therefore, it may be worthwhile to download a more recent version from the present page,
+or a more cor a more complete recent Praat package (especially for processors not mentioned above)
+from <a href="http://packages.debian.org/unstable/science/praat">Debian</a>.
+There is also always the possibility to compile Praat yourself
 from the <a href="download_sources.html">source code</a>.</p>
 
 <hr><h3>2. How to start</h3>
@@ -112,8 +118,8 @@ You may then try to obtain a JACK device by starting Praat via (if you have Pipe
 The last one is <a href="https://github.com/praat/praat/releases/download/v6.1.15/praat6115_linux32.tar.gz">Praat 6.1.15</a> of 20 May 2020.
 If that is too old for you, you could try to compile a newer version by yourself from the sources.
 <li>The last version for Ubuntu 20.04 is Praat 6.4.30 of 29 April 2025:<br>
-&nbsp;- for Intel64/AMD64/x64: <a href="https://github.com/praat/praat/releases/download/v6.4.30/praat6430_linux-intel64.tar.gz">praat6430_linux-intel64.tar.gz</a>, <a href="https://github.com/praat/praat/releases/download/v6.4.30/praat6430_linux-arm64-barren.tar.gz">praat6430_linux-arm64-barren.tar.gz</a><br>
-&nbsp;- for ARM64/AArch64: <a href="https://github.com/praat/praat/releases/download/v6.4.30/praat6430_linux-arm64.tar.gz">praat6430_linux-arm64.tar.gz</a> , <a href="https://github.com/praat/praat/releases/download/v6.4.30/praat6430_linux-intel64-barren.tar.gz">praat6430_linux-intel64-barren.tar.gz</a>
+&nbsp;- for Intel64: <a href="https://github.com/praat/praat/releases/download/v6.4.30/praat6430_linux-intel64.tar.gz">praat6430_linux-intel64.tar.gz</a>, <a href="https://github.com/praat/praat/releases/download/v6.4.30/praat6430_linux-arm64-barren.tar.gz">praat6430_linux-arm64-barren.tar.gz</a><br>
+&nbsp;- for ARM64: <a href="https://github.com/praat/praat/releases/download/v6.4.30/praat6430_linux-arm64.tar.gz">praat6430_linux-arm64.tar.gz</a> , <a href="https://github.com/praat/praat/releases/download/v6.4.30/praat6430_linux-intel64-barren.tar.gz">praat6430_linux-intel64-barren.tar.gz</a>
 </ul>
 
 <hr>
