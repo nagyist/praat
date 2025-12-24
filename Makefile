@@ -28,6 +28,7 @@ all: all-external all-self
 		external/num/libnum.a \
 		external/vorbis/libvorbis.a \
 		external/opusfile/libopusfile.a \
+		external/whispercpp/libwhisper.a \
 		$(LIBS)
 
 all-external:
@@ -42,6 +43,7 @@ all-external:
 	$(MAKE) -C external/espeak
 	$(MAKE) -C external/vorbis
 	$(MAKE) -C external/opusfile
+	$(MAKE) -C external/whispercpp
 
 all-self:
 	$(MAKE) -C kar
@@ -75,6 +77,7 @@ clean-external:
 	$(MAKE) -C external/espeak clean
 	$(MAKE) -C external/vorbis clean
 	$(MAKE) -C external/opusfile clean
+	$(MAKE) -C external/whispercpp clean
 
 clean-self:
 	$(MAKE) -C kar clean
