@@ -7,7 +7,7 @@ Downloading Praat for Linux
 
 <hr><h3>1. Downloading the Linux edition</h3>
 <p>The most straightforward way to obtain the newest version of the <b>Linux</b> edition of <b>Praat</b>
-is to download Praat from this page. The following executable work on most distributions,
+is to download Praat from this page. The following executables work on most distributions,
 such as Ubuntu 22.04 and 24.04, Fedora 38 and 40 and 42, Debian 12 and 13, and Centos 9 and 10.
 Click on the compressed archive for your processor type:</p>
 <dl>
@@ -24,7 +24,8 @@ Click on the compressed archive for your processor type:</p>
 <p>Unpack with <b>gunzip</b> and <b>tar xvf</b>. This will create the executable file <b>praat</b>.
 You can remove the <b>tar</b> file.</p>
 
-You could also simply do <b>sudo apt install praat</b> if you are on Ubuntu, although you may obtain a years-old version.
+<p>Alternatively, you could also simply do <b>sudo apt install praat</b> if you are on Ubuntu or Debian,
+although you may obtain a years-old version.
 Or you may get Praat from <a href="http://packages.debian.org/unstable/science/praat">Debian</a>,
 or compile it yourself (64-bit or 32-bit) from the <a href="download_sources.html">source code</a>.</p>
 
@@ -68,8 +69,8 @@ for instance from the packages <b>fonts-sil-charis</b> and <b>fonts-sil-doulos</
 
 <p>or on Fedora:</p>
 
-<code style="white-space:pre-wrap">   sudo apt install sil-doulos-fonts
-   sudo apt install sil-charis-fonts
+<code style="white-space:pre-wrap">   sudo dnf install sil-doulos-fonts
+   sudo dnf install sil-charis-fonts
 </code>
 
 <p>If you cannot install those packages, you can download the two fonts
@@ -109,10 +110,6 @@ the Debian distribution. To install Praat on your Debian computer, do</p>
 
 <code style="white-space:pre-wrap">   aptitude install praat
 </code>
-
-<p>The Debian package includes a <code>praat-open-files</code>
-command that allows opening files from the command line inside a Praat
-process that is already running.
 
 <p>Recent upstream versions of the Praat package backported to the stable
 and testing distributions of Debian are available in an
