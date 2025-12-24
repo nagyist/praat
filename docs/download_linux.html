@@ -35,8 +35,7 @@ after cd-ing to Praat’s folder.</p>
 then you may have to install one or more standard (system or audio) libraries on which Praat depends.
 On Ubuntu or Debian this may be:</p>
 
-<code style="white-space:pre-wrap">
-   sudo apt install libgtk-3-0      # the graphics toolkit
+<code style="white-space:pre-wrap">   sudo apt install libgtk-3-0      # the graphics toolkit
    sudo apt install libasound2      # the ALSA audio library
    sudo apt install libpulse0       # the Pulse audio server
    sudo apt install pipewire-jack   # the Jack audio library (overridden by Pipewire; from Ubuntu 24.04 on)
@@ -49,8 +48,7 @@ On Ubuntu or Debian this may be:</p>
 
 <p>On Fedora, the installs may be:</p>
 
-<code style="white-space:pre-wrap">
-   sudo dnf install gtk3                                # the graphics toolkit
+<code style="white-space:pre-wrap">   sudo dnf install gtk3                                # the graphics toolkit
    sudo dnf install alsa-lib                            # the ALSA audio library
    sudo dnf install pulseaudio-libs                     # the Pulse audio server
    sudo dnf install pipewire-jack-audio-connection-kit  # the Jack audio library (overridden by PipeWire)
@@ -97,7 +95,7 @@ You may then try to obtain a JACK device by starting Praat via (if you have Pipe
 <code style="white-space:pre-wrap">   pw-jack praat
 </code>
 
-or (if you don’t have Pipewire):
+<p>or (if you don’t have Pipewire):</p>
 
 <code style="white-space:pre-wrap">   sudo apt install jackd libjack0
    jack_control start     # starts the Jack server
