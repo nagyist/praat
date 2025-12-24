@@ -17,6 +17,9 @@ Thumbs.db
 # editor temporaries
 *.kate-swp
 *.orig
+.cache/
+.idea/
+compile_commands.json
 
 # Praat temporary files
 *kanweg*
