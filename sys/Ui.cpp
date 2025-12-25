@@ -285,7 +285,8 @@ static void UiField_setDefault (UiField me) {
 		break;
 		case _kUiField_type::LIST_:
 		{
-			GuiList_selectItem (my list, my integerDefaultValue);
+			if (my integerDefaultValue > 0)
+				GuiList_selectItem (my list, my integerDefaultValue);
 		}
 	}
 }
