@@ -8,10 +8,16 @@ DIRECT (HELP__SpeechRecognizer_help) {
 }
 
 FORM (CREATE_ONE__SpeechRecognizer_create, U"Create SpeechRecognizer", U"Create SpeechRecognizer...") {
-	LISTNUMSTR (modelIndex, modelName, U"Whisper model", theSpeechRecognizerModelNames (),
-		static_cast<int>(NUMfindFirst (theSpeechRecognizerModelNames (), theSpeechRecognizerDefaultModelName)))
-	LISTNUMSTR (languageIndex, languageName, U"Language", theSpeechRecognizerLanguageNames (),
-		static_cast<int>(NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName)))
+	static constSTRVEC modelNames;   // has to be static because of goto rule
+	modelNames = theSpeechRecognizerModelNames();   // cannot be called twice in the same scope
+	Melder_require (modelNames.size > 0,
+		U"Found no Whisper-cpp models to do speech recognition with.\n"
+		U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
+	);
+	LISTNUMSTR (modelIndex, modelName, U"Whisper model", modelNames,
+		static_cast <int> (NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName)))
+	LISTNUMSTR (languageIndex, languageName, U"Language", theSpeechRecognizerLanguageNames(),
+		static_cast <int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName)))
 	OK
 DO
 	CREATE_ONE
