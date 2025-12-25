@@ -1,4 +1,5 @@
 #pragma once
+#include "ggml_praat.h"
 
 // Rename `_generic` functions if no native implementation is available.
 // This effectively selects the generic implementation.
