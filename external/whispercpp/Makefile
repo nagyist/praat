@@ -1,13 +1,8 @@
 # Makefile of the library "external/whispercpp"
 
-include makefile.defs
+include ../../makefile.defs
 
 CPPFLAGS += -D_GNU_SOURCE
-CPPFLAGS += -DWHISPER_VERSION=\"1.8.2\"
-CPPFLAGS += -DGGML_VERSION=\"0.9.4\"
-CPPFLAGS += -DGGML_COMMIT
-CPPFLAGS += -DGGML_USE_CPU
-CPPFLAGS += -DGGML_CPU_GENERIC
 
 WHISPER_OBJECTS = \
 	whisper.o \
