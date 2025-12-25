@@ -86,7 +86,7 @@ autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) 
 
 		if (whisper_is_multilingual (my whisperContext.get ())) {
 			if (my d_languageName && !str32str(my d_languageName.get (), U"Autodetect")) {
-				params.language = whisper_lang_str (whisper_lang_id (Melder_32to8 (my d_languageName.get ()).get ()));
+				params.language = whisper_lang_str (whisper_lang_id (Melder_peek32to8 (my d_languageName.get())));
 			} else {
 				params.language = "auto";
 			}
