@@ -115,20 +115,24 @@ autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) 
 }
 
 static conststring32 theWhisperModelsFolder () {
-	static autostring32 whisperModelFolder;
-
-	if (! whisperModelFolder) {
+	static autostring32 whisperModelFolderPath;
+	if (! whisperModelFolderPath) {
 		try {
 			structMelderFolder modelsFolder { };
-			MelderFolder_getSubfolder (Melder_preferencesFolder (),	U"models/whispercpp", & modelsFolder);
+			MelderFolder_getSubfolder (Melder_preferencesFolder (),	U"models", & modelsFolder);
 			if (! MelderFolder_exists (& modelsFolder))
 				MelderFolder_create (& modelsFolder);
-			whisperModelFolder = Melder_dup (MelderFolder_peekPath (& modelsFolder));
+			structMelderFolder whispercppFolder { };
+			MelderFolder_getSubfolder (& modelsFolder,	U"whispercpp", & whispercppFolder);
+			if (! MelderFolder_exists (& whispercppFolder))
+				MelderFolder_create (& whispercppFolder);
+			whisperModelFolderPath = Melder_dup (MelderFolder_peekPath (& whispercppFolder));
+			Melder_casual (whisperModelFolderPath.get());
 		} catch (MelderError) {
 			Melder_clearError ();
 		}
 	}
-	return whisperModelFolder.get();
+	return whisperModelFolderPath.get();
 }
 
 constSTRVEC theSpeechRecognizerModelNames () {
