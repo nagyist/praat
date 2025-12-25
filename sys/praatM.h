@@ -948,6 +948,12 @@
 		Melder_information (constSTRVEC (result.get())); \
 	QUERY_END__
 
+#define QUERY_ONE_AND_ONE_FOR_STRING(klas1,klas2)  \
+	FIND_ONE_AND_ONE (klas1, klas2)
+#define QUERY_ONE_AND_ONE_FOR_STRING_END \
+	QUERY_FOR_STRING_END__
+
+
 /*
 	MODIFY
 */

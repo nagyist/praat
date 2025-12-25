@@ -22,6 +22,7 @@
 #include "LongSoundArea.h"   // for drawing TextGrid and Sound, or for aligning TextGrid to Sound
 #include "SoundAnalysisArea.h"   // for drawing TextGrid and Pitch
 #include "EditorM.h"
+#include "SpeechRecognizer.h"
 
 Thing_implement (TextGridArea, FunctionArea, 0);
 
@@ -1431,6 +1432,46 @@ static void menu_cb_AlignmentSettings (TextGridArea me, EDITOR_ARGS) {
 		my setInstancePref_align_allowSilences (allowSilences);
 	EDITOR_END
 }
+
+static void menu_cb_TranscribeInterval (TextGridArea me, EDITOR_ARGS) {
+	checkTierSelection (me, U"transcribe interval");
+	const AnyTier tier = static_cast <AnyTier> (my textGrid() -> tiers->at [my selectedTier]);
+	if (tier -> classInfo != classIntervalTier)
+		Melder_throw (U"Transcription works only for interval tiers, whereas tier ", my selectedTier, U" is a point tier.\nSelect an interval tier instead.");
+	const integer intervalNumber = getSelectedInterval (me);
+	if (! intervalNumber)
+		Melder_throw (U"Select an interval first");
+	{// scope
+		const autoMelderProgressOff noprogress;
+		FunctionArea_save (me, U"Transcribe interval");
+		TextGrid_Sound_transcribeInterval (my textGrid(), my borrowedSoundArea -> sound(), my selectedTier, intervalNumber,
+				my instancePref_transcribe_model(), my instancePref_transcribe_language());
+	}
+	FunctionArea_broadcastDataChanged (me);
+}
+
+static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
+	EDITOR_FORM (U"Transcription settings", nullptr)
+		LIST (modelIndex, U"Whisper model", theSpeechRecognizerModelNames (),
+			static_cast<int>(NUMfindFirst(theSpeechRecognizerModelNames (), theSpeechRecognizerDefaultModelName)))
+		LIST (languageIndex, U"Language", theSpeechRecognizerLanguageNames (),
+			static_cast<int>(NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName)))
+	EDITOR_OK
+		int prefModel = static_cast<int>(NUMfindFirst (theSpeechRecognizerModelNames (), my instancePref_transcribe_model()));
+		if (prefModel == 0)
+			prefModel = static_cast<int>(NUMfindFirst (theSpeechRecognizerModelNames (), theSpeechRecognizerDefaultModelName));
+		SET_INTEGER (modelIndex, prefModel)
+
+		int prefLanguage = static_cast<int>(NUMfindFirst (theSpeechRecognizerLanguageNames (), my instancePref_transcribe_language()));
+		if (prefLanguage == 0)
+			prefLanguage = static_cast<int>(NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName));
+		SET_INTEGER (languageIndex, prefLanguage)
+	EDITOR_DO
+		my setInstancePref_transcribe_model (theSpeechRecognizerModelNames () [modelIndex]);
+		my setInstancePref_transcribe_language (theSpeechRecognizerLanguageNames () [languageIndex]);
+	EDITOR_END
+}
+
 static void do_insertIntervalOnTier (TextGridArea me, int itier) {
 	try {
 		insertBoundaryOrPoint (me, itier,
@@ -1823,6 +1864,11 @@ void structTextGridArea :: v_createMenus () {
 			FunctionAreaMenu_addCommand (intervalMenu, U"Alignment settings...", 0,
 					menu_cb_AlignmentSettings, this);
 			FunctionAreaMenu_addCommand (intervalMenu, U"-- after align --", 0, nullptr, this);
+			FunctionAreaMenu_addCommand (intervalMenu, U"Transcribe interval", 'T',
+					menu_cb_TranscribeInterval, this);
+			FunctionAreaMenu_addCommand (intervalMenu, U"Transcribing settings...", 0,
+					menu_cb_TranscriptionSettings, this);
+			FunctionAreaMenu_addCommand (intervalMenu, U"-- after transcribing --", 0, nullptr, this);
 		}
 		FunctionAreaMenu_addCommand (intervalMenu, U"New interval:", 0, nullptr, this);
 		FunctionAreaMenu_addCommand (intervalMenu, U"Add interval on tier 1", GuiMenu_COMMAND | '1' | GuiMenu_DEPTH_1,

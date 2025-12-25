@@ -3,7 +3,7 @@
 
 include ../makefile.defs
 
-CPPFLAGS = -I ../kar -I ../melder -I ../sys -I ../dwsys -I ../stat -I ../dwtools -I ../LPC -I ../foned -I ../fon -I ../external/portaudio -I ../external/flac -I ../external/mp3 -I ../external/espeak
+CPPFLAGS = -I ../kar -I ../melder -I ../sys -I ../dwsys -I ../stat -I ../dwtools -I ../LPC -I ../foned -I ../fon -I ../external/portaudio -I ../external/flac -I ../external/mp3 -I ../external/espeak -I ../external/whispercpp
 
 OBJECTS = Transition.o Distributions_and_Transition.o \
    Function.o Sampled.o SampledXY.o Matrix.o Vector.o Polygon.o PointProcess.o \
@@ -22,6 +22,7 @@ OBJECTS = Transition.o Distributions_and_Transition.o \
    Sound_to_Cochleagram.o Spectrum_to_Excitation.o \
    VocalTract.o VocalTract_to_Spectrum.o \
    Sound_enhance.o VoiceAnalysis.o H1minusH2Tier.o \
+   SpeechRecognizer.o \
    WordList.o SpellingChecker.o \
    FujisakiPitch.o \
    ExperimentMFC.o manual_ExperimentMFC.o praat_ExperimentMFC.o \
@@ -35,7 +36,9 @@ OBJECTS = Transition.o Distributions_and_Transition.o \
    manual_sound.o manual_pitch.o manual_spectrum.o manual_formant.o \
    manual_pointProcess.o manual_annotation.o \
    praat_TimeFunction.o praat_TimeTier.o praat_TimeFrameSampled.o \
-   praat_Sound.o praat_Matrix.o praat_Tiers.o praat_TextGrid_init.o praat_uvafon_init.o
+   praat_Sound.o praat_Matrix.o praat_Tiers.o praat_TextGrid_init.o praat_uvafon_init.o \
+   praat_SpeechRecognizer.o
+
 
 .PHONY: all clean
 
