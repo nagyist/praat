@@ -28,7 +28,7 @@ autoWhisperContext :: ~autoWhisperContext () {
 }
 
 autoWhisperContext& autoWhisperContext :: operator= (autoWhisperContext&& other) noexcept {
-	if (this != &other) {
+	if (this != & other) {
 		if (ptr)
 			whisper_free (ptr);
 		ptr = other.ptr;
@@ -36,7 +36,6 @@ autoWhisperContext& autoWhisperContext :: operator= (autoWhisperContext&& other)
 	}
 	return *this;
 }
-
 
 Thing_implement (SpeechRecognizer, Daata, 0);
 
@@ -61,8 +60,8 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 		conststring32 modelPath = Melder_cat (theWhisperModelsFolder (), U"/", modelName);
 		conststring8 utf8ModelPath = Melder_peek32to8 (modelPath);
 
-		whisper_context* ctx = whisper_init_from_file_with_params (utf8ModelPath, contextParams);
-		if (!ctx)
+		whisper_context *ctx = whisper_init_from_file_with_params (utf8ModelPath, contextParams);
+		if (! ctx)
 			Melder_throw (U"Cannot create Whisper context from: ", modelPath, U". Model file not found?");
 
 		my whisperContext = autoWhisperContext (ctx);
@@ -134,12 +133,9 @@ static conststring32 theWhisperModelsFolder () {
 
 constSTRVEC theSpeechRecognizerModelNames () {
 	static autoSTRVEC whisperModelNames;
-
 	try {
-		whisperModelNames.reset ();
 		whisperModelNames = fileNames_STRVEC (Melder_cat (theWhisperModelsFolder (), U"/*.bin"));
 	} catch (MelderError) {
-		whisperModelNames.reset();
 		Melder_clearError ();
 	}
 	return whisperModelNames.get();
@@ -147,7 +143,6 @@ constSTRVEC theSpeechRecognizerModelNames () {
 
 constSTRVEC theSpeechRecognizerLanguageNames () {
 	static autoSTRVEC sortedWhisperLanguageNames;
-
 	if (! sortedWhisperLanguageNames) {
 		autoSTRVEC unsorted;
 		try {
