@@ -1,5 +1,3 @@
-#include "ggml_praat.h"
-
 #define _CRT_SECURE_NO_DEPRECATE // Disables "unsafe" warnings on Windows
 #define _USE_MATH_DEFINES // For M_PI on MSVC
 

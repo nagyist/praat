@@ -1,4 +1,3 @@
-#include "whisper_praat.h"
 #include "whisper.h"
 #include "whisper-arch.h"
 

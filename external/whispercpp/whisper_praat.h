@@ -1,1 +1,0 @@
-#define WHISPER_VERSION  "1.8.2"
