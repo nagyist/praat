@@ -28,7 +28,7 @@ autoWhisperContext :: ~autoWhisperContext () {
 }
 
 autoWhisperContext& autoWhisperContext :: operator= (autoWhisperContext&& other) noexcept {
-	if (this != &other) {
+	if (this != & other) {
 		if (ptr)
 			whisper_free (ptr);
 		ptr = other.ptr;
@@ -36,7 +36,6 @@ autoWhisperContext& autoWhisperContext :: operator= (autoWhisperContext&& other)
 	}
 	return *this;
 }
-
 
 Thing_implement (SpeechRecognizer, Daata, 0);
 
@@ -61,8 +60,8 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 		conststring32 modelPath = Melder_cat (theWhisperModelsFolder (), U"/", modelName);
 		conststring8 utf8ModelPath = Melder_peek32to8 (modelPath);
 
-		whisper_context* ctx = whisper_init_from_file_with_params (utf8ModelPath, contextParams);
-		if (!ctx)
+		whisper_context *ctx = whisper_init_from_file_with_params (utf8ModelPath, contextParams);
+		if (! ctx)
 			Melder_throw (U"Cannot create Whisper context from: ", modelPath, U". Model file not found?");
 
 		my whisperContext = autoWhisperContext (ctx);
@@ -87,7 +86,7 @@ autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) 
 
 		if (whisper_is_multilingual (my whisperContext.get ())) {
 			if (my d_languageName && !str32str(my d_languageName.get (), U"Autodetect")) {
-				params.language = whisper_lang_str (whisper_lang_id (Melder_32to8 (my d_languageName.get ()).get ()));
+				params.language = whisper_lang_str (whisper_lang_id (Melder_peek32to8 (my d_languageName.get())));
 			} else {
 				params.language = "auto";
 			}
@@ -116,30 +115,31 @@ autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) 
 }
 
 static conststring32 theWhisperModelsFolder () {
-	static autostring32 whisperModelFolder;
-
-	if (! whisperModelFolder) {
+	static autostring32 whisperModelFolderPath;
+	if (! whisperModelFolderPath) {
 		try {
 			structMelderFolder modelsFolder { };
-			MelderFolder_getSubfolder (Melder_preferencesFolder (),	U"models/whispercpp", & modelsFolder);
+			MelderFolder_getSubfolder (Melder_preferencesFolder (),	U"models", & modelsFolder);
 			if (! MelderFolder_exists (& modelsFolder))
 				MelderFolder_create (& modelsFolder);
-			whisperModelFolder = Melder_dup (MelderFolder_peekPath (& modelsFolder));
+			structMelderFolder whispercppFolder { };
+			MelderFolder_getSubfolder (& modelsFolder,	U"whispercpp", & whispercppFolder);
+			if (! MelderFolder_exists (& whispercppFolder))
+				MelderFolder_create (& whispercppFolder);
+			whisperModelFolderPath = Melder_dup (MelderFolder_peekPath (& whispercppFolder));
+			Melder_casual (whisperModelFolderPath.get());
 		} catch (MelderError) {
 			Melder_clearError ();
 		}
 	}
-	return whisperModelFolder.get();
+	return whisperModelFolderPath.get();
 }
 
 constSTRVEC theSpeechRecognizerModelNames () {
 	static autoSTRVEC whisperModelNames;
-
 	try {
-		whisperModelNames.reset ();
 		whisperModelNames = fileNames_STRVEC (Melder_cat (theWhisperModelsFolder (), U"/*.bin"));
 	} catch (MelderError) {
-		whisperModelNames.reset();
 		Melder_clearError ();
 	}
 	return whisperModelNames.get();
@@ -147,7 +147,6 @@ constSTRVEC theSpeechRecognizerModelNames () {
 
 constSTRVEC theSpeechRecognizerLanguageNames () {
 	static autoSTRVEC sortedWhisperLanguageNames;
-
 	if (! sortedWhisperLanguageNames) {
 		autoSTRVEC unsorted;
 		try {
