@@ -1,6 +1,6 @@
 /* espeak_praat.cpp
  *
-//  * Copyright (C) 2017-2021 David Weenink, 2024,2025 Paul Boersma
+ * Copyright (C) 2017-2021 David Weenink, 2024,2025 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

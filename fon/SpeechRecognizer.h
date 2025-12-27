@@ -1,7 +1,23 @@
 #ifndef _SpeechRecognizer_h_
 #define _SpeechRecognizer_h_
+/* SpeechRecognizer.h
+ *
+ * Copyright (C) 2025 Anastasia Shchupak
+ *
+ * This code is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * This code is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this work. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include "Data.h"
 #include "Sound.h"
 
 struct whisper_context;
@@ -41,5 +57,5 @@ inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect langu
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName);
 autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound);
 
-#endif
 /* End of file SpeechRecognizer.h */
+#endif

@@ -1,6 +1,11 @@
 To make GGML and Whisper-cpp compatible with Praat,
-we added the file `ggml_praat.h` at the top of
-`ggml.c`, `ggml-backend-reg.cpp` and `ggml-cpu.c`,
-and the file `whisper_praat,h` at the top of `whisper.cpp`.
+we add the following to the top of `ggml.h`:
 
+#define WHISPER_VERSION  "1.8.2"
+#define GGML_VERSION  "0.9.4"
+#define GGML_COMMIT  "unknown"
+#define GGML_USE_CPU
+#define GGML_CPU_GENERIC
 
+This works because `ggml.h` is included, directly or indirectly,
+at the very top of all `ggml` and `whisper` files (last checked 20251227).
