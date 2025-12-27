@@ -8,6 +8,9 @@
 #define GGML_COMMIT  "unknown"
 #define GGML_USE_CPU
 #define GGML_CPU_GENERIC
+#if ! defined (_GNU_SOURCE)
+	#define _GNU_SOURCE
+#endif
 
 //
 // GGML Tensor Library

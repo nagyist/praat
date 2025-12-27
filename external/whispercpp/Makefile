@@ -2,8 +2,6 @@
 
 include ../../makefile.defs
 
-CPPFLAGS += -D_GNU_SOURCE
-
 WHISPER_OBJECTS = \
 	whisper.o \
 	ggml.o \
@@ -23,7 +21,7 @@ WHISPER_OBJECTS = \
 
 .PHONY: all clean
 
-all:  libwhisper.a
+all: libwhisper.a
 
 clean:
 	$(RM) $(WHISPER_OBJECTS)
