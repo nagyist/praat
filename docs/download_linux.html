@@ -5,15 +5,42 @@
 Downloading Praat for Linux
 </b></font></table></table>
 
-<hr><h3>1. Downloading the Linux edition</h3>
-<p>The most straightforward way to obtain the newest version of the <b>Linux</b> edition of <b>Praat</b>
-is to download Praat from this page. The following executables work on most distributions,
-such as Ubuntu 22.04 and 24.04, Fedora 38 and 40 and 42, Debian 12 and 13, and Centos 9 and 10.
-Click on the compressed archive for your processor type:</p>
+<hr><h3>1. Relying on your Linux distribution</h3>
+<p>If you’re on Ubuntu or Debian, the fastest way to install Praat is to type</p>
+<code style="white-space:pre-wrap">   sudo apt install praat
+</code>
+<p>into a terminal window. However, this way you may obtain a years-old version:</p>
+<ul>
+<li>Ubuntu 22.04 has Praat 6.2.09 from February 2022
+<li>Debian 12 has Praat 6.3.07 from February 2023
+<li>Ubuntu 24.04 has Praat 6.4.06 from February 2024
+<li>Debian 13 has Praat 6.4.27 from January 2025
+</ul>
+<p>This way may be sub-optimal, because Praat is updated quite often.
+See <a href="manual/What_s_new_.html">What’s new?</a> to see what’s new.</p>
+
+<hr><h3>2. Downloading the Linux edition directly</h3>
+<p>If you want the newest version of Praat, you can download it from this page
+if you have a Linux distribution from 2022 or younger
+and one of the three supported processor types:</p>
+<ul>
+<li>“Intel64”, also known as AMD64, x86_64 or x64 (the most common processor type in current use)
+<li>“ARM64”, also known as AArch64 (the second most common processor type in current use)
+<li>“s390x” (a big-endian processor used on LinuxONE Ubuntu)
+</ul>
+The editions of Praat downloadable from this page have been built with GCC 11;
+they run correctly on at least the following distributions:
+<ul>
+<li>Ubuntu 22.04 and 24.04
+<li>Fedora 38, 40 and 42
+<li>Debian 12 and 13
+<li>Centos 9 and 10
+</ul>
+To download, click on the compressed archive for your processor type:</p>
 <dl>
 <dd><b>normal edition</b> (for interactive work as well as scripting):<br>
-&nbsp;- for Intel64 (= AMD64, x64): <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-intel64.tar.gz">praat6449_linux-intel64.tar.gz</a></b> (23 December 2025; 28.3 MB) &nbsp; <b><-- you probably want this</b><br>
-&nbsp;- for ARM64 (= AArch64): <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-arm64.tar.gz">praat6449_linux-arm64.tar.gz</a></b> (23 December 2025; 27.2 MB)<br>
+&nbsp;- for Intel64: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-intel64.tar.gz">praat6449_linux-intel64.tar.gz</a></b> (23 December 2025; 28.3 MB) &nbsp; <b><-- most commonly downloaded</b><br>
+&nbsp;- for ARM64: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-arm64.tar.gz">praat6449_linux-arm64.tar.gz</a></b> (23 December 2025; 27.2 MB)<br>
 &nbsp;- for s390x: <b><a href="https://github.com/praat/praat/releases/download/v6.4.49/praat6449_linux-s390x.tar.gz">praat6449_linux-s390x.tar.gz</a></b> (23 December 2025; 29.0 MB)
 <dd>&nbsp;
 <dd><b>barren server edition</b> (no GUI, no network, no sound, no graphics):<br>
@@ -24,26 +51,11 @@ Click on the compressed archive for your processor type:</p>
 <p>Unpack with <b>gunzip</b> and <b>tar xvf</b>. This will create the executable file <b>praat</b>.
 You can remove the <b>tar</b> file.</p>
 
-<p>Alternatively, you could also simply do <b>sudo apt install praat</b> if you are on Ubuntu or Debian,
-although you may obtain a years-old version:</p>
-<ul>
-<li>Ubuntu 22.04 has Praat 6.2.09 from February 2022
-<li>Debian 12 has Praat 6.3.07 from February 2023
-<li>Ubuntu 24.04 has Praat 6.4.06 from February 2024
-<li>Debian 13 has Praat 6.4.27 from January 2025
-</ul>
-Therefore, it may be worthwhile to download a more recent version from the present page,
-or a more complete recent Praat package (especially for processors not mentioned above)
-from <a href="http://packages.debian.org/unstable/science/praat">Debian</a>.
-There is also always the possibility to compile Praat yourself
-from the <a href="download_sources.html">source code</a>.</p>
-
-<hr><h3>2. How to start</h3>
 <p>Praat will work fine wherever it is on your disk; just type <b>./praat</b> into a terminal window
 after cd-ing to Praat’s folder.</p>
 <p>If Praat doesn’t start immediately (i.e. it may complain about missing <code>.so</code> files),
-then you may have to install one or more standard (system or audio) libraries on which Praat depends.
-On Ubuntu or Debian this may be:</p>
+then you may have to install one or more standard (graphics or audio) libraries on which Praat depends.
+On Ubuntu or Debian these may be:</p>
 
 <code style="white-space:pre-wrap">   sudo apt install libgtk-3-0      # the graphics toolkit
    sudo apt install libasound2      # the ALSA audio library
@@ -65,9 +77,21 @@ On Ubuntu or Debian this may be:</p>
                                                         # i.e. usually *not* jack-audio-connection-kit
 </code>
 
+<hr><h3>3. Downloading the Linux edition from Debian</h3>
+<p> If you prefer a more complete Praat package,
+or need to work on a processor not mentioned above,
+you can download a recent version from
+<a href="http://packages.debian.org/unstable/science/praat">Debian</a>.</p>
+
+<hr><h3>4. The last resort: build Praat yourself</h3>
+<p>If none of the above works, there is also always the possibility to compile Praat yourself
+from the <a href="download_sources.html">source code</a>.</p>
+
+<hr><h3>5. How to start</h3>
+
 <p>If you use Praat for the first time, choose <b>Intro</b> from the Help menu.</p>
 
-<hr><h3>3. Phonetic symbols</h3>
+<hr><h3>6. Phonetic symbols</h3>
 <p>If you want to see good phonetic characters,
 you have to install the Doulos SIL and Charis (or Charis SIL) fonts,
 for instance from the packages <b>fonts-sil-charis</b> and <b>fonts-sil-doulos</b> on Debian or Ubuntu:</p>
@@ -85,7 +109,7 @@ for instance from the packages <b>fonts-sil-charis</b> and <b>fonts-sil-doulos</
 <p>If you cannot install those packages, you can download the two fonts
 from <a href=http://www.sil.org>Summer Institute of Linguistics</a> and follow the installation instructions there.</p>
 
-<hr><h3>4. Running Praat from the command line</h3>
+<hr><h3>7. Running Praat from the command line</h3>
 <p>To run Praat from a terminal window,
 write a Praat script and specify that script on the command line, optionally with arguments, e.g.:</p>
 
@@ -94,7 +118,7 @@ write a Praat script and specify that script on the command line, optionally wit
 
 <p>For details see <a href="manual/Scripting_6_9__Calling_from_the_command_line.html">Calling from the command line</a> in the Scripting manual.</p>
 
-<hr><h3>5. Known possible problems, and their solution</h3>
+<hr><h3>8. Known possible problems, and their solution</h3>
 <p><b>1. Sound not working?</b></p>
 <p>Audio on Linux is notoriously fragile. For playback, Praat either uses PulseAudio or Alsa,
 and you choose between these with Praat -> Preferences -> Sound playing preferences.</p>
@@ -112,7 +136,7 @@ You may then try to obtain a JACK device by starting Praat via (if you have Pipe
    praat
 </code>
 
-<hr><h3>6. Editions of Praat for older computers or older operating system versions</h3>
+<hr><h3>9. Editions of Praat for older computers or older operating system versions</h3>
 <ul>
 <li>We do not create Praat editions for 32-bit Linux any longer (except for <a href=download_raspberrypi.html>Raspberry Pi</a>).
 The last one is <a href="https://github.com/praat/praat/releases/download/v6.1.15/praat6115_linux32.tar.gz">Praat 6.1.15</a> of 20 May 2020.

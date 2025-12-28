@@ -20,7 +20,7 @@ License for the Praat manual pages (in `docs/manual`)
 
 The `docs/manual` folder contains a copy of the manual pages of the Praat application,
 i.e. of both the HTML files and their included pictures (PNG files).
-These pages are also available in the Praat program under Help,
+These pages are also available in the Praat program under Help.
 The versions on the website were generated from Praat with the menu command
 **Save manual to HTML folder...**. As the source of these manual pages is the Praat source code,
 all HTML and PNG files in `docs/manual` are licensed under GPL-3.0-or-later:
