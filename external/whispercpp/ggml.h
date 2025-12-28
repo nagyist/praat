@@ -1,5 +1,17 @@
 #pragma once
 
+/*
+	Added by Paul Boersma on behalf of inlcusion into Praat
+*/
+#define WHISPER_VERSION  "1.8.2"
+#define GGML_VERSION  "0.9.4"
+#define GGML_COMMIT  "unknown"
+#define GGML_USE_CPU
+#define GGML_CPU_GENERIC
+#if ! defined (_GNU_SOURCE)
+	#define _GNU_SOURCE
+#endif
+
 //
 // GGML Tensor Library
 //

@@ -38,8 +38,9 @@ The following people contributed source code to Praat:
 	tables, @formulas, @scripting, and adaptation of PortAudio, GLPK, regular expressions, eSpeak, Opus and LAME.
 , David Weenink:
 	@@feedforward neural networks@, @@principal component analysis@, @@multidimensional scaling@, @@discriminant analysis@, @LPC,
-	@VowelEditor, @FormantPath,
+	@@KlattGrid|Acoustic synthesis (Klatt)@, automatic alignment, @VowelEditor, @FormantPath,
 	and adaptation of GSL, LAPACK, fftpack, regular expressions, eSpeak, Ogg Vorbis, Opus and LAME.
+, Anastasia Shchupak: speech recognition, automatic orthographic transcription, and adaptation of Whisper.cpp.
 , Stefan de Konink and Franz Brauße: major help in port to GTK.
 , Tom Naughton: major help in port to Cocoa.
 , Erez Volk: adaptation of FLAC and MAD.
@@ -75,6 +76,7 @@ We included the following freely available software libraries in Praat (sometime
 , Regular expressions by Henry Spencer, Mark Edel, Christopher Conrad, Eddy De Greef (@@General Public License, version 2|GPL 2@ or later).
 , Unicode Character Database by Unicode Inc., version 16.0 of August 2024 (@@Unicode Inc. license agreement@).
 , Quickselect and Median of ninthers, by Andrei Alexandrescu 2016 (@@Boost Software License 1.0@).
+, Whisper.cpp, by Georgi Gerganov and many others (@@MIT License@).
 
 Our own parts of the source code of Praat are distributed either under the
 @@General Public License, version 2@ or later, or under the @@General Public License, version 3@ or later.
@@ -119,6 +121,35 @@ The source code is available on `https://github.com/praat/praat.github.io`.
 See @Acknowledgments for details on the licenses of software libraries by others
 that are included in Praat.
 
+################################################################################
+"MIT License"
+© 2023–2024 the ggml authors; introductory paragraph Paul Boersma 2025
+
+The Praat source code contains a copy of the Whisper.cpp software (see @Acknowledgments).
+Here is its license text:
+
+`
+	MIT License
+	Copyright (c) 2023-2024 The ggml authors
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+`
 ################################################################################
 "FLAC BSD 3-clause license"
 © Xiph.org and others 2001–2016; introductory paragraph Paul Boersma 2021
