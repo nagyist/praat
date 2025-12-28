@@ -145,7 +145,7 @@ Before #including any FLAC header files, do
 
 Put #ifdef _WIN32 around flac_share_win_utf8_io.c.
 
-To minimize warnings, o something to
+To minimize warnings, do something to
 	#ifdef HAVE_STDINT_H
 such as replacing it with
 	#if HAVE_STDINT_H

@@ -16,7 +16,6 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /*
 	These things have to be #defines so that they can be used not only in main_Praat.cpp when initializing the app,
 	but also in an automated `praat.plist` (for macOS).
