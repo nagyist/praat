@@ -388,7 +388,7 @@ void TextGrid_Sound_transcribeInterval (
 		if (intervalNumber < 1 || intervalNumber > tier -> intervals.size)
 			Melder_throw (U"Interval ", intervalNumber, U" does not exist.");
 		TextInterval interval = tier -> intervals.at [intervalNumber];
-		autoSound soundPart = Sound_extractPart(sound, interval -> xmin, interval -> xmax,
+		autoSound soundPart = Sound_extractPart (sound, interval -> xmin, interval -> xmax,
 			kSound_windowShape::RECTANGULAR, 1.0, false);
 		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName);
 		autostring32 result = SpeechRecognizer_recognize (speechRecognizer.get (), soundPart.get ());
