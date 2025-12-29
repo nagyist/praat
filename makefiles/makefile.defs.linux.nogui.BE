@@ -1,7 +1,7 @@
-# File: makefile.defs.linux.nogui
+# File: makefile.defs.linux.nogui.BE
 
 # System: Linux without GUI, network, and sound
-# Paul Boersma 2021-12-27
+# Paul Boersma, 29 December 2025
 
 CC ?= gcc
 CXX ?= g++
@@ -10,6 +10,7 @@ LINK ?= $(CXX)
 PKG_CONFIG ?= "pkg-config"
 
 COMMONFLAGS = -DNO_GUI -DNO_NETWORK -D_FILE_OFFSET_BITS=64 `$(PKG_CONFIG) --cflags pangocairo` -DUNIX -Dlinux \
+	-DWORDS_BIGENDIAN=1 -DPA_BIG_ENDIAN \
 	-Wreturn-type -Wunused -Wunused-parameter -Wuninitialized -O3 -g1 -pthread
 
 CFLAGS = -std=gnu99 $(COMMONFLAGS) -Werror=missing-prototypes -Werror=implicit

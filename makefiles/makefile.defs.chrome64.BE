@@ -1,13 +1,14 @@
-# File: makefile.defs.chrome64
+# File: makefile.defs.chrome64.BE
 
 # System: Linux on Chromebook
-# Paul Boersma 2021-12-27
+# Paul Boersma, 29 December 2025
 
 CC ?= gcc
 CXX ?= g++
 LINK ?= $(CXX)
 
 COMMONFLAGS = -DUNIX -Dlinux -Dchrome -DALSA -DHAVE_PULSEAUDIO -D_FILE_OFFSET_BITS=64 `pkg-config --cflags gtk+-3.0` \
+	-DWORDS_BIGENDIAN=1 -DPA_BIG_ENDIAN \
 	-Wreturn-type -Wunused -Wunused-parameter -Wuninitialized -O3 -g1 -pthread
 
 CFLAGS = -std=gnu99 $(COMMONFLAGS) -Werror=missing-prototypes -Werror=implicit

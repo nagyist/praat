@@ -2387,6 +2387,32 @@ void praat_run () {
 		"sizeof(off_t) is less than 8. Compile Praat with -D_FILE_OFFSET_BITS=64.");
 
 	/*
+		Some libraries expect the definition of endian information.
+		Check here at compile time that these are #defined,
+		and check here at runtime that they have the correct value.
+	*/
+	#if ! defined (WORDS_BIGENDIAN)   // FLAC, MAD, Lame
+		#error WORDS_BIGENDIAN should be #defined
+	#endif
+	#if ! defined (PA_BIG_ENDIAN) && ! defined (PA_LITTLE_ENDIAN)   // PortAudio
+		#error PA_BIG_ENDIAN or PA_LITTLE_ENDIAN should be #defined
+	#endif
+	#if defined (PA_BIG_ENDIAN) && defined (PA_LITTLE_ENDIAN)
+		#error PA_BIG_ENDIAN and PA_LITTLE_ENDIAN shouldn't both be #defined
+	#endif
+	if (Melder_integersAreBigEndian()) {
+		Melder_assert (WORDS_BIGENDIAN == 1);
+		#if ! defined (PA_BIG_ENDIAN)
+			Melder_assert ("PA_BIG_ENDIAN should be #defined" && 0);
+		#endif
+	} else {
+		Melder_assert (WORDS_BIGENDIAN == 0);
+		#if ! defined (PA_LITTLE_ENDIAN)
+			Melder_assert ("PA_LITTLE_ENDIAN should be #defined" && 0);
+		#endif
+	}
+
+	/*
 		The type "integer" is defined as intptr_t, analogously to uinteger as uintptr_t
 		(last checked 2024-08-18).
 		However, the usual definition of an integer type that has 32 bits on 32-bit platforms

@@ -1,7 +1,7 @@
 # File: makefile.defs.linux.rpi
 
 # System: Raspberry Pi
-# Paul Boersma 2025-08-28
+# Paul Boersma 2025-12-29
 
 CC ?= gcc
 CXX ?= g++
@@ -9,7 +9,9 @@ LINK ?= $(CXX)
 
 PKG_CONFIG ?= "pkg-config"
 
-COMMONFLAGS = -DUNIX -Dlinux -DJACK -DPA_LITTLE_ENDIAN -Draspberrypi -D_FILE_OFFSET_BITS=64 `$(PKG_CONFIG) --cflags gtk+-3.0` \
+COMMONFLAGS = -DUNIX -Dlinux -Draspberrypi -DJACK \
+	-DWORDS_BIGENDIAN=0 -DPA_LITTLE_ENDIAN \
+	-D_FILE_OFFSET_BITS=64 `$(PKG_CONFIG) --cflags gtk+-3.0` \
 	-Wreturn-type -Wunused -Wunused-parameter -Wuninitialized -O1 -g1 -pthread
 
 CFLAGS = -std=gnu99 $(COMMONFLAGS) -Werror=missing-prototypes -Werror=implicit
@@ -18,7 +20,10 @@ CXXFLAGS = -std=c++2a $(COMMONFLAGS) -Wshadow
 
 EXECUTABLE = praat
 
-LIBS = `$(PKG_CONFIG) --libs gtk+-3.0` -no-pie -lm -ljack -static-libgcc -static-libstdc++ -lpthread -latomic -L /usr/lib/x86_64-linux-gnu
+# The static library /usr/lib/gcc/arm-linux-gnueabihf/8/libstdc++fs.a is needed with GCC 8,
+# and can be removed when using GCC 9
+LIBS = `$(PKG_CONFIG) --libs gtk+-3.0` -no-pie -lm -ljack \
+	-static-libgcc -static-libstdc++ -lpthread -latomic -ldl -lstdc++fs
 
 AR = ar
 RANLIB = ls

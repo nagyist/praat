@@ -1,15 +1,14 @@
-# File: makefile.defs.msys-mingw64
+# File: makefile.defs.msys-gcc
 
-# System: MinGW on Windows under MSYS2
-# Paul Boersma 2024-01-05
+# System: Mingw64 or Mingw32 on Windows under MSYS2
+# Paul Boersma, 29 December 2025
 
-PREFIX ?=
-
-CC = $(PREFIX)gcc
-CXX = $(PREFIX)g++
+CC = gcc
+CXX = g++
 LINK = $(CXX)
 
 COMMONFLAGS = -municode -D_FILE_OFFSET_BITS=64 \
+	-DWORDS_BIGENDIAN=0 -DPA_LITTLE_ENDIAN \
 	-O3
 # Probably implicit: -m64 -mwin32 -march=x86_64 -mtune=generic
 
@@ -20,10 +19,11 @@ CXXFLAGS = -std=gnu++17 $(COMMONFLAGS) -Wshadow
 
 EXECUTABLE = Praat.exe
 
-LIBS = -lwinmm -lwsock32 -lcomctl32 -lole32 -lgdi32 -lgdiplus -lcomdlg32 -lwinspool -static-libgcc -static-libstdc++ -mwindows -static
+LIBS = -lwinmm -lwsock32 -lcomctl32 -lole32 -lgdi32 -lgdiplus -lcomdlg32 -lwinspool \
+	-static-libgcc -static-libstdc++ -mwindows
 
-AR = $(PREFIX)ar
-RANLIB = $(PREFIX)ranlib
-WINDRES = $(PREFIX)windres
+AR = ar
+RANLIB = ranlib
+WINDRES = windres
 ICON = praat_win.o
 MAIN_ICON = main/praat_win.o
