@@ -75,7 +75,7 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 		contextParams.use_gpu = false;
 		contextParams.flash_attn = false;
 
-		conststring32 modelPath = Melder_cat (theWhisperModelsFolder (), U"/", modelName);
+		conststring32 modelPath = Melder_cat (theWhisperModelsFolder(), U"/", modelName);
 		conststring8 utf8ModelPath = Melder_peek32to8 (modelPath);
 
 		whisper_context *ctx = whisper_init_from_file_with_params (utf8ModelPath, contextParams);
@@ -92,7 +92,7 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 
 autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) {
 	try {
-		whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+		whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_GREEDY);
 		params.print_progress = true;   // also default
 		params.print_special = false;   // also default
 		params.print_timestamps = true; // also default
@@ -103,30 +103,35 @@ autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) 
 		//params.detect_language = true;  // default false, if true - only detecting the language and not transcribing
 
 		if (whisper_is_multilingual (my whisperContext.get ())) {
-			if (my d_languageName && !str32str(my d_languageName.get (), U"Autodetect")) {
+			if (my d_languageName && ! str32str (my d_languageName.get(), U"Autodetect")) {
 				params.language = whisper_lang_str (whisper_lang_id (Melder_peek32to8 (my d_languageName.get())));
 			} else {
 				params.language = "auto";
 			}
 		}
 
-		// resample sound to 16kHz if needed
-		autoSound resampled = Sound_resample (sound, 16000, 50);
-		sound = resampled.get ();
+		/*
+			Resample the sound to 16kHz if needed.
+		*/
+		autoSound resampled = Sound_resample (sound, 16000.0, 50);
+		sound = resampled.get();
 
-		// convert sound to float32 for whisper
-		std::vector<float> samples32;
-		samples32.reserve (sound -> nx);
-		for (integer i = 1; i <= sound -> nx; ++i)
-			samples32.push_back (static_cast<float>(sound -> z[1][i]));
+		/*
+			Convert the sound to float32 for Whisper.
+		*/
+		std::vector <float> samples32;
+		samples32. reserve (integer_to_uinteger_a (sound -> nx));
+		for (integer i = 1; i <= sound -> nx; ++ i)
+			samples32. push_back (static_cast <float> (sound -> z [1] [i]));
 
-		// run whisper
-		if (whisper_full (my whisperContext.get (), params, samples32.data(), static_cast<int>(sound -> nx)) != 0)
+		/*
+			Run Whisper.
+		*/
+		if (whisper_full (my whisperContext.get(), params, samples32.data(), static_cast <int> (sound -> nx)) != 0)
 			Melder_throw (U"Whisper failed to process audio");
-		autostring32 result = Melder_8to32 (whisper_full_get_segment_text (my whisperContext.get (), 0));
+		autostring32 result = Melder_8to32 (whisper_full_get_segment_text (my whisperContext.get(), 0));
 
 		return result;
-
 	} catch (MelderError) {
 		Melder_throw (U"Sound not transcribed.");
 	}
@@ -169,21 +174,25 @@ constSTRVEC theSpeechRecognizerLanguageNames () {
 		autoSTRVEC unsorted;
 		try {
 			const uint8 nLanguages = whisper_lang_max_id();
-			for (uint8 i = 0; i < nLanguages; ++i) {
-				autostring32 languageName = Melder_dup (Melder_peek8to32 (whisper_lang_str_full (i)));
+			for (uint8 i = 0; i < nLanguages; i ++) {
+				autostring32 languageName = Melder_8to32 (whisper_lang_str_full (i));
 
-				// capitalize first letter
+				/*
+					Capitalize the first letter, e.g. "dutch" -> "Dutch".
+				*/
 				if (languageName [0] != U'\0')
 					languageName [0] = Melder_toUpperCase (languageName [0]);
 
-				unsorted.append(languageName.get ());
+				unsorted.append (languageName.get());
 			}
 			autoSTRVEC sorted = sort_STRVEC (unsorted.get());
 
-			// create a list to return (with autodetect option)
-			sortedWhisperLanguageNames.append(U"Autodetect language");
-			for (integer i = 1; i <= sorted.size; ++i)
-				sortedWhisperLanguageNames.append (sorted[i].get());
+			/*
+				Create a list to return (with autodetect option).
+			*/
+			sortedWhisperLanguageNames. append (U"Autodetect language");
+			for (integer i = 1; i <= sorted.size; i ++)
+				sortedWhisperLanguageNames. append (sorted [i].get());
 
 		} catch (MelderError) {
 			unsorted.reset();

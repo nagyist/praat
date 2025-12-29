@@ -1452,22 +1452,28 @@ static void menu_cb_TranscribeInterval (TextGridArea me, EDITOR_ARGS) {
 
 static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Transcription settings", nullptr)
-		LIST (modelIndex, U"Whisper model", theSpeechRecognizerModelNames (),
-			static_cast<int>(NUMfindFirst(theSpeechRecognizerModelNames (), theSpeechRecognizerDefaultModelName)))
+		static constSTRVEC modelNames;   // has to be static because of goto rule
+		modelNames = theSpeechRecognizerModelNames();   // cannot be called twice in the same scope
+		Melder_require (modelNames.size > 0,
+			U"Found no Whisper-cpp models to do speech recognition with.\n"
+			U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
+		);
+		LIST (modelIndex, U"Whisper model", modelNames,
+				static_cast <int> (NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName)))
 		LIST (languageIndex, U"Language", theSpeechRecognizerLanguageNames (),
-			static_cast<int>(NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName)))
+				static_cast <int> (NUMfindFirst (modelNames, theSpeechRecognizerDefaultLanguageName)))
 	EDITOR_OK
-		int prefModel = static_cast<int>(NUMfindFirst (theSpeechRecognizerModelNames (), my instancePref_transcribe_model()));
+		int prefModel = static_cast <int> (NUMfindFirst (modelNames, my instancePref_transcribe_model()));
 		if (prefModel == 0)
-			prefModel = static_cast<int>(NUMfindFirst (theSpeechRecognizerModelNames (), theSpeechRecognizerDefaultModelName));
+			prefModel = static_cast <int> (NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName));
 		SET_INTEGER (modelIndex, prefModel)
 
-		int prefLanguage = static_cast<int>(NUMfindFirst (theSpeechRecognizerLanguageNames (), my instancePref_transcribe_language()));
+		int prefLanguage = static_cast <int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), my instancePref_transcribe_language()));
 		if (prefLanguage == 0)
-			prefLanguage = static_cast<int>(NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName));
+			prefLanguage = static_cast< int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName));
 		SET_INTEGER (languageIndex, prefLanguage)
 	EDITOR_DO
-		my setInstancePref_transcribe_model (theSpeechRecognizerModelNames () [modelIndex]);
+		my setInstancePref_transcribe_model (modelNames [modelIndex]);
 		my setInstancePref_transcribe_language (theSpeechRecognizerLanguageNames () [languageIndex]);
 	EDITOR_END
 }
@@ -1866,9 +1872,9 @@ void structTextGridArea :: v_createMenus () {
 			FunctionAreaMenu_addCommand (intervalMenu, U"-- after align --", 0, nullptr, this);
 			FunctionAreaMenu_addCommand (intervalMenu, U"Transcribe interval", 'T',
 					menu_cb_TranscribeInterval, this);
-			FunctionAreaMenu_addCommand (intervalMenu, U"Transcribing settings...", 0,
+			FunctionAreaMenu_addCommand (intervalMenu, U"Transcription settings...", 0,
 					menu_cb_TranscriptionSettings, this);
-			FunctionAreaMenu_addCommand (intervalMenu, U"-- after transcribing --", 0, nullptr, this);
+			FunctionAreaMenu_addCommand (intervalMenu, U"-- after transcribe --", 0, nullptr, this);
 		}
 		FunctionAreaMenu_addCommand (intervalMenu, U"New interval:", 0, nullptr, this);
 		FunctionAreaMenu_addCommand (intervalMenu, U"Add interval on tier 1", GuiMenu_COMMAND | '1' | GuiMenu_DEPTH_1,
