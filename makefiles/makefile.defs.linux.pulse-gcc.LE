@@ -1,6 +1,6 @@
-# File: makefile.defs.linux.pulse-gcc
+# File: makefile.defs.linux.pulse-gcc.LE
 # System: Linux
-# David Weenink and Paul Boersma 2025-12-22
+# David Weenink and Paul Boersma, 29 December 2025
 
 CC = gcc
 CXX = g++
@@ -8,7 +8,9 @@ LINK = $(CXX)
 
 PKG_CONFIG ?= pkg-config
 
-COMMONFLAGS = -DUNIX -Dlinux -DALSA -DJACK -DHAVE_PULSEAUDIO -D_FILE_OFFSET_BITS=64 `$(PKG_CONFIG) --cflags gtk+-3.0` \
+COMMONFLAGS = -DUNIX -Dlinux -DALSA -DJACK -DHAVE_PULSEAUDIO \
+	-DWORDS_BIGENDIAN=0 -DPA_LITTLE_ENDIAN \
+	-D_FILE_OFFSET_BITS=64 `$(PKG_CONFIG) --cflags gtk+-3.0` \
 	-Wreturn-type -Wunused -Wunused-parameter -Wuninitialized -O3 -g1 -pthread
 
 CFLAGS = -std=gnu99 $(COMMONFLAGS) -Werror=missing-prototypes -Werror=implicit
