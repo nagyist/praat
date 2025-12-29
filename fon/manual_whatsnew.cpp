@@ -29,6 +29,12 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.50# (29 December 2025)
+• A bit of speech recognition via Whisper.cpp (adapted to Praat by Anastasia Shchupak),
+  such as ##Transcribe interval# in the TextGrid window. This works after you install
+  one or more Whisper-cpp models, such as `ggml-base.bin` (from
+  `https://huggingface.co/ggerganov/whisper.cpp`) in the `models` subfolder of the @@preferences folder@.
+
 ##6.4.49# (23 December 2025)
 • Open without error messages or warnings Kay files that have one sample too few or too many.
 • Linux: the standard Linux edition now runs equally well on Ubuntu, Fedora, Debian and Centos.
