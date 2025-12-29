@@ -1470,7 +1470,7 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 
 		int prefLanguage = static_cast <int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), my instancePref_transcribe_language()));
 		if (prefLanguage == 0)
-			prefLanguage = static_cast< int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName));
+			prefLanguage = static_cast <int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName));
 		SET_INTEGER (languageIndex, prefLanguage)
 	EDITOR_DO
 		my setInstancePref_transcribe_model (modelNames [modelIndex]);

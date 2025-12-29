@@ -402,15 +402,15 @@ NORMAL (U"To change the ceiling, but not the path, choose ##Change ceiling...# f
 	"if the new ceiling is higher than the old ceiling, some formerly unvoiced frames may become voiced.")
 MAN_END
 
-MAN_BEGIN (U"PitchTier", U"ppgb", 20101230)
+MAN_BEGIN (U"PitchTier", U"ppgb", 20101230) // 20251229
 INTRO (U"One of the @@types of objects@ in Praat. "
 	"A PitchTier object represents a time-stamped pitch contour, "
 	"i.e. it contains a number of (%time, %pitch) points, without voiced/unvoiced information. "
 	"For instance, if your PitchTier contains two points, namely 150 Hz at a time of 0.5 seconds and "
 	"200 Hz at a time of 1.5 seconds, then this is to be interpreted as a pitch contour that "
 	"is constant at 150 Hz for all times before 0.5 seconds, constant at 200 Hz for all times after 1.5 seconds, "
-	"and linearly interpolated for all times between 0.5 and 1.5 seconds (i.e. 170 Hz at 0.7 seconds, "
-	"210 Hz at 1.1 seconds, and so on).")
+	"and linearly interpolated for all times between 0.5 and 1.5 seconds (i.e. 160 Hz at 0.7 seconds, "
+	"180 Hz at 1.1 seconds, and so on).")
 NORMAL (U"PitchTier objects are used for two purposes: "
 	"for manipulating the pitch curve of an existing sound "
 	"(see @@Intro 8.1. Manipulation of pitch@) "
