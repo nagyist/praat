@@ -75,8 +75,6 @@ The meaning of the names of binary files available on GitHub is as follows (edit
 - `praatXXXX_mac7.sit`: StuffIt archive with executable for MacOS 7
 
 ### 1.3. Linux binaries
-- **`praatXXXX_fedora-arm64.tar.gz`: gzipped tarred executable for ARM64 Fedora or Debian Linux (GTK 3)**
-- **`praatXXXX_fedora-intel64.tar.gz`: gzipped tarred executable for Intel64/AMD64 Fedora or Debian Linux (GTK 3)**
 - **`praatXXXX_linux-s390x-barren.tar.gz`: gzipped tarred executable for s390x Linux, without GUI, sound and graphics**
 - **`praatXXXX_linux-s390x.tar.gz`: gzipped tarred executable for s390x Linux (GTK 3)**
 - **`praatXXXX_linux-arm64-barren.tar.gz`: gzipped tarred executable for ARM64 Linux (Ubuntu, Debian...), without GUI, sound and graphics**
