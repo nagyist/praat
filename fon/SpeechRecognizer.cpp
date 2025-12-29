@@ -93,20 +93,22 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) {
 	try {
 		whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_GREEDY);
-		params.print_progress = true;   // also default
-		params.print_special = false;   // also default
-		params.print_timestamps = true; // also default
-		params.token_timestamps = true; // also default, necessary if we want to time tokens
-		params.single_segment = true;  // force single segment output
-		params.split_on_word = true;    // not default, not clear what it is doing
-		params.debug_mode = true;       // not default, not clear what it is doing
+		params. print_progress = true;   // also default
+		params. print_special = false;   // also default
+		params. print_timestamps = true; // also default
+		params. token_timestamps = true; // also default, necessary if we want to time tokens
+		params. single_segment = true;  // force single segment output
+		params. split_on_word = true;    // not default, not clear what it is doing
+		params. debug_mode = true;       // not default, not clear what it is doing
 		//params.detect_language = true;  // default false, if true - only detecting the language and not transcribing
 
 		if (whisper_is_multilingual (my whisperContext.get ())) {
 			if (my d_languageName && ! str32str (my d_languageName.get(), U"Autodetect")) {
-				params.language = whisper_lang_str (whisper_lang_id (Melder_peek32to8 (my d_languageName.get())));
+				autostring32 name = Melder_dup (my d_languageName.get());
+				name [0] = Melder_toLowerCase (name [0]);   // e.g. "Dutch" -> "dutch"
+				params. language = whisper_lang_str (whisper_lang_id (Melder_peek32to8 (name.get())));
 			} else {
-				params.language = "auto";
+				params. language = "auto";
 			}
 		}
 
