@@ -36,11 +36,8 @@ void Melder_init () {
 	Melder_alloc_init ();
 	Melder_audiofiles_init ();
 	#ifdef macintosh
-		SInt32 sys1, sys2, sys3;
-		Gestalt ('sys1', & sys1);
-		Gestalt ('sys2', & sys2);
-		Gestalt ('sys3', & sys3);
-		Melder_systemVersion = sys1 * 10000 + sys2 * 100 + sys3;
+		NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+		Melder_systemVersion = version. majorVersion * 10000 + version. minorVersion * 100 + version. patchVersion;
 	#endif
 	#ifdef linux
 		const char *gdkBackend = getenv ("GDK_BACKEND");   // this setting rules all the others; GDK typically supports wayland, x11, and broadway
