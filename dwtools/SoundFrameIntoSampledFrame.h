@@ -49,9 +49,9 @@ Thing_define (SoundFrameIntoSampledFrame, SampledFrameIntoSampledFrame) {
 	constSound inputSound;
 	double physicalAnalysisWidth; 			// depends on the effectiveAnalysiswidth and the window window shape
 	integer soundFrameSize; 				// determined by the physicalAnalysisWidth and the samplingFrequency of the Sound
-	autoSound frameAsSound;
+	autoSound frameAsSound;					// the soundFrame represented as a Sound object
 	double soundFrameExtremum;				// the largest amplitude in the inputSound frame either positive or negative
-	autoVEC windowFunction;					// the actual window used of size soundFrameSize
+	autoVEC windowFunction;					// the actual window used (size soundFrameSize)
 	VEC soundFrame;
 	kSound_windowShape windowShape;			// Type: Rectangular, triangular, hamming, etc..
 	bool subtractFrameMean = true;			// if true, the frame mean will be subtracted before the windowing operation

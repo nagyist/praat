@@ -20,73 +20,90 @@
 
 Thing_implement (SoundFrames, Thing, 0);
 
-void structSoundFrames :: init (constSound input, double effectiveAnalysisWidth, double timeStep, 
-	kSound_windowShape windowShape, bool subtractFrameMean)
+void structSoundFrames :: initForToSampled (constSound input, double effectiveAnalysisWidth, double timeStep,
+	kSound_windowShape windowShape, bool subtractChannelMean)
 {
 	our inputSound = input;
 	our physicalAnalysisWidth = getPhysicalAnalysisWidth (effectiveAnalysisWidth, windowShape);
 	if (timeStep == 0.0) {
 		// calculate output_dt
 	}
-	our dt = timeStep;
-	Sampled_shortTermAnalysis (inputSound, physicalAnalysisWidth, dt, & our numberOfFrames, & our t1);
-	initCommon (windowShape, subtractFrameMean);
+	output -> dx = timeStep;
+	Sampled_shortTermAnalysis (inputSound, physicalAnalysisWidth, output -> dx, & output -> nx, & output -> x1);
+	initCommon (windowShape, subtractChannelMean);
 }
 	
-void structSoundFrames :: initWithSampled (constSound input, constSampled output, double effectiveAnalysisWidth,
-	kSound_windowShape windowShape, bool subtractFrameMean)
+void structSoundFrames :: initForIntoSampled (constSound input, mutableSampled output, double effectiveAnalysisWidth,
+	kSound_windowShape windowShape, bool subtractChannelMean)
 {
-	Melder_require (input -> xmin == output -> xmin && input -> xmax == output -> xmax,
-		U"The domains of Sound ", input, U" and Sampled ", output , U" should be equal.");
+	Melder_assert (input -> xmin == output -> xmin && input -> xmax == output -> xmax);
 	our inputSound = input;
-	our t1 = output -> x1;
-	our numberOfFrames = output -> nx;
-	our dt = output -> dx;
+	our output = output;
 	our physicalAnalysisWidth = getPhysicalAnalysisWidth (effectiveAnalysisWidth, windowShape);	
-	initCommon (windowShape, subtractFrameMean);
+	initCommon (windowShape, subtractChannelMean);
 }
 
-void structSoundFrames :: initCommon (kSound_windowShape windowShape, bool subtractFrameMean)
+void structSoundFrames :: initCommon (kSound_windowShape windowShape, bool subtractChannelMean)
 {
 	our windowShape = windowShape;
-	our subtractFrameMean = subtractFrameMean;
+	our subtractChannelMean = subtractChannelMean;
 	soundFrameSize = getSoundFrameSize (physicalAnalysisWidth, inputSound -> dx);
 	windowFunction = raw_VEC (soundFrameSize);   // TODO: move out of thread repetition
+	soundFrame = raw_VEC (soundFrameSize);
 	windowShape_into_VEC (windowShape, windowFunction.get());
-	frameAsSound = Sound_create (1_integer, 0.0, soundFrameSize * inputSound -> dx, soundFrameSize,
+	frameAsSound = Sound_create (inputSound -> ny, 0.0, soundFrameSize * inputSound -> dx, soundFrameSize,
 		inputSound -> dx, 0.5 * inputSound -> dx);
-	soundFrame = frameAsSound -> z.row (1);
 	Melder_assert (soundFrame.size == soundFrameSize);
 }
 
-VEC structSoundFrames :: getFrame (integer iframe) {
-	const double midTime = t1 + (iframe - 1) * dt;
-	integer soundFrameBegin = Sampled_xToNearestIndex (inputSound, midTime - 0.5 * physicalAnalysisWidth);   // approximation
-	for (integer isample = 1; isample <= soundFrame.size; isample ++, soundFrameBegin ++) {
-		double sample = 0.0;
-		if (soundFrameBegin > 0 && soundFrameBegin <= inputSound -> nx) {
-			for (integer ichannel = 1; ichannel <= inputSound -> ny; ichannel ++)
-				sample += inputSound -> z [ichannel] [soundFrameBegin];
-			sample /= inputSound -> ny;
-		}
-		soundFrame [isample] = sample;
+Sound structSoundFrames :: getFrame (integer iframe) {
+	const double midTime = Sampled_indexToX (output, iframe);
+	integer startSample = Sampled_xToNearestIndex (inputSound, midTime - 0.5 * physicalAnalysisWidth); // approximation
+	const integer numberOfChannels = inputSound -> ny;
+	for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
+		VEC soundChannel = inputSound -> z.row (ichannel), frameChannel = frameAsSound -> z.row (ichannel);
+		integer currentSample = startSample;
+		for (integer i = 1; i <= soundFrame.size; i ++, currentSample ++)
+			frameChannel [i] = (( currentSample > 0 && currentSample <= inputSound -> nx) ? soundChannel [currentSample] : 0.0 );
+
+		if (subtractChannelMean)
+			centre_VEC_inout (frameChannel, nullptr);
+
+		frameChannel  *=  windowFunction.get();
 	}
-	if (subtractFrameMean)
-		centre_VEC_inout (soundFrame, nullptr);
-	soundFrameExtremum = NUMextremum_u (soundFrame);
-	soundFrame  *=  windowFunction.get();
-	return soundFrame;
+
+	return frameAsSound.get();
 }
 
-autoSoundFrames SoundFrames_createWithSampled (constSound input, constSampled output, double effectiveAnalysisWidth,
+VEC structSoundFrames :: getMonoFrame (integer iframe) {
+	getFrame (iframe);
+	for (integer i = 1; i <= soundFrameSize; i ++)
+		soundFrame [i] = Sampled_getValueAtSample (frameAsSound.get(), i, 0, 0); // average channels
+	return soundFrame.get();
+}
+
+autoSoundFrames SoundFrames_createForIntoSampled (constSound input, mutableSampled output, double effectiveAnalysisWidth,
 	kSound_windowShape windowShape, bool subtractFrameMean)
 {
 	try {
 		autoSoundFrames me = Thing_new (SoundFrames);
-		my initWithSampled (input, output, effectiveAnalysisWidth, windowShape, subtractFrameMean);
+		my initForIntoSampled (input, output, effectiveAnalysisWidth, windowShape, subtractFrameMean);
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"SoundFrames (with Sampled) could not be created.");
+	}
+}
+
+autoSoundFrames SoundFrames_create (constSound input, double effectiveAnalysisWidth,
+	double timeStep, kSound_windowShape windowShape,
+	bool subtractFrameChannelMean)
+{
+	try {
+		autoSoundFrames me = Thing_new (SoundFrames);
+		my initForToSampled (input, effectiveAnalysisWidth, timeStep, windowShape, subtractFrameChannelMean);
+		return me;
+	} catch (MelderError) {
+		Melder_throw (U"SoundFrames could not be created.");
 	}
 }
 

@@ -24,8 +24,7 @@
 Thing_define (PowerCepstrumWorkspace, Thing) {
 
 	/*
-		To do some of the calculations efficiently we use a Workspace to maintain state.
-		The following data will never be saved or copied when a PowerCepstrum is saved.
+		To do some of the calculations efficiently we use a Workspace that maintains state.
 	*/
 	constPowerCepstrum powerCepstrum;
 	integer numberOfPoints = 0;
@@ -74,7 +73,6 @@ Thing_define (PowerCepstrumWorkspace, Thing) {
 	void getRhamonicsPower (double qmin, double qmax, double f0fractionalWidth);
 			
 	double getRNR (double qmin, double qmax, double f0fractionalWidth);
-	
 
 };
 

@@ -1660,7 +1660,7 @@ so there should never be a reason to continue to work with older versions.
 Why no automatic update checking?
 =================================
 Many apps automatically check for updates when you start them up.
-This means that the owners of such an app are capable of recording which users use their app when,
+This means that the owners of such an app are capable of recording which users use their app,
 which is information that can potentially harm your privacy, for instance when a government
 or legal investigation demands that the app owners provide them with access to such information.
 The Praat team wants to stay far away from the possibility of such situations occurring,

@@ -869,11 +869,12 @@ FORM (NEW__PowerCepstrogram_to_Table_CPPvalues, U"PowerCepstrogram: To Table (CP
 	OK
 DO
 	CONVERT_EACH_TO_ONE (PowerCepstrogram)
-	autoTable result = PowerCepstrogram_to_Table_CPPvalues (me, fromPitch, toPitch, tolerance, 
+	autoTable result = PowerCepstrogram_to_Table_CPPvalues (me, fromPitch, toPitch, tolerance,
 		peakInterpolationType, fromQuefrency_trendLine, toQuefrency_trendLine, lineType, fitMethod
 	);
 	CONVERT_EACH_TO_ONE_END (my name.get(), U"_cpp");
 }
+
 FORM (CONVERT_EACH_TO_ONE__PowerCepstrogram_to_Table_hillenbrand, U"PowerCepstrogram: To Table (hillenbrand)", U"PowerCepstrogram: To Table (peak prominences)...") {
 	REAL (fromPitch, U"left Peak search pitch range (Hz)", U"60.0")
 	REAL (toPitch, U"right Peak search pitch range (Hz)", U"330.0")

@@ -21,7 +21,6 @@
 //#include "melder.h"
 #include "NUMFourier.h"
 #include "Sound_extensions.h"
-//#include "SampledFrameIntoSampledFrame.h"
 #include "Spectrum.h"
 
 inline integer getSoundFrameSize_odd (double approximatePhysicalAnalysisWidth, double samplingPeriod) {
@@ -37,34 +36,25 @@ inline integer getSoundFrameSize (double physicalAnalysisWidth, double samplingP
 }
 
 inline double getPhysicalAnalysisWidth (double effectiveAnalysisWidth, kSound_windowShape windowShape) {
-	const double physicalAnalysisWidth = ( windowShape == kSound_windowShape::RECTANGULAR ||
+	const double physicalAnalysisWidth = (
+		windowShape == kSound_windowShape::RECTANGULAR ||
 		windowShape == kSound_windowShape::TRIANGULAR || windowShape == kSound_windowShape::HAMMING ||
-		windowShape == kSound_windowShape::HANNING ? effectiveAnalysisWidth : 2.0 * effectiveAnalysisWidth )
-	;
+		windowShape == kSound_windowShape::HANNING ? effectiveAnalysisWidth : 2.0 * effectiveAnalysisWidth
+	);
 	return physicalAnalysisWidth;
 }
 
 Thing_define (SoundFrames, Thing) {
 
 	constSound inputSound;
-	double t1, dt;
-	integer numberOfFrames;
+	mutableSampled output;
 	double physicalAnalysisWidth;			// depends on the effectiveAnalysiswidth and the window window shape
 	integer soundFrameSize; 				// determined by the physicalAnalysisWidth and the samplingFrequency of the Sound
-	autoSound frameAsSound;					// Always a one-channel Sound, default channel 1
-	double soundFrameExtremum;				// the largest amplitude in the inputSound frame either positive or negative
+	autoSound frameAsSound;					// the (possibly multichannel) frame as a Sound
 	autoVEC windowFunction;					// the actual window used of size soundFrameSize
-	VEC soundFrame;							// row [1] of the frameAsSound
+	autoVEC soundFrame;						// convenience: average of the channels
 	kSound_windowShape windowShape;			// Type: Rectangular, triangular, hamming, etc..
-	bool subtractFrameMean = true;			// if true, the frame mean will be subtracted before windowing
-	#if 0
-	bool wantSpectrum = false;				// the spectrum of the frameAsSound;
-	autoSpectrum spectrum;
-	integer fftInterpolationFactor = 1;		// 0 = DFT, 1 = FFT, 2, 4, 8 FFT with extra zero's
-	integer numberOfFourierSamples;
-	autoVEC fourierSamples;					// size = numberOfFourierSamples
-	autoNUMFourierTable fourierTable;		// of dimension numberOfFourierSamples;
-	#endif
+	bool subtractChannelMean = true;		// if true, the frame mean of each channel will be subtracted before windowing
 
 private:
 	
@@ -72,26 +62,85 @@ private:
 	
 public:
 	
-	void init (constSound input, double effectiveAnalysisWidth, double timeStep,
-		kSound_windowShape windowShape, bool subtractFrameMean);
+	/*
+		Calculate the output sampling from the input parameters,
+		this is the default case
+	*/
+	void initForToSampled (constSound input, double effectiveAnalysisWidth, double timeStep,
+		kSound_windowShape windowShape, bool subtractChannelMean);
 	
 	/*
-		Initialise the object and use the sampling (x1, dx, nx) of the Sampled.
+		In special cases we need the sampling (x1, dx, nx) of the output Sampled:
+		like for the FormantPath.
 	*/
-	void initWithSampled (constSound input, constSampled output, double effectiveAnalysisWidth,
-		kSound_windowShape windowShape, bool subtractFrameMean);
+	void initForIntoSampled (constSound input, mutableSampled output, double effectiveAnalysisWidth,
+		kSound_windowShape windowShape, bool subtractChannelMean);
 	
-	VEC getFrame (integer iframe);
-
-	void soundFrameToForwardFourierTransform ();
-
-	void soundFrameIntoSpectrum ();
+	Sound getFrame (integer iframe);
+	
+	VEC getMonoFrame (integer iframe);
 };
 
-autoSoundFrames SoundFrames_createWithSampled (constSound input, constSampled output, double effectiveAnalysisWidth,
-	kSound_windowShape windowShape, bool subtractFrameMean);
+autoSoundFrames SoundFrames_createForIntoSampled (constSound input, mutableSampled output, double effectiveAnalysisWidth,
+	kSound_windowShape windowShape, bool subtractChannelMean);
 
-autoSoundFrames SoundFrames_create (constSound input, double effectiveAnalysisWidth, double timeStep,
-	kSound_windowShape windowShape, bool subtractFrameMean);
+autoSoundFrames SoundFrames_createForToSampled (constSound input, double effectiveAnalysisWidth, double timeStep,
+	kSound_windowShape windowShape, bool subtractChannelMean);
+
+#if 0
+Thing_define (SoundFrameIntoSpectrum, SoundFrames) {
+	autoSpectrum spectrum;
+	integer fftInterpolationFactor = 1;		// 0 = DFT, 1 = FFT, 2, 4, 8 FFT with extra zero's
+	integer numberOfFourierSamples;
+	autoVEC fourierSamples;					// size = numberOfFourierSamples
+	autoVEC fourierSamples_channel;
+	autoVEC power_channelAveraged;
+	autoNUMFourierTable fourierTable;		// of dimension numberOfFourierSamples;
+	
+	void init (constSound input, double effectiveAnalysisWidth, double timeStep,
+		kSound_windowShape windowShape, bool subtractChannelMean)
+	{
+		SoundFrameIntoSpectrum_Parent :: init (input, effectiveAnalysisWidth, timeStep, windowShape,  subtractChannelMean);
+		init_spectralPart ();
+	}
+	
+	Spectrum getSpectrum () {
+		
+	}
+	
+private:
+	
+	void init_spectralPart () {
+		our numberOfFourierSamples = our frameAsSound -> nx;
+		if (our fftInterpolationFactor > 0) {
+			our numberOfFourierSamples = Melder_iroundUpToPowerOfTwo (numberOfFourierSamples);
+			for (integer imultiply = fftInterpolationFactor; imultiply > 1; imultiply --)
+				our numberOfFourierSamples *= 2;
+		}
+		our fourierSamples = raw_VEC (numberOfFourierSamples);
+		our fourierSamples_channel = raw_VEC (numberOfFourierSamples);
+		our power_channelAveraged = raw_VEC (numberOfFourierSamples);
+		const integer numberOfFrequencies = numberOfFourierSamples / 2 + 1;
+		our fourierTable = NUMFourierTable_create (our numberOfFourierSamples);
+		our spectrum = Spectrum_create (0.5 / our frameAsSound -> dx, numberOfFrequencies);
+		our spectrum -> dx = 1.0 / (our frameAsSound -> dx * our numberOfFourierSamples);
+	}
+	
+	void soundFrameToPower_channelAveraged () {
+		const integer numberOfChannels = our frameAsSound -> ny;
+		power_channelAveraged.get()  <<=  0.0;
+		for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
+			fourierSamples.part (1, soundFrameSize)  <<=  frameAsSound -> z.row (ichannel);
+			fourierSamples.part (soundFrameSize + 1, numberOfFourierSamples)  <<=  0.0;
+			NUMfft_forward (fourierTable.get(), fourierSamples.get());
+			for (integer i = 1; i <= numberOfFourierSamples; i ++)
+				power_channelAveraged [i] += fourierSamples [i] * fourierSamples [i];
+		}
+		if (numberOfChannels > 1)
+			power_channelAveraged.get()  /=  numberOfChannels;
+	}
+
+};
+#endif /* 0 */
 
 #endif /* _SoundFrames_h_ */

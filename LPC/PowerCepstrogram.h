@@ -46,39 +46,6 @@ Thing_define (PowerCepstrogram, Matrix) {
 
 */
 
-Thing_define (PowerCepstrogramFrameIntoMatrixFrame, SampledFrameIntoSampledFrame) {
-	
-	constPowerCepstrogram inputPowerCepstrogram;
-	mutableMatrix outputMatrix;
-	autoPowerCepstrum powerCepstrum; // each column of the inputPowerCepstrogram
-	autoPowerCepstrumWorkspace workspace;
-	double qminFit, qmaxFit;
-	double qminPeakSearch, qmaxPeakSearch;
-	kCepstrum_trendType trendLineType;
-	kCepstrum_trendFit fitMethod;
-	kVector_peakInterpolation peakInterpolationType;
-	bool trendSubtracted = false;
-	bool wantSlopeAndIntercept, wantTrendSubtracted, wantPeakAndPosition;
-
-	void initBasicPowerCepstrogramFrameIntoMatrixFrame (constPowerCepstrogram inputPowerCepstrogram, mutableMatrix outputMatrix,
-		double qminFit, double qmaxFit, kCepstrum_trendType trendLineType, kCepstrum_trendFit fitMethod);
-	
-	void initBasicPeakSearch (double qminPeakSearch, double qmaxPeakSearch, kVector_peakInterpolation peakInterpolationType);
-	
-	void copyBasic (constSampledFrameIntoSampledFrame other)
-		override;
-	
-	void initHeap ()
-		override;
-	
-	void getInputFrame (integer iframe)
-			override;
-	bool inputFrameIntoOutputFrame (integer iframe)
-			override;
-	void saveOutputFrame (integer iframe)
-		override;
-};
-
 autoPowerCepstrogram PowerCepstrogram_create (double tmin, double tmax, integer nt, double dt, double t1,
 	double qmin, double qmax, integer nq, double dq, double q1);
 

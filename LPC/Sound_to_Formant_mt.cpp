@@ -113,7 +113,7 @@ void Sound_into_Formant_burg (constSound me, mutableLPC intermediateLPC, mutable
 	const double samplingPeriod = intermediateLPC -> samplingPeriod;
 
 	MelderThread_PARALLELIZE (outputFormant -> nx, thresholdNumberOfFramesPerThread)
-		autoSoundFrames soundFrames = SoundFrames_createWithSampled (me, intermediateLPC, effectiveAnalysisWidth,
+		autoSoundFrames soundFrames = SoundFrames_createForIntoSampled (me, intermediateLPC, effectiveAnalysisWidth,
 				kSound_windowShape::GAUSSIAN_2, true);
 		integer info;
 		autoVEC aa = raw_VEC (order);
@@ -124,7 +124,7 @@ void Sound_into_Formant_burg (constSound me, mutableLPC intermediateLPC, mutable
 		autoRoots roots = Roots_create (order);
 	MelderThread_FOR (iframe) {
 		const LPC_Frame lpcFrame = & intermediateLPC -> d_frames [iframe];
-		VEC soundFrame = soundFrames -> getFrame (iframe);
+		VEC soundFrame = soundFrames -> getMonoFrame (iframe);
 		soundFrameIntoLPCFrame_burg (soundFrame, lpcFrame, b1.get(), b2.get(), aa.get(), info);
 		Formant_Frame formantFrame = & outputFormant -> frames [iframe];
 		LPC_Frame_into_Formant_Frame (lpcFrame, formantFrame, samplingPeriod,
@@ -160,7 +160,7 @@ void Sound_and_LPC_into_Formant (constSound inputSound, constLPC inputLPC, mutab
 	const integer thresholdNumberOfFramesPerThread = 40;
 	const double samplingPeriod = inputLPC -> samplingPeriod;
 	MelderThread_PARALLELIZE (outputFormant -> nx, thresholdNumberOfFramesPerThread)
-		autoSoundFrames soundFrames = SoundFrames_createWithSampled (inputSound, intermediateLPC, effectiveAnalysisWidth,
+		autoSoundFrames soundFrames = SoundFrames_createForSampled (inputSound, intermediateLPC, effectiveAnalysisWidth,
 				kSound_windowShape::GAUSSIAN_2, true, false, 0_integer);
 		integer info;
 		autoRobustLPCWorkspace ws = RobustLPCWorkspace_create (inputLPC, inputSound, intermediateLPC,
