@@ -112,7 +112,7 @@
 /*
 	For MacOS, this is set in Melder_init.
 */
-inline int32 Melder_systemVersion;
+inline integer Melder_systemVersion;
 
 /********** ENFORCE INTERACTIVE BEHAVIOUR **********/
 

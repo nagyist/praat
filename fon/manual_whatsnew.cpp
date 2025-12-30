@@ -29,6 +29,10 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.51# (30 December 2025)
+• Windows: switch back to the faster version (version 6.4.50 was deliberately slower,
+  so as to support Windows 7 and 8.1 for the last time).
+
 ##6.4.50# (29 December 2025)
 • A bit of speech recognition via Whisper.cpp (adapted to Praat by Anastasia Shchupak),
   such as ##Transcribe interval# in the TextGrid window. This works after you install
