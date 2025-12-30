@@ -1,5 +1,5 @@
 # build system for praat
-# David Weenink 3 January 2025
+# David Weenink 27 December 2025
 
 project(
   'praat',
@@ -39,8 +39,6 @@ else
 	message ('Unknown os_name ================ ', os_name)
 endif
 
-
-
 dwsys_inc = include_directories ('dwsys')
 dwtools_inc = include_directories ('dwtools')
 EEG_inc = include_directories ('EEG')
@@ -63,6 +61,7 @@ num_inc = include_directories ('external/num')
 opusfile_inc = include_directories ('external/opusfile')
 portaudio_inc = include_directories ('external/portaudio')
 vorbis_inc = include_directories ('external/vorbis')
+whisper_inc = include_directories ('external/whispercpp')
 
 threads_dep = dependency('threads')
 
@@ -72,7 +71,7 @@ add_project_arguments (compiler_arguments_c, language: 'c')
 add_project_arguments (compiler_arguments_cpp, language: 'cpp')
 
 praat_dirs = ['artsynth', 'dwsys', 'dwtools', 'EEG', 'FFNet', 'fon', 'foned', 'gram', 'kar', 'LPC', 'melder', 'sensors', 'stat', 'sys']
-praat_external_dirs = ['clapack', 'espeak', 'flac', 'gsl', 'glpk', 'lame', 'num', 'mp3', 'opusfile', 'portaudio', 'vorbis']
+praat_external_dirs = ['clapack', 'espeak', 'flac', 'gsl', 'glpk', 'lame', 'num', 'mp3', 'opusfile', 'portaudio', 'vorbis', 'whispercpp']
 
 foreach dir : praat_dirs
 	subdir (dir)
@@ -82,6 +81,6 @@ foreach dir : praat_external_dirs
 endforeach
 
 praat_libs_dep = [libartsynth_dep, libdwsys_dep, libdwtools_dep, libEEG_dep, libFFNet_dep, libfon_dep, libfoned_dep, libgram_dep, libkar_dep, libLPC_dep, libmelder_dep, libsensors_dep, libstat_dep, libsys_dep]
-praat_external_libs_dep = [libclapack_dep, libespeak_dep, libflac_dep, libgsl_dep, libglpk_dep, liblame_dep, libmp3_dep, libnum_dep, libopusfile_dep, libportaudio_dep, libvorbis_dep]
+praat_external_libs_dep = [libclapack_dep, libespeak_dep, libflac_dep, libgsl_dep, libglpk_dep, liblame_dep, libmp3_dep, libnum_dep, libopusfile_dep, libportaudio_dep, libvorbis_dep, libwhisper_dep]
 
 subdir ('main')
