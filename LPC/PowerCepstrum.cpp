@@ -502,7 +502,7 @@ void PowerCepstrum_getMaximumAndQuefrency_pitch (PowerCepstrum me, double pitchF
 	kVector_peakInterpolation peakInterpolationType, double& peakdB, double& quefrency)
 {
 	const double qminPeakSearch = 1.0 / pitchCeiling;
-	const double qmaxPeakSearch = 1.0 / pitchFloor;
+		const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 	
 	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me, qminPeakSearch, qmaxPeakSearch, kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
 	workspace -> initPeakSearchPart (qminPeakSearch, qmaxPeakSearch, peakInterpolationType);
@@ -514,7 +514,7 @@ void PowerCepstrum_getMaximumAndQuefrency_pitch (PowerCepstrum me, double pitchF
 autoTable PowerCepstrum_tabulateRhamonics (PowerCepstrum me, double pitchFloor, double pitchCeiling, kVector_peakInterpolation peakInterpolationType) {
 	try {
 		const double qminPeakSearch = 1.0 / pitchCeiling;
-		const double qmaxPeakSearch = 1.0 / pitchFloor;
+		const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 		autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me, qminPeakSearch, qmaxPeakSearch,
 			kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
 
@@ -536,8 +536,8 @@ autoTable PowerCepstrum_tabulateRhamonics (PowerCepstrum me, double pitchFloor, 
 
 static autoMAT PowerCepstrum_getRhamonicsPower (PowerCepstrum me, double pitchFloor, double pitchCeiling, double f0fractionalWidth) {
 	try {
-		const double qminPeakSearch = 1.0 / pitchCeiling;
-		const double qmaxPeakSearch = 1.0 / pitchFloor;
+		const double qminPeakSearch = 1.0 /pitchCeiling;
+		const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 		autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me, qminPeakSearch, qmaxPeakSearch,
 			kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
 		workspace -> initPeakSearchPart (qminPeakSearch, qmaxPeakSearch, kVector_peakInterpolation :: CUBIC);
@@ -550,8 +550,8 @@ static autoMAT PowerCepstrum_getRhamonicsPower (PowerCepstrum me, double pitchFl
 }
 
 double PowerCepstrum_getRNR (PowerCepstrum me, double pitchFloor, double pitchCeiling, double f0fractionalWidth) {
-	const double qminPeakSearch = 1.0 / pitchCeiling;
-	const double qmaxPeakSearch = 1.0 / pitchFloor;
+	const double qminPeakSearch = 1.0 /pitchCeiling;
+	const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me,qminPeakSearch, qmaxPeakSearch, 
 		kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
 	workspace -> initPeakSearchPart (qminPeakSearch, qmaxPeakSearch, kVector_peakInterpolation :: CUBIC);
@@ -562,7 +562,8 @@ double PowerCepstrum_getRNR (PowerCepstrum me, double pitchFloor, double pitchCe
 double PowerCepstrum_getPeakProminence_hillenbrand (PowerCepstrum me, double pitchFloor, double pitchCeiling, double& qpeak) {
 	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me, 0.001, my xmax, kCepstrum_trendType::LINEAR,
 		kCepstrum_trendFit::LEAST_SQUARES);
-	const double qmaxPeakSearch = 1.0 / pitchFloor, qminPeakSearch = 1.0 /pitchCeiling;
+	const double qminPeakSearch = 1.0 /pitchCeiling;
+	const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 	workspace -> initPeakSearchPart (qminPeakSearch,qmaxPeakSearch, kVector_peakInterpolation :: NONE);
 	workspace -> getCPP ();
 	qpeak = workspace -> peakQuefrency;
@@ -574,7 +575,8 @@ double PowerCepstrum_getPeakProminence (PowerCepstrum me, double pitchFloor, dou
 	kCepstrum_trendType trendLineType, kCepstrum_trendFit fitMethod, double& qpeak)
 {
 	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me,qstartFit, qendFit, trendLineType, fitMethod);
-	const double qmaxPeakSearch = 1.0 / pitchFloor, qminPeakSearch = 1.0 /pitchCeiling;
+	const double qminPeakSearch = 1.0 /pitchCeiling;
+	const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 	workspace -> initPeakSearchPart (qminPeakSearch,qmaxPeakSearch, peakInterpolationType);
 	workspace -> getCPP ();
 	qpeak = workspace -> peakQuefrency;
