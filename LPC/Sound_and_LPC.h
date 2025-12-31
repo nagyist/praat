@@ -38,23 +38,6 @@
 	3. The precision of the autocorrelation and covariance method have been improved a little by using some `longdouble` accumulators.
 */
 
-Thing_define (SoundFrameIntoLPCFrame, SoundFrameIntoSampledFrame) {
-	
-	mutableLPC outputLPC;
-	integer order;
-	integer currentOrder;  // TODO djmw 20250825 is this one necessary 
-	integer orderp1; 	// convenience order+1
-	autoVEC a;			// common work vector of dimension orderp1
-
-	virtual void initBasicSoundFrameIntoLPCFrame (constSound input, mutableLPC outLPC, double effectiveAnalysisWidth, kSound_windowShape windowShape);
-	
-	void copyBasic (constSampledFrameIntoSampledFrame other)
-		override;
-
-	void initHeap ()
-		override;
-};
-
 /*********************** Autocorrelation method *************************************************************/
 
 /*
@@ -100,27 +83,6 @@ autoLPC Sound_to_LPC_marple (constSound me, int predictionOrder, double effectiv
 	double preEmphasisFrequency, double tol1, double tol2);
 
 /*********************** PLP (Hermansky) method ******************************************************/
-
-Thing_define (SoundFrameIntoLPCFramePLP, SoundFrameIntoLPCFrame) {
-
-	integer numberOfCriticalBandFilters;
-	autoVEC equalLoudnessPreemphasis;	
-	
-	void initBasicSoundFrameIntoLPCFramePLP (constSound inputSound, mutableLPC outputLPC, double effectiveAnalysisWidth,
-		kSound_windowShape windowShape);
-
-	void copyBasic (constSampledFrameIntoSampledFrame other)
-		override;
-
-	void initHeap ()
-		override;
-
-	bool inputFrameIntoOutputFrame (integer iframe)
-		override;
-		
-	void getFilterCharacteristics ();
-
-};
 
 /*********************** Robust method (LPC & Sound) *******************************************************/
 

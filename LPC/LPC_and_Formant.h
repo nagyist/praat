@@ -21,7 +21,6 @@
 #include "LPC.h"
 #include "Roots.h"
 #include "Formant.h"
-#include "SampledFrameIntoSampledFrame.h"
 
 inline integer numberOfFormantsFromNumberOfCoefficients2 (integer maxnCoefficients, double margin) {
 	return ( margin == 0.0 ? maxnCoefficients : (maxnCoefficients + 1) / 2 );
