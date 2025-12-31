@@ -21,7 +21,6 @@
 #include "SoundFrames.h"
 #include "Sound_and_LPC.h"
 #include "LPC_and_Formant.h"
-#include "SampledAndSampled.h"
 
 static void Sound_to_Formant_common (constSound inputSound, double& dt, double numberOfFormants_real, double maximumFrequency,
 	double effectiveAnalysisWidth, double preEmphasisFrequency,	double safetyMargin, 
@@ -67,8 +66,8 @@ static autoFormant createFormant_common (constSound me, double dt, integer numbe
 void Sound_into_Formant_burg (constSound me, mutableLPC intermediateLPC, mutableFormant outputFormant, 
 	double effectiveAnalysisWidth, double safetyMargin)
 {
-	SampledAndSampled_requireEqualDomains (me, intermediateLPC);
-	SampledAndSampled_assertEqualDomainsAndSampling (intermediateLPC, outputFormant);
+	Sampleds_requireEqualDomains (me, intermediateLPC);
+	Sampleds_assertEqualDomainsAndSampling (intermediateLPC, outputFormant);
 	const integer order = intermediateLPC -> maxnCoefficients;
 	const integer thresholdNumberOfFramesPerThread = 40;
 	const double samplingPeriod = intermediateLPC -> samplingPeriod;

@@ -108,7 +108,6 @@
 #include "Polygon_extensions.h"
 #include "Polynomial_to_Spectrum.h"
 #include "Roots_to_Spectrum.h"
-#include "SampledIntoSampled.h"
 #include "Sound_and_Spectrum_dft.h"
 #include "Sound_extensions.h"
 #include "Sound_and_TextGrid_extensions.h"

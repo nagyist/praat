@@ -16,7 +16,6 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SampledAndSampled.h"
 #include "SoundFrames.h"
 #include "Sound_and_LPC.h"
 #include "Sound_extensions.h"
@@ -730,7 +729,7 @@ void LPC_and_Sound_into_LPC_robust (constLPC inputLPC, constSound inputSound, mu
 	double effectiveAnalysisWidth, double k_stdev, integer itermax, double tol, bool wantlocation)
 {
 	Sound_and_LPC_require_equalDomainsAndSamplingPeriods (inputSound, outputLPC);
-	SampledAndSampled_requireEqualDomainsAndSampling (inputLPC, outputLPC);
+	Sampleds_requireEqualDomainsAndSampling (inputLPC, outputLPC);
 	const integer thresholdNumberOfFramesPerThread = 40, order = outputLPC -> maxnCoefficients;
 
 	MelderThread_PARALLEL (outputLPC -> nx, thresholdNumberOfFramesPerThread) {

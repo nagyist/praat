@@ -20,7 +20,6 @@
 #include "LPC_and_Polynomial.h"
 #include "NUM2.h"
 #include "Roots_and_Formant.h"
-#include "SampledAndSampled.h"
 
 void Formant_Frame_init (Formant_Frame me, integer numberOfFormants) {
 	if (numberOfFormants > 0)
@@ -29,7 +28,7 @@ void Formant_Frame_init (Formant_Frame me, integer numberOfFormants) {
 }
 
 void LPC_into_Formant (constLPC inputLPC, mutableFormant outputFormant, double margin) {
-	SampledAndSampled_requireEqualDomainsAndSampling (inputLPC, outputFormant);
+	Sampleds_requireEqualDomainsAndSampling (inputLPC, outputFormant);
 	const integer numberOfFrames = inputLPC -> nx, thresholdNumberOfFramesPerThread = 40;
 	autoMelderProgress progress (U"LPC into LineSpectralFrequencies...");
 	const integer order = inputLPC -> maxnCoefficients;

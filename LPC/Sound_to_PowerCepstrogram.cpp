@@ -18,7 +18,6 @@
 
 #include "NUM2.h"
 #include "Cepstrum_and_Spectrum.h"
-#include "SampledIntoSampled.h"
 #include "Sound_and_Spectrum.h"
 #include "Sound_extensions.h"
 #include "SoundFrames.h"
@@ -28,7 +27,7 @@
 static void Sound_into_PowerCepstrogram (constSound input, mutablePowerCepstrogram output, double effectiveAnalysisWidth, 
 	kSound_windowShape windowShape) 
 {
-	SampledIntoSampled_assertEqualDomains (input, output);
+	Sampleds_assertEqualDomains (input, output);
 	constexpr integer thresholdNumberOfFramesPerThread = 40;
 	const integer numberOfFrames = output -> nx;
 	//autoMelderProgress progress (U"Analyse power cepstrogram...");
