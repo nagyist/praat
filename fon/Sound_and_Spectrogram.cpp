@@ -129,71 +129,72 @@ autoSpectrogram Sound_to_Spectrogram_e (
 
 		autoMelderProgress progress (U"Sound to Spectrogram...");
 
-		MelderThread_PARALLELIZE (numberOfTimes, 15)
+		MelderThread_PARALLEL (numberOfTimes, 15) {
 			autoVEC data = zero_VEC (nsampFFT);
 			autoVEC spectrum = zero_VEC (half_nsampFFT + 1);
 			autoNUMFourierTable fftTable = NUMFourierTable_create (nsampFFT);
-		MelderThread_FOR (iframe) {
-			const double t = Sampled_indexToX (thee.get(), iframe);
-			const integer leftSample = Sampled_xToLowIndex (me, t), rightSample = leftSample + 1;
-			const integer startSample = rightSample - halfnsamp_window;
-			const integer endSample = leftSample + halfnsamp_window;
-			Melder_assert (startSample >= 1);
-			Melder_assert (endSample <= my nx);
+			MelderThread_FOR (iframe) {
+				const double t = Sampled_indexToX (thee.get(), iframe);
+				const integer leftSample = Sampled_xToLowIndex (me, t), rightSample = leftSample + 1;
+				const integer startSample = rightSample - halfnsamp_window;
+				const integer endSample = leftSample + halfnsamp_window;
+				Melder_assert (startSample >= 1);
+				Melder_assert (endSample <= my nx);
 
-			spectrum.all()  <<=  0.0;
-			/*
-				For multichannel sounds, the power spectrogram should represent the
-				average power in the channels,
-				so that the result for a stereo sound in which the
-				left channel has the same waveform as the right channel,
-				is identical to the result for the corresponding mono (= averaged) sound.
-				Averaging starts by adding up the powers of the channels.
-			*/
-			for (integer channel = 1; channel <= my ny; channel ++) {
-				for (integer j = 1, i = startSample; j <= nsamp_window; j ++)
-					data [j] = my z [channel] [i ++] * window [j];
-				for (integer j = nsamp_window + 1; j <= nsampFFT; j ++)
-					data [j] = 0.0;
+				spectrum.all()  <<=  0.0;
+				/*
+					For multichannel sounds, the power spectrogram should represent the
+					average power in the channels,
+					so that the result for a stereo sound in which the
+					left channel has the same waveform as the right channel,
+					is identical to the result for the corresponding mono (= averaged) sound.
+					Averaging starts by adding up the powers of the channels.
+				*/
+				for (integer channel = 1; channel <= my ny; channel ++) {
+					for (integer j = 1, i = startSample; j <= nsamp_window; j ++)
+						data [j] = my z [channel] [i ++] * window [j];
+					for (integer j = nsamp_window + 1; j <= nsampFFT; j ++)
+						data [j] = 0.0;
 
-				if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
-					const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
-					Melder_progress (estimatedProgress,
-						U"Sound to Spectrogram: analysed approximately ", Melder_iround (numberOfTimes * estimatedProgress),
-						U" out of ", numberOfTimes, U" frames"
-					);
+					if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
+						const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
+						Melder_progress (estimatedProgress,
+							U"Sound to Spectrogram: analysed approximately ", Melder_iround (numberOfTimes * estimatedProgress),
+							U" out of ", numberOfTimes, U" frames"
+						);
+					}
+
+					/*
+						Compute the Fast Fourier Transform of the frame.
+					*/
+					NUMfft_forward (fftTable.get(), data.get());   // data := complex spectrum
+
+					/*
+						Convert from complex to power spectrum,
+						accumulating the power spectra of the channels.
+					*/
+					spectrum [1] += data [1] * data [1];   // DC component
+					for (integer i = 2; i <= half_nsampFFT; i ++)
+						spectrum [i] += data [i + i - 2] * data [i + i - 2] + data [i + i - 1] * data [i + i - 1];
+					spectrum [half_nsampFFT + 1] += data [nsampFFT] * data [nsampFFT];   // Nyquist frequency. Correct??
 				}
+				/*
+					Power averaging ends by dividing the summed power by the number of channels,
+				*/
+				if (my ny > 1 )
+					spectrum.all()  /=  my ny;
 
 				/*
-					Compute the Fast Fourier Transform of the frame.
+					Binning.
 				*/
-				NUMfft_forward (fftTable.get(), data.get());   // data := complex spectrum
-
-				/*
-					Convert from complex to power spectrum,
-					accumulating the power spectra of the channels.
-				*/
-				spectrum [1] += data [1] * data [1];   // DC component
-				for (integer i = 2; i <= half_nsampFFT; i ++)
-					spectrum [i] += data [i + i - 2] * data [i + i - 2] + data [i + i - 1] * data [i + i - 1];
-				spectrum [half_nsampFFT + 1] += data [nsampFFT] * data [nsampFFT];   // Nyquist frequency. Correct??
+				for (integer iband = 1; iband <= numberOfFreqs; iband ++) {
+					const integer lowerSample = (iband - 1) * binWidth_samples + 1;
+					const integer higherSample = lowerSample + binWidth_samples;
+					const double power = NUMsum (spectrum.part (lowerSample, higherSample - 1));
+					thy z [iband] [iframe] = power * oneByBinWidth;
+				}
 			}
-			/*
-				Power averaging ends by dividing the summed power by the number of channels,
-			*/
-			if (my ny > 1 )
-				spectrum.all()  /=  my ny;
-
-			/*
-				Binning.
-			*/
-			for (integer iband = 1; iband <= numberOfFreqs; iband ++) {
-				const integer lowerSample = (iband - 1) * binWidth_samples + 1;
-				const integer higherSample = lowerSample + binWidth_samples;
-				const double power = NUMsum (spectrum.part (lowerSample, higherSample - 1));
-				thy z [iband] [iframe] = power * oneByBinWidth;
-			}
-		} MelderThread_ENDFOR
+		} MelderThread_ENDPARALLEL
 		return thee;
 	} catch (MelderError) {
 		Melder_throw (me, U": spectrogram analysis not performed.");

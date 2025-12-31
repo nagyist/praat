@@ -321,53 +321,54 @@ static autoFormant Sound_to_Formant_any_inplace (Sound me, double dt_in, integer
 
 	integer maximumFrameLength = nsamp_window;
 
-	MelderThread_PARALLELIZE (numberOfFrames, 3)
+	MelderThread_PARALLEL (numberOfFrames, 3) {
 		auto frameBuffer = raw_VEC (maximumFrameLength);
 		auto coefficients = raw_VEC (numberOfPoles);   // superfluous if which==2, but nobody uses that anyway
-	MelderThread_FOR (iframe) {
-		const double t = Sampled_indexToX (thee.get(), iframe);
-		const integer leftSample = Sampled_xToLowIndex (me, t);
-		const integer rightSample = leftSample + 1;
-		integer startSample = rightSample - halfnsamp_window;
-		integer endSample = leftSample + halfnsamp_window;
-		double maximumIntensity = 0.0;
-		Melder_clipLeft (1_integer, & startSample);   // this should not be more than a rounding problem
-		Melder_clipRight (& endSample, my nx);   // this should not be more than a rounding problem
-		for (integer i = startSample; i <= endSample; i ++) {
-			const double value = Sampled_getValueAtSample (me, i, Sound_LEVEL_MONO, 0);
-			if (value * value > maximumIntensity)
-				maximumIntensity = value * value;
-		}
-		thy frames [iframe]. intensity = maximumIntensity;
-		if (maximumIntensity == 0.0)
-			continue;   // Burg cannot stand all zeroes
+		MelderThread_FOR (iframe) {
+			const double t = Sampled_indexToX (thee.get(), iframe);
+			const integer leftSample = Sampled_xToLowIndex (me, t);
+			const integer rightSample = leftSample + 1;
+			integer startSample = rightSample - halfnsamp_window;
+			integer endSample = leftSample + halfnsamp_window;
+			double maximumIntensity = 0.0;
+			Melder_clipLeft (1_integer, & startSample);   // this should not be more than a rounding problem
+			Melder_clipRight (& endSample, my nx);   // this should not be more than a rounding problem
+			for (integer i = startSample; i <= endSample; i ++) {
+				const double value = Sampled_getValueAtSample (me, i, Sound_LEVEL_MONO, 0);
+				if (value * value > maximumIntensity)
+					maximumIntensity = value * value;
+			}
+			thy frames [iframe]. intensity = maximumIntensity;
+			if (maximumIntensity == 0.0)
+				continue;   // Burg cannot stand all zeroes
 
-		/* Copy a pre-emphasized window to a frame. */
-		const integer actualFrameLength = endSample - startSample + 1;   // should rarely be less than nsamp_window
-		VEC frame = frameBuffer.part (1, actualFrameLength);
-		const integer offset = startSample - 1;
-		for (integer isamp = 1; isamp <= actualFrameLength; isamp ++)
-			frame [isamp] = Sampled_getValueAtSample (me, offset + isamp, Sound_LEVEL_MONO, 0) * window [isamp];
+			/* Copy a pre-emphasized window to a frame. */
+			const integer actualFrameLength = endSample - startSample + 1;   // should rarely be less than nsamp_window
+			VEC frame = frameBuffer.part (1, actualFrameLength);
+			const integer offset = startSample - 1;
+			for (integer isamp = 1; isamp <= actualFrameLength; isamp ++)
+				frame [isamp] = Sampled_getValueAtSample (me, offset + isamp, Sound_LEVEL_MONO, 0) * window [isamp];
 
-		if (which == 1) {
-			burg (frame, coefficients.get(), & thy frames [iframe], 0.5 / my dx, safetyMargin);
-		} else if (which == 2) {
-			if (! splitLevinson (frame, numberOfPoles, & thy frames [iframe], 0.5 / my dx)) {
-				Melder_clearError ();
-				Melder_casual (U"(Sound_to_Formant:)"
-					U" Analysis results of frame ", iframe,
-					U" will be wrong."
+			if (which == 1) {
+				burg (frame, coefficients.get(), & thy frames [iframe], 0.5 / my dx, safetyMargin);
+			} else if (which == 2) {
+				if (! splitLevinson (frame, numberOfPoles, & thy frames [iframe], 0.5 / my dx)) {
+					Melder_clearError ();
+					Melder_casual (U"(Sound_to_Formant:)"
+						U" Analysis results of frame ", iframe,
+						U" will be wrong."
+					);
+				}
+			}
+			if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
+				const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
+				Melder_progress (0.1 + 0.8 * estimatedProgress,
+					U"Sound to Formant: analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
+					U" out of ", numberOfFrames, U" frames"
 				);
 			}
 		}
-		if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
-			const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
-			Melder_progress (0.1 + 0.8 * estimatedProgress,
-				U"Sound to Formant: analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
-				U" out of ", numberOfFrames, U" frames"
-			);
-		}
-	} MelderThread_ENDFOR
+	} MelderThread_ENDPARALLEL
 
 	Formant_sort (thee.get());
 	return thee;

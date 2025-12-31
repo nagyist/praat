@@ -438,7 +438,7 @@ autoPitch Sound_to_Pitch_any (Sound me,
 		if (MelderThread_TRACING)
 			Melder_casual (U"channel frame time pitch");
 
-		MelderThread_PARALLELIZE (numberOfFrames, 5)
+		MelderThread_PARALLEL (numberOfFrames, 5) {
 			autoMAT frame;
 			autoNUMFourierTable fftTable;
 			autoVEC ac;
@@ -453,27 +453,28 @@ autoPitch Sound_to_Pitch_any (Sound me,
 			double *r = & rbuffer [1 + nsamp_window];
 			autoINTVEC imax = zero_INTVEC (maxnCandidates);
 			autoVEC localMean = zero_VEC (my ny);
-		MelderThread_FOR (iframe) {
-			Pitch_Frame pitchFrame = & thy frames [iframe];
-			const double time = Sampled_indexToX (thee.get(), iframe);
-			if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
-				const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
-				Melder_progress (0.1 + 0.8 * estimatedProgress,
-					U"Sound to Pitch: analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
-					U" out of ", numberOfFrames, U" frames"
+			MelderThread_FOR (iframe) {
+				Pitch_Frame pitchFrame = & thy frames [iframe];
+				const double time = Sampled_indexToX (thee.get(), iframe);
+				if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
+					const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
+					Melder_progress (0.1 + 0.8 * estimatedProgress,
+						U"Sound to Pitch: analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
+						U" out of ", numberOfFrames, U" frames"
+					);
+				}
+				Sound_into_PitchFrame (me, pitchFrame, time,
+					pitchFloor, maxnCandidates, method, voicingThreshold, octaveCost,
+					fftTable.get(), dt_window, nsamp_window, halfnsamp_window,
+					maximumLag, nsampFFT, nsamp_period, halfnsamp_period,
+					brent_ixmax, brent_depth, globalPeak,
+					frame.get(), ac.get(), window.get(), windowR.get(),
+					r, imax.get(), localMean.get()
 				);
+				if (MelderThread_TRACING)
+					Melder_casual (MelderThread_CHANNEL, U" ", iframe, U" ", time, U" ", pitchFrame -> candidates [1]. frequency);
 			}
-			Sound_into_PitchFrame (me, pitchFrame, time,
-				pitchFloor, maxnCandidates, method, voicingThreshold, octaveCost,
-				fftTable.get(), dt_window, nsamp_window, halfnsamp_window,
-				maximumLag, nsampFFT, nsamp_period, halfnsamp_period,
-				brent_ixmax, brent_depth, globalPeak,
-				frame.get(), ac.get(), window.get(), windowR.get(),
-				r, imax.get(), localMean.get()
-			);
-			if (MelderThread_TRACING)
-				Melder_casual (MelderThread_CHANNEL, U" ", iframe, U" ", time, U" ", pitchFrame -> candidates [1]. frequency);
-		} MelderThread_ENDFOR
+		} MelderThread_ENDPARALLEL
 
 		Melder_progress (0.95, U"Sound to Pitch: path finder");
 		Pitch_pathFinder (thee.get(), silenceThreshold, voicingThreshold,

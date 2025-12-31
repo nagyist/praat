@@ -166,10 +166,11 @@ void MelderThread_run (
 
 /*
 	The above procedure can be simplified a bit by using the following four macros.
-	We surround the code by an extra pair of braces in order to allow multiple use within a function:
+	We surround the code by an extra pair of braces in order to allow multiple use within a function.
+	There will also be an extra pair of braces in your written code, so as to suggest scope correctly.
 */
 
-#define MelderThread_PARALLELIZE(numberOfElements, thresholdNumberOfElementsPerThread)  \
+#define MelderThread_PARALLEL(numberOfElements, thresholdNumberOfElementsPerThread)  \
 	{/* start of scope of `_errorFlag_` and `_threadFunction_` */  \
 		const integer _numberOfElements_ = numberOfElements;  \
 		const integer _thresholdNumberOfElementsPerThread_ = thresholdNumberOfElementsPerThread;  \
@@ -185,7 +186,7 @@ void MelderThread_run (
 						return;  \
 					Melder_thisThread_setCurrentElement (ielement);
 
-#define MelderThread_ENDFOR  \
+#define MelderThread_ENDPARALLEL  \
 				}  \
 			} catch (MelderError) {  \
 				_errorFlag_ = true;  \
@@ -213,7 +214,7 @@ void MelderThread_run (
 
 				autoMelderProgress progress (U"Sound to Pitch...");
 
-				MelderThread_PARALLELIZE (numberOfFrames, 5, false)
+				MelderThread_PARALLEL (numberOfFrames, 5, false) {
 					autoMAT frame = zero_MAT (my ny, ...);
 					autoNUMFourierTable fftTable = NUMFourierTable_create (...);
 					autoVEC ac = zero_VEC (...);
@@ -221,22 +222,24 @@ void MelderThread_run (
 					double *r = & rbuffer [...];
 					autoINTVEC imax = zero_INTVEC (maxnCandidates);
 					autoVEC localMean = zero_VEC (my ny);
-				MelderThread_FOR (iframe) {
-					Pitch_Frame pitchFrame = & thy frames [iframe];
-					Sound_into_PitchFrame (me, pitchFrame, maxnCandidates,
-						window.get(), windowR.get(),
-						frame.get(), fftTable.get(), ac.get(),
-						r, imax.get(), localMean.get()
-					);
 
-					if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
-						const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
-						Melder_progress (0.1 + 0.8 * estimatedProgress,
-							U"Sound to Pitch: analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
-							U" out of ", numberOfFrames, U" frames"
+					MelderThread_FOR (iframe) {
+						Pitch_Frame pitchFrame = & thy frames [iframe];
+						Sound_into_PitchFrame (me, pitchFrame, maxnCandidates,
+							window.get(), windowR.get(),
+							frame.get(), fftTable.get(), ac.get(),
+							r, imax.get(), localMean.get()
 						);
+
+						if (MelderThread_IS_MASTER) {   // then we can interact with the GUI
+							const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
+							Melder_progress (0.1 + 0.8 * estimatedProgress,
+								U"Sound to Pitch: analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
+								U" out of ", numberOfFrames, U" frames"
+							);
+						}
 					}
-				} MelderThread_ENDFOR
+				} MelderThread_ENDPARALLEL
 
 				Melder_progress (0.95, U"Sound to Pitch: path finder");
 				return thee;
@@ -306,13 +309,14 @@ void MelderThread_run (
 
 	This reordering is the preparation. You then make the following simple changes:
 	3. between 1abc and 2 above you insert:
-			MelderThread_PARALLELIZE (thy nx, 5, false)
+			MelderThread_PARALLEL (thy nx, 5, false) {
 	4. instead of
-			for (integer iframe = 1; iframe <= thy nx; iframe ++) {
+				for (integer iframe = 1; iframe <= thy nx; iframe ++) {
 	   you write
-			MelderThread_FOR (iframe) {
+				MelderThread_FOR (iframe) {
 	5. instead of the frame-loop-closing "}" you write
-			} MelderThread_ENDFOR
+				}
+			} MelderThread_ENDPARALLEL
 	6. you update the progress bar only in the master thread, by inserting
 			if (MelderThread_IS_MASTER) {
 	   and

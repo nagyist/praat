@@ -41,7 +41,7 @@ static void Sound_into_PowerCepstrogram (constSound input, mutablePowerCepstrogr
 	autoVEC windowFunction = raw_VEC (soundFrameSize);
 	windowShape_into_VEC (windowShape, windowFunction.get());
 
-	MelderThread_PARALLELIZE (numberOfFrames, thresholdNumberOfFramesPerThread)
+	MelderThread_PARALLEL (numberOfFrames, thresholdNumberOfFramesPerThread) {
 		bool subtractFrameMean = true;   // TODO: check
 		integer fftInterpolationFactor = 1;
 
@@ -65,99 +65,100 @@ static void Sound_into_PowerCepstrogram (constSound input, mutablePowerCepstrogr
 		autoNUMFourierTable fourierTable = NUMFourierTable_create (numberOfFourierSamples);
 		autoSpectrum spectrum = Spectrum_create (0.5 / frameAsSound -> dx, numberOfFrequencies);
 		spectrum -> dx = 1.0 / (frameAsSound -> dx * numberOfFourierSamples);
-	MelderThread_FOR (iframe) {
-		if (MelderThread_IS_MASTER && 0) {
-			const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
-			Melder_progress (0.98 * estimatedProgress,
-				U"Analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
-				U" out of ", numberOfFrames, U" frames"
-			);
-		}
-		const double midTime = Sampled_indexToX (output, iframe);
-		integer soundFrameBegin = Sampled_xToNearestIndex (input, midTime - 0.5 * physicalAnalysisWidth);   // approximation
-		integer channelBegin = soundFrameBegin;
+		MelderThread_FOR (iframe) {
+			if (MelderThread_IS_MASTER && 0) {
+				const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
+				Melder_progress (0.98 * estimatedProgress,
+					U"Analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
+					U" out of ", numberOfFrames, U" frames"
+				);
+			}
+			const double midTime = Sampled_indexToX (output, iframe);
+			integer soundFrameBegin = Sampled_xToNearestIndex (input, midTime - 0.5 * physicalAnalysisWidth);   // approximation
+			integer channelBegin = soundFrameBegin;
 
-		for (integer isample = 1; isample <= soundFrame.size; isample ++, channelBegin ++)
-			soundFrame [isample] = ( channelBegin > 0 && channelBegin <= input -> nx ? input -> z [1] [channelBegin] : 0.0 );
-		if (subtractFrameMean)
-			centre_VEC_inout (soundFrame, nullptr);
-		//const double soundFrameExtremum = NUMextremum_u (soundFrame);   // not used
-		soundFrame  *=  windowFunction.get();
-		/*
-			Step 1:
-			Take the channel unscaled power spectra and average them
-		*/
-		fourierSamples.part (1, soundFrameSize)  <<=  frameAsSound -> z.row (1);
-		fourierSamples. part (soundFrameSize + 1, fourierSamples.size)  <<=  0.0;
-		NUMfft_forward (fourierTable.get(), fourierSamples.get());
-		for (integer i = 1; i <= fourierSamples.size; i ++) // unscaled "power"
-			fourierSamples [i] *= fourierSamples [i];
-		const integer numberOfChannels = frameAsSound -> ny;
-		if (numberOfChannels > 1) {
+			for (integer isample = 1; isample <= soundFrame.size; isample ++, channelBegin ++)
+				soundFrame [isample] = ( channelBegin > 0 && channelBegin <= input -> nx ? input -> z [1] [channelBegin] : 0.0 );
+			if (subtractFrameMean)
+				centre_VEC_inout (soundFrame, nullptr);
+			//const double soundFrameExtremum = NUMextremum_u (soundFrame);   // not used
+			soundFrame  *=  windowFunction.get();
 			/*
-				Multiple channels: take the average of the power spectra
-				scaling is not necessary yet
+				Step 1:
+				Take the channel unscaled power spectra and average them
 			*/
-			for (integer ichan = 1; ichan <= numberOfChannels; ichan ++) {
-				channelBegin = soundFrameBegin;
-				for (integer isample = 1; isample <= soundFrame.size; isample ++, channelBegin ++)
-					soundFrame [isample] = ( channelBegin > 0 && channelBegin <= input -> nx ? input -> z [ichan] [channelBegin] : 0.0 );
-				soundFrame  *=  windowFunction.get();
-				fourierSamplesChannel.part (1, soundFrameSize)  <<=  frameAsSound -> z.row (ichan);
-				fourierSamples. part (soundFrameSize + 1, fourierSamples.size)  <<=  0.0;
-				NUMfft_forward (fourierTable.get(), fourierSamples.get());
-				for (integer i = 1; i <= fourierSamples.size; i ++) // to unscaled "power"
-					fourierSamples [i] *= fourierSamples [i];
-				fourierSamples.get() +=  fourierSamplesChannel.get();
+			fourierSamples.part (1, soundFrameSize)  <<=  frameAsSound -> z.row (1);
+			fourierSamples. part (soundFrameSize + 1, fourierSamples.size)  <<=  0.0;
+			NUMfft_forward (fourierTable.get(), fourierSamples.get());
+			for (integer i = 1; i <= fourierSamples.size; i ++) // unscaled "power"
+				fourierSamples [i] *= fourierSamples [i];
+			const integer numberOfChannels = frameAsSound -> ny;
+			if (numberOfChannels > 1) {
+				/*
+					Multiple channels: take the average of the power spectra
+					scaling is not necessary yet
+				*/
+				for (integer ichan = 1; ichan <= numberOfChannels; ichan ++) {
+					channelBegin = soundFrameBegin;
+					for (integer isample = 1; isample <= soundFrame.size; isample ++, channelBegin ++)
+						soundFrame [isample] = ( channelBegin > 0 && channelBegin <= input -> nx ? input -> z [ichan] [channelBegin] : 0.0 );
+					soundFrame  *=  windowFunction.get();
+					fourierSamplesChannel.part (1, soundFrameSize)  <<=  frameAsSound -> z.row (ichan);
+					fourierSamples. part (soundFrameSize + 1, fourierSamples.size)  <<=  0.0;
+					NUMfft_forward (fourierTable.get(), fourierSamples.get());
+					for (integer i = 1; i <= fourierSamples.size; i ++) // to unscaled "power"
+						fourierSamples [i] *= fourierSamples [i];
+					fourierSamples.get() +=  fourierSamplesChannel.get();
+				}
+				fourierSamples.get() /= numberOfChannels;
 			}
-			fourierSamples.get() /= numberOfChannels;
-		}
-		
-		/*
-			Step 2:
-			Scale the (average) power spectrum
-		*/
-		const VEC re = spectrum -> z.row (1);
-		const VEC im = spectrum -> z.row (2);
-		const integer numberOfFrequencies = spectrum -> nx;
-		const double scaling = output -> dx * output -> dx; // because we squared already
-		re [1] = fourierSamples [1] * scaling;
-		im [1] = 0.0;
-		for (integer i = 2; i < numberOfFrequencies; i ++) {
-			re [i] = fourierSamples [i + i - 2] * scaling;   // fourierSamples [2], [4], ...
-			im [i] = fourierSamples [i + i - 1] * scaling;   // fourierSamples [3], [5], ...
-		}
-		if ((numberOfFourierSamples & 1) != 0) {
-			if (numberOfFourierSamples > 1) {
-				re [numberOfFrequencies] = fourierSamples [numberOfFourierSamples - 1] * scaling;
-				im [numberOfFrequencies] = fourierSamples [numberOfFourierSamples] * scaling;
-			}
-		} else {
-			re [numberOfFrequencies] = fourierSamples [numberOfFourierSamples] * scaling;
-			im [numberOfFrequencies] = 0.0;
-		}
 
-		/*
-			Step 3:
-			Take log of the spectrum power values log (re + im ) because we already squared
-		*/
-		fourierSamples [1] = log ( re [1] + 1e-300);
-		for (integer i = 1; i < numberOfFrequencies / 2; i ++) {
-			fourierSamples [2 * i] = log (re [i] + im [i] + 1e-300);
-			fourierSamples [2 * i + 1] = 0.0;
+			/*
+				Step 2:
+				Scale the (average) power spectrum
+			*/
+			const VEC re = spectrum -> z.row (1);
+			const VEC im = spectrum -> z.row (2);
+			const integer numberOfFrequencies = spectrum -> nx;
+			const double scaling = output -> dx * output -> dx; // because we squared already
+			re [1] = fourierSamples [1] * scaling;
+			im [1] = 0.0;
+			for (integer i = 2; i < numberOfFrequencies; i ++) {
+				re [i] = fourierSamples [i + i - 2] * scaling;   // fourierSamples [2], [4], ...
+				im [i] = fourierSamples [i + i - 1] * scaling;   // fourierSamples [3], [5], ...
+			}
+			if ((numberOfFourierSamples & 1) != 0) {
+				if (numberOfFourierSamples > 1) {
+					re [numberOfFrequencies] = fourierSamples [numberOfFourierSamples - 1] * scaling;
+					im [numberOfFrequencies] = fourierSamples [numberOfFourierSamples] * scaling;
+				}
+			} else {
+				re [numberOfFrequencies] = fourierSamples [numberOfFourierSamples] * scaling;
+				im [numberOfFrequencies] = 0.0;
+			}
+
+			/*
+				Step 3:
+				Take log of the spectrum power values log (re + im ) because we already squared
+			*/
+			fourierSamples [1] = log ( re [1] + 1e-300);
+			for (integer i = 1; i < numberOfFrequencies / 2; i ++) {
+				fourierSamples [2 * i] = log (re [i] + im [i] + 1e-300);
+				fourierSamples [2 * i + 1] = 0.0;
+			}
+			fourierSamples [numberOfFrequencies] = log (re [numberOfFrequencies] + 1e-300);
+			/*
+				Step 4: inverse fft of the log spectrum
+			*/
+			NUMfft_backward (fourierTable.get(), fourierSamples.get());
+			const double df = 1.0 / (frameAsSound -> dx * numberOfFourierSamples);
+			for (integer i = 1; i <= powerCepstrum -> nx; i ++) {
+				const double val = fourierSamples [i] * df;
+				powerCepstrum -> z [1] [i] = val * val;
+			}
+			output -> z.column (iframe)  <<=  powerCepstrum -> z.row (1);
 		}
-		fourierSamples [numberOfFrequencies] = log (re [numberOfFrequencies] + 1e-300);
-		/*
-			Step 4: inverse fft of the log spectrum
-		*/
-		NUMfft_backward (fourierTable.get(), fourierSamples.get());
-		const double df = 1.0 / (frameAsSound -> dx * numberOfFourierSamples);
-		for (integer i = 1; i <= powerCepstrum -> nx; i ++) {
-			const double val = fourierSamples [i] * df;
-			powerCepstrum -> z [1] [i] = val * val;
-		}
-		output -> z.column (iframe)  <<=  powerCepstrum -> z.row (1);
-	} MelderThread_ENDFOR
+	} MelderThread_ENDPARALLEL
 }
 
 autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchFloor, double dt, double maximumFrequency, double preEmphasisFrequency) {
@@ -186,64 +187,64 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchF
 		bool subtractFrameMean = true;
 		const double powerScaling = input -> dx * input -> dx; // =amplitude_scaling^2
 
-		MelderThread_PARALLELIZE (nFrames, 10)
+		MelderThread_PARALLEL (nFrames, 10) {
 			autoSoundFrames soundFrames = SoundFrames_createForIntoSampled (input.get(), output.get(), effectiveAnalysisWidth, windowShape, subtractFrameMean);
 			autoVEC fourierSamples = raw_VEC (numberOfFourierSamples);
 			autoVEC power_channelAveraged = raw_VEC (numberOfFourierSamples);
 			autoVEC onesidedPSD = raw_VEC (numberOfFrequencies);
 			autoNUMFourierTable fourierTable = NUMFourierTable_create (numberOfFourierSamples);		// of dimension numberOfFourierSamples;
-		MelderThread_FOR (iframe) {
-			/*
-				Get average power spectrum of channels
-				Let X(f) be the Fourier Transform of x(t) defined on the domain [-F,+F].
-				Power P[f] of a spectral component X(f):
-					P[f] =	|X(f)/sqrt(2)|^2 = 0.5|X(f)|^2 for f != 0,
-							|X(0)|^2 for f=0.
-				The onesidedPSD [f] =  2 * P (f)=X(f)^2 for f >= 0 and |X(0)|^2 for f=0
-				The bin width of the first and last frequency in the onesidedPSD is half the bin width at the other frequencies
-				Do scaling and averaging together
-			*/
-			soundFrames -> getFrame (iframe);
-			Sound sound = soundFrames -> frameAsSound.get();
-			power_channelAveraged.get()  <<=  0.0;
-			onesidedPSD.get()  <<=  0.0;
-			for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
-				fourierSamples.part (1, soundFrameSize)  <<=  sound -> z.row (ichannel);
-				fourierSamples.part (soundFrameSize + 1, numberOfFourierSamples)  <<=  0.0;
-				NUMfft_forward (fourierTable.get(), fourierSamples.get());
-				onesidedPSD [1] += fourierSamples [1] * fourierSamples [1];
-				for (integer i = 2; i < numberOfFrequencies; i ++) {
-					double re = fourierSamples [2 * i - 2], im = fourierSamples [2 * i - 1];
-					onesidedPSD [i] += re * re + im * im;
+			MelderThread_FOR (iframe) {
+				/*
+					Get average power spectrum of channels
+					Let X(f) be the Fourier Transform of x(t) defined on the domain [-F,+F].
+					Power P[f] of a spectral component X(f):
+						P[f] =	|X(f)/sqrt(2)|^2 = 0.5|X(f)|^2 for f != 0,
+								|X(0)|^2 for f=0.
+					The onesidedPSD [f] =  2 * P (f)=X(f)^2 for f >= 0 and |X(0)|^2 for f=0
+					The bin width of the first and last frequency in the onesidedPSD is half the bin width at the other frequencies
+					Do scaling and averaging together
+				*/
+				soundFrames -> getFrame (iframe);
+				Sound sound = soundFrames -> frameAsSound.get();
+				power_channelAveraged.get()  <<=  0.0;
+				onesidedPSD.get()  <<=  0.0;
+				for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
+					fourierSamples.part (1, soundFrameSize)  <<=  sound -> z.row (ichannel);
+					fourierSamples.part (soundFrameSize + 1, numberOfFourierSamples)  <<=  0.0;
+					NUMfft_forward (fourierTable.get(), fourierSamples.get());
+					onesidedPSD [1] += fourierSamples [1] * fourierSamples [1];
+					for (integer i = 2; i < numberOfFrequencies; i ++) {
+						double re = fourierSamples [2 * i - 2], im = fourierSamples [2 * i - 1];
+						onesidedPSD [i] += re * re + im * im;
+					}
+					onesidedPSD [numberOfFrequencies] += fourierSamples [numberOfFourierSamples] * 	fourierSamples [numberOfFourierSamples];
+					for (integer i = 1; i < numberOfFourierSamples; i ++)
+						power_channelAveraged [i] += fourierSamples [i] * fourierSamples [i];
 				}
-				onesidedPSD [numberOfFrequencies] += fourierSamples [numberOfFourierSamples] * 	fourierSamples [numberOfFourierSamples];
-				for (integer i = 1; i < numberOfFourierSamples; i ++)
-					power_channelAveraged [i] += fourierSamples [i] * fourierSamples [i];
+				onesidedPSD.get()  *=  powerScaling / numberOfChannels; // scaling and averaging over channels
+				power_channelAveraged.get()  *=  powerScaling / numberOfChannels;
+				/*
+					Get log power.
+				*/
+				fourierSamples [1] = log (onesidedPSD [1] + 1e-300);
+				for (integer i = 2; i < numberOfFrequencies; i ++) {
+					fourierSamples [2 * i - 2] = log (onesidedPSD [i] + 1e-300);
+					fourierSamples [2 * i - 1] = 0.0;
+				}
+				fourierSamples [numberOfFourierSamples] = log (onesidedPSD [numberOfFrequencies]);
+				/*
+					Inverse transform
+				*/
+				NUMfft_backward (fourierTable.get(), fourierSamples.get());
+				/*
+					scale first.
+				*/
+				const double df = 1.0 / (sound -> dx * numberOfFourierSamples);
+				fourierSamples.get()  *=  df;
+				for (integer i = 1; i <= numberOfFrequencies; i ++)
+					output -> z [i] [iframe] = fourierSamples [i] * fourierSamples [i];
 			}
-			onesidedPSD.get()  *=  powerScaling / numberOfChannels; // scaling and averaging over channels
-			power_channelAveraged.get()  *=  powerScaling / numberOfChannels;
-			/*
-				Get log power.
-			*/
-			fourierSamples [1] = log (onesidedPSD [1] + 1e-300);
-			for (integer i = 2; i < numberOfFrequencies; i ++) {
-				fourierSamples [2 * i - 2] = log (onesidedPSD [i] + 1e-300);
-				fourierSamples [2 * i - 1] = 0.0;
-			}
-			fourierSamples [numberOfFourierSamples] = log (onesidedPSD [numberOfFrequencies]);
-			/*
-				Inverse transform
-			*/
-			NUMfft_backward (fourierTable.get(), fourierSamples.get());
-			/*
-				scale first.
-			*/
-			const double df = 1.0 / (sound -> dx * numberOfFourierSamples);
-			fourierSamples.get()  *=  df;
-			for (integer i = 1; i <= numberOfFrequencies; i ++)
-				output -> z [i] [iframe] = fourierSamples [i] * fourierSamples [i];
-			
-		} MelderThread_ENDFOR
+		} MelderThread_ENDPARALLEL
 		return output;
 	} catch (MelderError) {
 		Melder_throw (me, U": no PowerCepstrogram created.");

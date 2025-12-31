@@ -117,16 +117,17 @@ autoPowerCepstrogram PowerCepstrogram_subtractTrend (constPowerCepstrogram me, d
 			my ymin, my ymax, my ny, my dy, my y1);
 		const integer thresholdNumberOfFramesPerThread = 10;
 		
-		MelderThread_PARALLELIZE (my nx, thresholdNumberOfFramesPerThread)
+		MelderThread_PARALLEL (my nx, thresholdNumberOfFramesPerThread) {
 			autoPowerCepstrum powerCepstrum = PowerCepstrum_create (my ymax, my ny);
 			autoPowerCepstrumWorkspace ws = PowerCepstrumWorkspace_create (powerCepstrum.get(), qminFit, qmaxFit, trendLineType, fitMethod);
-		MelderThread_FOR (iframe) {
-			powerCepstrum -> z.row (1)  <<=  my z.column (iframe);
-			ws -> newData (powerCepstrum.get());
-			ws -> getSlopeAndIntercept ();
-			ws -> subtractTrend ();
-			thy z.column (iframe)  <<=  powerCepstrum -> z.row (1);
-		} MelderThread_ENDFOR
+			MelderThread_FOR (iframe) {
+				powerCepstrum -> z.row (1)  <<=  my z.column (iframe);
+				ws -> newData (powerCepstrum.get());
+				ws -> getSlopeAndIntercept ();
+				ws -> subtractTrend ();
+				thy z.column (iframe)  <<=  powerCepstrum -> z.row (1);
+			}
+		} MelderThread_ENDPARALLEL
 		return thee;
 	} catch (MelderError) {
 		Melder_throw (me, U": no trend subtracted.");
@@ -154,35 +155,36 @@ autoTable PowerCepstrogram_to_Table_hillenbrand (PowerCepstrogram me, double pit
 	}
 }
 
-void PowerCepstrogram_into_Matrix_CPP (PowerCepstrogram me, mutableMatrix thee, bool trendSubtracted, double pitchFloor,
+static void PowerCepstrogram_into_Matrix_CPP (PowerCepstrogram me, mutableMatrix thee, bool trendSubtracted, double pitchFloor,
 	double pitchCeiling, double deltaF0, kVector_peakInterpolation peakInterpolationType, double qminFit, double qmaxFit,
 	kCepstrum_trendType trendLineType, kCepstrum_trendFit fitMethod)
 {
 	Melder_assert (thy ny == 6);
 	const integer numberOfFrames = thy nx, thresholdNumberOfFramesPerThread = 10;
 	const double qminPeakSearch = 1.0 / pitchCeiling, qmaxPeakSearch = 1.0 / pitchFloor;
-	MelderThread_PARALLELIZE (numberOfFrames, thresholdNumberOfFramesPerThread)
+	MelderThread_PARALLEL (numberOfFrames, thresholdNumberOfFramesPerThread) {
 		autoPowerCepstrum powerCepstrum = PowerCepstrum_create (my ymax, my ny);
 		autoPowerCepstrumWorkspace ws = PowerCepstrumWorkspace_create (powerCepstrum.get(), qminFit, qmaxFit, trendLineType, fitMethod);
 		ws -> initPeakSearchPart (qminPeakSearch, qmaxPeakSearch, peakInterpolationType);
-	MelderThread_FOR (iframe) {
-		powerCepstrum -> z.row (1)  <<=  my z.column (iframe);
-		ws -> newData (powerCepstrum.get());
-		ws -> trendSubtracted = trendSubtracted;
-		ws -> getSlopeAndIntercept ();
-		ws -> slopeKnown = true;
-		ws -> getPeakAndPosition ();
-		ws -> getCPP ();
-		thy z [1] [iframe] = Sampled_indexToX (thee, iframe);
-		thy z [2] [iframe] = ws -> slope;
-		thy z [3] [iframe] = ws -> intercept;
-		thy z [4] [iframe] = ws -> peakdB;
-		thy z [5] [iframe] = ws -> peakQuefrency;
-		thy z [6] [iframe] = ws -> cpp;
-	} MelderThread_ENDFOR
+		MelderThread_FOR (iframe) {
+			powerCepstrum -> z.row (1)  <<=  my z.column (iframe);
+			ws -> newData (powerCepstrum.get());
+			ws -> trendSubtracted = trendSubtracted;
+			ws -> getSlopeAndIntercept ();
+			ws -> slopeKnown = true;
+			ws -> getPeakAndPosition ();
+			ws -> getCPP ();
+			thy z [1] [iframe] = Sampled_indexToX (thee, iframe);
+			thy z [2] [iframe] = ws -> slope;
+			thy z [3] [iframe] = ws -> intercept;
+			thy z [4] [iframe] = ws -> peakdB;
+			thy z [5] [iframe] = ws -> peakQuefrency;
+			thy z [6] [iframe] = ws -> cpp;
+		}
+	} MelderThread_ENDPARALLEL
 }
 
-autoMatrix PowerCepstrogram_to_Matrix_CPP (PowerCepstrogram me, bool trendSubtracted, double pitchFloor, double pitchCeiling,
+static autoMatrix PowerCepstrogram_to_Matrix_CPP (PowerCepstrogram me, bool trendSubtracted, double pitchFloor, double pitchCeiling,
 	double deltaF0, kVector_peakInterpolation peakInterpolationType, double qminFit, double qmaxFit,
 	kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod)
 {
