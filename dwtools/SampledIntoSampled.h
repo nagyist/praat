@@ -18,23 +18,7 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
-	This is how my multi-threading will be implemented in the future,
-	no need for all the _def files anymore. No SampledIntoSampled object anymore.
-	We just pass a SampledFrameIntoSampledFrame object to the SampledIntoSampled_mt function.
-	This implemntation lives parallel with the old implementation untill all the code has been 
-	put into the new form.
-	We first use a 2 at the end of the objects in this new implementation
-	SampledFrameIntoSampledFrame.h, SoundFrameIntoSampledFrame2.h, 
-	Sound_and_LPC.h, Sound_and_LPC2.cpp
-	When everythig works OK we will remove the old files and remove the 2 at the end of the
-	objects to get a clean implementation
-*/
-
-#include "melder.h"
 #include "SampledFrameIntoSampledFrame.h"
-
-void SampledIntoSampled_mt (SampledFrameIntoSampledFrame frameIntoFrame, integer thresholdNumberOfFramesPerThread);
 
 inline void Sampled_requireEqualSampling (constSampled me, constSampled thee) {
 	Melder_assert (me && thee);
