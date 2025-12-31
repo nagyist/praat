@@ -1,5 +1,5 @@
 # stereoAnalysis.praat
-# Paul Boersma, 21 October 2025
+# Paul Boersma, 31 December 2025
 #
 # This script checks that analyses on stereo sounds make sense
 # as compared to each other and as compared to analyses on mono sounds.
@@ -150,7 +150,7 @@ Remove
 # The LPC analysis should give the exact same result for the two channels,
 # because the two channels are averaged before the LPC analysis is performed.
 #
-# Before some date in 2025 (?), the LPC algorithms took only channel 1 into account.
+# Before October 2025, the LPC algorithms took only channel 1 into account.
 #
 
 select Sound chan1
@@ -192,7 +192,7 @@ Remove
 # Also, the sum and difference sounds should give the exact same results as each other,
 # because averaging is done after squaring.
 #
-# Before some date in 2025 (?), the algorithm took only channel 1 into account.
+# Before December 2025, the algorithm took only channel 1 into account.
 #
 
 if praatVersion >= 5353   ; PowerCepstrogram available since July 2013
@@ -201,7 +201,7 @@ if praatVersion >= 5353   ; PowerCepstrogram available since July 2013
 
 	select Sound chan2
 	chan2.PowerCepstrogram = To PowerCepstrogram... 60.0 0.002 5000.0 50.0
-	if praatVersion >= 9999
+	if praatVersion >= 6452
 		assert objectsAreIdentical (chan2.PowerCepstrogram, chan1.PowerCepstrogram)   ; when will this happen?
 	else
 		assert not objectsAreIdentical (chan2.PowerCepstrogram, chan1.PowerCepstrogram)   ; bug
@@ -209,7 +209,7 @@ if praatVersion >= 5353   ; PowerCepstrogram available since July 2013
 
 	select Sound sum
 	sum.PowerCepstrogram = To PowerCepstrogram... 60.0 0.002 5000.0 50.0
-	if praatVersion >= 9999
+	if praatVersion >= 6452
 		assert not objectsAreIdentical (sum.PowerCepstrogram, chan1.PowerCepstrogram)   ; more power
 	else
 		assert objectsAreIdentical (sum.PowerCepstrogram, chan1.PowerCepstrogram)   ; bug (only channel 1)
