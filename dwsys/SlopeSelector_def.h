@@ -30,13 +30,13 @@ oo_DEFINE_STRUCT (ExtendedCrossing)
 		friend bool operator<  (const structExtendedCrossing& lhs, const structExtendedCrossing& rhs) {
 			auto approximatelyEqual = [&] (double numericalEqualityPrecision) {
 				if (std::fabs (lhs.real) < numericalEqualityPrecision || std::fabs (rhs.real) < numericalEqualityPrecision) {
-					return std::fabs(lhs.real - rhs.real) < numericalEqualityPrecision;
+					return std::fabs (lhs.real - rhs.real) < numericalEqualityPrecision;
 				}
 				// Use relative difference otherwise
-				return std::fabs(lhs.real - rhs.real) <= numericalEqualityPrecision * std::fmax(std::fabs(lhs.real), std::fabs(rhs.real));
+				return std::fabs (lhs.real - rhs.real) <= numericalEqualityPrecision * std::fmax (std::fabs (lhs.real), std::fabs (rhs.real));
 			};
 			const bool r = ( !approximatelyEqual (1e-12) ? (lhs.real < rhs.real) :
-				(lhs.high != rhs.high ? (lhs.high > rhs.high) : (lhs.low < rhs.low)) );
+					(lhs.high != rhs.high ? (lhs.high > rhs.high) : (lhs.low < rhs.low)) );
 			return r;
 		}
 		/*
@@ -78,9 +78,9 @@ oo_DEFINE_CLASS (SlopeSelector, Daata)
 	oo_INTVEC (sortedRandomCrossingCodes, sampleSize)
 	oo_INTEGER (inversionsSize)
 	oo_INTVEC (currentInversions, inversionsSize)
-	oo_STRUCTVEC(ExtendedCrossing, xslopes, maximumContractionSize)
+	oo_STRUCTVEC (ExtendedCrossing, xslopes, maximumContractionSize)
 	oo_VEC (buffer, maximumContractionSize) // for buffering and final quantile calculations
-	oo_STRUCTVEC(ExtendedCrossing, xcrossings, numberOfPoints)
+	oo_STRUCTVEC (ExtendedCrossing, xcrossings, numberOfPoints)
 	oo_OBJECT (PermutationInversionCounter, 0, inversionCounter)
 
 	#if oo_DECLARING

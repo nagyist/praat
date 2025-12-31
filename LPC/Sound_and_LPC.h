@@ -1,5 +1,5 @@
-#ifndef _Sound_and_LPC2_h_
-#define _Sound_and_LPC2_h_
+#ifndef _Sound_and_LPC_h_
+#define _Sound_and_LPC_h_
 /* Sound_and_LPC.h
  *
  * Copyright (C) 1994-2025 David Weenink

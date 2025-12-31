@@ -1,5 +1,5 @@
 # data.praat
-# Paul Boersma, 16 December 2025
+# Paul Boersma, 31 December 2025
 # Checks Copy, Equal, Read, Save.
 
 tracing$ = "no"
@@ -102,6 +102,7 @@ executionStrings = Create Strings as characters: "execution"
 selectObject: intentionStrings, executionStrings
 editDistanceTable = To EditDistanceTable
 @test (editDistanceTable)
+removeObject: intentionStrings, executionStrings
 
 appendInfoLine: "FFNet"
 Create iris example: 0, 0

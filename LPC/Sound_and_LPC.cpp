@@ -683,7 +683,7 @@ void structRobustLPCWorkspace :: inputFrameIntoOutputFrame (LPC_Frame inputLPCFr
 		error.all()  <<=  soundFrame;
 		VECfilterInverse_inplace (error.get(), inout_a, filterMemory.get());
 		NUMstatistics_huber (error.get(), & location, wantLocation, & scale, wantScale, k_stdev, 
-			tol1, huber_iterations, huberwork.get());
+				tol1, huber_iterations, huberwork.get());
 		setSampleWeights ();
 
 		setCovariances ();
