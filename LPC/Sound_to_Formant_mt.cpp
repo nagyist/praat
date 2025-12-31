@@ -112,7 +112,7 @@ void Sound_into_Formant_burg (constSound me, mutableLPC intermediateLPC, mutable
 	const integer thresholdNumberOfFramesPerThread = 40;
 	const double samplingPeriod = intermediateLPC -> samplingPeriod;
 
-	MelderThread_PARALLELIZE (outputFormant -> nx, thresholdNumberOfFramesPerThread)
+	MelderThread_PARALLEL (outputFormant -> nx, thresholdNumberOfFramesPerThread) {
 		autoSoundFrames soundFrames = SoundFrames_createForIntoSampled (me, intermediateLPC, effectiveAnalysisWidth,
 				kSound_windowShape::GAUSSIAN_2, true);
 		integer info;
@@ -122,14 +122,15 @@ void Sound_into_Formant_burg (constSound me, mutableLPC intermediateLPC, mutable
 		autoVEC polynomialIntoRootsWorkspace = raw_VEC (order * order + order + order + 11 * order);
 		autoPolynomial p = Polynomial_create (-1.0, 1.0, order);
 		autoRoots roots = Roots_create (order);
-	MelderThread_FOR (iframe) {
-		const LPC_Frame lpcFrame = & intermediateLPC -> d_frames [iframe];
-		VEC soundFrame = soundFrames -> getMonoFrame (iframe);
-		soundFrameIntoLPCFrame_burg (soundFrame, lpcFrame, b1.get(), b2.get(), aa.get(), info);
-		Formant_Frame formantFrame = & outputFormant -> frames [iframe];
-		LPC_Frame_into_Formant_Frame (lpcFrame, formantFrame, samplingPeriod,
-				safetyMargin, p.get(), roots.get(), polynomialIntoRootsWorkspace.get());
-	} MelderThread_ENDFOR
+		MelderThread_FOR (iframe) {
+			const LPC_Frame lpcFrame = & intermediateLPC -> d_frames [iframe];
+			VEC soundFrame = soundFrames -> getMonoFrame (iframe);
+			soundFrameIntoLPCFrame_burg (soundFrame, lpcFrame, b1.get(), b2.get(), aa.get(), info);
+			Formant_Frame formantFrame = & outputFormant -> frames [iframe];
+			LPC_Frame_into_Formant_Frame (lpcFrame, formantFrame, samplingPeriod,
+					safetyMargin, p.get(), roots.get(), polynomialIntoRootsWorkspace.get());
+		}
+	} MelderThread_ENDPARALLEL
 }
 
 autoFormant Sound_to_Formant_burg_mt (constSound me, double dt, double numberOfFormants, double maximumFrequency,
@@ -159,7 +160,7 @@ void Sound_and_LPC_into_Formant (constSound inputSound, constLPC inputLPC, mutab
 	const integer order = inputLPC -> maxnCoefficients;
 	const integer thresholdNumberOfFramesPerThread = 40;
 	const double samplingPeriod = inputLPC -> samplingPeriod;
-	MelderThread_PARALLELIZE (outputFormant -> nx, thresholdNumberOfFramesPerThread)
+	MelderThread_PARALLEL (outputFormant -> nx, thresholdNumberOfFramesPerThread) {
 		autoSoundFrames soundFrames = SoundFrames_createForSampled (inputSound, intermediateLPC, effectiveAnalysisWidth,
 				kSound_windowShape::GAUSSIAN_2, true, false, 0_integer);
 		integer info;
@@ -168,16 +169,17 @@ void Sound_and_LPC_into_Formant (constSound inputSound, constLPC inputLPC, mutab
 		autoVEC polynomialIntoRootsWorkspace = raw_VEC (order * order + order + order + 11 * order);		
 		autoPolynomial p = Polynomial_create (-1.0, 1.0, order);
 		autoRoots roots = Roots_create (order);
-	MelderThread_FOR (iframe) {
-		const LPC_Frame inputLPCFrame = & inputLPC -> d_frames [iframe];
-		const LPC_Frame intermediateLPCFrame = & intermediateLPC -> d_frames [iframe];
-		const Formant_Frame formantFrame = & outputFormant -> frames [iframe];
-		VEC soundFrame = soundFrames -> getFrame (iframe);
+		MelderThread_FOR (iframe) {
+			const LPC_Frame inputLPCFrame = & inputLPC -> d_frames [iframe];
+			const LPC_Frame intermediateLPCFrame = & intermediateLPC -> d_frames [iframe];
+			const Formant_Frame formantFrame = & outputFormant -> frames [iframe];
+			VEC soundFrame = soundFrames -> getFrame (iframe);
 
-		soundFrameAndLPCFrameIntoLPCFrame (soundFrame, inputLPCFrame, intermediateLPCFrame, ws.get(), info);
-		LPC_Frame_into_Formant_Frame (intermediateLPCFrame, formantFrame, samplingPeriod,
-				safetyMargin, p.get(), roots.get(), polynomialIntoRootsWorkspace.get());
-	} MelderThread_ENDFOR
+			soundFrameAndLPCFrameIntoLPCFrame (soundFrame, inputLPCFrame, intermediateLPCFrame, ws.get(), info);
+			LPC_Frame_into_Formant_Frame (intermediateLPCFrame, formantFrame, samplingPeriod,
+					safetyMargin, p.get(), roots.get(), polynomialIntoRootsWorkspace.get());
+		}
+	} MelderThread_ENDPARALLEL
 }
 
 autoFormant Sound_and_LPC_to_Formant (constSound inputSound, constLPC inputLPC, double effectiveAnalysisWidth, double preEmphasisFrequency, 

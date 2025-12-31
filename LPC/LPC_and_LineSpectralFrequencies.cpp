@@ -127,65 +127,67 @@ void LPC_into_LineSpectralFrequencies (constLPC inputLPC, mutableLineSpectralFre
 	const integer numberOfCoefficients = inputLPC -> maxnCoefficients + 1;
 	autoMelderProgress progress (U"LPC into LineSpectralFrequencies...");
 
-	MelderThread_PARALLELIZE (numberOfFrames, thresholdNumberOfFramesPerThread)
+	MelderThread_PARALLEL (numberOfFrames, thresholdNumberOfFramesPerThread) {
 
 		autoPolynomial gsum = Polynomial_create (-2.0, 2.0, numberOfCoefficients);   // large enough
 		autoPolynomial gdif = Polynomial_create (-2.0, 2.0, numberOfCoefficients);
 		autoRoots roots = Roots_create ((numberOfCoefficients + 1) / 2);
 
-	MelderThread_FOR (iframe) {
+		MelderThread_FOR (iframe) {
 
-		if (MelderThread_IS_MASTER) {
-			const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
-			Melder_progress (0.98 * estimatedProgress,
-				U"Analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
-				U" out of ", numberOfFrames, U" frames"
-			);
-		}
-		LPC_Frame inputFrame = & inputLPC -> d_frames [iframe];
-		LineSpectralFrequencies_Frame outputFrame = & outputLSF -> d_frames [iframe];
-		Melder_assert (inputFrame -> nCoefficients == inputFrame -> a.size); // check invariant
-		const double maximumFrequency = outputLSF -> maximumFrequency;
-		/*
-			Construct Fs and Fa
-			divide out the zeros
-			transform to polynomial equations gsum and gdif of half the order
-		*/
-		LPC_Frame_into_Polynomial_sum (inputFrame, gsum.get());
-		const integer half_order_gsum = gsum -> numberOfCoefficients - 1;
-		LPC_Frame_into_Polynomial_dif (inputFrame, gdif.get());
-		const integer half_order_gdif = gdif -> numberOfCoefficients - 1;
-		double currentGridSize = gridSize;
-		integer numberOfBisections = 0, numberOfRootsFound = 0;
-		while (numberOfRootsFound  < half_order_gsum && numberOfBisections < 10) {
-			numberOfRootsFound = Polynomial_into_Roots_searchOnGrid (gsum.get(), roots.get(), currentGridSize);
-			currentGridSize *= 0.5;
-			numberOfBisections++;
-		}
-		integer frameAnalysisInfo = 0;
-		if (numberOfBisections >= 10)
-			frameAnalysisInfo = 1; // too many bisections
-		/*
-			[gsum-> xmin, gsum -> xmax] <==> [nyquistFrequency, 0],
-			i.e. highest root corresponds to lowest frequency
-		*/
-		for (integer i = 1; i <= half_order_gsum; i ++)
-			outputFrame -> frequencies [2 * i - 1] = acos (roots -> roots [half_order_gsum + 1 - i].real() / 2.0) / NUMpi * maximumFrequency;
-		/*
-			The roots of gdif lie inbetween the roots of gsum
-		*/
-		for (integer i = 1; i <= half_order_gdif; i ++) {
-			const double xmax = roots -> roots [half_order_gsum + 1 - i].real();
-			const double xmin = ( i == half_order_gsum ? gsum -> xmin : roots -> roots [half_order_gsum - i].real() );
-			const double root = Polynomial_findOneSimpleRealRoot_ridders (gdif.get(), xmin, xmax);
-			if (isdefined (root))
-				outputFrame -> frequencies [2 * i] = acos (root / 2.0) / NUMpi * maximumFrequency;
-			else
-				outputFrame -> numberOfFrequencies --;
-		}
-		outputFrame -> frequencies.resize (outputFrame -> numberOfFrequencies); // maintain invariant		
+			if (MelderThread_IS_MASTER) {
+				const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
+				Melder_progress (0.98 * estimatedProgress,
+					U"Analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
+					U" out of ", numberOfFrames, U" frames"
+				);
+			}
+			LPC_Frame inputFrame = & inputLPC -> d_frames [iframe];
+			LineSpectralFrequencies_Frame outputFrame = & outputLSF -> d_frames [iframe];
+			Melder_assert (inputFrame -> nCoefficients == inputFrame -> a.size); // check invariant
+			const double maximumFrequency = outputLSF -> maximumFrequency;
+			/*
+				Construct Fs and Fa
+				divide out the zeros
+				transform to polynomial equations gsum and gdif of half the order
+			*/
+			LPC_Frame_into_Polynomial_sum (inputFrame, gsum.get());
+			const integer half_order_gsum = gsum -> numberOfCoefficients - 1;
+			LPC_Frame_into_Polynomial_dif (inputFrame, gdif.get());
+			const integer half_order_gdif = gdif -> numberOfCoefficients - 1;
+			double currentGridSize = gridSize;
+			integer numberOfBisections = 0, numberOfRootsFound = 0;
+			while (numberOfRootsFound  < half_order_gsum && numberOfBisections < 10) {
+				numberOfRootsFound = Polynomial_into_Roots_searchOnGrid (gsum.get(), roots.get(), currentGridSize);
+				currentGridSize *= 0.5;
+				numberOfBisections++;
+			}
+			integer frameAnalysisInfo = 0;
+			if (numberOfBisections >= 10)
+				frameAnalysisInfo = 1; // too many bisections
+			/*
+				[gsum-> xmin, gsum -> xmax] <==> [nyquistFrequency, 0],
+				i.e. highest root corresponds to lowest frequency
+			*/
+			for (integer i = 1; i <= half_order_gsum; i ++)
+				outputFrame -> frequencies [2 * i - 1] = acos (roots -> roots [half_order_gsum + 1 - i].real() / 2.0) / NUMpi * maximumFrequency;
+			/*
+				The roots of gdif lie inbetween the roots of gsum
+			*/
+			for (integer i = 1; i <= half_order_gdif; i ++) {
+				const double xmax = roots -> roots [half_order_gsum + 1 - i].real();
+				const double xmin = ( i == half_order_gsum ? gsum -> xmin : roots -> roots [half_order_gsum - i].real() );
+				const double root = Polynomial_findOneSimpleRealRoot_ridders (gdif.get(), xmin, xmax);
+				if (isdefined (root))
+					outputFrame -> frequencies [2 * i] = acos (root / 2.0) / NUMpi * maximumFrequency;
+				else
+					outputFrame -> numberOfFrequencies --;
+			}
+			outputFrame -> frequencies.resize (outputFrame -> numberOfFrequencies); // maintain invariant
 
-	} MelderThread_ENDFOR
+		}
+
+	} MelderThread_ENDPARALLEL
 }
 
 autoLineSpectralFrequencies LPC_to_LineSpectralFrequencies (constLPC me, double gridSize) {
@@ -208,55 +210,56 @@ void LineSpectralFrequencies_into_LPC (constLineSpectralFrequencies me, mutableL
 	const integer numberOfFrames = my nx, thresholdNumberOfFramesPerThread = 40;
 	autoMelderProgress progress (U"LineSpectralFrequencies_into_LPC...");
 
-	MelderThread_PARALLELIZE (numberOfFrames, thresholdNumberOfFramesPerThread)
+	MelderThread_PARALLEL (numberOfFrames, thresholdNumberOfFramesPerThread) {
 		autoPolynomial fs = Polynomial_create (-1.0, 1.0, my maximumNumberOfFrequencies + 2);
 		autoPolynomial fa = Polynomial_create (-1.0, 1.0, my maximumNumberOfFrequencies + 2);
-	MelderThread_FOR (iframe) {
-		if (MelderThread_IS_MASTER) {
-			const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
-			Melder_progress (0.98 * estimatedProgress,
-				U"Analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
-				U" out of ", numberOfFrames, U" frames"
-			);
+		MelderThread_FOR (iframe) {
+			if (MelderThread_IS_MASTER) {
+				const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
+				Melder_progress (0.98 * estimatedProgress,
+					U"Analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
+					U" out of ", numberOfFrames, U" frames"
+				);
+			}
+			LPC_Frame lpcFrame = & outputLPC -> d_frames [iframe];
+			VEC a = lpcFrame -> a.get();
+			LineSpectralFrequencies_Frame lsfFrame = & my d_frames [iframe];
+			const double maximumFrequency = my maximumFrequency;
+			const integer numberOfFrequencies = lsfFrame -> numberOfFrequencies;
+			integer numberOfOmegas = (numberOfFrequencies + 1) / 2;
+			/*
+				Reconstruct Fs (z)
+				Use lpcFrame -> a as a buffer whose size changes!!!
+			*/
+			for (integer i = 1; i <= numberOfOmegas; i ++) {
+				const double omega = lsfFrame -> frequencies [2 * i - 1] / maximumFrequency * NUMpi;
+				a [i] = -2.0 * cos (omega);
+			}
+			Polynomial_initFromProductOfSecondOrderTerms (fs.get(), a.part (1, numberOfOmegas));
+			/*
+				Reconstruct Fa (z)
+			*/
+			numberOfOmegas = numberOfFrequencies / 2;
+			for (integer i = 1; i <= numberOfOmegas; i ++) {
+				const double omega = lsfFrame -> frequencies [2 * i] / maximumFrequency * NUMpi;
+				a [i] = -2.0 * cos (omega);
+			}
+			Polynomial_initFromProductOfSecondOrderTerms (fa.get(), a.part (1, numberOfOmegas));
+
+			if (numberOfFrequencies % 2 == 0) {
+				Polynomial_multiply_firstOrderFactor (fs.get(), -1.0);   // * (z + 1)
+				Polynomial_multiply_firstOrderFactor (fa.get(), 1.0);   // * (z - 1)
+			} else {
+				Polynomial_multiply_secondOrderFactor (fa.get(), 1.0);   // * (z^2 - 1)
+			}
+			Melder_assert (fs -> numberOfCoefficients == fa -> numberOfCoefficients);
+			/*
+				A(z) = (Fs(z) + Fa(z) / 2
+			*/
+			for (integer i = 1; i <= fs -> numberOfCoefficients - 2; i ++)
+				a [lsfFrame -> numberOfFrequencies - i + 1] = 0.5 * (fs -> coefficients [i + 1] + fa -> coefficients [i + 1]);
 		}
-		LPC_Frame lpcFrame = & outputLPC -> d_frames [iframe];
-		VEC a = lpcFrame -> a.get();
-		LineSpectralFrequencies_Frame lsfFrame = & my d_frames [iframe];
-		const double maximumFrequency = my maximumFrequency;
-		const integer numberOfFrequencies = lsfFrame -> numberOfFrequencies;
-		integer numberOfOmegas = (numberOfFrequencies + 1) / 2;
-		/*
-			Reconstruct Fs (z)
-			Use lpcFrame -> a as a buffer whose size changes!!!
-		*/
-		for (integer i = 1; i <= numberOfOmegas; i ++) {
-			const double omega = lsfFrame -> frequencies [2 * i - 1] / maximumFrequency * NUMpi;
-			a [i] = -2.0 * cos (omega);
-		}
-		Polynomial_initFromProductOfSecondOrderTerms (fs.get(), a.part (1, numberOfOmegas));
-		/*
-			Reconstruct Fa (z)
-		*/
-		numberOfOmegas = numberOfFrequencies / 2;
-		for (integer i = 1; i <= numberOfOmegas; i ++) {
-			const double omega = lsfFrame -> frequencies [2 * i] / maximumFrequency * NUMpi;
-			a [i] = -2.0 * cos (omega);
-		}
-		Polynomial_initFromProductOfSecondOrderTerms (fa.get(), a.part (1, numberOfOmegas));
-	
-		if (numberOfFrequencies % 2 == 0) {
-			Polynomial_multiply_firstOrderFactor (fs.get(), -1.0);   // * (z + 1)
-			Polynomial_multiply_firstOrderFactor (fa.get(), 1.0);   // * (z - 1)
-		} else {
-			Polynomial_multiply_secondOrderFactor (fa.get(), 1.0);   // * (z^2 - 1)
-		}
-		Melder_assert (fs -> numberOfCoefficients == fa -> numberOfCoefficients);
-		/*
-			A(z) = (Fs(z) + Fa(z) / 2
-		*/
-		for (integer i = 1; i <= fs -> numberOfCoefficients - 2; i ++)
-			a [lsfFrame -> numberOfFrequencies - i + 1] = 0.5 * (fs -> coefficients [i + 1] + fa -> coefficients [i + 1]);
-	} MelderThread_ENDFOR
+	} MelderThread_ENDPARALLEL
 }
 
 autoLPC LineSpectralFrequencies_to_LPC (constLineSpectralFrequencies me) {

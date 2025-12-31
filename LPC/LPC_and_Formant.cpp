@@ -96,24 +96,25 @@ void LPC_into_Formant (constLPC inputLPC, mutableFormant outputFormant, double m
 	const integer bufferSize = order * order + order + order + 11 * order;
 	const double samplingFrequency = 1.0 / inputLPC -> samplingPeriod;
 
-	MelderThread_PARALLELIZE (numberOfFrames, thresholdNumberOfFramesPerThread)
+	MelderThread_PARALLEL (numberOfFrames, thresholdNumberOfFramesPerThread) {
 		autoVEC buffer = raw_VEC (bufferSize);
 		autoPolynomial p = Polynomial_create (-1.0, 1.0, order);
 		autoRoots roots = Roots_create (order);
-	MelderThread_FOR (iframe) {
-		Formant_Frame formantFrame = & outputFormant -> frames [iframe];
-		LPC_Frame inputLPCFrame = & inputLPC -> d_frames [iframe];
-		formantFrame -> intensity = inputLPCFrame -> gain;
-		if (inputLPCFrame -> nCoefficients == 0) {
-			formantFrame -> numberOfFormants = 0; // TODO Formant_Frame -> resize (newNumberOfFormants)
-			formantFrame -> formant.resize (formantFrame -> numberOfFormants); // maintain invariant
-		} else {
-			LPC_Frame_into_Polynomial (inputLPCFrame, p.get());
-			Polynomial_into_Roots (p.get(), roots.get(), buffer.get());
-			Roots_fixIntoUnitCircle (roots.get());
-			Roots_into_Formant_Frame (roots.get(), formantFrame, samplingFrequency, margin);
+		MelderThread_FOR (iframe) {
+			Formant_Frame formantFrame = & outputFormant -> frames [iframe];
+			LPC_Frame inputLPCFrame = & inputLPC -> d_frames [iframe];
+			formantFrame -> intensity = inputLPCFrame -> gain;
+			if (inputLPCFrame -> nCoefficients == 0) {
+				formantFrame -> numberOfFormants = 0; // TODO Formant_Frame -> resize (newNumberOfFormants)
+				formantFrame -> formant.resize (formantFrame -> numberOfFormants); // maintain invariant
+			} else {
+				LPC_Frame_into_Polynomial (inputLPCFrame, p.get());
+				Polynomial_into_Roots (p.get(), roots.get(), buffer.get());
+				Roots_fixIntoUnitCircle (roots.get());
+				Roots_into_Formant_Frame (roots.get(), formantFrame, samplingFrequency, margin);
+			}
 		}
-	} MelderThread_ENDFOR
+	} MelderThread_ENDPARALLEL
 
 	Formant_sort (outputFormant);
 }
@@ -213,14 +214,15 @@ autoLPC Formant_to_LPC (constFormant me, double samplingPeriod) {
 		autoLPC outputLPC = LPC_create (my xmin, my xmax, my nx, my dx, my x1, 2 * my maxnFormants, samplingPeriod);
 		const integer thresholdNumberOfFramesPerThread = 80;
 
-		MelderThread_PARALLELIZE (my nx, thresholdNumberOfFramesPerThread)
-		MelderThread_FOR (iframe) {
-			const Formant_Frame f = & my frames [iframe];
-			const LPC_Frame lpcFrame = & outputLPC -> d_frames [iframe];
-			const integer numberOfCoefficients = 2 * f -> numberOfFormants;
-			LPC_Frame_init (lpcFrame, numberOfCoefficients);
-			Formant_Frame_into_LPC_Frame (f, lpcFrame, samplingPeriod);
-		} MelderThread_ENDFOR
+		MelderThread_PARALLEL (my nx, thresholdNumberOfFramesPerThread) {
+			MelderThread_FOR (iframe) {
+				const Formant_Frame f = & my frames [iframe];
+				const LPC_Frame lpcFrame = & outputLPC -> d_frames [iframe];
+				const integer numberOfCoefficients = 2 * f -> numberOfFormants;
+				LPC_Frame_init (lpcFrame, numberOfCoefficients);
+				Formant_Frame_into_LPC_Frame (f, lpcFrame, samplingPeriod);
+			}
+		} MelderThread_ENDPARALLEL
 
 		return outputLPC;
 	} catch (MelderError) {
