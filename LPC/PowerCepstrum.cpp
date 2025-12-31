@@ -146,9 +146,9 @@ void structPowerCepstrumWorkspace :: getPeakAndPosition () {
 	Matrix thee = asdBs.get();
 	double peakdBR, peakQuefrencyR;
 	Vector_getMaximumAndX_twoSideApproach ((Vector) thee, qminPeakSearch, qmaxPeakSearch,
-		1, peakInterpolationType, false, & peakdB, & peakQuefrency);
+			1, peakInterpolationType, false, & peakdB, & peakQuefrency);
 	Vector_getMaximumAndX_twoSideApproach ((Vector) thee, qminPeakSearch, qmaxPeakSearch,
-		1, peakInterpolationType, true, & peakdBR, & peakQuefrencyR);
+			1, peakInterpolationType, true, & peakdBR, & peakQuefrencyR);
 	const integer index = Sampled_xToIndex (thee, peakQuefrency), indexR = Sampled_xToIndex(thee, peakQuefrencyR);
 	if (index != indexR && (indexR - index) <= 5) {
 		double indexm = 0.5 * (index + indexR);
@@ -273,7 +273,7 @@ void structPowerCepstrumWorkspace :: initWorkspace (constPowerCepstrum me, doubl
 	x = raw_VEC (numberOfPoints);
 	y = raw_VEC (numberOfPoints);
 	asdBs = Matrix_create (powerCepstrum -> xmin, powerCepstrum -> xmax, powerCepstrum -> nx, powerCepstrum -> dx, powerCepstrum -> x1,
-		powerCepstrum -> ymin, powerCepstrum -> ymax, powerCepstrum -> ny, powerCepstrum -> dy, powerCepstrum ->y1);
+			powerCepstrum -> ymin, powerCepstrum -> ymax, powerCepstrum -> ny, powerCepstrum -> dy, powerCepstrum ->y1);
 	maximumNumberOfRhamonics = 15;
 	rhamonics = raw_MAT (maximumNumberOfRhamonics, 5_integer);
 	slopeSelector = SlopeSelector_create (x.get(), y.get()); // only reference to the x and y vectors
@@ -525,7 +525,7 @@ autoTable PowerCepstrum_tabulateRhamonics (PowerCepstrum me, double pitchFloor, 
 		const double qminPeakSearch = 1.0 / pitchCeiling;
 		const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 		autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me, qminPeakSearch, qmaxPeakSearch,
-			kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
+				kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
 
 		workspace -> initPeakSearchPart (qminPeakSearch, qmaxPeakSearch, peakInterpolationType);
 		workspace -> getRhamonicPeaks (qminPeakSearch, qmaxPeakSearch);
@@ -548,7 +548,7 @@ static autoMAT PowerCepstrum_getRhamonicsPower (PowerCepstrum me, double pitchFl
 		const double qminPeakSearch = 1.0 /pitchCeiling;
 		const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 		autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me, qminPeakSearch, qmaxPeakSearch,
-			kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
+				kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
 		workspace -> initPeakSearchPart (qminPeakSearch, qmaxPeakSearch, kVector_peakInterpolation :: CUBIC);
 		workspace -> getRhamonicsPower (qminPeakSearch, qmaxPeakSearch, f0fractionalWidth);
 		autoMAT result = copy_MAT (workspace -> rhamonics.get());
@@ -562,7 +562,7 @@ double PowerCepstrum_getRNR (PowerCepstrum me, double pitchFloor, double pitchCe
 	const double qminPeakSearch = 1.0 /pitchCeiling;
 	const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me,qminPeakSearch, qmaxPeakSearch, 
-		kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
+			kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
 	workspace -> initPeakSearchPart (qminPeakSearch, qmaxPeakSearch, kVector_peakInterpolation :: CUBIC);
 	const double rnr = workspace -> getRNR (qminPeakSearch, qmaxPeakSearch, f0fractionalWidth);
 	return rnr;
@@ -570,7 +570,7 @@ double PowerCepstrum_getRNR (PowerCepstrum me, double pitchFloor, double pitchCe
 
 double PowerCepstrum_getPeakProminence_hillenbrand (PowerCepstrum me, double pitchFloor, double pitchCeiling, double& qpeak) {
 	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me, 0.001, my xmax, kCepstrum_trendType::LINEAR,
-		kCepstrum_trendFit::LEAST_SQUARES);
+			kCepstrum_trendFit::LEAST_SQUARES);
 	const double qminPeakSearch = 1.0 /pitchCeiling;
 	const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
 	workspace -> initPeakSearchPart (qminPeakSearch,qmaxPeakSearch, kVector_peakInterpolation :: NONE);
