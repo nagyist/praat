@@ -16,7 +16,6 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SampledAndSampled.h"
 #include "SoundFrames.h"
 #include "Sound_and_LPC.h"
 #include "Sound_extensions.h"
@@ -549,7 +548,7 @@ autoLPC Sound_to_LPC_marple (constSound me, int predictionOrder, double effectiv
 
 /*********************** PLP (Hermansky) method *************************************************************/
 
-
+#if 0
 bool structSoundFrameIntoLPCFramePLP :: inputFrameIntoOutputFrame (integer /*iframe*/) {
 	
 	
@@ -557,6 +556,7 @@ bool structSoundFrameIntoLPCFramePLP :: inputFrameIntoOutputFrame (integer /*ifr
 	
 	return true;
 }
+#endif
 /*
 void structSoundFrameIntoLPCFramePLP :: getFilterCharacteristics () {
 	struct structCriticalBandFilter {
@@ -683,7 +683,7 @@ void structRobustLPCWorkspace :: inputFrameIntoOutputFrame (LPC_Frame inputLPCFr
 		error.all()  <<=  soundFrame;
 		VECfilterInverse_inplace (error.get(), inout_a, filterMemory.get());
 		NUMstatistics_huber (error.get(), & location, wantLocation, & scale, wantScale, k_stdev, 
-			tol1, huber_iterations, huberwork.get());
+				tol1, huber_iterations, huberwork.get());
 		setSampleWeights ();
 
 		setCovariances ();
@@ -730,7 +730,7 @@ void LPC_and_Sound_into_LPC_robust (constLPC inputLPC, constSound inputSound, mu
 	double effectiveAnalysisWidth, double k_stdev, integer itermax, double tol, bool wantlocation)
 {
 	Sound_and_LPC_require_equalDomainsAndSamplingPeriods (inputSound, outputLPC);
-	SampledAndSampled_requireEqualDomainsAndSampling (inputLPC, outputLPC);
+	Sampleds_requireEqualDomainsAndSampling (inputLPC, outputLPC);
 	const integer thresholdNumberOfFramesPerThread = 40, order = outputLPC -> maxnCoefficients;
 
 	MelderThread_PARALLEL (outputLPC -> nx, thresholdNumberOfFramesPerThread) {

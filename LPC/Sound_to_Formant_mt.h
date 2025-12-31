@@ -18,34 +18,9 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Sound.h"
 #include "LPC.h"
 #include "Formant.h"
-#include "Sound_and_LPC.h"
-#include "LPC_and_Formant.h"
-#include "SampledFrameIntoSampledFrame.h"
-
-#if 0
-Thing_define (SoundFrameIntoFormantFrame, SampledFrameIntoSampledFrame) {
-
-	autoSoundFrameIntoLPCFrame soundIntoLPC;
-	autoLPCFrameIntoFormantFrame lpcIntoFormant;
-
-	void initBasicSoundFrameIntoFormantFrame (constSound inputSound, mutableFormant outputFormant);
-	
-	void initHeap ()
-		override;
-		
-	void getInputFrame (integer iframe) override {
-		soundIntoLPC -> getInputFrame (iframe);
-	}
-	
-	bool inputFrameIntoOutputFrame (integer iframe)
-		override;
-};
-
-autoSoundFrameIntoFormantFrame SoundFrameIntoFormantFrame_create (SoundFrameIntoLPCFrame soundIntoLPC, 
-	LPCFrameIntoFormantFrame lpcIntoFormant);
-#endif
 
 void Sound_into_Formant_robust_mt (constSound me, Formant out,	double windowLength,
 	integer numberOfPoles, double safetyMargin, double k, integer itermax, double tol, double location, bool wantlocation

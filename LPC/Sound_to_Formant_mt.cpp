@@ -21,53 +21,13 @@
 #include "SoundFrames.h"
 #include "Sound_and_LPC.h"
 #include "LPC_and_Formant.h"
-#include "SampledAndSampled.h"
-
-#if 0
-Thing_implement (SoundFrameIntoFormantFrame, SampledFrameIntoSampledFrame, 0);
-
-void structSoundFrameIntoFormantFrame :: initBasicSoundFrameIntoFormantFrame (constSound inputSound, mutableFormant outputFormant) {
-	SoundFrameIntoFormantFrame_Parent :: initBasic (inputSound, outputFormant);
-	
-}
-
-void structSoundFrameIntoFormantFrame :: initHeap () {
-	SoundFrameIntoFormantFrame_Parent :: initHeap ();
-	soundIntoLPC -> initHeap ();
-	lpcIntoFormant -> initHeap ();
-}
-
-bool structSoundFrameIntoFormantFrame :: inputFrameIntoOutputFrame (integer iframe) {
-	bool result = soundIntoLPC -> inputFrameIntoOutputFrame (iframe);
-	if (result)
-		result = lpcIntoFormant -> inputFrameIntoOutputFrame (iframe);
-	return result;
-}
-
-autoSoundFrameIntoFormantFrame SoundFrameIntoFormantFrame_create (SoundFrameIntoLPCFrame soundIntoLPC, LPCFrameIntoFormantFrame lpcIntoFormant) {
-	try {
-		autoSoundFrameIntoFormantFrame me = Thing_new (SoundFrameIntoFormantFrame);
-		my soundIntoLPC.adoptFromAmbiguousOwner (soundIntoLPC);
-		my lpcIntoFormant.adoptFromAmbiguousOwner (lpcIntoFormant);
-		return me;
-	} catch (MelderError) {
-		Melder_throw (U"Cannot create SoundFrameIntoFormantFrame.");
-	}
-}
-#endif
-
-/*
-	Precondition:
-		Sound already has the 'right' sampling frequency and has been pre-emphasized
-*/
-
 
 static void Sound_to_Formant_common (constSound inputSound, double& dt, double numberOfFormants_real, double maximumFrequency,
 	double effectiveAnalysisWidth, double preEmphasisFrequency,	double safetyMargin, 
 	autoFormant& outputFormant, autoLPC& outputLPC, autoSound& sound)
 {
 	try {
-		if (dt<= 0.0)
+		if (dt <= 0.0)
 			dt = effectiveAnalysisWidth / 4.0;
 		autoSound resampled = Sound_resampleAndOrPreemphasize (inputSound, maximumFrequency, 50, preEmphasisFrequency);
 		const integer numberOfPoles = 2.0 * numberOfFormants_real;
@@ -89,8 +49,8 @@ static void Sound_to_Formant_common (constSound inputSound, double& dt, double n
 	} catch (MelderError) {
 		Melder_throw (U"Cannot create Formant or LPC or Sound.");
 	}
-	
 }
+
 static autoFormant createFormant_common (constSound me, double dt, integer numberOfPoles, double effectiveAnalysisWidth,
 	double safetyMargin)
 {
@@ -106,8 +66,8 @@ static autoFormant createFormant_common (constSound me, double dt, integer numbe
 void Sound_into_Formant_burg (constSound me, mutableLPC intermediateLPC, mutableFormant outputFormant, 
 	double effectiveAnalysisWidth, double safetyMargin)
 {
-	SampledAndSampled_requireEqualDomains (me, intermediateLPC);
-	SampledAndSampled_assertEqualDomainsAndSampling (intermediateLPC, outputFormant);
+	Sampleds_requireEqualDomains (me, intermediateLPC);
+	Sampleds_assertEqualDomainsAndSampling (intermediateLPC, outputFormant);
 	const integer order = intermediateLPC -> maxnCoefficients;
 	const integer thresholdNumberOfFramesPerThread = 40;
 	const double samplingPeriod = intermediateLPC -> samplingPeriod;

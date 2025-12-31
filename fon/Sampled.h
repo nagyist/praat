@@ -129,5 +129,33 @@ double Sampled_getXOfMaximum
 void Sampled_drawInside
 	(constSampled me, Graphics g, double xmin, double xmax, double ymin, double ymax, bool speckle, integer levelNumber, int unit);
 
+inline void Sampleds_requireEqualSampling (constSampled me, constSampled thee) {
+	Melder_require (my x1 == thy x1 && my nx == thy nx && my dx == thy dx,
+		U"The sampling of ", me, U" and ", thee, U" should be equal.");
+}
+
+inline void Sampleds_assertEqualSampling (constSampled me, constSampled thee) {
+	Melder_assert (my x1 == thy x1 && my nx == thy nx && my dx == thy dx);
+}
+
+inline void Sampleds_requireEqualDomains (constSampled me, constSampled thee) {
+	Melder_require (my xmin == thy xmin && my xmax == thy xmax,
+		U"The domains of ", me, U" and ", thee, U" should be equal.");
+}
+
+inline void Sampleds_assertEqualDomains (constSampled me, constSampled thee) {
+	Melder_assert (my xmin == thy xmin && my xmax == thy xmax);
+}
+
+inline void Sampleds_requireEqualDomainsAndSampling (constSampled me, constSampled thee) {
+	Sampleds_requireEqualDomains (me, thee);
+	Sampleds_requireEqualSampling (me, thee);
+}
+
+inline void Sampleds_assertEqualDomainsAndSampling (constSampled me, constSampled thee) {
+	Sampleds_assertEqualDomains (me, thee);
+	Sampleds_assertEqualSampling (me, thee);
+}
+
 /* End of file Sampled.h */
 #endif

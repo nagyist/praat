@@ -20,67 +20,6 @@
 #include "LPC_and_Polynomial.h"
 #include "NUM2.h"
 #include "Roots_and_Formant.h"
-#include "SampledAndSampled.h"
-
-/*- Start of to be removed */
-#if 0
-Thing_implement (LPCFrameIntoFormantFrame, SampledFrameIntoSampledFrame, 0);
-
-void structLPCFrameIntoFormantFrame :: initBasicLPCFrameIntoFormantFrame (constLPC inputLPC, mutableFormant outputFormant, double margin) {
-	LPCFrameIntoFormantFrame_Parent :: initBasic (inputLPC, outputFormant);
-	our inputLPC = inputLPC;
-	our outputFormant = outputFormant;
-	our margin = margin;
-}
-
-void structLPCFrameIntoFormantFrame :: copyBasic (constSampledFrameIntoSampledFrame other2) {
-	constLPCFrameIntoFormantFrame other = static_cast <constLPCFrameIntoFormantFrame> (other2);
-	LPCFrameIntoFormantFrame_Parent :: copyBasic (other);
-	our inputLPC = other -> inputLPC;
-	our outputFormant = other -> outputFormant;
-	our margin = other -> margin;
-}
-
-void structLPCFrameIntoFormantFrame :: initHeap () {
-	LPCFrameIntoFormantFrame_Parent :: initHeap ();
-	our order = inputLPC -> maxnCoefficients;
-	bufferSize = order * order + order + order + 11 * order;
-	buffer = raw_VEC (bufferSize);		
-	p = Polynomial_create (-1.0, 1.0, order);
-	roots = Roots_create (order);
-}
-
-bool structLPCFrameIntoFormantFrame :: inputFrameIntoOutputFrame (integer iframe) {
-	Formant_Frame formantFrame = & outputFormant -> frames [iframe];
-	LPC_Frame inputLPCFrame = & inputLPC -> d_frames [iframe];
-	formantFrame -> intensity = inputLPCFrame -> gain;
-	integer frameAnalysisInfo = 0;
-	if (inputLPCFrame -> nCoefficients == 0) {
-		formantFrame -> numberOfFormants = 0;
-		formantFrame -> formant.resize (formantFrame -> numberOfFormants); // maintain invariant
-		frameAnalysisInfo = 1;	
-		return true;
-	}
-	frameAnalysisInfo = 0;
-	const double samplingFrequency = 1.0 / inputLPC -> samplingPeriod;
-	autoPolynomial p = LPC_Frame_to_Polynomial (inputLPCFrame);
-	Polynomial_into_Roots (p.get(), roots.get(), buffer.get());
-	Roots_fixIntoUnitCircle (roots.get());
-	Roots_into_Formant_Frame (roots.get(), formantFrame, samplingFrequency, margin);
-	return true;
-}
-
-autoLPCFrameIntoFormantFrame LPCFrameIntoFormantFrame_create (constLPC inputLPC, mutableFormant outputFormant, double margin) {
-	try {
-		autoLPCFrameIntoFormantFrame me = Thing_new (LPCFrameIntoFormantFrame);
-		my initBasicLPCFrameIntoFormantFrame (inputLPC, outputFormant, margin);
-		return me;
-	} catch (MelderError) {
-		Melder_throw (U"Cannot create LPCFrameIntoFormantFrame.");
-	}
-}
-#endif
-/*- End of to be removed */
 
 void Formant_Frame_init (Formant_Frame me, integer numberOfFormants) {
 	if (numberOfFormants > 0)
@@ -89,7 +28,7 @@ void Formant_Frame_init (Formant_Frame me, integer numberOfFormants) {
 }
 
 void LPC_into_Formant (constLPC inputLPC, mutableFormant outputFormant, double margin) {
-	SampledAndSampled_requireEqualDomainsAndSampling (inputLPC, outputFormant);
+	Sampleds_requireEqualDomainsAndSampling (inputLPC, outputFormant);
 	const integer numberOfFrames = inputLPC -> nx, thresholdNumberOfFramesPerThread = 40;
 	autoMelderProgress progress (U"LPC into LineSpectralFrequencies...");
 	const integer order = inputLPC -> maxnCoefficients;

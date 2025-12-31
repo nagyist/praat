@@ -79,7 +79,7 @@ double structSlopeSelector :: getIntercept (double slope) {
 	for (integer i = 1; i <= numberOfPoints; i ++) {
 		buffer [i] = yp [i] - slope * xp [i];
 	}
-	return (num::NUMquantile_e (buffer.get(), 0.5));
+	return num::NUMquantile_e (buffer.get(), 0.5);
 }
 
 double structSlopeSelector :: getSlope_Siegel () {
@@ -131,10 +131,10 @@ void structSlopeSelector :: getKth_TheilSen (integer k, double& kth, double& kp1
 		
 		auto approximatelyEqual = [&] (double lhs, double rhs, double numericalEqualityPrecision) {
 			if (std::fabs (lhs) < numericalEqualityPrecision || std::fabs (rhs) < numericalEqualityPrecision) {
-				return std::fabs(lhs - rhs) < numericalEqualityPrecision;
+				return std::fabs (lhs - rhs) < numericalEqualityPrecision;
 			}
 			// Use relative difference otherwise
-			return std::fabs(lhs - rhs) <= numericalEqualityPrecision * std::fmax(std::fabs(lhs), std::fabs(rhs));
+			return std::fabs (lhs - rhs) <= numericalEqualityPrecision * std::fmax (std::fabs (lhs), std::fabs (rhs));
 		};
 		
 		auto getSlopes = [&] (integer numberOfSlopes) {
@@ -357,7 +357,7 @@ double structSlopeSelector :: slopeQuantile_orderNSquaredWithBuffer (double fact
 	return medianSlope;
 }
 
-void SlopeSelector_init (SlopeSelector me, integer numberOfPoints) {
+static void SlopeSelector_init (SlopeSelector me, integer numberOfPoints) {
 	my numberOfPoints = numberOfPoints;
 	my sampleSize = my numberOfPoints;
 	my maximumContractionSize = 5 * my numberOfPoints;
@@ -400,7 +400,7 @@ autoSlopeSelector SlopeSelector_create (constVEC const& x, constVEC const& y) {
 	}
 }
 
-void SlopeSelectorTheilSen_getMedianSlope (SlopeSelector me, double& slope, double& intercept) {
+static void SlopeSelectorTheilSen_getMedianSlope (SlopeSelector me, double& slope, double& intercept) {
 	slope = my slopeQuantile (0.5);
 	intercept = my getIntercept (slope);
 }
@@ -426,7 +426,7 @@ static void oneSpecial () { // gave a wrong slope (e-316)
 	const double slope4 = sls -> slopeQuantile_TheilSen (factor);
 }
 
-void special50 () { // gets stucck because needs > maximumNumberOfTries
+static void special50 () { // gets stucck because needs > maximumNumberOfTries
 	//const integer n = 50;
 	autoVEC x {0, 0.20408163265306123, 0.40816326530612246, 0.61224489795918369, 0.81632653061224492, 1.0204081632653061, 1.2244897959183674, 1.4285714285714286, 1.6326530612244898, 1.8367346938775511, 2.0408163265306123, 2.2448979591836737, 2.4489795918367347, 2.6530612244897958, 2.8571428571428572, 3.0612244897959187, 3.2653061224489797, 3.4693877551020407, 3.6734693877551021, 3.8775510204081636, 4.0816326530612246, 4.2857142857142856, 4.4897959183673475, 4.6938775510204085, 4.8979591836734695, 5.1020408163265305, 5.3061224489795915, 5.5102040816326534, 5.7142857142857144, 5.9183673469387754, 6.1224489795918373, 6.3265306122448983, 6.5306122448979593, 6.7346938775510203, 6.9387755102040813, 7.1428571428571432, 7.3469387755102042, 7.5510204081632653, 7.7551020408163271, 7.9591836734693882, 8.1632653061224492, 8.3673469387755102, 8.5714285714285712, 8.7755102040816322, 8.979591836734695, 9.183673469387756, 9.387755102040817, 9.591836734693878, 9.795918367346939, 10};
 	autoVEC y {0, 0.92803998653746245, 1.8560799730749249, 2.7841199596123873, 3.7121599461498498, 4.6401999326873122, 5.5682399192247747, 6.4962799057622371, 7.4243198922996996, 8.3523598788371629, 9.2803998653746245, 10.208439851912088, 11.136479838449549, 12.064519824987011, 12.992559811524474, 13.920599798061938, 14.848639784599399, 15.776679771136861, 16.704719757674326, 17.632759744211789, 18.560799730749249, 11.892870479075036, 20.416879703824176, 21.344919690361639, 22.272959676899099, 23.200999663436559, 24.129039649974022, 25.057079636511489, 25.985119623048949, 26.913159609586408, 27.841199596123875, 28.769239582661339, 29.697279569198798, 30.625319555736258, 31.553359542273721, 32.481399528811188, 33.409439515348652, 34.337479501886108, 35.265519488423578, 36.193559474961035, 52.020555528667835, 38.049639448035961, 38.977679434573417, 39.905719421110881, 40.833759407648351, 48.501531333854921, 42.689839380723278, 43.617879367260734, 44.545919353798197, 35.700411620170151};
@@ -449,7 +449,7 @@ void special50 () { // gets stucck because needs > maximumNumberOfTries
 void timeSlopeSelection () {
 	try {
 		Melder_clearInfo ();
-		autoINTVEC sizes {10_integer, 50_integer, 100_integer, 500_integer, 1000_integer, 5000_integer, 10000_integer};
+		autoINTVEC sizes { 10_integer, 50_integer, 100_integer, 500_integer, 1000_integer, 5000_integer, 10000_integer };
 		MelderInfo_write (U"Old: n² slopes, sort, NUMquantile(0.5)\n"
 			"New: Matoušek (1991) O(n log(n))\n"
 		);
@@ -464,7 +464,7 @@ void timeSlopeSelection () {
 			autoVEC x = from_to_count_VEC (0.0, 10.0, n);
 			autoVEC y = randomGauss_VEC (n, b, stddev);
 			for (integer i = 1; i <= n; i ++)
-				y[i] += slope * x[i];
+				y[i] += slope * x [i];
 			autoSlopeSelector sls =  SlopeSelector_create (x.get(), y.get());
 			autoVEC buffer = raw_VEC (maxNumberOfLines);
 			Melder_stopwatch ();
@@ -484,10 +484,10 @@ void timeSlopeSelection () {
 			for (integer i = 1; i <= 5; i ++) {
 				const double slope = NUMrandomUniform (0.1, 10.0);
 				for (integer i = 1; i <= n; i ++)
-					y[i] = slope * x[i];
+					y[i] = slope * x [i];
 				for (integer j = 1; j <= n / 10; j ++) {
 					const integer index = NUMrandomInteger (1, n);
-					y [index] += NUMrandomUniform  (-20.0,20.0);
+					y [index] += NUMrandomUniform (-20.0, 20.0);
 				}
 				sls -> newDataPoints (x.get(), y.get());
 				const double slope4 = sls -> slopeQuantile_TheilSen (factor);

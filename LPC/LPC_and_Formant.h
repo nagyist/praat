@@ -21,34 +21,6 @@
 #include "LPC.h"
 #include "Roots.h"
 #include "Formant.h"
-#include "SampledFrameIntoSampledFrame.h"
-
-Thing_define (LPCFrameIntoFormantFrame, SampledFrameIntoSampledFrame) {
-
-	constLPC inputLPC;
-	mutableFormant outputFormant;
-	double margin;
-	integer order;			// convenience
-	integer bufferSize;
-	autoVEC buffer;
-	autoPolynomial p;		// for the coefficients
-	autoRoots roots;		// the roots of the polynomial
-
-	void initBasicLPCFrameIntoFormantFrame (constLPC inputLPC, mutableFormant outputFormant, double margin);
-
-	void copyBasic (constSampledFrameIntoSampledFrame other)
-		override;
-	
-	bool inputFrameIntoOutputFrame (integer iframe)
-		override;
-
-	void initHeap ()
-		override;
-
-};
-
-autoLPCFrameIntoFormantFrame LPCFrameIntoFormantFrame_create (constLPC inputLPC, mutableFormant outputFormant, double margin);
-
 
 inline integer numberOfFormantsFromNumberOfCoefficients2 (integer maxnCoefficients, double margin) {
 	return ( margin == 0.0 ? maxnCoefficients : (maxnCoefficients + 1) / 2 );

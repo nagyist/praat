@@ -26,7 +26,6 @@
 
 #include "PowerCepstrumWorkspace.h"
 #include "Matrix.h"
-#include "SampledFrameIntoSampledFrame.h"
 #include "Sound.h"
 #include "Table.h"
 

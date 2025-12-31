@@ -23,7 +23,6 @@
 
 #include "LPC_and_LineSpectralFrequencies.h"
 #include "NUM2.h"
-#include "SampledIntoSampled.h"
 
 /*
 	Conversion from Y(w) to a polynomial in x (= 2 cos (w))
@@ -120,7 +119,7 @@ static integer Polynomial_into_Roots_searchOnGrid (Polynomial me, Roots thee, do
 }
 
 void LPC_into_LineSpectralFrequencies (constLPC inputLPC, mutableLineSpectralFrequencies outputLSF, double gridSize) {
-	SampledIntoSampled_requireEqualDomainsAndSampling (inputLPC, outputLSF);
+	Sampleds_requireEqualDomainsAndSampling (inputLPC, outputLSF);
 	if (gridSize <= 0.0)
 		gridSize = 0.02;
 	const integer numberOfFrames = inputLPC -> nx, thresholdNumberOfFramesPerThread = 40;
@@ -206,7 +205,7 @@ autoLineSpectralFrequencies LPC_to_LineSpectralFrequencies (constLPC me, double 
 /**************************** LineSpectralFrequencies to LPC **********************************/
 
 void LineSpectralFrequencies_into_LPC (constLineSpectralFrequencies me, mutableLPC outputLPC) {
-	SampledIntoSampled_requireEqualDomainsAndSampling (me, outputLPC);
+	Sampleds_requireEqualDomainsAndSampling (me, outputLPC);
 	const integer numberOfFrames = my nx, thresholdNumberOfFramesPerThread = 40;
 	autoMelderProgress progress (U"LineSpectralFrequencies_into_LPC...");
 
