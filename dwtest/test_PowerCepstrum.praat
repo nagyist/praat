@@ -1,5 +1,5 @@
 # test_PowerCepstrum.praat
-# djmw 20190910, 20220721, 20241201
+# djmw 20190910, 20220721, 20241201, 20251231
 
 appendInfoLine: "test_PowerCepstrum.praat"
 
@@ -18,6 +18,8 @@ appendInfoLine: "test_PowerCepstrum.praat"
 @test_perfectCosineSpectra
 
 @powerCepstrumSmoothingsOldAndNew
+
+@testSearchDomain
 
 appendInfoLine: "test_PowerCepstrum.praat OK"
 
@@ -493,7 +495,23 @@ procedure timingComparison
 	random_initializeSafelyAndUnpredictably ()
 endproc
 	
-
+procedure testSearchDomain
+	appendInfo: tab$, "testSearchDomain"
+	.sound = Create Sound as tone complex: "tc", 0, 0.025, 16000, 
+	... "cosine", 100, 0, 0, 0
+	.spectrum = To Spectrum: "yes"
+	.ps = To PowerCepstrum
+	# This ps->xmax = 0.016; The maximum value for the peak search gives
+	#  1/60=0.0166 which is larger than ps->xmax
+	# For Praat versions 6.3.39 until 6.4.49 the following query would give an 
+	# error message because of this. 
+	# This error was reported by James Kirby 20250908
+	.peak = Get quefrency of peak: 60, 333.3, "parabolic"
+	# the following would also result in an error
+	.peak = Get peak in quefrency interval: 1./333.3, 1.0/60.0, "parabolic"
+	removeObject: .sound, .spectrum, .ps
+	appendInfoLine: " OK"
+endproc
 
 
 
