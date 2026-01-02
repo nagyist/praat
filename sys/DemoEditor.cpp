@@ -270,7 +270,6 @@ void Demo_waitForInput (Interpreter interpreter) {
 	interpreter -> pausedByDemoWindow = true;
 	trace (U"setting the interpreter to ", Melder_pointer (interpreter));
 	theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
-	//interpreter -> lineNumber -= 1;
 	Melder_getCurrentFolder (& interpreter -> savedFolder);
 	if (theReferenceToTheOnlyDemoEditor -> wasBackgrounding)
 		praat_foreground ();
