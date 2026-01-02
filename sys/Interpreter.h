@@ -2,11 +2,11 @@
 #define _Interpreter_h_
 /* Interpreter.h
  *
- * Copyright (C) 1993-2018,2020-2024 Paul Boersma
+ * Copyright (C) 1993-2018,2020-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -154,6 +154,7 @@ Thing_define (Interpreter, Thing) {
 		our _dynamicEditorEnvironment. _optionalInstance = nullptr;
 	}
 
+	autostring32 text;
 	int numberOfParameters, numberOfLabels, callDepth;
 	int types [1+Interpreter_MAXNUM_PARAMETERS], numbersOfLines [1+Interpreter_MAXNUM_PARAMETERS];
 	char32 parameters [1+Interpreter_MAXNUM_PARAMETERS] [1+Interpreter_MAX_PARAMETER_LENGTH];
@@ -165,7 +166,9 @@ Thing_define (Interpreter, Thing) {
 	autostring32 dialogTitle;
 	char32 procedureNames [1+Interpreter_MAX_CALL_DEPTH] [100];
 	std::unordered_map <std::u32string, autoInterpreterVariable> variablesMap;
-	bool running, stopped;
+	bool running, stopped, pausedByDemoWindow, pausedByPauseWindow;
+	structMelderFolder savedFolder;   // to remember across pausing
+	integer callStack [1 + Interpreter_MAX_CALL_DEPTH];
 
 	autovector <mutablestring32> lines;   // not autostringvector, because the elements are reference copies
 	integer lineNumber = 0;
@@ -199,8 +202,9 @@ void Interpreter_getArgumentsFromDialog (Interpreter me, UiForm dialog);
 void Interpreter_getArgumentsFromString (Interpreter me, conststring32 arguments);
 void Interpreter_getArgumentsFromArgs (Interpreter me, integer nargs, Stackel args);
 void Interpreter_getArgumentsFromCommandLine (Interpreter me, integer argc, char **argv);
-void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables);   // destroys 'text'
+void Interpreter_run (Interpreter me, autostring32 text, const bool reuseVariables);   // messes up 'text'
 void Interpreter_stop (Interpreter me);   // can be called from any procedure called deep-down by the interpreter; will stop before next line
+void Interpreter_resume (Interpreter me);
 
 void Interpreter_voidExpression (Interpreter me, conststring32 expression);
 void Interpreter_numericExpression (Interpreter me, conststring32 expression, double *p_value);

@@ -548,15 +548,6 @@ autoLPC Sound_to_LPC_marple (constSound me, int predictionOrder, double effectiv
 
 /*********************** PLP (Hermansky) method *************************************************************/
 
-#if 0
-bool structSoundFrameIntoLPCFramePLP :: inputFrameIntoOutputFrame (integer /*iframe*/) {
-	
-	
-	
-	
-	return true;
-}
-#endif
 /*
 void structSoundFrameIntoLPCFramePLP :: getFilterCharacteristics () {
 	struct structCriticalBandFilter {

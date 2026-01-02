@@ -96,7 +96,10 @@ int main (int argc, char *argv []) {
 		praat_run ();
 		trace (stopwatch());
 	} catch (MelderError) {
-		Melder_flushError (U"This error message percolated all the way to the top.");   // an attempt to catch Apache errors
+		Melder_flushError (
+			U"This error message percolated all the way to the top.\n"
+			U"Praat will now quit; contact the authors if this is unexpected."
+		);   // an attempt to catch Apache errors
 	}
 	return 0;   // obligatory (because on Windows `main` is just a normal function called from our WinMain)
 }

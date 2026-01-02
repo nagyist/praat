@@ -1,6 +1,6 @@
 /* ManPage.cpp
  *
- * Copyright (C) 1996-2011,2016,2023-2025 Paul Boersma
+ * Copyright (C) 1996-2011,2016,2023-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,7 +153,7 @@ void ManPage_runAllChunksToCache (ManPage me, Interpreter optionalInterpreterRef
 				autoMelderString program;
 				MelderString_append (& program, paragraph -> text);
 				MelderString_append (& program, procedures.string);
-				Interpreter_run (interpreterReference, program.string, chunkNumber > 1);
+				Interpreter_run (interpreterReference, Melder_dup (program.string), chunkNumber > 1);
 			} catch (MelderError) {
 				anErrorHasOccurred = true;
 				errorChunk = chunkNumber;

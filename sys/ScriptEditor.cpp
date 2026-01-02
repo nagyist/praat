@@ -1,6 +1,6 @@
 /* ScriptEditor.cpp
  *
- * Copyright (C) 1997-2005,2007-2018,2020-2025 Paul Boersma
+ * Copyright (C) 1997-2005,2007-2018,2020-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ static void args_ok (UiForm sendingForm, integer /* narg */, Stackel /* args */,
 		Script_rememberDuringThisAppSession_move (script.move());
 		my interpreter -> scriptReference = Script_find (MelderFile_peekPath (& my file));
 	}
-	Interpreter_run (my interpreter.get(), text.get(), false);
+	Interpreter_run (my interpreter.get(), text.move(), false);
 }
 
 static void args_ok_selectionOnly (UiForm sendingForm, integer /* narg */, Stackel /* args */, conststring32 /* sendingString */,
@@ -125,40 +125,14 @@ static void args_ok_selectionOnly (UiForm sendingForm, integer /* narg */, Stack
 		Script_rememberDuringThisAppSession_move (script.move());
 		my interpreter -> scriptReference = Script_find (MelderFile_peekPath (& my file));
 	}
-	Interpreter_run (my interpreter.get(), text.get(), false);
+	Interpreter_run (my interpreter.get(), text.move(), false);
 }
 
 static void menu_cb_run_async (ScriptEditor me) {
 	try {
-		bool isObscured = false;
 		autostring32 text = GuiText_getString (my textWidget);
-		trace (U"Running the following script (1):\n", text.get());
 		if (! MelderFile_isNull (& my file))
 			MelderFile_setDefaultDir (& my file);
-		const conststring32 obscuredLabel = U"#!praatObscured";
-		if (Melder_startsWith (text.get(), obscuredLabel)) {
-			const integer obscuredLabelLength = Melder_length (obscuredLabel);
-			const double fileKey_real = Melder_atof (MelderFile_name (& my file));
-			const uint64 fileKey = ( isdefined (fileKey_real) ? uint64 (fileKey_real) : 0 );
-			char32 *restOfText = & text [obscuredLabelLength];
-			uint64 passwordHash = 0;
-			if (*restOfText == U'\n') {
-				restOfText += 1;   // skip newline
-			} else if (*restOfText == U' ') {
-				restOfText ++;
-				char32 *endOfFirstLine = str32chr (restOfText, U'\n');
-				if (! endOfFirstLine)
-					Melder_throw (U"Incomplete script.");
-				*endOfFirstLine = U'\0';
-				passwordHash = NUMhashString (restOfText);
-				restOfText = endOfFirstLine + 1;
-			} else {
-				Melder_throw (U"Unexpected nonspace after #!praatObscured.");
-			}
-			static uint64 nonsecret = UINT64_C (529857089);
-			text = unhex_STR (restOfText, fileKey + nonsecret + passwordHash);
-			isObscured = true;
-		}
 		Melder_includeIncludeFiles (& text);
 		const integer npar = Interpreter_readParameters (my interpreter.get(), text.get());
 		if (npar != 0) {
@@ -175,8 +149,9 @@ static void menu_cb_run_async (ScriptEditor me) {
 				Script_rememberDuringThisAppSession_move (script.move());
 				my interpreter -> scriptReference = Script_find (MelderFile_peekPath (& my file));
 			}
-			trace (U"Running the following script (2):\n", text.get());
-			Interpreter_run (my interpreter.get(), text.get(), false);
+			TRACE
+			trace (U"going to run a script");
+			Interpreter_run (my interpreter.get(), text.move(), false);
 		}
 	} catch (MelderError) {
 		Melder_flushError (U"The script didn’t run to its completion.");
@@ -186,11 +161,7 @@ static void menu_cb_run_async (ScriptEditor me) {
 static void menu_cb_run (ScriptEditor me, EDITOR_ARGS) {
 	if (my interpreter -> running)
 		Melder_throw (U"The script is already running (paused). Please close or continue the pause, trust or demo window.");
-	#ifdef macintosh
-		dispatch_async (dispatch_get_main_queue (), ^{ menu_cb_run_async (me); });
-	#else
-		menu_cb_run_async (me);
-	#endif
+	menu_cb_run_async (me);
 }
 
 static void menu_cb_runSelection_async (ScriptEditor me) {
@@ -248,7 +219,7 @@ static void menu_cb_runSelection_async (ScriptEditor me) {
 				Script_rememberDuringThisAppSession_move (script.move());
 				my interpreter -> scriptReference = Script_find (MelderFile_peekPath (& my file));
 			}
-			Interpreter_run (my interpreter.get(), textPlusProcedures.string, false);
+			Interpreter_run (my interpreter.get(), Melder_dup (textPlusProcedures.string), false);
 		}
 	} catch (MelderError) {
 		Melder_flushError (U"The script selection didn’t run to its completion.");
@@ -258,11 +229,7 @@ static void menu_cb_runSelection_async (ScriptEditor me) {
 static void menu_cb_runSelection (ScriptEditor me, EDITOR_ARGS) {
 	if (my interpreter -> running)
 		Melder_throw (U"The script is already running (paused). Please close or continue the pause, trust or demo window.");
-	#ifdef macintosh
-		dispatch_async (dispatch_get_main_queue (), ^{ menu_cb_runSelection_async (me); });
-	#else
-		menu_cb_runSelection_async (me);
-	#endif
+	menu_cb_runSelection_async (me);
 }
 
 static void menu_cb_addToMenu (ScriptEditor me, EDITOR_ARGS) {

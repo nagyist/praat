@@ -1,6 +1,6 @@
 /* HyperPage.cpp
  *
- * Copyright (C) 1996-2025 Paul Boersma
+ * Copyright (C) 1996-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -587,7 +587,7 @@ void HyperPage_script (HyperPage me, double width_inches, double height_inches, 
 				if (! MelderFolder_isNull (& my rootDirectory))
 					Melder_setCurrentFolder (& my rootDirectory);
 				try {
-					//Interpreter_run (interpreter, text.get(), false);   // BUG: implement
+					//Interpreter_run (interpreter, text.move(), false);   // BUG: implement
 				} catch (MelderError) {
 					Melder_clearError ();
 				}
