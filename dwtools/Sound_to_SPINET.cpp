@@ -64,7 +64,7 @@ autoSPINET Sound_to_SPINET (Sound me, double timeStep, double windowDuration, do
 			bw [i] = NUM2pi * b * (f [i] * (6.23e-6 * f [i] + 93.39e-3) + 28.52);
 		}
 
-		autoMelderProgress progress (U"SPINET analysis");
+		autoMelderProgress progress (U"Sound to SPINET...");
 
 		for (integer i = 1; i <= numberOfGammaFilters; i ++) {
 			const double bb = (f [i] / 1000.0) * exp (- f [i] / 1000.0); // outer & middle ear and phase locking

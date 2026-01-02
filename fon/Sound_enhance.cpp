@@ -1,10 +1,10 @@
 /* Sound_enhance.cpp
  *
- * Copyright (C) 1992-2012,2015-2020,2023,2024 Paul Boersma
+ * Copyright (C) 1992-2012,2015-2020,2023,2024,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -72,7 +72,7 @@ autoSound Sound_deepenBandModulation (constSound me, double enhancement_dB,
 			for (integer i = 1; i <= n; i ++)
 				amp [i] = filtered -> z [1] [i];
 
-			autoMelderProgress progress (U"Deepen band modulation...");
+			autoMelderProgress progress (U"Sound: Deepen band modulation...");
 			double fmin = flow;
 			while (fmin < fhigh) {
 				/*

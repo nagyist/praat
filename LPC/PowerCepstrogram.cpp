@@ -470,8 +470,8 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram_hillenbrand (Sound me, double pit
 		const double qmax = 0.5 * nfft / samplingFrequency, dq = qmax / (nfftdiv2 + 1);
 		autoPowerCepstrogram him = PowerCepstrogram_create (my xmin, my xmax, numberOfFrames, dt, t1, 0, qmax, nfftdiv2+1, dq, 0);
 		
-		autoMelderProgress progress (U"Cepstrogram analysis");
-		
+		autoMelderProgress progress (U"Sound to PowerCepstrogram...");
+
 		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
 			const double tbegin = std::max (thy xmin, t1 + (iframe - 1) * dt - analysisWidth / 2.0);
 			const integer istart = std::max (1_integer, Sampled_xToLowIndex (thee.get(), tbegin));   // ppgb: afronding naar beneden?

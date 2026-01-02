@@ -164,7 +164,7 @@ autoDTW Cepstrumc_to_DTW (Cepstrumc me, Cepstrumc thee, double wc, double wle, d
 				dist /= wc + wle + wr + wer;
 				his z [iframe] [jframe] = sqrt ((double) dist);   // prototype along y-direction
 			}
-			Melder_progress ( (double) iframe / my nx, U"Calculate distances: frame ", iframe, U" from ", my nx, U".");
+			Melder_progress ((double) iframe / my nx, U"Calculate distances: frame ", iframe, U" from ", my nx, U".");
 		}
 		DTW_findPath (him.get(), matchStart, matchEnd, constraint);
 		return him;

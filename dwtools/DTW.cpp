@@ -793,7 +793,7 @@ autoDTW Matrices_to_DTW (Matrix me, Matrix thee, bool matchStart, bool matchEnd,
 			U"Column sizes should be equal.");
 
 		autoDTW him = DTW_create (my xmin, my xmax, my nx, my dx, my x1, thy xmin, thy xmax, thy nx, thy dx, thy x1);
-		autoMelderProgress progess (U"Calculate distances");
+		autoMelderProgress progess (U"Matrices to DTW: Calculate distances...");
 		for (integer i = 1; i <= my nx; i ++) {
 			for (integer j = 1; j <= thy nx; j ++) {
 				/*
@@ -1269,7 +1269,7 @@ void DTW_Polygon_findPathInside (DTW me, Polygon thee, int localSlope, autoMatri
 			Forward pass.
 		*/
 		integer numberOfIsolatedPoints = 0;
-		autoMelderProgress progress (U"Find path");
+		autoMelderProgress progress (U"DTW & Polygon: Find path...");
 		for (integer j = 2; j <= my nx; j ++) {
 			for (integer i = 2; i <= my ny; i ++) {
 				if (! DTW_ISREACHABLE (i, j))
