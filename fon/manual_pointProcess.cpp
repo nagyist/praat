@@ -1,6 +1,6 @@
 /* manual_pointProcess.cpp
  *
- * Copyright (C) 1992-2008,2010,2011,2014-2017,2019-2023,2025 Paul Boersma
+ * Copyright (C) 1992-2008,2010,2011,2014-2017,2019-2023,2025,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -483,7 +483,7 @@ EQUATION (U"%RAP = %absAP(seconds) / %meanPeriod(seconds)")
 NORMAL (U"The result is a value between 0 and 2, or between 0 and 200 percent.")
 MAN_END
 
-MAN_BEGIN (U"PointProcess: Get jitter (ppq5)...", U"ppgb", 20221202)
+MAN_BEGIN (U"PointProcess: Get jitter (ppq5)...", U"ppgb", 20221202)   // 20260102
 INTRO (U"A command that becomes available in the @@Query submenu@ when you select a @PointProcess object.")
 NORMAL (U"This command will write into the Info window the %%five-point Period Perturbation Quotient%, "
 	"a jitter measure defined as the average absolute difference between an interval and the average of it and its four closest neighbours, "
@@ -494,7 +494,7 @@ NORMAL (U"As jitter is often used as a measure of voice quality (see @@Voice 2. 
 	"or the possible difference in the durations of consecutive intervals (periods).")
 ENTRY (U"1. The command window")
 SCRIPT (5.4, Manual_SETTINGS_WINDOW_HEIGHT (4), U""
-	Manual_DRAW_SETTINGS_WINDOW ("PointProcess: Get jitter (rap)", 4)
+	Manual_DRAW_SETTINGS_WINDOW ("PointProcess: Get jitter (ppq5)", 4)
 	Manual_DRAW_SETTINGS_WINDOW_RANGE ("Time range (s)", "0.0", "0.0 (= all)")
 	Manual_DRAW_SETTINGS_WINDOW_FIELD ("Period floor (s)", "0.0001")
 	Manual_DRAW_SETTINGS_WINDOW_FIELD ("Period ceiling (s)", "0.02")
@@ -544,7 +544,7 @@ EQUATION (U"%PPQ5 = %PPQ5(seconds) / %meanPeriod(seconds)")
 NORMAL (U"The result is a value between 0 and 4, or between 0 and 400 percent.")
 MAN_END
 
-MAN_BEGIN (U"PointProcess: Get jitter (ddp)...", U"ppgb", 20221202)
+MAN_BEGIN (U"PointProcess: Get jitter (ddp)...", U"ppgb", 20221202)   // 20260102
 INTRO (U"A command that becomes available in the @@Query submenu@ when you select a @PointProcess object.")
 NORMAL (U"This command will write into the Info window the %%Difference of Differences of Periods%, "
 	"a jitter measure defined as the average absolute difference between the consecutives differences between consecutive intervals, "
@@ -555,7 +555,7 @@ NORMAL (U"As jitter is often used as a measure of voice quality (see @@Voice 2. 
 	"or the possible difference in the durations of consecutive intervals (periods).")
 ENTRY (U"1. The command window")
 SCRIPT (5.4, Manual_SETTINGS_WINDOW_HEIGHT (4), U""
-	Manual_DRAW_SETTINGS_WINDOW ("PointProcess: Get jitter (rap)", 4)
+	Manual_DRAW_SETTINGS_WINDOW ("PointProcess: Get jitter (ddp)", 4)
 	Manual_DRAW_SETTINGS_WINDOW_RANGE ("Time range (s)", "0.0", "0.0 (= all)")
 	Manual_DRAW_SETTINGS_WINDOW_FIELD ("Period floor (s)", "0.0001")
 	Manual_DRAW_SETTINGS_WINDOW_FIELD ("Period ceiling (s)", "0.02")

@@ -1,6 +1,6 @@
 /* Photo.cpp
  *
- * Copyright (C) 2013-2025 Paul Boersma
+ * Copyright (C) 2013-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -202,7 +202,7 @@ autoPhoto Photo_readFromImageFile (MelderFile file) {
 			}
 			return me;
 		#else
-			return autoPhoto();
+			Melder_throw (U"Photo_readFromImageFile not implemented.");
 		#endif
 	} catch (MelderError) {
 		Melder_throw (U"Picture file ", file, U" not opened as Photo.");
