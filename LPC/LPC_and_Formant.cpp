@@ -30,7 +30,7 @@ void Formant_Frame_init (Formant_Frame me, integer numberOfFormants) {
 void LPC_into_Formant (constLPC inputLPC, mutableFormant outputFormant, double margin) {
 	Sampleds_requireEqualDomainsAndSampling (inputLPC, outputFormant);
 	const integer numberOfFrames = inputLPC -> nx, thresholdNumberOfFramesPerThread = 40;
-	autoMelderProgress progress (U"LPC into LineSpectralFrequencies...");
+	autoMelderProgress progress (U"LPC to LineSpectralFrequencies...");
 	const integer order = inputLPC -> maxnCoefficients;
 	const integer bufferSize = order * order + order + order + 11 * order;
 	const double samplingFrequency = 1.0 / inputLPC -> samplingPeriod;

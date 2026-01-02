@@ -1,6 +1,6 @@
 /* Pitch_to_PointProcess.cpp
  *
- * Copyright (C) 1992-2005,2007,2008,2011,2014-2018,2020,2021,2024,2025 Paul Boersma
+ * Copyright (C) 1992-2005,2007,2008,2011,2014-2018,2020,2021,2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -257,7 +257,7 @@ autoPointProcess Sound_Pitch_to_PointProcess_cc (Sound sound, Pitch pitch) {
 		/*
 			Cycle over all voiced intervals.
 		*/
-		autoMelderProgress progress (U"Sound & Pitch: To PointProcess...");
+		autoMelderProgress progress (U"Sound & Pitch: To PointProcess (cc)...");
 		for (;;) {
 			double tleft, tright;
 			if (! Pitch_getVoicedIntervalAfter (pitch, t, & tleft, & tright))
@@ -352,7 +352,7 @@ autoPointProcess Sound_Pitch_to_PointProcess_peaks (Sound sound, Pitch pitch, in
 			Cycle over all voiced intervals.
 		*/
 
-		autoMelderProgress progress (U"Sound & Pitch: To PointProcess");
+		autoMelderProgress progress (U"Sound & Pitch: To PointProcess (peaks)...");
 		for (;;) {
 			double tleft, tright;
 			if (! Pitch_getVoicedIntervalAfter (pitch, t, & tleft, & tright))

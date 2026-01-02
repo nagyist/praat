@@ -1,10 +1,10 @@
 /* Ltas.cpp
  *
- * Copyright (C) 1992-2012,2015-2018,2022,2023 Paul Boersma
+ * Copyright (C) 1992-2012,2015-2018,2022,2023,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -314,7 +314,7 @@ autoLtas PointProcess_Sound_to_Ltas (PointProcess pulses, Sound sound,
 		autoLtas numbers = Data_copy (ltas.get());
 		if (numberOfPeriods < 1)
 			Melder_throw (U"Cannot compute an Ltas if there are no periods in the point process.");
-		autoMelderProgress progress (U"Ltas analysis...");
+		autoMelderProgress progress (U"PointProcess & Sound: To Ltas...");
 		for (integer ipulse = 2; ipulse < pulses -> nt; ipulse ++) {
 			double leftInterval = pulses -> t [ipulse] - pulses -> t [ipulse - 1];
 			double rightInterval = pulses -> t [ipulse + 1] - pulses -> t [ipulse];
@@ -428,7 +428,7 @@ autoLtas PointProcess_Sound_to_Ltas_harmonics (PointProcess pulses, Sound sound,
 		ltas -> xmax = maximumHarmonic;
 		if (numberOfPeriods < 1)
 			Melder_throw (U"There are no periods in the point process.");
-		autoMelderProgress progress (U"LTAS (harmonics) analysis...");
+		autoMelderProgress progress (U"PointProcess & Sound: To LTAS (harmonics)...");
 		for (integer ipulse = 2; ipulse < pulses -> nt; ipulse ++) {
 			const double leftInterval = pulses -> t [ipulse] - pulses -> t [ipulse - 1];
 			const double rightInterval = pulses -> t [ipulse + 1] - pulses -> t [ipulse];

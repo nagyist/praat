@@ -138,7 +138,7 @@ autoBarkSpectrogram Sound_to_BarkSpectrogram (Sound me, double analysisWidth, do
 		autoSound window = Sound_createGaussian (windowDuration, samplingFrequency);
 		autoBarkSpectrogram thee = BarkSpectrogram_create (my xmin, my xmax, numberOfFrames, dt, t1, fmin_bark, fmax_bark, numberOfFilters, df_bark, f1_bark);
 
-		autoMelderProgress progess (U"BarkSpectrogram analysis");
+		autoMelderProgress progess (U"Sound to BarkSpectrogram...");
 
 		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
 			const double t = Sampled_indexToX (thee.get(), iframe);
@@ -215,7 +215,7 @@ autoMelSpectrogram Sound_to_MelSpectrogram (Sound me, double analysisWidth, doub
 		autoSound window = Sound_createGaussian (windowDuration, samplingFrequency);
 		autoMelSpectrogram thee = MelSpectrogram_create (my xmin, my xmax, numberOfFrames, dt, t1, fmin_mel, fmax_mel, numberOfFilters, df_mel, f1_mel);
 
-		autoMelderProgress progress (U"MelSpectrogram analysis");
+		autoMelderProgress progress (U"Sound to MelSpectrogram...");
 
 		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
 			const double t = Sampled_indexToX (thee.get(), iframe);
@@ -310,7 +310,7 @@ autoSpectrogram Sound_Pitch_to_Spectrogram (Sound me, Pitch thee, double analysi
 
 		autoSound sframe = Sound_createSimple (1, windowDuration, samplingFrequency);
 		autoSound window = Sound_createGaussian (windowDuration, samplingFrequency);
-		autoMelderProgress progress (U"Sound & Pitch: To FormantFilter");
+		autoMelderProgress progress (U"Sound & Pitch: To Spectrogram...");
 		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
 			const double t = Sampled_indexToX (him.get(), iframe);
 			double f0 = Pitch_getValueAtTime (thee, t, kPitch_unit::HERTZ, 0);

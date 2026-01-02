@@ -1,10 +1,10 @@
 /* Sound_to_Formant.cpp
  *
- * Copyright (C) 1992-2008,2010-2012,2014-2021,2024,2025 Paul Boersma
+ * Copyright (C) 1992-2008,2010-2012,2014-2021,2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -307,7 +307,7 @@ static autoFormant Sound_to_Formant_any_inplace (Sound me, double dt_in, integer
 	}
 	autoFormant thee = Formant_create (my xmin, my xmax, numberOfFrames, dt, t1, (numberOfPoles + 1) / 2);   // e.g. 11 poles -> maximally 6 formants
 
-	autoMelderProgress progress (U"Formant analysis...");
+	autoMelderProgress progress (U"Sound to Formant...");
 
 	/* Pre-emphasis. */
 	Sound_preEmphasize_inplace (me, preemphasisFrequency);

@@ -794,7 +794,7 @@ autoBarkFilter Sound_to_BarkFilter (Sound me, double analysisWidth, double dt, d
 		autoBarkFilter thee = BarkFilter_create (my xmin, my xmax, numberOfFrames, dt, t1,
 		                      fmin_bark, fmax_bark, nf, df_bark, f1_bark);
 
-		autoMelderProgress progess (U"BarkFilter analysis");
+		autoMelderProgress progess (U"Sound to BarkFilter...");
 
 		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
 			const double t = Sampled_indexToX (thee.get(), iframe);
@@ -881,7 +881,7 @@ autoMelFilter Sound_to_MelFilter (Sound me, double analysisWidth, double dt, dou
 		autoSound window = Sound_createGaussian (windowDuration, samplingFrequency);
 		autoMelFilter thee = MelFilter_create (my xmin, my xmax, numberOfFrames, dt, t1, fmin_mel, fmax_mel, nf, df_mel, f1_mel);
 
-		autoMelderProgress progress (U"MelFilters analysis");
+		autoMelderProgress progress (U"Sound to MelFilter...");
 
 		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
 			const double t = Sampled_indexToX (thee.get(), iframe);
@@ -986,7 +986,7 @@ autoFormantFilter Sound_Pitch_to_FormantFilter (Sound me, Pitch thee, double ana
 		*/
 		autoSound sframe = Sound_createSimple (1, windowDuration, samplingFrequency);
 		autoSound window = Sound_createGaussian (windowDuration, samplingFrequency);
-		autoMelderProgress progress (U"Sound & Pitch: To FormantFilter");
+		autoMelderProgress progress (U"Sound & Pitch: To FormantFilter...");
 		integer numberOfUndefinedPitches = 0;
 		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
 			const double t = Sampled_indexToX (him.get(), iframe);

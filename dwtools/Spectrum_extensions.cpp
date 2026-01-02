@@ -218,7 +218,7 @@ autoMatrix Spectrum_unwrap (Spectrum me) {
 
 		tbs.dvtmn2 = (2.0 * tbs.dvtmn2 - snx -> z [2] [1] - snx -> z [2] [my nx]) / (my nx - 1);
 
-		autoMelderProgress progress (U"Phase unwrapping");
+		autoMelderProgress progress (U"Spectrum: Unwrap phase...");
 
 		double pphase = 0.0, phase = 0.0;
 		double ppdvt = snx -> z [2] [1];

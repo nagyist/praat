@@ -91,7 +91,7 @@ trace(4);
 		/*
 			Calculate distance matrix.
 		*/
-		autoMelderProgress progress (U"CCs_to_DTW");
+		autoMelderProgress progress (U"CCs to DTW");
 		for (integer iframe = 1; iframe <= my nx; iframe ++) {
 			trace (U"iframe ", iframe, U"/", my nx);
 			const CC_Frame fi = & my frame [iframe];
