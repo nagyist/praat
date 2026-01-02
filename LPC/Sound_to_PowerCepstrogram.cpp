@@ -189,7 +189,6 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchF
 		MelderThread_PARALLEL (nFrames, 10) {
 			autoSoundFrames soundFrames = SoundFrames_createForIntoSampled (input.get(), output.get(), effectiveAnalysisWidth, windowShape, subtractFrameMean);
 			autoVEC fourierSamples = raw_VEC (numberOfFourierSamples);
-			autoVEC power_channelAveraged = raw_VEC (numberOfFourierSamples);
 			autoVEC onesidedPSD = raw_VEC (numberOfFrequencies);
 			autoNUMFourierTable fourierTable = NUMFourierTable_create (numberOfFourierSamples);		// of dimension numberOfFourierSamples;
 			MelderThread_FOR (iframe) {
@@ -205,7 +204,6 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchF
 				*/
 				soundFrames -> getFrame (iframe);
 				Sound sound = soundFrames -> frameAsSound.get();
-				power_channelAveraged.get()  <<=  0.0;
 				onesidedPSD.get()  <<=  0.0;
 				for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
 					fourierSamples.part (1, soundFrameSize)  <<=  sound -> z.row (ichannel);
@@ -217,11 +215,8 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchF
 						onesidedPSD [i] += re * re + im * im;
 					}
 					onesidedPSD [numberOfFrequencies] += fourierSamples [numberOfFourierSamples] * 	fourierSamples [numberOfFourierSamples];
-					for (integer i = 1; i < numberOfFourierSamples; i ++)
-						power_channelAveraged [i] += fourierSamples [i] * fourierSamples [i];
 				}
 				onesidedPSD.get()  *=  powerScaling / numberOfChannels; // scaling and averaging over channels
-				power_channelAveraged.get()  *=  powerScaling / numberOfChannels;
 				/*
 					Get log power.
 				*/
