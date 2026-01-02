@@ -1,6 +1,6 @@
 /* UiPause.cpp
  *
- * Copyright (C) 2009-2020,2022-2025 Paul Boersma
+ * Copyright (C) 2009-2020,2022-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,11 @@
 static autoUiForm thePauseForm;
 static int thePauseForm_clicked = 0;
 static int theCancelContinueButton = 0;
-static int theEventLoopDepth = 0;
+static bool thePauseForm_wasBackgrounding = false;
+static Interpreter thePauseForm_interpreterReference;
+static bool thePauseForm_secondPass = false;
+static structMelderFolder thePauseForm_savedFolder;
+static Editor thePauseForm_savedEditorReference;
 
 static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */, Stackel /* args */,
 	conststring32 /* sendingString */, Interpreter /* interpreter */,
@@ -34,8 +38,19 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	thePauseForm_clicked = UiForm_getClickedContinueButton (thePauseForm.get());
 	if (thePauseForm_clicked != theCancelContinueButton)
 		UiForm_Interpreter_addVariables (thePauseForm.get(), (Interpreter) closure);   // 'closure', not 'interpreter' or 'theInterpreter'!
+	/*
+		Resume the interpreter.
+	*/
+	thePauseForm_interpreterReference -> lineNumber -= 1;   // in order to make sure we'll get a second pass
+	thePauseForm_secondPass = true;
+	thePauseForm_interpreterReference -> pausedByPauseWindow = false;
+	Interpreter_resume (thePauseForm_interpreterReference);
 }
 static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) {
+	Interpreter_stop (thePauseForm_interpreterReference);
+	Melder_assert (thePauseForm);
+	thePauseForm. releaseToUser();   // undangle
+	Melder_assert (! thePauseForm);
 	if (theCancelContinueButton != 0) {
 		thePauseForm_clicked = theCancelContinueButton;
 	} else {
@@ -43,11 +58,12 @@ static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) 
 	}
 }
 void UiPause_begin (GuiWindow topShell, Editor optionalPauseWindowOwningEditor, conststring32 title, Interpreter interpreter) {
-	if (theEventLoopDepth > 0)
+	if (thePauseForm)
 		Melder_throw (Melder_upperCaseAppName(), U" cannot have more than one pause form at a time.");
 	thePauseForm = UiForm_create (topShell, optionalPauseWindowOwningEditor, Melder_cat (U"Pause: ", title),
 		thePauseFormOkCallback, interpreter,   // pass interpreter as closure!
-		nullptr, nullptr);
+		nullptr, nullptr
+	);
 }
 void UiPause_real (conststring32 label, conststring32 defaultValue) {
 	if (! thePauseForm)
@@ -165,87 +181,54 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 	conststring32 continueText7, conststring32 continueText8, conststring32 continueText9,
 	conststring32 continueText10, Interpreter interpreter)
 {
-	if (! thePauseForm)
-		Melder_throw (U"Found the function “endPause” without a preceding “beginPause”.");
-	Melder_assert (interpreter);
-	Editor savedEditor = interpreter -> optionalDynamicEnvironmentEditor();
-	UiForm_setPauseForm (thePauseForm.get(), numberOfContinueButtons, defaultContinueButton, cancelContinueButton,
-		continueText1, continueText2, continueText3, continueText4, continueText5,
-		continueText6, continueText7, continueText8, continueText9, continueText10,
-		thePauseFormCancelCallback
-	);
-	theCancelContinueButton = cancelContinueButton;
-	UiForm_finish (thePauseForm.get());
-	const bool wasBackgrounding = Melder_backgrounding;
-	//if (theCurrentPraatApplication -> batch) goto end;
-	if (wasBackgrounding)
-		praat_foreground ();
-	/*
-		Put the pause form on the screen.
-	*/
-	UiForm_destroyWhenUnmanaged (thePauseForm.get());
-	UiForm_do (thePauseForm.get(), false);
-	/*
-		Wait for the user to click Stop or Continue.
-	*/
-	{// scope
-		autoMelderSaveCurrentFolder saveFolder;
+	if (! thePauseForm_secondPass) {
+		if (! thePauseForm)
+			Melder_throw (U"Found the function “endPause” without a preceding “beginPause”.");
+		Melder_assert (interpreter);
+		thePauseForm_interpreterReference = interpreter;
+		thePauseForm_savedEditorReference = interpreter -> optionalDynamicEnvironmentEditor();
+		UiForm_setPauseForm (thePauseForm.get(), numberOfContinueButtons, defaultContinueButton, cancelContinueButton,
+			continueText1, continueText2, continueText3, continueText4, continueText5,
+			continueText6, continueText7, continueText8, continueText9, continueText10,
+			thePauseFormCancelCallback
+		);
+		theCancelContinueButton = cancelContinueButton;
+		UiForm_finish (thePauseForm.get());
+		thePauseForm_wasBackgrounding = Melder_backgrounding;
+		//if (theCurrentPraatApplication -> batch) goto end;
+		if (thePauseForm_wasBackgrounding)
+			praat_foreground ();
+		Melder_getCurrentFolder (& thePauseForm_savedFolder);
 		thePauseForm_clicked = 0;
-		Melder_assert (theEventLoopDepth == 0);
-		theEventLoopDepth ++;
-		try {
-			/*
-				TODO: make asynchronous, with Interpreter_resume()
-			*/
-			do {
-				#if gtk
-					gtk_main_iteration ();
-				#elif cocoa
-					NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-					NSEvent *nsEvent;
-					if ((nsEvent = [NSApp
-						nextEventMatchingMask: NSEventMaskAny
-						untilDate: [NSDate distantPast]
-						inMode: NSDefaultRunLoopMode
-						dequeue: YES]) != nullptr)
-					{
-						[NSApp   sendEvent: nsEvent];
-					}
-					constexpr double moderatePollingFrequency = 300.0;   // hertz
-					constexpr double moderatePollingPeriod = 1.0 / moderatePollingFrequency;   // e.g. 3.333 ms
-					[NSThread   sleepForTimeInterval: moderatePollingPeriod];
-					[pool release];
-				#elif motif
-					XEvent event;
-					GuiNextEvent (& event);
-					XtDispatchEvent (& event);
-				#endif
-			} while (! thePauseForm_clicked);
-		} catch (MelderError) {
-			Melder_flushError (U"An error made it to the outer level in a pause window; should not occur! Please write to paul.boersma@uva.nl");
-		}
-		theEventLoopDepth --;
-	}
-	if (wasBackgrounding)
-		praat_background ();
-	thePauseForm. releaseToUser();   // undangle
-	if (thePauseForm_clicked == -1) {
-		Interpreter_stop (interpreter);
-		Melder_throw (U"You interrupted the script.");
-		//Melder_flushError ();
-		//Melder_clearError ();
+		thePauseForm_interpreterReference -> pausedByPauseWindow = true;
+		/*
+			Put the pause form on the screen.
+		*/
+		UiForm_destroyWhenUnmanaged (thePauseForm.get());
+		UiForm_do (thePauseForm.get(), false);
+		return 0;
 	} else {
-		//Melder_casual (U"Clicked ", thePauseForm_clicked);
+		Melder_assert (thePauseForm);
+		Melder_assert (thePauseForm_interpreterReference);
+		if (thePauseForm_wasBackgrounding)
+			praat_background ();
+		thePauseForm. releaseToUser();   // undangle
+		Melder_assert (! thePauseForm);
+		if (thePauseForm_clicked == -1) {
+			const integer lineNumber = thePauseForm_interpreterReference -> lineNumber;
+			Interpreter_stop (thePauseForm_interpreterReference);
+			Melder_flushError (U"You interrupted the script at line ", lineNumber, U".");
+		}
+		if (thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor() != thePauseForm_savedEditorReference) {
+			Melder_assert (thePauseForm_savedEditorReference);
+			Melder_assert (! thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor());
+			Melder_assert (thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName());
+					// testing the assumption that the environment can be lost but never added during pause
+			Melder_throw (U"Cannot continue after pause, because the ", thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName(), U" has been closed.");
+		}
+		thePauseForm_secondPass = false;
+		return thePauseForm_clicked;
 	}
-	if (interpreter -> optionalDynamicEnvironmentEditor() != savedEditor) {
-		Melder_assert (savedEditor);
-		Melder_assert (! interpreter -> optionalDynamicEnvironmentEditor());
-		Melder_assert (interpreter -> optionalDynamicEditorEnvironmentClassName());
-				// testing the assumption that the environment can be lost but never added during pause
-		Melder_throw (U"Cannot continue after pause, because the ", interpreter -> optionalDynamicEditorEnvironmentClassName(), U" has been closed.");
-	}
-	return thePauseForm_clicked;
 }
 
 /* End of file UiPause.cpp */
-
