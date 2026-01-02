@@ -169,6 +169,7 @@ Thing_define (Interpreter, Thing) {
 	bool running, stopped, pausedByDemoWindow, pausedByPauseWindow;
 	structMelderFolder savedFolder;   // to remember across pausing
 	integer callStack [1 + Interpreter_MAX_CALL_DEPTH];
+	bool fromif, fromendfor;
 
 	autovector <mutablestring32> lines;   // not autostringvector, because the elements are reference copies
 	integer lineNumber = 0;

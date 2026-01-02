@@ -2194,6 +2194,8 @@ void Interpreter_run (Interpreter me, autostring32 text, const bool reuseVariabl
 		private_Interpreter_initialize (me, text.move(), reuseVariables);
 		my lineNumber = 1;
 		my callDepth = 0;
+		my fromif = false;
+		my fromendfor = false;
 		my setDynamicFromOwningEditorEnvironment ();
 		Interpreter_resume (me);
 	} catch (MelderError) {
@@ -2218,8 +2220,7 @@ void Interpreter_resume (Interpreter me) {
 		autoMelderString command2;
 		autoMelderString buffer;
 		integer assertErrorLineNumber = 0;
-		bool fromif = false, fromendfor = false;
-		int callDepth = 0;
+		int callDepth = my callDepth;
 		const integer numberOfLines = my lines.size;
 		/*
 			Execute commands.
@@ -2361,7 +2362,7 @@ void Interpreter_resume (Interpreter me) {
 								for (iline = my lineNumber - 1; iline > 0; iline --) {
 									char32 *line = lines [iline];
 									if (line [0] == U'f' && line [1] == U'o' && line [2] == U'r' && line [3] == U' ') {
-										if (depth == 0) { my lineNumber = iline - 1; fromendfor = true; break; }   // go before 'for'
+										if (depth == 0) { my lineNumber = iline - 1; my fromendfor = true; break; }   // go before 'for'
 										else depth --;
 									} else if (str32nequ (lines [iline], U"endfor", 6) &&
 											(! Melder_staysWithinInk (lines [iline] [6]) || lines [iline] [6] == U';'))
@@ -2429,9 +2430,9 @@ void Interpreter_resume (Interpreter me) {
 							if (iline > numberOfLines)
 								Melder_throw (U"Unmatched 'else'.");
 						} else if (str32nequ (command2.string, U"elsif ", 6) || str32nequ (command2.string, U"elif ", 5)) {
-							if (fromif) {
+							if (my fromif) {
 								double value;
-								fromif = false;
+								my fromif = false;
 								Interpreter_numericExpression (me, command2.string + 5, & value);
 								if (value == 0.0) {
 									int depth = 0;
@@ -2466,7 +2467,7 @@ void Interpreter_resume (Interpreter me) {
 											|| (str32nequ (lines [iline], U"elif", 4) && ! Melder_staysWithinInk (lines [iline] [4]))) {
 											if (depth == 0) {
 												my lineNumber = iline - 1;
-												fromif = true;
+												my fromif = true;
 												break;   // go at next 'elsif' or 'elif'
 											}
 										} else if (str32nequ (lines [iline], U"if ", 3)) {
@@ -2534,8 +2535,8 @@ void Interpreter_resume (Interpreter me) {
 								Melder_throw (U"Missing loop variable after \'for\'.");
 							InterpreterVariable var = Interpreter_lookUpVariable (me, varpos);
 							Interpreter_numericExpression (me, topos + 4, & toValue);
-							if (fromendfor) {
-								fromendfor = false;
+							if (my fromendfor) {
+								my fromendfor = false;
 								loopVariable = var -> numericValue + 1.0;
 							} else if (frompos) {
 								*topos = U'\0';
@@ -2657,7 +2658,7 @@ void Interpreter_resume (Interpreter me) {
 									} else if (str32nequ (lines [iline], U"elsif ", 6) || str32nequ (lines [iline], U"elif ", 5)) {
 										if (depth == 0) {
 											my lineNumber = iline - 1;
-											fromif = true;
+											my fromif = true;
 											break;   // go at 'elsif'
 										}
 									} else if (str32nequ (lines [iline], U"if ", 3)) {
@@ -3487,7 +3488,7 @@ void Interpreter_resume (Interpreter me) {
 				}
 			}
 		} // endfor lineNumber
-		if (my stopped) {   // not just paused
+		if (! my pausedByDemoWindow && ! my pausedByPauseWindow) {
 			//my numberOfLabels = 0;
 			my running = false;
 			my stopped = false;
