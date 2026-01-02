@@ -26,8 +26,8 @@
 #define PRAAT_NAME  Praat
 #define PRAAT_VERSION_STR  6.4.52
 #define PRAAT_VERSION_NUM  6452
-#define PRAAT_YEAR  2025
-#define PRAAT_MONTH  12
-#define PRAAT_DAY  31
+#define PRAAT_YEAR  2026
+#define PRAAT_MONTH  1
+#define PRAAT_DAY  2
 
 /* End of file main_Praat.h */

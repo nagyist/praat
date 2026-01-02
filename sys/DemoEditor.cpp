@@ -32,7 +32,7 @@ bool Demo_hasGraphics (Graphics graphics) {
 /***** DemoEditor methods *****/
 
 void structDemoEditor :: v9_destroy () noexcept {
-	Melder_free (praatPicture);
+	Melder_free (our praatPicture);
 	theReferenceToTheOnlyDemoEditor = nullptr;
 	DemoEditor_Parent :: v9_destroy ();
 }
@@ -45,9 +45,17 @@ void structDemoEditor :: v1_info () {
 }
 
 void structDemoEditor :: v_goAway () {
-	if (waitingForInput)
-		userWantsToClose = true;
-	else
+	if (our waitingForInput) {
+		if (our interpreterReference) {
+			const integer lineNumber = our interpreterReference -> lineNumber;
+			Interpreter_stop (our interpreterReference);
+			Melder_flushError (
+				U"You interrupted the script at line ", lineNumber, U".\n"
+				U"The Demo window will now close."
+			);
+		}
+		forget (theReferenceToTheOnlyDemoEditor);
+	} else
 		DemoEditor_Parent :: v_goAway ();
 }
 
@@ -77,6 +85,16 @@ static void gui_drawingarea_cb_mouse (DemoEditor me, GuiDrawingArea_MouseEvent e
 	my shiftKeyPressed = event -> shiftKeyPressed;
 	my commandKeyPressed = event -> commandKeyPressed;
 	my optionKeyPressed = event -> optionKeyPressed;
+	if (my waitingForInput) {
+		my waitingForInput = false;
+		if (theReferenceToTheOnlyDemoEditor -> wasBackgrounding)
+			praat_background ();
+		if (my interpreterReference) {
+			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
+			my interpreterReference -> pausedByDemoWindow = false;
+			Interpreter_resume (my interpreterReference);
+		}
+	}
 }
 
 static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event) {
@@ -91,6 +109,16 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 	my shiftKeyPressed = event -> shiftKeyPressed;
 	my commandKeyPressed = event -> commandKeyPressed;
 	my optionKeyPressed = event -> optionKeyPressed;
+	if (my waitingForInput) {
+		my waitingForInput = false;
+		if (theReferenceToTheOnlyDemoEditor -> wasBackgrounding)
+			praat_background ();
+		if (my interpreterReference) {
+			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
+			my interpreterReference -> pausedByDemoWindow = false;
+			Interpreter_resume (my interpreterReference);
+		}
+	}
 }
 
 static void gui_drawingarea_cb_resize (DemoEditor me, GuiDrawingArea_ResizeEvent event) {
@@ -224,8 +252,13 @@ void Demo_timer (double duration) {
 }
 
 void Demo_waitForInput (Interpreter interpreter) {
+	/*
+		This function pauses the interpreter.
+		Key or mouse input will resume the interpreter..
+	*/
 	if (! theReferenceToTheOnlyDemoEditor)
 		return;
+	theReferenceToTheOnlyDemoEditor -> wasBackgrounding = Melder_backgrounding;
 	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
@@ -234,63 +267,13 @@ void Demo_waitForInput (Interpreter interpreter) {
 	theReferenceToTheOnlyDemoEditor -> clicked = false;
 	theReferenceToTheOnlyDemoEditor -> keyPressed = false;
 	theReferenceToTheOnlyDemoEditor -> waitingForInput = true;
-	{// scope
-		autoMelderSaveCurrentFolder saveFolder;
-		const bool wasBackgrounding = Melder_backgrounding;
-		if (wasBackgrounding)
-			praat_foreground ();
-		try {
-			/*
-				TODO: make asynchronous, with Interpreter_resume()
-			*/
-			#if gtk
-				do {
-					gtk_main_iteration ();
-				} while (! theReferenceToTheOnlyDemoEditor -> clicked &&
-				         ! theReferenceToTheOnlyDemoEditor -> keyPressed &&
-				         ! theReferenceToTheOnlyDemoEditor -> userWantsToClose);
-			#elif cocoa
-				do {
-					NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-					[theReferenceToTheOnlyDemoEditor -> windowForm -> d_cocoaShell   displayIfNeeded];
-					Graphics_updateWs (theReferenceToTheOnlyDemoEditor -> graphics.get());   // make sure that even texts will be drawn
-					NSEvent *nsEvent = [NSApp
-						nextEventMatchingMask: NSEventMaskAny
-						untilDate: [NSDate distantPast]
-						inMode: NSDefaultRunLoopMode
-						dequeue: YES
-					];
-					if (nsEvent)
-						[NSApp  sendEvent: nsEvent];
-					constexpr double moderatePollingFrequency = 300.0;   // hertz
-					constexpr double moderatePollingPeriod = 1.0 / moderatePollingFrequency;   // e.g. 3.333 ms
-					[NSThread   sleepForTimeInterval: moderatePollingPeriod];
-					[pool release];
-				} while (! theReferenceToTheOnlyDemoEditor -> clicked &&
-				         ! theReferenceToTheOnlyDemoEditor -> keyPressed &&
-				         ! theReferenceToTheOnlyDemoEditor -> userWantsToClose);
-			#elif defined (_WIN32)
-				do {
-					//Graphics_updateWs (theReferenceToTheOnlyDemoEditor -> graphics.get());   // make sure that even texts will be drawn
-					XEvent event;
-					GuiNextEvent (& event);
-					XtDispatchEvent (& event);
-				} while (! theReferenceToTheOnlyDemoEditor -> clicked &&
-				         ! theReferenceToTheOnlyDemoEditor -> keyPressed &&
-				         ! theReferenceToTheOnlyDemoEditor -> userWantsToClose);
-			#endif
-		} catch (MelderError) {
-			Melder_flushError (U"An error made it to the outer level in the Demo window; should not occur! Please write to paul.boersma@uva.nl");
-		}
-		if (wasBackgrounding)
-			praat_background ();
-	}
-	theReferenceToTheOnlyDemoEditor -> waitingForInput = false;
-	if (theReferenceToTheOnlyDemoEditor -> userWantsToClose) {
-		Interpreter_stop (interpreter);
-		forget (theReferenceToTheOnlyDemoEditor);
-		Melder_throw (U"You interrupted the script.");
-	}
+	interpreter -> pausedByDemoWindow = true;
+	trace (U"setting the interpreter to ", Melder_pointer (interpreter));
+	theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
+	//interpreter -> lineNumber -= 1;
+	Melder_getCurrentFolder (& interpreter -> savedFolder);
+	if (theReferenceToTheOnlyDemoEditor -> wasBackgrounding)
+		praat_foreground ();
 }
 
 void Demo_peekInput (Interpreter interpreter) {

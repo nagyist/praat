@@ -1,6 +1,6 @@
 /* Interpreter.cpp
  *
- * Copyright (C) 1993-2025 Paul Boersma
+ * Copyright (C) 1993-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1168,7 +1168,7 @@ static integer lookupLabel (Interpreter me, conststring32 labelName) {
 	for (integer ilabel = 1; ilabel <= my numberOfLabels; ilabel ++)
 		if (str32equ (labelName, my labelNames [ilabel]))
 			return ilabel;
-	Melder_throw (U"Unknown label \"", labelName, U"\".");
+	Melder_throw (U"Unknown label \"", labelName, U"\" (we know of ", my numberOfLabels, U" labels).");
 }
 
 static bool isCommand (conststring32 string) {
@@ -2032,16 +2032,13 @@ static void assignToStringArrayElement (Interpreter me, char32 *& p, const char3
 	var -> stringArrayValue [indexValue] = value. move();
 }
 
-static void private_Interpreter_initialize (Interpreter me, char32 *text, const bool reuseVariables) {
-	char32 *command = text;
+static void private_Interpreter_initialize (Interpreter me, autostring32 text, const bool reuseVariables) {
+	my text = text.move();
+	char32 *command = my text.get();
 	autoMelderString command2;
 	integer numberOfLines = 0;
 	bool atLastLine = false;
 	int chopped = 0;
-	/*
-		Start.
-	*/
-	my running = true;
 	/*
 		Count lines and set the newlines to zero.
 	*/
@@ -2059,7 +2056,8 @@ static void private_Interpreter_initialize (Interpreter me, char32 *text, const 
 		Remember line starts and labels.
 	*/
 	my lines. resize (numberOfLines);
-	command = text;   // reset
+	command = my text.get();   // reset
+	my numberOfLabels = 0;
 	for (integer lineNumber = 1; lineNumber <= numberOfLines; lineNumber ++, command += Melder_length (command) + 1 + chopped) {
 		while (Melder_isHorizontalSpace (*command))
 			command ++;   // nbsp can occur for scripts copied from the manual
@@ -2191,34 +2189,53 @@ static void private_Interpreter_initialize (Interpreter me, char32 *text, const 
 	}
 }
 
-void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
+void Interpreter_run (Interpreter me, autostring32 text, const bool reuseVariables) {
+	try {
+		private_Interpreter_initialize (me, text.move(), reuseVariables);
+		my lineNumber = 1;
+		my callDepth = 0;
+		my setDynamicFromOwningEditorEnvironment ();
+		Interpreter_resume (me);
+	} catch (MelderError) {
+		throw;
+	}
+}
+
+void Interpreter_resume (Interpreter me) {
+	/*
+		Start.
+	*/
+	my running = true;
+	my stopped = false;
+	my pausedByDemoWindow = false;
+	my pausedByPauseWindow = false;
 	bool assertionFailed = false;
+	//TRACE
+	trace (U"resuming at line ", my lineNumber);
 	try {
 		static MelderString valueString;   // to divert the info
 		static MelderString assertErrorString;
 		autoMelderString command2;
 		autoMelderString buffer;
-		integer assertErrorLineNumber = 0, callStack [1 + Interpreter_MAX_CALL_DEPTH];
+		integer assertErrorLineNumber = 0;
 		bool fromif = false, fromendfor = false;
 		int callDepth = 0;
-		my callDepth = 0;
-		private_Interpreter_initialize (me, text, reuseVariables);
 		const integer numberOfLines = my lines.size;
 		/*
 			Execute commands.
 		*/
-		my setDynamicFromOwningEditorEnvironment ();
 		trace (U"going to handle ", numberOfLines, U" lines");
 		//for (integer lineNumber = 1; lineNumber <= numberOfLines; lineNumber ++) {
 			//trace (U"line ", lineNumber, U": ", lines [lineNumber]);
 		//}
-		for (my lineNumber = 1; my lineNumber <= numberOfLines; my lineNumber ++) {
+		for (; my lineNumber <= numberOfLines; my lineNumber ++) {
 			if (my stopped)
 				break;
-			//trace (U"now at line ", lineNumber, U": ", lines [lineNumber]);
-			//for (int lineNumber2 = 1; lineNumber2 <= numberOfLines; lineNumber2 ++) {
-				//trace (U"  line ", lineNumber2, U": ", lines [lineNumber2]);
-			//}
+			if (my pausedByDemoWindow)
+				break;
+			if (my pausedByPauseWindow)
+				break;
+			trace (U"now at line ", my lineNumber, U": ", my lines [my lineNumber]);
 			constvector <mutablestring32> lines = my lines.get();
 			try {
 				char32 c0;
@@ -2291,7 +2308,7 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 						fail = true;
 						break;
 					case U'@':
-						Interpreter_do_procedureCall (me, command2.string + 1, lines, my lineNumber, callStack, callDepth);
+						Interpreter_do_procedureCall (me, command2.string + 1, lines, my lineNumber, my callStack, callDepth);
 						break;
 					case U'a':
 						if (str32nequ (command2.string, U"assert ", 7)) {
@@ -2313,7 +2330,7 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 						break;
 					case U'c':
 						if (str32nequ (command2.string, U"call ", 5)) {
-							Interpreter_do_oldProcedureCall (me, command2.string + 5, lines, my lineNumber, callStack, callDepth);
+							Interpreter_do_oldProcedureCall (me, command2.string + 5, lines, my lineNumber, my callStack, callDepth);
 						} else
 							fail = true;
 						break;
@@ -2383,7 +2400,7 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 									Melder_throw (U"Stray text after 'endproc'.");
 								if (callDepth == 0)
 									Melder_throw (U"Unmatched 'endproc'.");
-								my lineNumber = callStack [callDepth --];
+								my lineNumber = my callStack [callDepth --];
 								-- my callDepth;
 							} else fail = true;
 						} else if (str32nequ (command2.string, U"else", 4) &&
@@ -3470,9 +3487,11 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 				}
 			}
 		} // endfor lineNumber
-		my numberOfLabels = 0;
-		my running = false;
-		my stopped = false;
+		if (my stopped) {   // not just paused
+			//my numberOfLabels = 0;
+			my running = false;
+			my stopped = false;
+		}
 	} catch (MelderError) {
 		if (my lineNumber > 0) {
 			const bool normalExplicitExit = str32nequ (my lines [my lineNumber], U"exit ", 5) || Melder_hasError (U"Script exited.");
@@ -3484,7 +3503,7 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 				Melder_appendError (U"Script line ", my lineNumber, U" not performed or completed:\n« ", my lines [my lineNumber], U" »");
 			}
 		}
-		my numberOfLabels = 0;
+		//my numberOfLabels = 0;
 		my running = false;
 		my stopped = false;
 		if (Melder_hasCrash ()) {
@@ -3500,6 +3519,8 @@ void Interpreter_run (Interpreter me, char32 *text, const bool reuseVariables) {
 void Interpreter_stop (Interpreter me) {
 //Melder_casual (U"Interpreter_stop in: ", Melder_pointer (me));
 	my stopped = true;
+	my running = false;
+	//my numberOfLabels = 0;
 //Melder_casual (U"Interpreter_stop out: ", Melder_pointer (me));
 }
 

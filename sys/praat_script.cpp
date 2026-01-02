@@ -1,11 +1,10 @@
 /* praat_script.cpp
  *
- * Copyright (C) 1993-2025 Paul Boersma
+ * Copyright (C) 1993-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3
-  of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -536,7 +535,7 @@ void praat_executeScriptFromFile (MelderFile file, conststring32 arguments, Edit
 			Interpreter_getArgumentsFromString (interpreter.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
 		}
 		autoMelderFileSetCurrentFolder folder (file);   // so that script-relative file names can be used inside the script
-		Interpreter_run (interpreter.get(), text.get(), false);
+		Interpreter_run (interpreter.get(), text.move(), false);
 	} catch (MelderError) {
 		Melder_throw (U"Script ", file, U" not completed.");
 	}
@@ -574,7 +573,7 @@ void praat_runScript (conststring32 fileName, integer narg, Stackel args, Editor
 		interpreter -> scriptReference = Script_find (MelderFile_peekPath (& file));
 		{// scope
 			autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used inside the script
-			Interpreter_run (interpreter.get(), text.get(), false);
+			Interpreter_run (interpreter.get(), text.move(), false);
 		}   // back to the default directory of the caller
 	} catch (MelderError) {
 		Melder_throw (U"Script ", & file, U" not completed.");   // don't refer to 'fileName', because its contents may have changed
@@ -634,7 +633,7 @@ void praat_executeScriptFromCommandLine (conststring32 fileName, integer argc, c
 		Interpreter_readParameters (interpreter.get(), text.get());
 		Interpreter_getArgumentsFromCommandLine (interpreter.get(), argc, argv);   // interpret caller-relative paths for infile/outfile/folder arguments
 		autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used inside the script
-		Interpreter_run (interpreter.get(), text.get(), false);
+		Interpreter_run (interpreter.get(), text.move(), false);
 	} catch (MelderError) {
 		Melder_throw (U"Script ", & file, U" not completed.");   // don't refer to 'fileName', because its contents may have changed
 	}
@@ -678,7 +677,7 @@ extern "C" void praatlib_executeScript (const char *text8) {
 	try {
 		autoInterpreter interpreter = Interpreter_create ();
 		autostring32 string = Melder_8to32 (text8);
-		Interpreter_run (interpreter.get(), string.get(), false);
+		Interpreter_run (interpreter.get(), string.move(), false);
 	} catch (MelderError) {
 		Melder_throw (U"Script not completed.");
 	}
@@ -688,7 +687,7 @@ void praat_executeScriptFromText (conststring32 text) {
 	try {
 		autoInterpreter interpreter = Interpreter_create ();
 		autostring32 string = Melder_dup (text);   // copy, because Interpreter will change it (UGLY)
-		Interpreter_run (interpreter.get(), string.get(), false);
+		Interpreter_run (interpreter.get(), string.move(), false);
 	} catch (MelderError) {
 		Melder_throw (U"Script not completed.");
 	}
@@ -707,7 +706,7 @@ static void secondPassThroughScript (UiForm sendingForm, integer /* narg */, Sta
 	Interpreter_readParameters (interpreter.get(), text.get());
 	Interpreter_getArgumentsFromDialog (interpreter.get(), sendingForm);
 	autoPraatBackground background;
-	Interpreter_run (interpreter.get(), text.get(), false);
+	Interpreter_run (interpreter.get(), text.move(), false);
 }
 
 static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterOwningEditor, EditorCommand optionalCommand) {
@@ -756,7 +755,7 @@ static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterO
 			//praat_executeScriptFromFile (file, nullptr, optionalInterpreterOwningEditor);
 			{// scope
 				autoMelderFileSetCurrentFolder folder (file);   // so that callee-relative file names can be used inside the script
-				Interpreter_run (interpreter.get(), text.get(), false);
+				Interpreter_run (interpreter.get(), text.move(), false);
 			}
 		}
 	} catch (MelderError) {
