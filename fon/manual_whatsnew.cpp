@@ -1,6 +1,6 @@
 /* manual_whatsnew.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,19 @@ MAN_PAGES_BEGIN
 R"~~~(
 ################################################################################
 "What's new?"
-© Paul Boersma 1995–2025
+© Paul Boersma 1995–2026
 
 Latest changes in Praat.
+
+##6.4.52# (3 January 2026)
+• MacOS Tahoe: support making menu choices or turning windows to full screen
+  if a script is paused (by the Demo window or the Pause window),
+  as on earlier MacOS versions and on Windows and Linux.
+• Windows: support horizontal scrolling in three ways (two-finger swiping on the touchpad;
+  left and right tilting of the mouse’s scroll wheel; turning the mouse’s scroll wheel
+  while keeping the Shift key pressed).
+• Linux: prevented a crash when a “barren” edition tried to run `runAllTests_batch.praat`.
+• @@Sound: To PowerCepstrogram...@ now averages the power over channels instead of taking only channel 1.
 
 ##6.4.51# (30 December 2025)
 • Windows: switch back to the faster version (version 6.4.50 was deliberately slower,
