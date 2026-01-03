@@ -1841,7 +1841,7 @@ void GuiWin_initialize2 (unsigned int argc, char **argv)
 	windowClass. lpszClassName = Melder_32toW (theApplicationClassName).transfer();
 	RegisterClassEx (& windowClass);
 	InitCommonControls ();
-	EnableMouseInPointer (TRUE);
+	EnableMouseInPointer (TRUE);   // from Windows 8 on
 }
 
 void GuiApp_setApplicationShell (GuiObject shell) {
@@ -2869,7 +2869,7 @@ static LRESULT CALLBACK windowProc (HWND window, UINT message, WPARAM wParam, LP
 		HANDLE_MSG (window, WM_CTLCOLORBTN, on_ctlColorBtn);
 		HANDLE_MSG (window, WM_CTLCOLORSTATIC, on_ctlColorStatic);
 		HANDLE_MSG (window, WM_ACTIVATE, on_activate);
-		case WM_POINTERWHEEL: {
+		case WM_POINTERWHEEL: {   // from Windows 8 on
 			int zDelta = GET_WHEEL_DELTA_WPARAM (wParam);
 			int fwKeys = GET_KEYSTATE_WPARAM (wParam);
 			if (GetKeyState (VK_SHIFT) < 0)
@@ -2879,7 +2879,7 @@ static LRESULT CALLBACK windowProc (HWND window, UINT message, WPARAM wParam, LP
 			on_mouseWheel (window, point.x, point.y, zDelta, fwKeys);
 			return 0;
 		}
-		case WM_POINTERHWHEEL: {
+		case WM_POINTERHWHEEL: {   // from Windows 8 on
 			int zDelta = GET_WHEEL_DELTA_WPARAM (wParam);
 			int fwKeys = GET_KEYSTATE_WPARAM (wParam) | MK_SHIFT;
 			POINT point = { GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam) };

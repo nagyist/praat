@@ -396,9 +396,7 @@ Thing_implement (GuiDrawingArea, GuiControl, 0);
 				for (integer igraphics = 1; igraphics <= my numberOfGraphicses; igraphics ++) {
 					GraphicsScreen graphics = static_cast <GraphicsScreen> (my graphicses [igraphics]);
 					if (graphics -> d_macView) {
-						graphics -> d_macGraphicsContext = Melder_systemVersion < 101400 ?
-								(CGContextRef) [[NSGraphicsContext currentContext] graphicsPort] :
-								[[NSGraphicsContext currentContext] CGContext];
+						graphics -> d_macGraphicsContext = [[NSGraphicsContext currentContext] CGContext];
 						Melder_assert (!! graphics -> d_macGraphicsContext);
 					}
 				}
