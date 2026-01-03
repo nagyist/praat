@@ -1841,6 +1841,7 @@ void GuiWin_initialize2 (unsigned int argc, char **argv)
 	windowClass. lpszClassName = Melder_32toW (theApplicationClassName).transfer();
 	RegisterClassEx (& windowClass);
 	InitCommonControls ();
+	EnableMouseInPointer (TRUE);
 }
 
 void GuiApp_setApplicationShell (GuiObject shell) {
@@ -2719,19 +2720,26 @@ static void on_vscroll (HWND window, HWND controlWindow, UINT code, int pos) {
 	(void)(fn)((hwnd),WM_MOUSEWHEEL,MAKEWPARAM((fwKeys),(zDelta)),MAKELPARAM((xPos),(yPos)))
 //#define HANDLE_WM_MOUSEWHEEL(hwnd,wParam,lParam,fn) \
 	((fn)((hwnd),(int)(short)LOWORD(lParam),(int)(short)HIWORD(lParam),(int)(short)HIWORD(wParam),(UINT)(short)LOWORD(wParam)),(LRESULT)0)
-static void on_verticalWheel (HWND window, int xPos, int yPos, int zDelta, int fwKeys) {
+static void on_mouseWheel (HWND window, int xPos, int yPos, int zDelta, int fwKeys) {
 	GuiObject me = (GuiObject) GetWindowLongPtr (window, GWLP_USERDATA);
 	if (me) {
 		if (my widgetClass == xmDrawingAreaWidgetClass) {
+			const bool isHorizontal = ( fwKeys & MK_SHIFT );
+			const int direction = ( isHorizontal ? ( zDelta < 0 ? SB_LINELEFT : SB_LINERIGHT ) : ( zDelta < 0 ? SB_LINEDOWN : SB_LINEUP ) );
 			const bool controlKeyPressed = ( fwKeys & MK_CONTROL );
-			if (controlKeyPressed)
+			if (controlKeyPressed) {
 				_GuiWinDrawingArea_handleZoom (me, double (zDelta) / 10.0);
-			else if (my parent -> widgetClass == xmScrolledWindowWidgetClass)
-				on_scroll (my parent -> motiff.scrolledWindow.verticalBar, zDelta < 0 ? SB_LINEDOWN : SB_LINEUP, 0);
-			else
+			} else if (my parent -> widgetClass == xmScrolledWindowWidgetClass) {
+				on_scroll (isHorizontal ? my parent -> motiff.scrolledWindow.horizontalBar : my parent -> motiff.scrolledWindow.verticalBar, direction, 0);
+			} else if (isHorizontal) {
+				for (GuiObject child = my parent -> firstChild; child; child = child -> nextSibling)
+					if (child -> widgetClass == xmScrollBarWidgetClass && child -> orientation == XmHORIZONTAL)
+						on_scroll (child, direction, 0);
+			} else {
 				for (GuiObject child = my parent -> firstChild; child; child = child -> nextSibling)
 					if (child -> widgetClass == xmScrollBarWidgetClass && child -> orientation == XmVERTICAL)
-						on_scroll (child, zDelta < 0 ? SB_LINEDOWN : SB_LINEUP, 0);
+						on_scroll (child, direction, 0);
+			}
 		} else FORWARD_WM_MOUSEWHEEL (window, xPos, yPos, zDelta, fwKeys, DefWindowProc);
 	} else FORWARD_WM_MOUSEWHEEL (window, xPos, yPos, zDelta, fwKeys, DefWindowProc);
 }
@@ -2853,8 +2861,7 @@ static LRESULT CALLBACK windowProc (HWND window, UINT message, WPARAM wParam, LP
 		HANDLE_MSG (window, WM_PAINT, on_paint);
 		HANDLE_MSG (window, WM_HSCROLL, on_hscroll);
 		HANDLE_MSG (window, WM_VSCROLL, on_vscroll);
-		HANDLE_MSG (window, WM_MOUSEWHEEL, on_verticalWheel);
-		//HANDLE_MSG (window, WM_MOUSEHWHEEL, on_horizontalWheel);
+		HANDLE_MSG (window, WM_MOUSEWHEEL, on_mouseWheel);
 		HANDLE_MSG (window, WM_SIZE, on_size);
 		HANDLE_MSG (window, WM_KEYDOWN, on_key);
 		HANDLE_MSG (window, WM_CHAR, on_char);
@@ -2862,6 +2869,24 @@ static LRESULT CALLBACK windowProc (HWND window, UINT message, WPARAM wParam, LP
 		HANDLE_MSG (window, WM_CTLCOLORBTN, on_ctlColorBtn);
 		HANDLE_MSG (window, WM_CTLCOLORSTATIC, on_ctlColorStatic);
 		HANDLE_MSG (window, WM_ACTIVATE, on_activate);
+		case WM_POINTERWHEEL: {
+			int zDelta = GET_WHEEL_DELTA_WPARAM (wParam);
+			int fwKeys = GET_KEYSTATE_WPARAM (wParam);
+			if (GetKeyState (VK_SHIFT) < 0)
+				fwKeys |= MK_SHIFT;
+			POINT point = { GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam) };
+			ScreenToClient (window, & point);
+			on_mouseWheel (window, point.x, point.y, zDelta, fwKeys);
+			return 0;
+		}
+		case WM_POINTERHWHEEL: {
+			int zDelta = GET_WHEEL_DELTA_WPARAM (wParam);
+			int fwKeys = GET_KEYSTATE_WPARAM (wParam) | MK_SHIFT;
+			POINT point = { GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam) };
+			ScreenToClient (window, & point);
+			on_mouseWheel (window, point.x, point.y, zDelta, fwKeys);
+			return 0;
+		}
 		case WM_USER:   // TODO: remove once Elan's sendpraat is updated to using WM_APP instead of WM_USER
 		case WM_APP:
 		{
