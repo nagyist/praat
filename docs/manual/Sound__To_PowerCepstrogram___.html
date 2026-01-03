@@ -24,6 +24,10 @@ Sound: To PowerCepstrogram...
 </dl>
 <h2>Algorithm</h2>
 <p>The sound will first be resampled to twice the value of the <i>Maximum frequency</i>, with the algorithm described at <a href="Sound__Resample___.html">Sound: Resample...</a>. After this, pre-emphasis is applied with the algorithm described at <a href="Sound__Pre-emphasize__in-place____.html">Sound: Pre-emphasize (in-place)...</a>. For each analysis window a Gaussian window is applied and the <b>Spectrum</b> is calculated. The Spectrum is then transformed to a <b>PowerCepstrum</b> with the procedure described at <a href="Spectrum__To_PowerCepstrum.html">Spectrum: To PowerCepstrum</a>. Finally, the values from the PowerCepstrum are stored in the vertical slice of the PowerCepstrogram.</p>
+<h3>Links to this page</h3>
+<ul>
+<li><a href="What_s_new_.html">What's new?</a>
+</ul>
 <hr>
 <address>
 	<p>© djmw 20200403</p>
