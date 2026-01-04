@@ -781,15 +781,15 @@ LIST_ITEM (U"\\bu The results of the root finder may not always be accurate when
 	"roots have to be found.")
 MAN_END
 
-MAN_BEGIN (U"LPC: To Polynomial (slice)...", U"djmw", 20040407)
+MAN_BEGIN (U"LPC: To Polynomial (slice)...", U"djmw", 20260104)
 INTRO (U"A command that creates a Polynomial object from each selected @LPC object.")
 ENTRY (U"Settings")
 TERM (U"##Time (s)")
-DEFINITION (U"defines the LPC frame whose coefficents will be selected.")
+DEFINITION (U"defines the LPC frame whose coefficients will be selected.")
 ENTRY (U"Behaviour")
-NORMAL (U"The linear prediction coefficients %a__1..%n_ of the selected LPC "
-	"frame will be copied to polynomial coefficients %c__1..%n+1_ as follows:")
-EQUATION (U"%c__%i_ = %a__%n\\--%i+1_, ")
+NORMAL (U"The linear prediction coefficients %a__1..%n_ of the LPC frame that is nearest to the"
+	" given time will be copied into polynomial coefficients %c__1..%n+1_ as follows:")
+EQUATION (U"%c__%i_ = %a__%n\\--%i+1_  for %i=1..%n,")
 EQUATION (U"%c__%n+1_ = 1")
 MAN_END
 
