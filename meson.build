@@ -17,6 +17,7 @@ os_name = build_machine.system()
 if os_name == 'linux'
 
 	common_compiler_arguments = '''-DUNIX -Dlinux -DALSA -DHAVE_PULSEAUDIO -D_FILE_OFFSET_BITS=64 -Wreturn-type 
+		-DWORDS_BIGENDIAN=0 -DPA_LITTLE_ENDIAN 
 		-Wunused -Wunused-parameter -Wuninitialized'''.split()
 	compiler_arguments_cpp = common_compiler_arguments
 	compiler_arguments_c = ['-std=gnu99'] + common_compiler_arguments + ['-Wshadow']
