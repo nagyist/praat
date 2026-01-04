@@ -1,6 +1,6 @@
 /* LPC_and_Polynomial.cpp
  *
- * Copyright (C) 1994-2020, 2025 David Weenink
+ * Copyright (C) 1994-2020, 2025, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,9 +47,9 @@ void LPC_Frame_into_Polynomial (constLPC_Frame me, mutablePolynomial p) {
 	p -> coefficients [numberOfPolynomialCoefficientsNeeded] = 1.0;
 }
 
-autoPolynomial LPC_to_Polynomial (constLPC me, double time) {
+autoPolynomial LPC_to_Polynomial_slice (constLPC me, double time) {
 	try {
-		integer iFrame = Sampled_xToIndex (me, time);
+		integer iFrame = Sampled_xToNearestIndex (me, time);
 		Melder_clip (1_integer, & iFrame, my nx);   // constant extrapolation
 		autoPolynomial thee = LPC_Frame_to_Polynomial (& my d_frames [iFrame]);
 		return thee;
