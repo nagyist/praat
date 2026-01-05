@@ -37,7 +37,6 @@
 #include "LPC_to_Spectrum.h"
 #include "NUM2.h"
 #include "PowerCepstrum.h"
-#include "PowerCepstrogram.h"
 #include "Sound_to_PowerCepstrogram.h"
 #include "Sound_and_LPC.h"
 #include "Sound_to_Formant_mt.h"

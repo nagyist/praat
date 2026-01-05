@@ -561,7 +561,7 @@ static autoMAT PowerCepstrum_getRhamonicsPower (PowerCepstrum me, double pitchFl
 double PowerCepstrum_getRNR (PowerCepstrum me, double pitchFloor, double pitchCeiling, double f0fractionalWidth) {
 	const double qminPeakSearch = 1.0 /pitchCeiling;
 	const double qmaxPeakSearch = std::min (my xmax, 1.0 / pitchFloor);
-	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me,qminPeakSearch, qmaxPeakSearch, 
+	autoPowerCepstrumWorkspace workspace = PowerCepstrumWorkspace_create (me,qminPeakSearch, qmaxPeakSearch,
 			kCepstrum_trendType::LINEAR, kCepstrum_trendFit::ROBUST_FAST);
 	workspace -> initPeakSearchPart (qminPeakSearch, qmaxPeakSearch, kVector_peakInterpolation :: CUBIC);
 	const double rnr = workspace -> getRNR (qminPeakSearch, qmaxPeakSearch, f0fractionalWidth);
