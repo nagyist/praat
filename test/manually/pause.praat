@@ -4,6 +4,6 @@
 beginPause: "Invisible pause"
 	comment: "Just hit 'return' on your keyboard"
 		word: "Something", ""
-clicked = endPause: "Stop", "Continue", 2, 1
+clicked = endPause: "Cancel", "Continue", 2, 1
 
 printline 'clicked'

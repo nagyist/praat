@@ -32,32 +32,89 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	conststring32 /* sendingString */, Interpreter /* interpreter */,
 	conststring32 /* invokingButtonTitle */, bool /* modified */, void *closure, Editor optionalEditor)
 {
+	Melder_assert (thePauseForm_interpreterReference);
+	if (thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor() != thePauseForm_savedEditorReference) {
+		Melder_assert (thePauseForm_savedEditorReference);
+		Melder_assert (! thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor());
+		Melder_assert (thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName());
+				// testing the assumption that the environment can be lost but never added during pause
+		Melder_assert (thePauseForm);
+		thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
+		Melder_assert (! thePauseForm);
+		const integer lineNumber = thePauseForm_interpreterReference -> lineNumber;
+		Interpreter_stop (thePauseForm_interpreterReference);
+		Melder_flushError (U"Cannot continue after pause, because the ", thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName(), U" has been closed.",
+				U"\nScript interrupted at line ", lineNumber, U".");   // a top-level error message
+		return;
+	}
 	/*
 		Get the data from the pause form.
 	*/
+	Melder_assert (thePauseForm);
 	thePauseForm_clicked = UiForm_getClickedContinueButton (thePauseForm.get());
 	if (thePauseForm_clicked != theCancelContinueButton)
 		UiForm_Interpreter_addVariables (thePauseForm.get(), (Interpreter) closure);   // 'closure', not 'interpreter' or 'theInterpreter'!
+	thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
+	Melder_assert (! thePauseForm);
 	/*
 		Resume the interpreter.
 	*/
 	thePauseForm_interpreterReference -> lineNumber -= 1;   // in order to make sure we'll get a second pass
 	thePauseForm_secondPass = true;
 	thePauseForm_interpreterReference -> pausedByPauseWindow = false;
+	if (thePauseForm_wasBackgrounding)
+		praat_background ();
 	Interpreter_resume (thePauseForm_interpreterReference);
 }
 static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) {
-	Interpreter_stop (thePauseForm_interpreterReference);
+	Melder_assert (thePauseForm_interpreterReference);
+	/*
+		We arrive here if the user clicked the close box of the dialog window, or if they clicked Stop.
+	*/
 	Melder_assert (thePauseForm);
-	thePauseForm. releaseToUser();   // undangle
+	thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
 	Melder_assert (! thePauseForm);
 	if (theCancelContinueButton != 0) {
-		thePauseForm_clicked = theCancelContinueButton;
+		/*
+			The pause window apparently contains a "Cancel"-like button, so it doesn’t contain a Stop button.
+			Hence, if we arrive here, the user must have clicked the close box of the dialog window.
+			We divert this click to the "Cancel"-like button,
+			and it will be the script’s responsibility to handle it.
+		*/
+		thePauseForm_clicked = theCancelContinueButton;   // there was
+		if (thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor() != thePauseForm_savedEditorReference) {
+			Melder_assert (thePauseForm_savedEditorReference);
+			Melder_assert (! thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor());
+			Melder_assert (thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName());
+					// testing the assumption that the environment can be lost but never added during pause
+			const integer lineNumber = thePauseForm_interpreterReference -> lineNumber;
+			Interpreter_stop (thePauseForm_interpreterReference);
+			Melder_flushError (U"Cannot continue after pause, because the ", thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName(), U" has been closed.",
+					U"\nScript interrupted at line ", lineNumber, U".");   // a top-level error message
+		}
+		/*
+			Resume the interpreter.
+		*/
+		thePauseForm_interpreterReference -> lineNumber -= 1;   // in order to make sure we'll get a second pass
+		thePauseForm_secondPass = true;
+		thePauseForm_interpreterReference -> pausedByPauseWindow = false;
+		if (thePauseForm_wasBackgrounding)
+			praat_background ();
+		Interpreter_resume (thePauseForm_interpreterReference);
 	} else {
-		thePauseForm_clicked = -1;   // STOP button
+		/*
+			The pause window apparently contains no "Cancel"-like button, so it must contain a Stop button.
+			Perform the normal action for the Stop button, which is to post a message about interruption.
+			A click in the close box of the dialog window performs the same action as the Stop button.
+		*/
+		const integer lineNumber = thePauseForm_interpreterReference -> lineNumber;
+		Interpreter_stop (thePauseForm_interpreterReference);
+		Melder_flushError (U"You interrupted the script at line ", lineNumber, U".");   // a top-level error message
 	}
 }
 void UiPause_begin (GuiWindow topShell, Editor optionalPauseWindowOwningEditor, conststring32 title, Interpreter interpreter) {
+	if (thePauseForm_secondPass)
+		return;   // this can happen in `pauseScript()` and in `pause`.
 	if (thePauseForm)
 		Melder_throw (Melder_upperCaseAppName(), U" cannot have more than one pause form at a time.");
 	thePauseForm = UiForm_create (topShell, optionalPauseWindowOwningEditor, Melder_cat (U"Pause: ", title),
@@ -165,6 +222,8 @@ void UiPause_heading (conststring32 label) {
 	UiForm_addHeading (thePauseForm.get(), nullptr, label);
 }
 void UiPause_comment (conststring32 label) {
+	if (thePauseForm_secondPass)
+		return;   // this can happen in `pauseScript()` and in `pause`.
 	if (! thePauseForm)
 		Melder_throw (U"The function “comment” should be between a “beginPause” and an “endPause”.");
 	UiForm_addComment (thePauseForm.get(), nullptr, label);
@@ -208,24 +267,7 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 		UiForm_do (thePauseForm.get(), false);
 		return 0;
 	} else {
-		Melder_assert (thePauseForm);
-		Melder_assert (thePauseForm_interpreterReference);
-		if (thePauseForm_wasBackgrounding)
-			praat_background ();
-		thePauseForm. releaseToUser();   // undangle
 		Melder_assert (! thePauseForm);
-		if (thePauseForm_clicked == -1) {
-			const integer lineNumber = thePauseForm_interpreterReference -> lineNumber;
-			Interpreter_stop (thePauseForm_interpreterReference);
-			Melder_flushError (U"You interrupted the script at line ", lineNumber, U".");
-		}
-		if (thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor() != thePauseForm_savedEditorReference) {
-			Melder_assert (thePauseForm_savedEditorReference);
-			Melder_assert (! thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor());
-			Melder_assert (thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName());
-					// testing the assumption that the environment can be lost but never added during pause
-			Melder_throw (U"Cannot continue after pause, because the ", thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName(), U" has been closed.");
-		}
 		thePauseForm_secondPass = false;
 		return thePauseForm_clicked;
 	}

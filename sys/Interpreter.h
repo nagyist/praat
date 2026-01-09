@@ -173,6 +173,8 @@ Thing_define (Interpreter, Thing) {
 
 	autovector <mutablestring32> lines;   // not autostringvector, because the elements are reference copies
 	integer lineNumber = 0;
+	integer assertErrorLineNumber = 0;
+	autoMelderString assertErrorString;
 
 	kInterpreter_ReturnType returnType;   // automatically initialized as kInterpreter_ReturnType::VOID_
 	bool returnedBoolean;

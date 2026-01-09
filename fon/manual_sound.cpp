@@ -1592,18 +1592,18 @@ And these are narrower again:
 
 ################################################################################
 "audio control panel"
-© Paul Boersma 2022-09-11,2024
+© Paul Boersma 2022-09-11,2024,2026
 
 Your platform’s way of controlling where sounds will be played, and how loud.
 
-On macOS X or 11 or 12 or 13 or 14, go to the Apple menu,
+On macOS X or 11 or 12 or 13 or 14 or 15 or 26, go to the Apple menu,
 then to ##System Settings# (older: ##System Preferences#),
 then to #Sound, then to #Output. If you want to change only the loudness,
 then modern Macs have three keys on the keyboard for that.
 
-On Ubuntu Linux 18.04 or 20.04 or 22.04, go to the left side bar,
-then to #Settings, then to #Sound, then to #Output
-(a loudspeaker icon can be in the menu bar).
+On Ubuntu Linux 22.04 or 24.04, the fastest way is to click the loudspeaker icon in the menu bar,
+then click the #Settings symbol (or the cartwheel), then #Output
+(otherwise, look for the #Settings app, then #Sound, then #Output).
 
 On Windows 10 or 11, it lies somewhat deeper:
 go to the Start icon, then to #Settings, then to #System, then to #Sound, then to #Output.
