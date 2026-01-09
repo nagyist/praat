@@ -2,7 +2,7 @@
 #define _Sound_to_PowerCepstrogram_h_
 /* Sound_to_PowerCepstrogram.h
  *
- * Copyright (C) 2012-2025 David Weenink
+ * Copyright (C) 2012-2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PowerCepstrum.h"
 #include "PowerCepstrogram.h"
 #include "Sound.h"
 

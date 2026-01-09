@@ -459,7 +459,7 @@ autoMatrix FormantPath_to_Matrix_stress (FormantPath me, double windowLength, co
 		const integer numberOfDataPoints = (windowLength + 0.5 * my dx) / my dx;
 		Melder_require (numberOfDataPoints >= maximumNumberOfCoefficients,
 			U"The window length is too short for the number of coefficients you use in the stress determination (",
-			maximumNumberOfCoefficients, U"). Either increase your window length or decrease the number of coefficents per track."
+			maximumNumberOfCoefficients, U"). Either increase your window length or decrease the number of coefficients per track."
 		);
 		while (fromFormant <= parameters.size && parameters [fromFormant] <= 0)
 			fromFormant ++;

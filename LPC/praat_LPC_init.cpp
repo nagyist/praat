@@ -1,6 +1,6 @@
 /* praat_LPC_init.cpp
  *
- * Copyright (C) 1994-2024 David Weenink
+ * Copyright (C) 1994-2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@
 #include "LPC_to_Spectrum.h"
 #include "NUM2.h"
 #include "PowerCepstrum.h"
-#include "PowerCepstrogram.h"
 #include "Sound_to_PowerCepstrogram.h"
 #include "Sound_and_LPC.h"
 #include "Sound_to_Formant_mt.h"
@@ -1153,7 +1152,7 @@ FORM (CONVERT_EACH_TO_ONE__LPC_to_Polynomial_slice, U"LPC: To Polynomial", U"LPC
 	OK
 DO
 	CONVERT_EACH_TO_ONE (LPC)
-		autoPolynomial result = LPC_to_Polynomial (me, time);
+		autoPolynomial result = LPC_to_Polynomial_slice (me, time);
 	CONVERT_EACH_TO_ONE_END (my name.get(), U"_", NUMnumber_as_stringWithDotReplacedByUnderscore (time))
 }
 

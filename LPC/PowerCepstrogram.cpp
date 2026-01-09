@@ -24,9 +24,7 @@
 #include "Sound_extensions.h"
 
 
-#define TOLOG(x) ((1 / NUMln10) * log ((x) + 1e-30))
 #define TO10LOG(x) ((10 / NUMln10) * log ((x) + 1e-30))
-#define FROMLOG(x) (exp ((x) * (NUMln10 / 10.0)) - 1e-30)
 
 integer a = sizeof(struct structMatrix);
 
@@ -410,106 +408,7 @@ autoPowerCepstrogram Matrix_to_PowerCepstrogram (Matrix me) {
 }
 
 
-//       1           2                          nfftdiv2
-//    re   im    re     im                   re      im
-// ((fft [1],0) (fft [2],fft [3]), (,), (,), (fft [nfft], 0))  nfft even
-// ((fft [1],0) (fft [2],fft [3]), (,), (,), (fft [nfft-1], fft [nfft]))  nfft odd
-static void complexfftoutput_to_power (constVEC fft, VEC dbs, bool to_db) {
-	double valsq = fft [1] * fft [1];
-	dbs [1] = ( to_db ? TOLOG (valsq) : valsq );
-	const integer nfftdiv2p1 = (fft.size + 2) / 2;
-	const integer nend = ( fft.size % 2 == 0 ? nfftdiv2p1 : nfftdiv2p1 + 1 );
-	for (integer i = 2; i < nend; i ++) {
-		const double re = fft [i + i - 2], im = fft [i + i - 1];
-		valsq = re * re + im * im;
-		dbs [i] = ( to_db ? TOLOG (valsq) : valsq );
-	}
-	if (fft.size % 2 == 0) {
-		valsq = fft [fft.size] * fft [fft.size];
-		dbs [nfftdiv2p1] = ( to_db ? TOLOG (valsq) : valsq );
-	}
-}
 
-autoPowerCepstrogram Sound_to_PowerCepstrogram_hillenbrand (Sound me, double pitchFloor, double dt) {
-	try {
-		// minimum analysis window has 3 periods of lowest pitch
-		const double physicalDuration = my dx * my nx;
-		const double analysisWidth = std::min (3.0 / pitchFloor, physicalDuration);
-
-		double samplingFrequency = 1.0 / my dx;
-		autoSound thee;
-		if (samplingFrequency > 30000.0) {
-			samplingFrequency = samplingFrequency / 2.0;
-			thee = Sound_resample (me, samplingFrequency, 1);
-		} else {
-			thee = Data_copy (me);
-		}
-		/*
-			Pre-emphasis with fixed coefficient 0.9
-		*/
-		for (integer i = thy nx; i > 1; i --)
-			thy z [1] [i] -= 0.9 * thy z [1] [i - 1];
-
-		const integer nosInWindow = Melder_ifloor (analysisWidth * samplingFrequency);
-		Melder_require (nosInWindow >= 8,
-			U"Analysis window too short.");
-
-		double t1;
-		integer numberOfFrames;
-		Sampled_shortTermAnalysis (thee.get(), analysisWidth, dt, & numberOfFrames, & t1);
-		autoVEC hamming = raw_VEC (nosInWindow);
-		for (integer i = 1; i <= nosInWindow; i ++)
-			hamming [i] = 0.54 - 0.46 * cos (NUM2pi * (i - 1) / (nosInWindow - 1));
-
-		const integer nfft = Melder_clippedLeft (8_integer /* minimum possible */, Melder_iroundUpToPowerOfTwo (nosInWindow));
-		const integer nfftdiv2 = nfft / 2;
-		autoVEC fftbuf = zero_VEC (nfft); // "complex" array
-		autoVEC spectrum = zero_VEC (nfftdiv2 + 1); // +1 needed 
-		autoNUMFourierTable fftTable = NUMFourierTable_create (nfft); // sound to spectrum
-		
-		const double qmax = 0.5 * nfft / samplingFrequency, dq = qmax / (nfftdiv2 + 1);
-		autoPowerCepstrogram him = PowerCepstrogram_create (my xmin, my xmax, numberOfFrames, dt, t1, 0, qmax, nfftdiv2+1, dq, 0);
-		
-		autoMelderProgress progress (U"Sound to PowerCepstrogram...");
-
-		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
-			const double tbegin = std::max (thy xmin, t1 + (iframe - 1) * dt - analysisWidth / 2.0);
-			const integer istart = std::max (1_integer, Sampled_xToLowIndex (thee.get(), tbegin));   // ppgb: afronding naar beneden?
-			integer iend = istart + nosInWindow - 1;
-			Melder_clipRight (& iend, thy nx);
-			fftbuf.part (1, nosInWindow)  <<=  thy z.row (1).part (istart, iend) * hamming.all();
-			fftbuf.part (nosInWindow + 1, nfft)  <<=  0.0;
-			
-			NUMfft_forward (fftTable.get(), fftbuf.get());
-			complexfftoutput_to_power (fftbuf.get(), spectrum.get(), true); // log10(|fft|^2)
-		
-			centre_VEC_inout (spectrum.get()); // subtract average
-			/*
-				Here we diverge from Hillenbrand as he takes the fft of half of the spectral values.
-				H. forgets that the actual spectrum has nfft/2+1 values. Thefore, we take the inverse
-				transform because this keeps the number of samples a power of 2.
-				At the same time this results in twice as many numbers in the quefrency domain, i.e. we end up with nfft/2+1
-				numbers while H. has only nfft/4!
-			 */
-			fftbuf [1] = spectrum [1];
-			for (integer i = 2; i < nfftdiv2 + 1; i ++) {
-				fftbuf [i+i-2] = spectrum [i];
-				fftbuf [i+i-1] = 0.0;
-			}
-			fftbuf [nfft] = spectrum [nfftdiv2 + 1];
-			NUMfft_backward (fftTable.get(), fftbuf.get());
-			for (integer i = 1; i <= nfftdiv2 + 1; i ++)
-				his z [i] [iframe] = fftbuf [i] * fftbuf [i];
-
-			if (iframe % 10 == 1)
-				Melder_progress ((double) iframe / numberOfFrames, U"Cepstrogram analysis of frame ",
-					 iframe, U" out of ", numberOfFrames, U".");
-		}
-		return him;
-	} catch (MelderError) {
-		Melder_throw (me, U": no Cepstrogram created.");
-	}
-}
 
 double PowerCepstrogram_getCPPS (PowerCepstrogram me, bool subtractTrendBeforeSmoothing, double timeAveragingWindow, double quefrencyAveragingWindow, double pitchFloor, double pitchCeiling, double deltaF0, kVector_peakInterpolation peakInterpolationType, double qminFit, double qmaxFit, kCepstrum_trendType lineType, kCepstrum_trendFit fitMethod) {
 	try {

@@ -22,145 +22,8 @@
 #include "Sound_extensions.h"
 #include "SoundFrames.h"
 #include "Sound_to_PowerCepstrogram.h"
-#include "SoundFrameIntoSampledFrame.h"   // needed only for getPhysicalAnalysisWidth2; TODO: move that function into the right location
 
-static void Sound_into_PowerCepstrogram (constSound input, mutablePowerCepstrogram output, double effectiveAnalysisWidth, 
-	kSound_windowShape windowShape) 
-{
-	Sampleds_assertEqualDomains (input, output);
-	constexpr integer thresholdNumberOfFramesPerThread = 40;
-	const integer numberOfFrames = output -> nx;
-	//autoMelderProgress progress (U"Analyse power cepstrogram...");
-
-	/*
-		The stuff that is constant, and equal among threads.
-	*/
-	const double physicalAnalysisWidth = getPhysicalAnalysisWidth2 (effectiveAnalysisWidth, windowShape);
-	const integer soundFrameSize = getSoundFrameSize2 (physicalAnalysisWidth, input -> dx);
-	autoVEC windowFunction = raw_VEC (soundFrameSize);
-	windowShape_into_VEC (windowShape, windowFunction.get());
-
-	MelderThread_PARALLEL (numberOfFrames, thresholdNumberOfFramesPerThread) {
-		bool subtractFrameMean = true;   // TODO: check
-		integer fftInterpolationFactor = 1;
-
-		autoPowerCepstrum powerCepstrum = PowerCepstrum_create (output -> ymax, output -> ny);
-		autoSound frameAsSound = Sound_create (1, 0.0, soundFrameSize * input -> dx, soundFrameSize, input -> dx, 0.5 * input -> dx);
-		VEC soundFrame = frameAsSound -> z.row (1);
-		Melder_assert (soundFrame.size == soundFrameSize);
-
-		/*
-			Spectrum.
-		*/
-		integer numberOfFourierSamples = frameAsSound -> nx;
-		if (fftInterpolationFactor > 0) {
-			numberOfFourierSamples = Melder_iroundUpToPowerOfTwo (numberOfFourierSamples);
-			for (integer imultiply = fftInterpolationFactor; imultiply > 1; imultiply --)
-				numberOfFourierSamples *= 2;
-		}
-		autoVEC fourierSamples = raw_VEC (numberOfFourierSamples);
-		autoVEC fourierSamplesChannel = raw_VEC (numberOfFourierSamples);
-		const integer numberOfFrequencies = numberOfFourierSamples / 2 + 1;
-		autoNUMFourierTable fourierTable = NUMFourierTable_create (numberOfFourierSamples);
-		autoSpectrum spectrum = Spectrum_create (0.5 / frameAsSound -> dx, numberOfFrequencies);
-		spectrum -> dx = 1.0 / (frameAsSound -> dx * numberOfFourierSamples);
-		MelderThread_FOR (iframe) {
-			if (MelderThread_IS_MASTER && 0) {
-				const double estimatedProgress = MelderThread_ESTIMATED_PROGRESS;
-				Melder_progress (0.98 * estimatedProgress,
-					U"Analysed approximately ", Melder_iround (numberOfFrames * estimatedProgress),
-					U" out of ", numberOfFrames, U" frames"
-				);
-			}
-			const double midTime = Sampled_indexToX (output, iframe);
-			integer soundFrameBegin = Sampled_xToNearestIndex (input, midTime - 0.5 * physicalAnalysisWidth);   // approximation
-			integer channelBegin = soundFrameBegin;
-
-			for (integer isample = 1; isample <= soundFrame.size; isample ++, channelBegin ++)
-				soundFrame [isample] = ( channelBegin > 0 && channelBegin <= input -> nx ? input -> z [1] [channelBegin] : 0.0 );
-			if (subtractFrameMean)
-				centre_VEC_inout (soundFrame, nullptr);
-			//const double soundFrameExtremum = NUMextremum_u (soundFrame);   // not used
-			soundFrame  *=  windowFunction.get();
-			/*
-				Step 1:
-				Take the channel unscaled power spectra and average them
-			*/
-			fourierSamples.part (1, soundFrameSize)  <<=  frameAsSound -> z.row (1);
-			fourierSamples. part (soundFrameSize + 1, fourierSamples.size)  <<=  0.0;
-			NUMfft_forward (fourierTable.get(), fourierSamples.get());
-			for (integer i = 1; i <= fourierSamples.size; i ++) // unscaled "power"
-				fourierSamples [i] *= fourierSamples [i];
-			const integer numberOfChannels = frameAsSound -> ny;
-			if (numberOfChannels > 1) {
-				/*
-					Multiple channels: take the average of the power spectra
-					scaling is not necessary yet
-				*/
-				for (integer ichan = 1; ichan <= numberOfChannels; ichan ++) {
-					channelBegin = soundFrameBegin;
-					for (integer isample = 1; isample <= soundFrame.size; isample ++, channelBegin ++)
-						soundFrame [isample] = ( channelBegin > 0 && channelBegin <= input -> nx ? input -> z [ichan] [channelBegin] : 0.0 );
-					soundFrame  *=  windowFunction.get();
-					fourierSamplesChannel.part (1, soundFrameSize)  <<=  frameAsSound -> z.row (ichan);
-					fourierSamples. part (soundFrameSize + 1, fourierSamples.size)  <<=  0.0;
-					NUMfft_forward (fourierTable.get(), fourierSamples.get());
-					for (integer i = 1; i <= fourierSamples.size; i ++) // to unscaled "power"
-						fourierSamples [i] *= fourierSamples [i];
-					fourierSamples.get() +=  fourierSamplesChannel.get();
-				}
-				fourierSamples.get() /= numberOfChannels;
-			}
-
-			/*
-				Step 2:
-				Scale the (average) power spectrum
-			*/
-			const VEC re = spectrum -> z.row (1);
-			const VEC im = spectrum -> z.row (2);
-			const integer numberOfFrequencies = spectrum -> nx;
-			const double scaling = output -> dx * output -> dx; // because we squared already
-			re [1] = fourierSamples [1] * scaling;
-			im [1] = 0.0;
-			for (integer i = 2; i < numberOfFrequencies; i ++) {
-				re [i] = fourierSamples [i + i - 2] * scaling;   // fourierSamples [2], [4], ...
-				im [i] = fourierSamples [i + i - 1] * scaling;   // fourierSamples [3], [5], ...
-			}
-			if ((numberOfFourierSamples & 1) != 0) {
-				if (numberOfFourierSamples > 1) {
-					re [numberOfFrequencies] = fourierSamples [numberOfFourierSamples - 1] * scaling;
-					im [numberOfFrequencies] = fourierSamples [numberOfFourierSamples] * scaling;
-				}
-			} else {
-				re [numberOfFrequencies] = fourierSamples [numberOfFourierSamples] * scaling;
-				im [numberOfFrequencies] = 0.0;
-			}
-
-			/*
-				Step 3:
-				Take log of the spectrum power values log (re + im ) because we already squared
-			*/
-			fourierSamples [1] = log ( re [1] + 1e-300);
-			for (integer i = 1; i < numberOfFrequencies / 2; i ++) {
-				fourierSamples [2 * i] = log (re [i] + im [i] + 1e-300);
-				fourierSamples [2 * i + 1] = 0.0;
-			}
-			fourierSamples [numberOfFrequencies] = log (re [numberOfFrequencies] + 1e-300);
-			/*
-				Step 4: inverse fft of the log spectrum
-			*/
-			NUMfft_backward (fourierTable.get(), fourierSamples.get());
-			const double df = 1.0 / (frameAsSound -> dx * numberOfFourierSamples);
-			for (integer i = 1; i <= powerCepstrum -> nx; i ++) {
-				const double val = fourierSamples [i] * df;
-				powerCepstrum -> z [1] [i] = val * val;
-			}
-			output -> z.column (iframe)  <<=  powerCepstrum -> z.row (1);
-		}
-	} MelderThread_ENDPARALLEL
-}
-
-autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchFloor, double dt, double maximumFrequency, double preEmphasisFrequency) {
+autoPowerCepstrogram Sound_to_PowerCepstrogram (constSound me, double pitchFloor, double dt, double maximumFrequency, double preEmphasisFrequency) {
 	try {
 		const kSound_windowShape windowShape = kSound_windowShape::GAUSSIAN_2;
 		const double effectiveAnalysisWidth = 3.0 / pitchFloor; // minimum analysis window has 3 periods of lowest pitch
@@ -202,8 +65,7 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchF
 					The bin width of the first and last frequency in the onesidedPSD is half the bin width at the other frequencies
 					Do scaling and averaging together
 				*/
-				soundFrames -> getFrame (iframe);
-				Sound sound = soundFrames -> frameAsSound.get();
+				Sound sound = soundFrames -> getFrame (iframe);
 				onesidedPSD.get()  <<=  0.0;
 				for (integer ichannel = 1; ichannel <= numberOfChannels; ichannel ++) {
 					fourierSamples.part (1, soundFrameSize)  <<=  sound -> z.row (ichannel);
@@ -214,7 +76,7 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchF
 						double re = fourierSamples [2 * i - 2], im = fourierSamples [2 * i - 1];
 						onesidedPSD [i] += re * re + im * im;
 					}
-					onesidedPSD [numberOfFrequencies] += fourierSamples [numberOfFourierSamples] * 	fourierSamples [numberOfFourierSamples];
+					onesidedPSD [numberOfFrequencies] += fourierSamples [numberOfFourierSamples] * fourierSamples [numberOfFourierSamples];
 				}
 				onesidedPSD.get()  *=  powerScaling / numberOfChannels; // scaling and averaging over channels
 				/*
@@ -245,62 +107,107 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram_new (constSound me, double pitchF
 	}
 }
 
-static autoPowerCepstrogram Sound_to_PowerCepstrogram_old (Sound me, double pitchFloor, double dt, double maximumFrequency, double preEmphasisFrequency) {
-	try {
-		const double analysisWidth = 3.0 / pitchFloor; // minimum analysis window has 3 periods of lowest pitch
-		const double physicalAnalysisWidth = 2.0 * analysisWidth;
-		const double physicalSoundDuration = my dx * my nx;
-		volatile const double windowDuration = Melder_clippedRight (2.0 * analysisWidth, my dx * my nx);   // gaussian window
-		Melder_require (physicalSoundDuration >= physicalAnalysisWidth,
-			U"Your sound is too short:\n"
-			U"it should be longer than 6.0 / pitchFloor (", physicalAnalysisWidth, U" s)."
-		);
-		// Convenience: analyse the whole sound into one Cepstrogram_frame
-		const double samplingFrequency = 2.0 * maximumFrequency;
-		autoSound sound = Sound_resample (me, samplingFrequency, 50);
-		Sound_preEmphasize_inplace (sound.get(), preEmphasisFrequency);
-		double t1;
-		integer nFrames;
-		Sampled_shortTermAnalysis (me, windowDuration, dt, & nFrames, & t1);
-		autoSound sframe = Sound_createSimple (1_integer, windowDuration, samplingFrequency);
-		autoSound window = Sound_createGaussian (windowDuration, samplingFrequency);
-		/*
-			Find out the size of the FFT
-		*/
-		const integer nfft = Melder_clippedLeft (2_integer, Melder_iroundUpToPowerOfTwo (sframe -> nx));   // TODO: explain edge case
-		const integer nq = nfft / 2 + 1;
-		const double qmax = 0.5 * nfft / samplingFrequency, dq = 1.0 / samplingFrequency;
-		autoPowerCepstrogram thee = PowerCepstrogram_create (my xmin, my xmax, nFrames, dt, t1, 0, qmax, nq, dq, 0);
+//       1           2                          nfftdiv2
+//    re   im    re     im                   re      im
+// ((fft [1],0) (fft [2],fft [3]), (,), (,), (fft [nfft], 0))  nfft even
+// ((fft [1],0) (fft [2],fft [3]), (,), (,), (fft [nfft-1], fft [nfft]))  nfft odd
 
-		autoMelderProgress progress (U"Cepstrogram analysis");
+#define TOLOG(x) ((1 / NUMln10) * log ((x) + 1e-30))
 
-		for (integer iframe = 1; iframe <= nFrames; iframe++) {
-			const double t = Sampled_indexToX (thee.get(), iframe); // TODO express the following 3 lines more clearly
-			Sound_into_Sound (sound.get(), sframe.get(), t - windowDuration / 2);
-			Vector_subtractMean (sframe.get());
-			Sounds_multiply (sframe.get(), window.get());
-			autoSpectrum spec = Sound_to_Spectrum (sframe.get(), true);   // FFT yes
-			autoPowerCepstrum cepstrum = Spectrum_to_PowerCepstrum (spec.get());
-			for (integer i = 1; i <= nq; i ++)
-				thy z [i] [iframe] = cepstrum -> z [1] [i];
-
-			if (iframe % 10 == 1)
-				Melder_progress ((double) iframe / nFrames, U"PowerCepstrogram analysis of frame ",
-						iframe, U" out of ", nFrames, U".");
-		}
-		return thee;
-	} catch (MelderError) {
-		Melder_throw (me, U": no PowerCepstrogram created.");
+static void complexfftoutput_to_power (constVEC fft, VEC dbs, bool to_db) {
+	double valsq = fft [1] * fft [1];
+	dbs [1] = ( to_db ? TOLOG (valsq) : valsq );
+	const integer nfftdiv2p1 = (fft.size + 2) / 2;
+	const integer nend = ( fft.size % 2 == 0 ? nfftdiv2p1 : nfftdiv2p1 + 1 );
+	for (integer i = 2; i < nend; i ++) {
+		const double re = fft [i + i - 2], im = fft [i + i - 1];
+		valsq = re * re + im * im;
+		dbs [i] = ( to_db ? TOLOG (valsq) : valsq );
+	}
+	if (fft.size % 2 == 0) {
+		valsq = fft [fft.size] * fft [fft.size];
+		dbs [nfftdiv2p1] = ( to_db ? TOLOG (valsq) : valsq );
 	}
 }
 
-autoPowerCepstrogram Sound_to_PowerCepstrogram (Sound me, double pitchFloor, double dt, double maximumFrequency, double preEmphasisFrequency) {
-	autoPowerCepstrogram result;
-	if (Melder_debug == -10)
-		result = Sound_to_PowerCepstrogram_old (me, pitchFloor, dt, maximumFrequency, preEmphasisFrequency);
-	else
-		result = Sound_to_PowerCepstrogram_new (me, pitchFloor, dt, maximumFrequency, preEmphasisFrequency);
-	return result;
-}
+autoPowerCepstrogram Sound_to_PowerCepstrogram_hillenbrand (constSound me, double pitchFloor, double dt) {
+	try {
+		// minimum analysis window has 3 periods of lowest pitch
+		const double physicalDuration = my dx * my nx;
+		const double analysisWidth = std::min (3.0 / pitchFloor, physicalDuration);
 
+		double samplingFrequency = 1.0 / my dx;
+		autoSound thee;
+		if (samplingFrequency > 30000.0) {
+			samplingFrequency = samplingFrequency / 2.0;
+			thee = Sound_resample (me, samplingFrequency, 1);
+		} else {
+			thee = Data_copy (me);
+		}
+		/*
+			Pre-emphasis with fixed coefficient 0.9
+		*/
+		for (integer i = thy nx; i > 1; i --)
+			thy z [1] [i] -= 0.9 * thy z [1] [i - 1];
+
+		const integer nosInWindow = Melder_ifloor (analysisWidth * samplingFrequency);
+		Melder_require (nosInWindow >= 8,
+			U"Analysis window too short.");
+
+		double t1;
+		integer numberOfFrames;
+		Sampled_shortTermAnalysis (thee.get(), analysisWidth, dt, & numberOfFrames, & t1);
+		autoVEC hamming = raw_VEC (nosInWindow);
+		for (integer i = 1; i <= nosInWindow; i ++)
+			hamming [i] = 0.54 - 0.46 * cos (NUM2pi * (i - 1) / (nosInWindow - 1));
+
+		const integer nfft = Melder_clippedLeft (8_integer /* minimum possible */, Melder_iroundUpToPowerOfTwo (nosInWindow));
+		const integer nfftdiv2 = nfft / 2;
+		autoVEC fftbuf = zero_VEC (nfft); // "complex" array
+		autoVEC spectrum = zero_VEC (nfftdiv2 + 1); // +1 needed 
+		autoNUMFourierTable fftTable = NUMFourierTable_create (nfft); // sound to spectrum
+		
+		const double qmax = 0.5 * nfft / samplingFrequency, dq = qmax / (nfftdiv2 + 1);
+		autoPowerCepstrogram him = PowerCepstrogram_create (my xmin, my xmax, numberOfFrames, dt, t1, 0, qmax, nfftdiv2+1, dq, 0);
+		
+		autoMelderProgress progress (U"Sound to PowerCepstrogram...");
+
+		for (integer iframe = 1; iframe <= numberOfFrames; iframe ++) {
+			const double tbegin = std::max (thy xmin, t1 + (iframe - 1) * dt - analysisWidth / 2.0);
+			const integer istart = std::max (1_integer, Sampled_xToNearestIndex (thee.get(), tbegin));
+			integer iend = istart + nosInWindow - 1;
+			Melder_clipRight (& iend, thy nx);
+			fftbuf.part (1, nosInWindow)  <<=  thy z.row (1).part (istart, iend) * hamming.all();
+			fftbuf.part (nosInWindow + 1, nfft)  <<=  0.0;
+			
+			NUMfft_forward (fftTable.get(), fftbuf.get());
+			complexfftoutput_to_power (fftbuf.get(), spectrum.get(), true); // log10(|fft|^2)
+		
+			centre_VEC_inout (spectrum.get()); // subtract average
+			/*
+				Here we diverge from Hillenbrand as he takes the fft of half of the spectral values.
+				H. forgets that the actual spectrum has nfft/2+1 values. Therefore, we take the inverse
+				transform because this keeps the number of samples a power of 2.
+				At the same time this results in twice as many numbers in the quefrency domain, i.e. we end up with nfft/2+1
+				numbers while H. has only nfft/4!
+			 */
+			fftbuf [1] = spectrum [1];
+			for (integer i = 2; i < nfftdiv2 + 1; i ++) {
+				fftbuf [i+i-2] = spectrum [i];
+				fftbuf [i+i-1] = 0.0;
+			}
+			fftbuf [nfft] = spectrum [nfftdiv2 + 1];
+			NUMfft_backward (fftTable.get(), fftbuf.get());
+			for (integer i = 1; i <= nfftdiv2 + 1; i ++)
+				his z [i] [iframe] = fftbuf [i] * fftbuf [i];
+
+			if (iframe % 10 == 1)
+				Melder_progress ((double) iframe / numberOfFrames, U"Cepstrogram analysis of frame ",
+					 iframe, U" out of ", numberOfFrames, U".");
+		}
+		return him;
+	} catch (MelderError) {
+		Melder_throw (me, U": no Cepstrogram created.");
+	}
+}
 /* End of file Sound_to_PowerCepstrogram.cpp */

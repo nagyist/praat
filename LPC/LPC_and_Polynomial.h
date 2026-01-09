@@ -2,7 +2,7 @@
 #define _LPC_and_Polynomial_h_
 /* LPC_and_Polynomial.h
  *
- * Copyright (C) 1994-2025 David Weenink
+ * Copyright (C) 1994-2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "LPC.h"
 #include "Polynomial.h"
 
-autoPolynomial LPC_to_Polynomial (constLPC me, double t);
+autoPolynomial LPC_to_Polynomial_slice (constLPC me, double t);
 
 autoPolynomial LPC_Frame_to_Polynomial (constLPC_Frame me);
 

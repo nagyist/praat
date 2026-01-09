@@ -1,6 +1,6 @@
 /* LPC.cpp
  *
- * Copyright (C) 1994-2020 David Weenink
+ * Copyright (C) 1994-2020, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@ void LPC_drawGain (LPC me, Graphics g, double tmin, double tmax, double gmin, do
 }
 
 void LPC_drawPoles (LPC me, Graphics g, double time, bool garnish) {
-	autoPolynomial p = LPC_to_Polynomial (me, time);
+	autoPolynomial p = LPC_to_Polynomial_slice (me, time);
 	autoRoots r = Polynomial_to_Roots (p.get());
 	Roots_draw (r.get(), g, -1.0, 1.0, -1.0, 1.0, U"+", 12.0, garnish);
 }
