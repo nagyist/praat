@@ -1,6 +1,6 @@
 /* manual_functions.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ void manual_functions_init (ManPages me) {
 MAN_PAGES_BEGIN R"~~~(
 ################################################################################
 "Functions"
-© Paul Boersma 2022-2024
+© Paul Boersma 2022-2026
 
 A growing list of functions that you can use in @formulas and @scripting...
 
@@ -67,7 +67,7 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`arctanh##` (%`matrix##`) – inverse hyperbolic tangent of each cell of %`matrix##`
 , @`assert` %`condition` – condition checking
 , @`asserterror` %`message$` – testing that a certain error occurs
-, @`asynchronous` – let the script continue while the sound is playing
+, @`asynchronous` – let the script continue while the sound is playing or a subprocess is running
 , @`backslashTrigraphsToUnicode$` (%`string$`) – convert e.g. \bsct to \ct
 , @`barkToHertz` (%`x`) – from Bark-rate to acoustic frequency
 , @`besselI` (%`n`, %`x`) – modified Bessel function of the first kind, %I__%n_
@@ -998,11 +998,19 @@ In this case a different error message than the expected error message occurs, a
 
 ################################################################################
 "`asynchronous`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2026
 
 A keyword that can be used in @Scripting, to let a script continue while a sound is playing:
 {;
 	\#{asynchronous} \@{Sound: ||Play}
+}
+or to let a script continue while a subprocess is running:
+{;
+	\#{asynchronous} \`{runSubprocess}: “C://apps/videoViewer.exe”, “hello.wav”
+}
+or
+{;
+	\#{asynchronous} \`{runSystem}: “C://apps/videoViewer.exe hello.wav”
 }
 
 ################################################################################

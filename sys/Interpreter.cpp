@@ -2196,6 +2196,7 @@ void Interpreter_run (Interpreter me, autostring32 text, const bool reuseVariabl
 		my callDepth = 0;
 		my fromif = false;
 		my fromendfor = false;
+		my assertErrorLineNumber = 0;
 		my setDynamicFromOwningEditorEnvironment ();
 		Interpreter_resume (me);
 	} catch (MelderError) {
@@ -2216,10 +2217,8 @@ void Interpreter_resume (Interpreter me) {
 	trace (U"resuming at line ", my lineNumber);
 	try {
 		static MelderString valueString;   // to divert the info
-		static MelderString assertErrorString;
 		autoMelderString command2;
 		autoMelderString buffer;
-		integer assertErrorLineNumber = 0;
 		int callDepth = my callDepth;
 		const integer numberOfLines = my lines.size;
 		/*
@@ -2302,8 +2301,8 @@ void Interpreter_resume (Interpreter me) {
 				{
 					(void) praat_executeCommand (me, command2.string);
 				/*
-				 * Interpret control flow and variables.
-				 */
+					Interpret control flow and variables.
+				*/
 				} else switch (c0) {
 					case U'.':
 						fail = true;
@@ -2318,11 +2317,13 @@ void Interpreter_resume (Interpreter me) {
 							if (value == 0.0 || isundef (value)) {
 								assertionFailed = true;
 								Melder_throw (U"Script assertion fails in line ", my lineNumber,
-									U" (", value == 0.0 ? U"false" : U"undefined", U"):\n   ", command2.string + 7);
+										U" (", value == 0.0 ? U"false" : U"undefined", U"):\n   ", command2.string + 7);
 							}
 						} else if (str32nequ (command2.string, U"asserterror ", 12)) {
-							MelderString_copy (& assertErrorString, command2.string + 12);
-							assertErrorLineNumber = my lineNumber;
+							MelderString_copy (& my assertErrorString, command2.string + 12);
+							TRACE
+							trace (U"assert error string: <<", my assertErrorString.string, U">>");
+							my assertErrorLineNumber = my lineNumber;
 						} else
 							fail = true;
 						break;
@@ -3456,34 +3457,35 @@ void Interpreter_resume (Interpreter me) {
 						}
 					}
 				} // endif fail
-				if (assertErrorLineNumber != 0 && assertErrorLineNumber != my lineNumber) {
-					const integer save_assertErrorLineNumber = assertErrorLineNumber;
-					assertErrorLineNumber = 0;
+				if (my assertErrorLineNumber != 0 && my assertErrorLineNumber != my lineNumber) {
+					const integer save_assertErrorLineNumber = my assertErrorLineNumber;
+					my assertErrorLineNumber = 0;
 					Melder_throw (U"Script assertion fails in line ", save_assertErrorLineNumber,
-							U": error « ", assertErrorString.string, U" » not raised. Instead: no error.");
-					
+							U": error « ", my assertErrorString.string, U" » not raised. Instead: no error.");
+
 				}
 			} catch (MelderError) {
 				//	Melder_casual (U"Error: << ", Melder_getError(),
-				//		U" >>\nassertErrorLineNumber: ", assertErrorLineNumber,
+				//		U" >>\nassertErrorLineNumber: ", my assertErrorLineNumber,
 				//		U"\nlineNumber: ", lineNumber,
 				//		U"\nAssert error string: << ", assertErrorString.string,
 				//		U" >>\n"
 				//	);
 				if (Melder_hasCrash ())
 					throw;
-				if (assertErrorLineNumber == 0) {
+				if (my assertErrorLineNumber == 0) {
 					throw;
-				} else if (assertErrorLineNumber != my lineNumber) {
-					if (str32str (Melder_getError (), assertErrorString.string)) {
+				} else if (my assertErrorLineNumber != my lineNumber) {
+					if (str32str (Melder_getError (), my assertErrorString.string)) {
 						Melder_clearError ();
-						assertErrorLineNumber = 0;
+						my assertErrorLineNumber = 0;
 					} else {
 						autostring32 errorCopy_nothrow = Melder_dup_f (Melder_getError ());
 						Melder_clearError ();
-						Melder_throw (U"Script assertion fails in line ", assertErrorLineNumber,
-							U": error « ", assertErrorString.string, U" » not raised. Instead:\n",
-							errorCopy_nothrow.get());
+						Melder_throw (U"Script assertion fails in line ", my assertErrorLineNumber,
+							U": error « ", my assertErrorString.string, U" » not raised. Instead:\n",
+							errorCopy_nothrow.get()
+						);
 					}
 				}
 			}
