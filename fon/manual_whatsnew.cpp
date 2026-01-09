@@ -29,6 +29,12 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.53# (9 January 2026)
+• Scripting: fixed some problems introduced in version 6.4.52 concerning the interaction
+  between pause windows and editor scripts.
+• Scripting: @`runSubprocess` and @`runSystem` now support @`asynchronous`, with
+  which you can spawn a subprocess without waiting for it to finish. 
+
 ##6.4.52# (3 January 2026)
 • MacOS Tahoe: support making menu choices or turning windows to full screen
   if a script is paused (by the Demo window or the Pause window),

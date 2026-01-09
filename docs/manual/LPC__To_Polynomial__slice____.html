@@ -15,11 +15,11 @@ LPC: To Polynomial (slice)...
 <h2>Settings</h2>
 <dl>
 <dt><b>Time (s)</b>
-<dd>defines the LPC frame whose coefficents will be selected.</dd>
+<dd>defines the LPC frame whose coefficients will be selected.</dd>
 </dl>
 <h2>Behaviour</h2>
-<p>The linear prediction coefficients <i>a</i><sub>1..<i>n</i></sub> of the selected LPC frame will be copied to polynomial coefficients <i>c</i><sub>1..<i>n</i>+1</sub> as follows:</p>
-<table width="100%" style="white-space:pre-wrap"><tr><td align=middle><i>c</i><sub><i>i</i></sub> = <i>a</i><sub><i>n</i>&#8211;<i>i</i>+1</sub>, </table>
+<p>The linear prediction coefficients <i>a</i><sub>1..<i>n</i></sub> of the LPC frame that is nearest to the given time will be copied into polynomial coefficients <i>c</i><sub>1..<i>n</i>+1</sub> as follows:</p>
+<table width="100%" style="white-space:pre-wrap"><tr><td align=middle><i>c</i><sub><i>i</i></sub> = <i>a</i><sub><i>n</i>&#8211;<i>i</i>+1</sub>  for <i>i</i>=1..<i>n</i>,</table>
 <table width="100%" style="white-space:pre-wrap"><tr><td align=middle><i>c</i><sub><i>n</i>+1</sub> = 1</table>
 <h3>Links to this page</h3>
 <ul>
@@ -28,7 +28,7 @@ LPC: To Polynomial (slice)...
 </ul>
 <hr>
 <address>
-	<p>© djmw 20040407</p>
+	<p>© djmw 20260104</p>
 </address>
 </body>
 </html>

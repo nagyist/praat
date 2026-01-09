@@ -2321,7 +2321,7 @@ void Interpreter_resume (Interpreter me) {
 							}
 						} else if (str32nequ (command2.string, U"asserterror ", 12)) {
 							MelderString_copy (& my assertErrorString, command2.string + 12);
-							TRACE
+							//TRACE
 							trace (U"assert error string: <<", my assertErrorString.string, U">>");
 							my assertErrorLineNumber = my lineNumber;
 						} else
