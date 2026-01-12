@@ -2874,6 +2874,8 @@ static LRESULT CALLBACK windowProc (HWND window, UINT message, WPARAM wParam, LP
 			int fwKeys = GET_KEYSTATE_WPARAM (wParam);
 			if (GetKeyState (VK_SHIFT) < 0)
 				fwKeys |= MK_SHIFT;
+			if (GetKeyState (VK_CONTROL) < 0)
+				fwKeys |= MK_CONTROL;
 			POINT point = { GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam) };
 			ScreenToClient (window, & point);
 			on_mouseWheel (window, point.x, point.y, zDelta, fwKeys);
