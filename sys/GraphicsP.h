@@ -92,7 +92,7 @@ Thing_define (GraphicsScreen, Graphics) {
 		COLORREF d_winForegroundColour;
 		HPEN d_winPen;
 		HBRUSH d_winBrush;
-		bool d_fatNonSolid;
+		HDC d_savedDC;
 		bool d_useGdiplus;
 		HBITMAP d_gdiBitmap;
 		Gdiplus::Bitmap *d_gdiplusBitmap;

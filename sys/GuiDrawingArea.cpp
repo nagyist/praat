@@ -1,11 +1,11 @@
 /* GuiDrawingArea.cpp
  *
- * Copyright (C) 1993-2018,2020-2022 Paul Boersma,
+ * Copyright (C) 1993-2018,2020-2023,2025,2026 Paul Boersma,
  *               2008 Stefan de Konink, 2010 Franz Brausse, 2013 Tom Naughton
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -446,9 +446,9 @@ Thing_implement (GuiDrawingArea, GuiControl, 0);
 			event. x = local_point. x;
 			event. y = local_point. y;
 			NSUInteger modifiers = [nsEvent modifierFlags];
-			event. shiftKeyPressed = modifiers & NSShiftKeyMask;
-			event. optionKeyPressed = modifiers & NSAlternateKeyMask;
-			event. commandKeyPressed = modifiers & NSCommandKeyMask;
+			event. shiftKeyPressed = modifiers & NSEventModifierFlagShift;
+			event. optionKeyPressed = modifiers & NSEventModifierFlagOption;
+			event. commandKeyPressed = modifiers & NSEventModifierFlagCommand;
 			try {
 				my mouseCallback (my mouseBoss, & event);
 			} catch (MelderError) {
@@ -522,9 +522,9 @@ Thing_implement (GuiDrawingArea, GuiControl, 0);
 				event. key = 0x2193;
 			trace (U"key ", event. key);
 			NSUInteger modifiers = [nsEvent modifierFlags];
-			event. shiftKeyPressed = modifiers & NSShiftKeyMask;
-			event. optionKeyPressed = modifiers & NSAlternateKeyMask;
-			event. commandKeyPressed = modifiers & NSCommandKeyMask;
+			event. shiftKeyPressed = modifiers & NSEventModifierFlagShift;
+			event. optionKeyPressed = modifiers & NSEventModifierFlagOption;
+			event. commandKeyPressed = modifiers & NSEventModifierFlagCommand;
 			try {
 				my d_keyCallback (my d_keyBoss, & event);
 			} catch (MelderError) {
