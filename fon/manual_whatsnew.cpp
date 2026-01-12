@@ -29,6 +29,10 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.54# (12 January 2026)
+• Windows: fixed a problem introduced in 6.4.52 by which Ctrl-mousewheel wouldn’t zoom in or out.
+• Windows: better dotted or dashed lines. 
+
 ##6.4.53# (9 January 2026)
 • Scripting: fixed some problems introduced in version 6.4.52 concerning the interaction
   between pause windows and editor scripts.

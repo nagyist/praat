@@ -128,7 +128,9 @@ static void args_ok_selectionOnly (UiForm sendingForm, integer /* narg */, Stack
 	Interpreter_run (my interpreter.get(), text.move(), false);
 }
 
-static void menu_cb_run_async (ScriptEditor me) {
+static void menu_cb_run (ScriptEditor me, EDITOR_ARGS) {
+	if (my interpreter -> running)
+		Melder_throw (U"The script is already running (paused). Please close or continue the pause, trust or demo window.");
 	try {
 		autostring32 text = GuiText_getString (my textWidget);
 		if (! MelderFile_isNull (& my file))
@@ -149,8 +151,6 @@ static void menu_cb_run_async (ScriptEditor me) {
 				Script_rememberDuringThisAppSession_move (script.move());
 				my interpreter -> scriptReference = Script_find (MelderFile_peekPath (& my file));
 			}
-			TRACE
-			trace (U"going to run a script");
 			Interpreter_run (my interpreter.get(), text.move(), false);
 		}
 	} catch (MelderError) {
@@ -158,13 +158,9 @@ static void menu_cb_run_async (ScriptEditor me) {
 	}
 }
 
-static void menu_cb_run (ScriptEditor me, EDITOR_ARGS) {
+static void menu_cb_runSelection (ScriptEditor me, EDITOR_ARGS) {
 	if (my interpreter -> running)
 		Melder_throw (U"The script is already running (paused). Please close or continue the pause, trust or demo window.");
-	menu_cb_run_async (me);
-}
-
-static void menu_cb_runSelection_async (ScriptEditor me) {
 	try {
 		autostring32 selectedText = GuiText_getSelection (my textWidget);
 		if (! selectedText)
@@ -224,12 +220,6 @@ static void menu_cb_runSelection_async (ScriptEditor me) {
 	} catch (MelderError) {
 		Melder_flushError (U"The script selection didn’t run to its completion.");
 	}
-}
-
-static void menu_cb_runSelection (ScriptEditor me, EDITOR_ARGS) {
-	if (my interpreter -> running)
-		Melder_throw (U"The script is already running (paused). Please close or continue the pause, trust or demo window.");
-	menu_cb_runSelection_async (me);
 }
 
 static void menu_cb_addToMenu (ScriptEditor me, EDITOR_ARGS) {
