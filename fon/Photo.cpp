@@ -175,27 +175,42 @@ autoPhoto Photo_readFromImageFile (MelderFile file) {
 				const integer bitsPerPixel = uinteger_to_integer_a (CGImageGetBitsPerPixel (image));
 				const integer bitsPerComponent = uinteger_to_integer_a (CGImageGetBitsPerComponent (image));
 				const integer bytesPerRow = uinteger_to_integer_a (CGImageGetBytesPerRow (image));
+				TRACE
 				trace (
 					bitsPerPixel, U" bits per pixel, ",
 					bitsPerComponent, U" bits per component, ",
 					bytesPerRow, U" bytes per row"
 				);
 				/*
-				 * Now we probably need to use:
-				 * CGColorSpaceRef CGImageGetColorSpace (CGImageRef image);
-				 * CGImageAlphaInfo CGImageGetAlphaInfo (CGImageRef image);
-				 */
+					Now we probably need to use:
+					CGColorSpaceRef CGImageGetColorSpace (CGImageRef image);
+					CGImageAlphaInfo CGImageGetAlphaInfo (CGImageRef image);
+				*/
 				CGDataProviderRef dataProvider = CGImageGetDataProvider (image);   // not retained, so don't release
 				CFDataRef data = CGDataProviderCopyData (dataProvider);
 				uint8 *pixelData = (uint8_t *) CFDataGetBytePtr (data);
-				for (integer irow = 1; irow <= height; irow ++) {
-					uint8 *rowAddress = pixelData + bytesPerRow * (height - irow);
-					for (integer icol = 1; icol <= width; icol ++) {
-						my d_red   -> z [irow] [icol] = (*rowAddress ++) / 255.0;
-						my d_green -> z [irow] [icol] = (*rowAddress ++) / 255.0;
-						my d_blue  -> z [irow] [icol] = (*rowAddress ++) / 255.0;
-						my d_transparency -> z [irow] [icol] = 1.0 - (*rowAddress ++) / 255.0;
+				if (bitsPerPixel == 4 * bitsPerComponent) {
+					for (integer irow = 1; irow <= height; irow ++) {
+						uint8 *rowAddress = pixelData + bytesPerRow * (height - irow);
+						for (integer icol = 1; icol <= width; icol ++) {
+							my d_red   -> z [irow] [icol] = (*rowAddress ++) / 255.0;
+							my d_green -> z [irow] [icol] = (*rowAddress ++) / 255.0;
+							my d_blue  -> z [irow] [icol] = (*rowAddress ++) / 255.0;
+							my d_transparency -> z [irow] [icol] = 1.0 - (*rowAddress ++) / 255.0;
+						}
 					}
+				} else if (bitsPerPixel == bitsPerComponent) {
+					for (integer irow = 1; irow <= height; irow ++) {
+						uint8 *rowAddress = pixelData + bytesPerRow * (height - irow);
+						for (integer icol = 1; icol <= width; icol ++) {
+							my d_red   -> z [irow] [icol] =
+							my d_green -> z [irow] [icol] =
+							my d_blue  -> z [irow] [icol] = 1.0 - (*rowAddress ++) / 255.0;
+							my d_transparency -> z [irow] [icol] = 0.0;
+						}
+					}
+				} else {
+					Melder_throw (U"Unknown colour format in picture file.");
 				}
 				CFRelease (data);
 				CGImageRelease (image);
@@ -312,7 +327,7 @@ autoPhoto Photo_readFromImageFile (MelderFile file) {
 		);
 		Melder_assert (dataProvider);
 		CGImageRef image = CGImageCreate (integer_to_uinteger_a (my nx), integer_to_uinteger_a (numberOfRows),
-			8, 32, integer_to_uinteger_a (bytesPerRow), colourSpace, kCGImageAlphaLast, dataProvider, nullptr, false, kCGRenderingIntentDefault);
+				8, 32, integer_to_uinteger_a (bytesPerRow), colourSpace, kCGImageAlphaLast, dataProvider, nullptr, false, kCGRenderingIntentDefault);
 		CGDataProviderRelease (dataProvider);
 		Melder_assert (image);
 		NSString *path = (NSString *) MelderFile_peekPathCfstring (file);
