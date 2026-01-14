@@ -61,7 +61,8 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram (constSound me, double pitchFloor
 					Power P[f] of a spectral component X(f):
 						P[f] =	|X(f)/sqrt(2)|^2 = 0.5|X(f)|^2 for f != 0,
 								|X(0)|^2 for f=0.
-					The onesidedPSD [f] =  2 * P (f)=X(f)^2 for f >= 0 and |X(0)|^2 for f=0
+					Because we add negative and positive frequencies:
+					The onesidedPSD [f] =  2 * P (f) = X(f)^2 for f >= 0 and |X(0)|^2 for f=0
 					The bin width of the first and last frequency in the onesidedPSD is half the bin width at the other frequencies
 					Do scaling and averaging together
 				*/
@@ -79,6 +80,8 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram (constSound me, double pitchFloor
 					onesidedPSD [numberOfFrequencies] += fourierSamples [numberOfFourierSamples] * fourierSamples [numberOfFourierSamples];
 				}
 				onesidedPSD.get()  *=  powerScaling / numberOfChannels; // scaling and averaging over channels
+				onesidedPSD [1] *= 0.5; // half bin width
+				onesidedPSD [numberOfFrequencies] *= 0.5; // half bin width
 				/*
 					Get log power.
 				*/
