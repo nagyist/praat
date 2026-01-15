@@ -175,7 +175,7 @@ autoPhoto Photo_readFromImageFile (MelderFile file) {
 				const integer bitsPerPixel = uinteger_to_integer_a (CGImageGetBitsPerPixel (image));
 				const integer bitsPerComponent = uinteger_to_integer_a (CGImageGetBitsPerComponent (image));
 				const integer bytesPerRow = uinteger_to_integer_a (CGImageGetBytesPerRow (image));
-				TRACE
+				//TRACE
 				trace (
 					bitsPerPixel, U" bits per pixel, ",
 					bitsPerComponent, U" bits per component, ",

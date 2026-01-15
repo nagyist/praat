@@ -1,6 +1,6 @@
 /* SoundAnalysisArea.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -363,7 +363,7 @@ bool structSoundAnalysisArea :: v_mouse (GuiDrawingArea_MouseEvent event, double
 			if (x_world >= our endWindow() && localY_fraction > 0.96 && localY_fraction <= 1.00) {
 				our setInstancePref_pitch_ceiling (our instancePref_pitch_ceiling() * 1.26);
 				our d_pitch. reset();
-				our d_intensity.reset();
+				our d_intensity. reset();
 				our d_pulses. reset();
 				return FunctionEditor_UPDATE_NEEDED;
 			}

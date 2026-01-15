@@ -1,6 +1,6 @@
 /* manual_demoWindow.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ As the title page of a presentation, you could do:
 }
 ################################################################################
 "Demo window 2. Getting user input"
-© Paul Boersma 2009–2023
+© Paul Boersma 2009–2023,2026
 
 For almost all applications, you will want the user (or the participant in an experiment) to be able to click on things in the Demo window,
 or to control the Demo window by pressing keys. Here is a presentation with two screens:
@@ -159,16 +159,16 @@ This script allows you to use the arrow keys and the space bar to navigate betwe
 	\#`{demo} \@{24}
 	\#`{demo} \@{Select inner viewport:} 0, 100, 0, 100
 	\#`{demo} \@{Axes:} 0, 100, 0, 100
-	\#`{demo} \@{Paint rectangle:} \"purple\", 0, 100, 0, 100
+	\#`{demo} \@{Paint rectangle:} "purple", 0, 100, 0, 100
 	\#`{demo} \@{Pink}
-	\#`{demo} \@{Text:} 50, \"centre\", 50, \"half\", \"This is the first page\"
+	\#`{demo} \@{Text:} 50, "centre", 50, "half", "This is the first page"
 	while \#`{demoWaitForInput} ()
 		goto SECOND_SCREEN \#`{demoInput} (“•→ ”)
 	endwhile
 	\`{label} SECOND_SCREEN
 	\#`{demo} \@{Erase all}
-	\#`{demo} \@{Paint rectangle:} \"purple\", 0, 100, 0, 100
-	\#`{demo} \@{Text:} 50, \"centre\", 50, \"half\", \"This is the second page\"
+	\#`{demo} \@{Paint rectangle:} "purple", 0, 100, 0, 100
+	\#`{demo} \@{Text:} 50, "centre", 50, "half", "This is the second page"
 	while \#`{demoWaitForInput} ()
 		goto END \#`{demoInput} (“•→ ”)
 		goto FIRST_SCREEN \#`{demoInput} (“←”)
