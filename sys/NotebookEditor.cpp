@@ -184,7 +184,7 @@ void structNotebookEditor :: v_createMenuItems_help (EditorMenu menu) {
 
 void NotebookEditor_init (NotebookEditor me, conststring32 initialText) {
 	TextEditor_init (me, initialText);
-	my interpreter = Interpreter_createFromEnvironment (nullptr);
+	my interpreter = Interpreter_createFromEnvironment (nullptr, nullptr);
 	theReferencesToAllOpenNotebookEditors. addItem_ref (me);
 }
 

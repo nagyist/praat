@@ -32,13 +32,20 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	conststring32 /* sendingString */, Interpreter /* interpreter */,
 	conststring32 /* invokingButtonTitle */, bool /* modified */, void *closure, Editor optionalEditor)
 {
+	if (! thePauseForm)   // BUG: perhaps there was a mistake in the script
+		return;
 	Melder_assert (thePauseForm_interpreterReference);
+	Melder_assert (Thing_isa (thePauseForm_interpreterReference, classInterpreter));
 	if (thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor() != thePauseForm_savedEditorReference) {
 		Melder_assert (thePauseForm_savedEditorReference);
 		Melder_assert (! thePauseForm_interpreterReference -> optionalDynamicEnvironmentEditor());
 		Melder_assert (thePauseForm_interpreterReference -> optionalDynamicEditorEnvironmentClassName());
 				// testing the assumption that the environment can be lost but never added during pause
 		Melder_assert (thePauseForm);
+		if (thePauseForm -> d_dialogForm) {
+			GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
+			thePauseForm_secondPass = false;
+		}
 		thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
 		Melder_assert (! thePauseForm);
 		const integer lineNumber = thePauseForm_interpreterReference -> lineNumber;
@@ -54,6 +61,10 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	thePauseForm_clicked = UiForm_getClickedContinueButton (thePauseForm.get());
 	if (thePauseForm_clicked != theCancelContinueButton)
 		UiForm_Interpreter_addVariables (thePauseForm.get(), (Interpreter) closure);   // 'closure', not 'interpreter' or 'theInterpreter'!
+	Melder_assert (thePauseForm_clicked >= 1 && thePauseForm_clicked <= 10);
+	conststring32 clickedText = thePauseForm -> continueTexts [thePauseForm_clicked].get();
+	if (thePauseForm -> d_dialogForm)
+		GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
 	thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
 	Melder_assert (! thePauseForm);
 	/*
@@ -64,14 +75,27 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	thePauseForm_interpreterReference -> pausedByPauseWindow = false;
 	if (thePauseForm_wasBackgrounding)
 		praat_background ();
-	Interpreter_resume (thePauseForm_interpreterReference);
+	try {
+		Interpreter_resume (thePauseForm_interpreterReference);
+	} catch (MelderError) {
+		if (thePauseForm_clicked == theCancelContinueButton)
+			Melder_flushError (U"This happened after you cancelled the pause form.");
+		else
+			Melder_flushError (U"This happened after you clicked “", clickedText, U"” in the pause form.");
+	}
 }
 static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) {
+	if (! thePauseForm)   // BUG: perhaps there was a mistake in the script
+		return;
 	Melder_assert (thePauseForm_interpreterReference);
 	/*
 		We arrive here if the user clicked the close box of the dialog window, or if they clicked Stop.
 	*/
 	Melder_assert (thePauseForm);
+	if (thePauseForm -> d_dialogForm) {
+		GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
+		thePauseForm_secondPass = false;
+	}
 	thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
 	Melder_assert (! thePauseForm);
 	if (theCancelContinueButton != 0) {
@@ -100,7 +124,11 @@ static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) 
 		thePauseForm_interpreterReference -> pausedByPauseWindow = false;
 		if (thePauseForm_wasBackgrounding)
 			praat_background ();
-		Interpreter_resume (thePauseForm_interpreterReference);
+		try {
+			Interpreter_resume (thePauseForm_interpreterReference);
+		} catch (MelderError) {
+			Melder_flushError (U"This happened after you stopped the pause form.");
+		}
 	} else {
 		/*
 			The pause window apparently contains no "Cancel"-like button, so it must contain a Stop button.
@@ -271,6 +299,17 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 		thePauseForm_secondPass = false;
 		return thePauseForm_clicked;
 	}
+}
+
+void UiPause_cleanUp () {
+	thePauseForm. reset();
+	thePauseForm_clicked = 0;
+	theCancelContinueButton = 0;
+	thePauseForm_wasBackgrounding = false;
+	thePauseForm_interpreterReference = nullptr;
+	thePauseForm_secondPass = false;
+	MelderFolder_setToNull (& thePauseForm_savedFolder);
+	thePauseForm_savedEditorReference = nullptr;
 }
 
 /* End of file UiPause.cpp */

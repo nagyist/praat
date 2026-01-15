@@ -1,6 +1,6 @@
 /* Ui.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -907,16 +907,16 @@ void UiForm_setPauseForm (UiForm me,
 	my numberOfContinueButtons = numberOfContinueButtons;
 	my defaultContinueButton = defaultContinueButton;
 	my cancelContinueButton = cancelContinueButton;
-	my continueTexts [1] = continue1;
-	my continueTexts [2] = continue2;
-	my continueTexts [3] = continue3;
-	my continueTexts [4] = continue4;
-	my continueTexts [5] = continue5;
-	my continueTexts [6] = continue6;
-	my continueTexts [7] = continue7;
-	my continueTexts [8] = continue8;
-	my continueTexts [9] = continue9;
-	my continueTexts [10] = continue10;
+	my continueTexts [1] = Melder_dup (continue1);
+	my continueTexts [2] = Melder_dup (continue2);
+	my continueTexts [3] = Melder_dup (continue3);
+	my continueTexts [4] = Melder_dup (continue4);
+	my continueTexts [5] = Melder_dup (continue5);
+	my continueTexts [6] = Melder_dup (continue6);
+	my continueTexts [7] = Melder_dup (continue7);
+	my continueTexts [8] = Melder_dup (continue8);
+	my continueTexts [9] = Melder_dup (continue9);
+	my continueTexts [10] = Melder_dup (continue10);
 	my cancelCallback = cancelCallback;
 }
 
@@ -1762,7 +1762,7 @@ void UiForm_finish (UiForm me) {
 		for (int i = 1; i <= my numberOfContinueButtons; i ++) {
 			x = dialogWidth - Gui_RIGHT_DIALOG_SPACING - roomPerContinueButton * (my numberOfContinueButtons - i + 1) + horizontalSpacing;
 			my continueButtons [i] = GuiButton_createShown (form, x, x + continueButtonWidth, y, y + Gui_PUSHBUTTON_HEIGHT,
-				my continueTexts [i], gui_button_cb_ok, me,
+				my continueTexts [i].get(), gui_button_cb_ok, me,
 				i == my defaultContinueButton && okButtonIsDefault ? GuiButton_DEFAULT : i == my cancelContinueButton ? GuiButton_CANCEL : 0
 			);
 		}

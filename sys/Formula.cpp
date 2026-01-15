@@ -1,6 +1,6 @@
 /* Formula.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -4413,7 +4413,7 @@ static void do_runScript () {
 	}
 	try {
 		const Editor optionalNewInterpreterOwningWindow = theInterpreter -> optionalDynamicEnvironmentEditor();
-		praat_runScript (fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
+		praat_runScript (theInterpreter, fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
 		theLevel -= 1;
 	} catch (MelderError) {
 		theLevel -= 1;
@@ -7791,8 +7791,13 @@ static void do_realvector () {
 		U"The function “realvector” requires 3 or 4 arguments (an optional number of lines, a label text, a format, and a default value), not ", n->number, U".");
 	integer numberOfLines = 7;   // the default
 	const Stackel defaultValue = pop;
-	Melder_require (defaultValue->which == Stackel_STRING,
-		U"The last argument of “realvector” (the default value) should be a string, not ", defaultValue->whichText(), U".");
+	conststring32 defaultString;
+	if (defaultValue->which == Stackel_STRING)
+		defaultString = defaultValue->getString();
+	else if (defaultValue->which == Stackel_NUMERIC_VECTOR)
+		defaultString = Melder_VEC (defaultValue->numericVector, true);
+	else
+		Melder_throw (U"The last argument of “realvector” (the default value) should be a string or a numeric vector, not ", defaultValue->whichText(), U".");
 	const Stackel _format = pop;
 	Melder_require (_format->which == Stackel_STRING,
 		U"The penultimate argument of “realvector” (the format) should be a string, not ", _format->whichText(), U".");
@@ -7808,7 +7813,7 @@ static void do_realvector () {
 			U"The first argument of “realvector” (the number of lines) should be a number, not ", _numberOfLines->whichText(), U".");
 		numberOfLines = Melder_iround (_numberOfLines->number);
 	}
-	UiPause_realvector (label->getString(), format, defaultValue->getString(), numberOfLines);
+	UiPause_realvector (label->getString(), format, defaultString, numberOfLines);
 	pushNumber (1);
 }
 static void do_positivevector () {
@@ -7819,8 +7824,13 @@ static void do_positivevector () {
 		U"The function “positivevector” requires 3 or 4 arguments (an optional number of lines, a label text, a format, and a default value), not ", n->number, U".");
 	integer numberOfLines = 7;   // the default
 	const Stackel defaultValue = pop;
-	Melder_require (defaultValue->which == Stackel_STRING,
-		U"The last argument of “positivevector” (the default value) should be a string, not ", defaultValue->whichText(), U".");
+	conststring32 defaultString;
+	if (defaultValue->which == Stackel_STRING)
+		defaultString = defaultValue->getString();
+	else if (defaultValue->which == Stackel_NUMERIC_VECTOR)
+		defaultString = Melder_VEC (defaultValue->numericVector, true);
+	else
+		Melder_throw (U"The last argument of “positivevector” (the default value) should be a string or a numeric vector, not ", defaultValue->whichText(), U".");
 	const Stackel _format = pop;
 	Melder_require (_format->which == Stackel_STRING,
 		U"The penultimate argument of “positivevector” (the format) should be a string, not ", _format->whichText(), U".");
@@ -7836,7 +7846,7 @@ static void do_positivevector () {
 			U"The first argument of “positivevector” (the number of lines) should be a number, not ", _numberOfLines->whichText(), U".");
 		numberOfLines = Melder_iround (_numberOfLines->number);
 	}
-	UiPause_positivevector (label->getString(), format, defaultValue->getString(), numberOfLines);
+	UiPause_positivevector (label->getString(), format, defaultString, numberOfLines);
 	pushNumber (1);
 }
 static void do_integervector () {
@@ -7847,8 +7857,13 @@ static void do_integervector () {
 		U"The function “integervector” requires 3 or 4 arguments (an optional number of lines, a label text, a format, and a default value), not ", n->number, U".");
 	integer numberOfLines = 7;   // the default
 	const Stackel defaultValue = pop;
-	Melder_require (defaultValue->which == Stackel_STRING,
-		U"The last argument of “integervector” (the default value) should be a string, not ", defaultValue->whichText(), U".");
+	conststring32 defaultString;
+	if (defaultValue->which == Stackel_STRING)
+		defaultString = defaultValue->getString();
+	else if (defaultValue->which == Stackel_NUMERIC_VECTOR)
+		defaultString = Melder_VEC (defaultValue->numericVector, true);
+	else
+		Melder_throw (U"The last argument of “integervector” (the default value) should be a string or a numeric vector, not ", defaultValue->whichText(), U".");
 	const Stackel _format = pop;
 	Melder_require (_format->which == Stackel_STRING,
 		U"The penultimate argument of “integervector” (the format) should be a string, not ", _format->whichText(), U".");
@@ -7864,7 +7879,7 @@ static void do_integervector () {
 			U"The first argument of “integervector” (the number of lines) should be a number, not ", _numberOfLines->whichText(), U".");
 		numberOfLines = Melder_iround (_numberOfLines->number);
 	}
-	UiPause_integervector (label->getString(), format, defaultValue->getString(), numberOfLines);
+	UiPause_integervector (label->getString(), format, defaultString, numberOfLines);
 	pushNumber (1);
 }
 static void do_naturalvector () {
@@ -7875,8 +7890,13 @@ static void do_naturalvector () {
 		U"The function “naturalvector” requires 3 or 4 arguments (an optional number of lines, a label text, a format, and a default value), not ", n->number, U".");
 	integer numberOfLines = 7;   // the default
 	const Stackel defaultValue = pop;
-	Melder_require (defaultValue->which == Stackel_STRING,
-		U"The last argument of “naturalvector” (the default value) should be a string, not ", defaultValue->whichText(), U".");
+	conststring32 defaultString;
+	if (defaultValue->which == Stackel_STRING)
+		defaultString = defaultValue->getString();
+	else if (defaultValue->which == Stackel_NUMERIC_VECTOR)
+		defaultString = Melder_VEC (defaultValue->numericVector, true);
+	else
+		Melder_throw (U"The last argument of “naturalector” (the default value) should be a string or a numeric vector, not ", defaultValue->whichText(), U".");
 	const Stackel _format = pop;
 	Melder_require (_format->which == Stackel_STRING,
 		U"The penultimate argument of “naturalvector” (the format) should be a string, not ", _format->whichText(), U".");
@@ -7892,7 +7912,7 @@ static void do_naturalvector () {
 			U"The first argument of “naturalvector” (the number of lines) should be a number, not ", _numberOfLines->whichText(), U".");
 		numberOfLines = Melder_iround (_numberOfLines->number);
 	}
-	UiPause_naturalvector (label->getString(), format, defaultValue->getString(), numberOfLines);
+	UiPause_naturalvector (label->getString(), format, defaultString, numberOfLines);
 	pushNumber (1);
 }
 static void do_boolean () {
