@@ -2,11 +2,11 @@
 #define _Ui_h_
 /* Ui.h
  *
- * Copyright (C) 1992-2005,2007-2024 Paul Boersma
+ * Copyright (C) 1992-2005,2007-2024,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -193,7 +193,7 @@ Thing_define (UiForm, Thing) {
 	void (*applyCallback) (UiForm dia, void *closure);
 	void (*cancelCallback) (UiForm dia, void *closure);
 	int numberOfContinueButtons, defaultContinueButton, cancelContinueButton, clickedContinueButton;
-	conststring32 continueTexts [1 + MAXIMUM_NUMBER_OF_CONTINUE_BUTTONS];   // references to strings owned by a script
+	autostring32 continueTexts [1 + MAXIMUM_NUMBER_OF_CONTINUE_BUTTONS];
 	int numberOfFields;
 	autoUiField field [1 + MAXIMUM_NUMBER_OF_FIELDS];
 	UiField referenceToLatestUsedChoiceOrOptionMenu;
