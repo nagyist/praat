@@ -1,6 +1,6 @@
 /* main_Praat.h
  *
- * Copyright (C) 2024,2025 Paul Boersma
+ * Copyright (C) 2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@
 	and `Info.plist Preprocessor Prefix File` to `main/main_Praat.h`.
 */
 #define PRAAT_NAME  Praat
-#define PRAAT_VERSION_STR  6.4.54
-#define PRAAT_VERSION_NUM  6454
+#define PRAAT_VERSION_STR  6.4.55
+#define PRAAT_VERSION_NUM  6455
 #define PRAAT_YEAR  2026
 #define PRAAT_MONTH  1
-#define PRAAT_DAY  12
+#define PRAAT_DAY  15
 
 /* End of file main_Praat.h */
