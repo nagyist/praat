@@ -258,7 +258,7 @@ void Demo_timer (double duration) {
 }
 
 void Demo_waitForInput (Interpreter interpreter) {
-	TRACE
+	//TRACE
 	trace (U"entering interpreter ", Melder_pointer (interpreter));
 	/*
 		This function pauses the interpreter.
