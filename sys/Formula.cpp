@@ -114,7 +114,7 @@ enum { NO_SYMBOL_,
 		HERTZ_TO_BARK_, BARK_TO_HERTZ_, PHON_TO_DIFFERENCE_LIMENS_, DIFFERENCE_LIMENS_TO_PHON_,
 		HERTZ_TO_MEL_, MEL_TO_HERTZ_, HERTZ_TO_SEMITONES_, SEMITONES_TO_HERTZ_,
 		ERB_, HERTZ_TO_ERB_, ERB_TO_HERTZ_,
-		SUM_, MEAN_, STDEV_, CENTER_,
+		SUM_, MEAN_, STDEV_, CENTER_, RANDOM_IMAX_,
 		EVALUATE_, EVALUATE_NOCHECK_, EVALUATE_STR_, EVALUATE_NOCHECK_STR_,
 		STRING_STR_, VERTICAL_STR_, NUMBERS_VEC_, SLEEP_, UNICODE_, UNICODE_STR_,
 	#define HIGH_FUNCTION_1  UNICODE_STR_
@@ -294,7 +294,7 @@ static const conststring32 Formula_instructionNames [1 + highestSymbol] = { U"",
 	U"hertzToBark", U"barkToHertz", U"phonToDifferenceLimens", U"differenceLimensToPhon",
 	U"hertzToMel", U"melToHertz", U"hertzToSemitones", U"semitonesToHertz",
 	U"erb", U"hertzToErb", U"erbToHertz",
-	U"sum", U"mean", U"stdev", U"center",
+	U"sum", U"mean", U"stdev", U"center", U"randomImax",
 	U"evaluate", U"evaluate_nocheck", U"evaluate$", U"evaluate_nocheck$",
 	U"string$", U"vertical$", U"numbers#", U"sleep", U"unicode", U"unicode$",
 	U"arctan2", U"randomUniform", U"randomInteger", U"randomGauss", U"randomBinomial",
@@ -3851,6 +3851,14 @@ static void do_center () {
 		pushNumber (NUMcenterOfGravity (x->numericVector));
 	} else {
 		Melder_throw (U"Cannot compute the center of ", x->whichText(), U".");
+	}
+}
+static void do_randomImax () {
+	const Stackel x = pop;
+	if (x->which == Stackel_NUMERIC_VECTOR) {
+		pushNumber (NUMrandomImax (x->numericVector));
+	} else {
+		Melder_throw (U"Cannot compute a random imax of ", x->whichText(), U".");
 	}
 }
 static void do_function_dd_d (double (*f) (double, double)) {
@@ -8948,6 +8956,7 @@ CASE_NUM_WITH_TENSORS (LOG10_, do_log10)
 } break; case MEAN_: { do_mean ();
 } break; case STDEV_: { do_stdev ();
 } break; case CENTER_: { do_center ();
+} break; case RANDOM_IMAX_: { do_randomImax ();
 } break; case EVALUATE_: { do_evaluate ();
 } break; case EVALUATE_NOCHECK_: { do_evaluate_nocheck ();
 } break; case EVALUATE_STR_: { do_evaluate_STR ();

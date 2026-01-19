@@ -1,6 +1,6 @@
 /* NUMrandom.cpp
  *
- * Copyright (C) 1992-2006,2008,2011,2012,2014-2018,2020,2025 Paul Boersma
+ * Copyright (C) 1992-2006,2008,2011,2012,2014-2018,2020,2025,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -692,6 +692,23 @@ bool NUMrandomBernoulli (double probability) {
 
 double NUMrandomBernoulli_real (double probability) {
 	return (double) (NUMrandomFraction() < probability);
+}
+
+double NUMrandomImax (constVECVU const& vec) {
+	for (integer i = 1; i <= vec.size; i ++)
+		if (vec [i] < 0.0)
+			Melder_throw (U"Element ", i, U" is less than zero; cannot interpret as a probability.");
+	const double total = NUMsum (vec);
+	if (total == 0.0)
+		Melder_throw (U"Cannot interpret a zero vector as probabilities.");
+	const double cutOff = NUMrandomUniform (0.0, total);
+	/* mutable accumulator */ longdouble sum = 0.0;
+	for (integer i = 1; i <= vec.size; i ++) {
+		sum += vec [i];
+		if (sum > cutOff)
+			return i;
+	}
+	return vec.size;
 }
 
 #define repeat  do
