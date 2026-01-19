@@ -2,7 +2,7 @@
 #define _melder_tensor_h_
 /* melder_tensor.h
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -346,6 +346,8 @@ struct autovector {
 		our size = newSize;
 	}
 	void insert (integer position, const T& value) {
+		if (position == 0)
+			position = our size + 1;
 		resize (our size + 1, MelderArray::kInitializationType::RAW);
 		Melder_assert (position >= 1 && position <= our size);
 		for (integer i = our size; i > position; i --)
