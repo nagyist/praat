@@ -34,7 +34,6 @@ Thing_define (InterpreterVariable, SimpleString) {
 };
 
 #define Interpreter_MAXNUM_PARAMETERS  400
-#define Interpreter_MAXNUM_LABELS  1000
 #define Interpreter_MAX_CALL_DEPTH  50
 
 #define Interpreter_MAX_LABEL_LENGTH  99
@@ -156,14 +155,14 @@ Thing_define (Interpreter, Thing) {
 	}
 
 	autostring32 text;
-	int numberOfParameters, numberOfLabels, callDepth;
+	int numberOfParameters, callDepth;
 	int types [1+Interpreter_MAXNUM_PARAMETERS], numbersOfLines [1+Interpreter_MAXNUM_PARAMETERS];
 	char32 parameters [1+Interpreter_MAXNUM_PARAMETERS] [1+Interpreter_MAX_PARAMETER_LENGTH];
 	char32 formats [1+Interpreter_MAXNUM_PARAMETERS] [1+Interpreter_MAX_FORMAT_LENGTH];
 	autostring32 arguments [1+Interpreter_MAXNUM_PARAMETERS];
 	char32 choiceArguments [1+Interpreter_MAXNUM_PARAMETERS] [100];
-	char32 labelNames [1+Interpreter_MAXNUM_LABELS] [1+Interpreter_MAX_LABEL_LENGTH];
-	integer labelLines [1+Interpreter_MAXNUM_LABELS];
+	autoSTRVEC labelNames;
+	autoINTVEC labelLines;
 	autostring32 dialogTitle;
 	char32 procedureNames [1+Interpreter_MAX_CALL_DEPTH] [100];
 	std::unordered_map <std::u32string, autoInterpreterVariable> variablesMap;
