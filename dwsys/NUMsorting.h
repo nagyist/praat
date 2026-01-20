@@ -41,13 +41,14 @@ template<typename Keys, typename Values>
 void NUMsortTogether (Keys a, Values b) {
 	using ElementOfA = std::remove_reference_t <decltype (a [1])>;
 	using ElementOfB = std::remove_reference_t <decltype (b [1])>;
+	using std::swap;
 	Melder_assert (a.size == b.size);
 	if (a.size < 2)
 		return;   // already sorted
 	if (a.size == 2) {
 		if (a [2] < a [1]) {
-			std::swap (a [1], a [2]);
-			std::swap (b [1], b [2]);
+			swap (a [1], a [2]);
+			swap (b [1], b [2]);
 		}
 		return;
 	}
@@ -62,7 +63,7 @@ void NUMsortTogether (Keys a, Values b) {
 				}
 			a [imin] = a [i];
 			a [i] = min;
-			std::swap (b [imin], b [i]);
+			swap (b [imin], b [i]);
 		}
 		return;
 	}
@@ -94,8 +95,10 @@ void NUMsortTogether (Keys a, Values b) {
 		for (;;) { /* H4 */
 			i = j;
 			j = j << 1;
-			if (j > r) break;
-			if (j < r && a [j] < a [j + 1]) j ++; /* H5 */
+			if (j > r)
+				break;
+			if (j < r && a [j] < a [j + 1])
+				j ++; /* H5 */
 			/* if (k >= a [j]) break; H6 */
 			a [i] = a [j];
 			b [i] = b [j]; /* H7 */
