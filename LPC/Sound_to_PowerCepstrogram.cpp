@@ -59,8 +59,8 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram (constSound me, double pitchFloor
 					Get average power spectrum of channels
 					Let X(f) be the Fourier Transform, defined on the domain [-F,+F], of the real signal x(t).
 					The power spectrum is defined as the Fourier transform of the autocorrelation of x(t) which
-					is |X(f)|^2
-					The one-sided power spectrum is then P(f)= |X(f)|^2+|X(-f)|^2 for 0 <= f <= Nyquist
+					equals |X(f)|^2
+					The one-sided power spectrum is then P(f)= |X(f)|^2+|X(-f)|^2 = 2|X(f)|^2 for 0 <= f <= F
 					The bin width of the first and last frequency in the onesidedPowerSpectrum is half the bin width at the other frequencies
 					Do scaling and averaging together
 				*/
@@ -78,7 +78,6 @@ autoPowerCepstrogram Sound_to_PowerCepstrogram (constSound me, double pitchFloor
 					onesidedPowerSpectrum [numberOfFrequencies] += fourierSamples [numberOfFourierSamples] * fourierSamples [numberOfFourierSamples];
 				}
 				onesidedPowerSpectrum.get()  *=  2.0 * powerScaling / numberOfChannels; // scaling and averaging over channels
-				 // half bin width
 				/*
 					Get log power.
 				*/
