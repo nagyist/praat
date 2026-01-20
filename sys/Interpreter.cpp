@@ -23,6 +23,7 @@
 #include "../kar/UnicodeData.h"
 
 #include "../fon/Vector.h"
+#include "../dwsys/NUMsorting.h"
 
 #define Interpreter_WORD 1
 #define Interpreter_SENTENCE 2
@@ -1166,10 +1167,10 @@ InterpreterVariable Interpreter_lookUpVariable (Interpreter me, conststring32 ke
 }
 
 static integer lookupLabel (Interpreter me, conststring32 labelName) {
-	for (integer ilabel = 1; ilabel <= my numberOfLabels; ilabel ++)
-		if (str32equ (labelName, my labelNames [ilabel]))
-			return ilabel;
-	Melder_throw (U"Unknown label \"", labelName, U"\" (we know of ", my numberOfLabels, U" labels).");
+	const integer position = NUMfindFirst (my labelNames.get(), labelName);
+	if (position == 0)
+		Melder_throw (U"Unknown label \"", labelName, U"\" (we know of ", my labelNames.size, U" labels).");
+	return position;
 }
 
 static bool isCommand (conststring32 string) {
@@ -2058,7 +2059,8 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 	*/
 	my lines. resize (numberOfLines);
 	command = my text.get();   // reset
-	my numberOfLabels = 0;
+	my labelNames. reset();
+	my labelLines. reset();
 	for (integer lineNumber = 1; lineNumber <= numberOfLines; lineNumber ++, command += Melder_length (command) + 1 + chopped) {
 		while (Melder_isHorizontalSpace (*command))
 			command ++;   // nbsp can occur for scripts copied from the manual
@@ -2078,15 +2080,12 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 		#endif
 		my lines [lineNumber] = command;
 		if (str32nequ (command, U"label ", 6)) {
-			for (integer ilabel = 1; ilabel <= my numberOfLabels; ilabel ++)
-				if (str32equ (command + 6, my labelNames [ilabel]))
-					Melder_throw (U"Duplicate label \"", command + 6, U"\".");
-			if (my numberOfLabels >= Interpreter_MAXNUM_LABELS)
-				Melder_throw (U"Too many labels.");
-			str32ncpy (my labelNames [++ my numberOfLabels], command + 6, Interpreter_MAX_LABEL_LENGTH);
-			my labelNames [my numberOfLabels] [Interpreter_MAX_LABEL_LENGTH] = U'\0';
-			my labelLines [my numberOfLabels] = lineNumber;
+			if (NUMfindFirst (my labelNames.get(), command + 6) != 0)
+				Melder_throw (U"Duplicate label \"", command + 6, U"\".");
+			my labelNames. insert (0, command + 6);
+			my labelLines. insert (0, lineNumber);
 		}
+		NUMsortTogether (my labelNames.get(), my labelLines.get());   // TODO: make less superfluous (by using binary look-up)
 	}
 	/*
 		Connect continuation lines.
