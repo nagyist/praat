@@ -2958,7 +2958,7 @@ static void VECupdateDataAndSupport_inplace (VECVU const& v, BOOLVECVU const& su
 	Melder_assert (v.size == support.size);
 	autoVEC abs = abs_VEC (v);
 	autoINTVEC index = to_INTVEC (v.size);
-	NUMsortTogether <double, integer> (abs.get(), index.get()); // sort is always increasing
+	NUMsortTogether (abs.get(), index.get());   // sort is always increasing
 	for (integer i = 1; i <= v.size - numberOfNonZeros; i ++) {
 		v [index [i]] = 0.0;
 		support [index [i]] = false;

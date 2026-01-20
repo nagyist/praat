@@ -37,10 +37,13 @@
 	it may occur that the first 1 after sorting came from position 3 and the second 
 	1 came from position 2.
 */
-template<typename T1, typename T2>
-void NUMsortTogether (vector<T1> a, vector<T2> b) {
+template<typename Keys, typename Values>
+void NUMsortTogether (Keys a, Values b) {
+	using ElementOfA = std::remove_reference_t <decltype (a [1])>;
+	using ElementOfB = std::remove_reference_t <decltype (b [1])>;
 	Melder_assert (a.size == b.size);
-	if (a.size < 2) return;   /* Already sorted. */
+	if (a.size < 2)
+		return;   // already sorted
 	if (a.size == 2) {
 		if (a [2] < a [1]) {
 			std::swap (a [1], a [2]);
@@ -50,7 +53,7 @@ void NUMsortTogether (vector<T1> a, vector<T2> b) {
 	}
 	if (a.size <= 12) {
 		for (integer i = 1; i < a.size; i ++) {
-			T1 min = a [i];
+			ElementOfA min = a [i];
 			integer imin = i;
 			for (integer j = i + 1; j <= a.size; j ++)
 				if (a [j] < min) {
@@ -67,8 +70,8 @@ void NUMsortTogether (vector<T1> a, vector<T2> b) {
 	integer l = (a.size >> 1) + 1;
 	integer r = a.size;
 	for (;;) {
-		T1	k;
-		T2 kb;
+		ElementOfA k;
+		ElementOfB kb;
 		/* H2 Decrease */
 		if (l > 1) {
 			l --;
