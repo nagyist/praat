@@ -1,6 +1,6 @@
 /* praat.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -317,10 +317,8 @@ static void praat_remove (integer iobject, bool removeVisibly) {
 		theCurrentPraatObjects -> list [iobject]. isBeingCreated = false;
 		theCurrentPraatObjects -> totalBeingCreated --;
 	}
-	trace (U"deselect object ", iobject);
 	if (removeVisibly)
 		praat_deselect (iobject);
-	trace (U"deselected object ", iobject);
 
 	/*
 		To prevent synchronization problems, kill editors before killing the data.
@@ -337,11 +335,8 @@ static void praat_remove (integer iobject, bool removeVisibly) {
 		}
 	}
 	MelderFile_setToNull (& theCurrentPraatObjects -> list [iobject]. file);
-	trace (U"free name");
 	theCurrentPraatObjects -> list [iobject]. name. reset();
-	trace (U"forget object");
 	forget (theCurrentPraatObjects -> list [iobject]. object);   // note: this might save a file-based object to file
-	trace (U"forgotten object");
 }
 
 void praat_cleanUpName (char32 *name) {
@@ -930,7 +925,7 @@ void praat_dontUsePictureWindow () { praatP.dontUsePictureWindow = true; }
 			{// scope
 				autoPraatBackground background;
 				try {
-					praat_executeScriptFromFile (& messageFile, nullptr, nullptr);
+					praat_executeScriptFromFile (nullptr, & messageFile, nullptr, nullptr);
 				} catch (MelderError) {
 					Melder_flushError (Melder_upperCaseAppName(), U": message not completely handled.");
 				}
@@ -944,7 +939,7 @@ void praat_dontUsePictureWindow () { praatP.dontUsePictureWindow = true; }
 	static int cb_userMessage () {
 		autoPraatBackground background;
 		try {
-			praat_executeScriptFromFile (& messageFile, nullptr, nullptr);
+			praat_executeScriptFromFile (nullptr, & messageFile, nullptr, nullptr);
 		} catch (MelderError) {
 			Melder_flushError (Melder_upperCaseAppName(), U": message not completely handled.");
 		}
@@ -2009,7 +2004,7 @@ static void executeStartUpFile (MelderFolder startUpDirectory, conststring32 fil
 		if (! MelderFile_readable (& startUp))
 			return;   // it's OK if the file doesn't exist
 		try {
-			praat_executeScriptFromFile (& startUp, nullptr, nullptr);
+			praat_executeScriptFromFile (nullptr, & startUp, nullptr, nullptr);
 		} catch (MelderError) {
 			Melder_flushError (Melder_upperCaseAppName(), U": start-up file ", & startUp, U" not completed.");
 		}
@@ -2115,7 +2110,7 @@ void praat_run () {
 				if (MelderFile_readable (& plugin)) {
 					Melder_backgrounding = true;
 					try {
-						praat_executeScriptFromFile (& plugin, nullptr, nullptr);
+						praat_executeScriptFromFile (nullptr, & plugin, nullptr, nullptr);
 					} catch (MelderError) {
 						Melder_flushError (Melder_upperCaseAppName(), U": plugin ", & plugin, U" contains an error.");
 					}

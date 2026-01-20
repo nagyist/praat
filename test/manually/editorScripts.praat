@@ -107,6 +107,20 @@ editor: textGrid
 	Select: 0.3, 0.7
 	pauseScript: "Just continue."
 	Zoom: 0.3, 0.7
+endeditor
+removeObject: sound, textGrid
+
+sound = Create Sound from formula: "sineWithNoise", 1, 0, 1, 44100, "1/2 * sin(2*pi*377*x) + randomGauss(0,0.1)"
+textGrid = To TextGrid: "Mary John Bell", "bell"
+selectObject: sound, textGrid
+View & Edit
+editor: textGrid
+	Select: 0.3, 0.7
+	beginPause: "Just continue."
+	clicked = endPause: "Next", 1
+	Zoom: 0.3, 0.7
+endeditor
+removeObject: sound, textGrid
 
 # The same, but during the pause, try to close the window (or remove the Sound).
 

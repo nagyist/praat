@@ -78,28 +78,23 @@ static void psRevertLine (GraphicsPostscript me) {
 	static void winPrepareLine (GraphicsScreen me) {
 		HPEN newPen;
 		const int lineWidth_pixels = Melder_clippedLeft (1, int (LINE_WIDTH_IN_PIXELS (me) + 0.5));
-		my d_fatNonSolid = my lineType != Graphics_DRAWN && lineWidth_pixels > 1;
-		if (Melder_debug == 10) {
-			LOGBRUSH brush;
-			brush. lbStyle = BS_SOLID;
-			brush. lbColor = my d_winForegroundColour;
-			brush. lbHatch = my lineType == Graphics_DRAWN ? 0 : my lineType == Graphics_DOTTED ? PS_DOT : my lineType == Graphics_DASHED ? PS_DASH : PS_DASHDOT;
-			if (my lineType == Graphics_DRAWN) {
-				newPen = ExtCreatePen (PS_GEOMETRIC, lineWidth_pixels, & brush, 0, nullptr);
-			} else {
-				DWORD style [] = { 36, 33 };
-				newPen = ExtCreatePen (PS_GEOMETRIC | PS_USERSTYLE, lineWidth_pixels, & brush, 2, style);
-			}
+		LOGBRUSH brush;
+		brush. lbStyle = BS_SOLID;
+		brush. lbColor = my d_winForegroundColour;
+		brush. lbHatch = ( my lineType == Graphics_DRAWN ? 0 : my lineType == Graphics_DOTTED ? PS_DOT : my lineType == Graphics_DASHED ? PS_DASH : PS_DASHDOT );
+		const double factor = ( my resolution > 192 ? 3.0 : 1.0 );
+		if (my lineType == Graphics_DRAWN) {
+			newPen = ExtCreatePen (PS_GEOMETRIC | PS_ENDCAP_FLAT, lineWidth_pixels, & brush, 0, nullptr);
+		} else if (my lineType == Graphics_DOTTED) {
+			DWORD style [] = { static_cast <DWORD> (factor * (1 + lineWidth_pixels / 2)), static_cast <DWORD> (factor * (2 + lineWidth_pixels / 4)) };
+			newPen = ExtCreatePen (PS_GEOMETRIC | PS_ENDCAP_FLAT | PS_USERSTYLE, lineWidth_pixels, & brush, 2, style);
+		} else if (my lineType == Graphics_DASHED) {
+			DWORD style [] = { static_cast <DWORD> (factor * (4 + lineWidth_pixels)), static_cast <DWORD> (factor * (2 + lineWidth_pixels / 4)) };
+			newPen = ExtCreatePen (PS_GEOMETRIC | PS_ENDCAP_FLAT | PS_USERSTYLE, lineWidth_pixels, & brush, 2, style);
 		} else {
-			/*newPen = CreatePen (my lineType == Graphics_DRAWN ? PS_SOLID :
-				my lineType == Graphics_DOTTED ? PS_DOT : my lineType == Graphics_DASHED ? PS_DASH : PS_DASHDOT,
-				my fatNonSolid ? 1 : lineWidth_pixels, my foregroundColour);*/
-			LOGPEN pen;
-			pen. lopnStyle = my lineType == Graphics_DRAWN ? PS_SOLID : my lineType == Graphics_DOTTED ? PS_DOT : my lineType == Graphics_DASHED ? PS_DASH : PS_DASHDOT;
-			pen. lopnWidth. x = my d_fatNonSolid ? 1 : lineWidth_pixels;
-			pen. lopnWidth. y = 0;
-			pen. lopnColor = my d_winForegroundColour | 0x02000000;
-			newPen = CreatePenIndirect (& pen);
+			DWORD style [] = { static_cast <DWORD> (factor * (4 + lineWidth_pixels)), static_cast <DWORD> (factor * (2 + lineWidth_pixels / 4)),
+					static_cast <DWORD> (factor * (1 + lineWidth_pixels / 2)), static_cast <DWORD> (factor * (2 + lineWidth_pixels / 4)) };
+			newPen = ExtCreatePen (PS_GEOMETRIC | PS_ENDCAP_FLAT | PS_USERSTYLE, lineWidth_pixels, & brush, 4, style);
 		}
 		SelectPen (my d_gdiGraphicsContext, newPen);
 		DeletePen (my d_winPen);
@@ -192,20 +187,6 @@ void structGraphicsScreen :: v_polyline (integer numberOfPoints, double *xyDC, b
 				if (close)
 					points [numberOfPoints] = points [0];
 				Polyline (our d_gdiGraphicsContext, points, numberOfPoints + close);
-				if (our d_fatNonSolid) {
-					for (integer i = 0; i < numberOfPoints; i ++)
-						points [i]. x -= 1;
-					if (close)
-						points [numberOfPoints] = points [0];
-					Polyline (our d_gdiGraphicsContext, points, numberOfPoints + close);
-					for (integer i = 0; i < numberOfPoints; i ++) {
-						points [i]. x += 1;
-						points [i]. y -= 1;
-					}
-					if (close)
-						points [numberOfPoints] = points [0];
-					Polyline (our d_gdiGraphicsContext, points, numberOfPoints + close);
-				}
 				Melder_free (points);
 			}
 			DEFAULT

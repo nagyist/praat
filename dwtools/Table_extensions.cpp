@@ -284,7 +284,7 @@ autoTable Table_getOneWayKruskalWallis (Table me, integer column, integer factor
 		for (integer irow = 1; irow <= numberOfData; irow ++)
 			data [irow] = my rows.at [irow] -> cells [column]. number;
 
-		NUMsortTogether <double, integer> (data.get(), levels -> classIndex.get());
+		NUMsortTogether (data.get(), levels -> classIndex.get());
 		VECrankSorted (data.get());
 		/*
 			Get correctionfactor for ties (Hays pg. 831)

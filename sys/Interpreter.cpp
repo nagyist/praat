@@ -122,10 +122,11 @@ autoInterpreter Interpreter_create () {
 	}
 }
 
-autoInterpreter Interpreter_createFromEnvironment (Editor optionalInterpreterOwningEditor) {
-	autoInterpreter interpreter = Interpreter_create ();
-	interpreter -> setOwningEditorEnvironmentFromOptionalEditor (optionalInterpreterOwningEditor);
-	return interpreter;
+autoInterpreter Interpreter_createFromEnvironment (Interpreter optionalParentInterpreter, Editor optionalInterpreterOwningEditor) {
+	autoInterpreter me = Interpreter_create ();
+	my optionalParentInterpreter = optionalParentInterpreter;
+	my setOwningEditorEnvironmentFromOptionalEditor (optionalInterpreterOwningEditor);
+	return me;
 }
 
 void Interpreters_undangleEnvironment (Editor environment) noexcept {

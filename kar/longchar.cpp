@@ -1,10 +1,10 @@
 /* longchar.cpp
  *
- * Copyright (C) 1992-2009,2011-2019,2021,2024 Paul Boersma
+ * Copyright (C) 1992-2009,2011-2019,2021,2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -577,6 +577,7 @@ static struct structLongchar_Info Longchar_database [] = {
 { 'n', 'v', 2, 1, { "/archunder",        0, 0,   0,   0,      0, 0,      0, 0,   0,   0   },  57,  57,  57,  57, UNICODE_COMBINING_INVERTED_BREVE_BELOW }, // nonsyllabic
 { '~', 'v', 2, 1, { "/tildeunder",       0, 0,   0,   0,      0, 0,      0, 0,   0,   0   },  48,  48,  48,  48, UNICODE_COMBINING_TILDE_BELOW }, // creaky voiced
 { '-', 'v', 2, 1, { "/minusunder",       0, 0,   0,   0,      0, 0,      0, 0,   0,   0   },  61,  61,  61,  61, UNICODE_COMBINING_MINUS_SIGN_BELOW }, // backed
+{ '.', 'v', 2, 1, { "",                  0, 0,   0,   0,      0, 0,      0, 0,   0,   0   }, '?', '?', '?', '?', UNICODE_COMBINING_DOT_BELOW }, // apico-postalveolar
 { '~', '<', 2, 1, { "/tildethrough",     0, 0,   0,   0,      0, 0,      0, 0,   0,   0   },   0, 242, 242,   0, UNICODE_COMBINING_TILDE_OVERLAY }, // velarized l
 { '3', 'v', 2, 1, { "/halfringright",    0, 0,   0,   0,      0, 0,      0, 0,   0,   0   }, 166, 166, 166, 166, UNICODE_COMBINING_RIGHT_HALF_RING_BELOW }, // rounded
 { 'l', 'i', 2, 1, { "/ligature",         0, 0,   0,   0,      0, 0,      0, 0,   0,   0   }, 131, 131, 131, 131, UNICODE_COMBINING_DOUBLE_INVERTED_BREVE },

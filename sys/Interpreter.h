@@ -77,6 +77,7 @@ conststring32 kInterpreter_ReturnType_errorMessage (kInterpreter_ReturnType retu
 Thing_define (Interpreter, Thing) {
 	Script scriptReference;
 	Notebook notebookReference;
+	Interpreter optionalParentInterpreter;
 
 	struct EditorEnvironment {
 		ClassInfo _optionalClass;
@@ -189,7 +190,7 @@ Thing_define (Interpreter, Thing) {
 };
 
 autoInterpreter Interpreter_create ();
-autoInterpreter Interpreter_createFromEnvironment (Editor optionalInterpreterOwningEditor);
+autoInterpreter Interpreter_createFromEnvironment (Interpreter optionalParentInterpreter, Editor optionalInterpreterOwningEditor);
 
 void Interpreters_undangleEnvironment (Editor environment) noexcept;
 

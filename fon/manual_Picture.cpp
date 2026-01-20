@@ -628,7 +628,7 @@ You can either type the symbols directly (if your computer has an input method f
 
 ################################################################################
 "Phonetic symbols: diacritics"
-© Paul Boersma 2004,2005,2006,2007,2008,2009,2011,2013,2021,2025
+© Paul Boersma 2004,2005,2006,2007,2008,2009,2011,2013,2021,2025,2026
 
 To draw phonetic diacritical symbols in the @@Picture window@ or in the @TextGridEditor,
 make sure that you have installed the Charis and/or Doulos SIL font, for instance from `sil.org` or from `praat.org`.
@@ -644,6 +644,7 @@ Diacritics below the letter:
 , o\T( `o\T(`  (%%combining left tack below%, %atr): advanced tongue root
 , o\T) `o\T)`  (%%combining right tack below%, %rtr): retracted tongue root
 , e\-v `e\-v`  (%%combining macron below%): backed
+, s\.v `s\.v`  (%%combining dot below%): apico-postalveolar (non-standard IPA retroflex, if necessary to distinguish it from apico-palatal; see @@Ladefoged & Maddieson (1996)@)
 , o\+v `o\+v`  (%%combining plus sign below%): fronted
 , o\:v `o\:v`  (%%combining diaeresis below%): breathy voice
 , o\~v `o\~v`  (%%combining tilde below%): creaky voice

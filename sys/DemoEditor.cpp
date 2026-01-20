@@ -49,10 +49,12 @@ void structDemoEditor :: v_goAway () {
 		if (our interpreterReference) {
 			const integer lineNumber = our interpreterReference -> lineNumber;
 			Interpreter_stop (our interpreterReference);
+			#if 0
 			Melder_flushError (
 				U"You interrupted the script at line ", lineNumber, U".\n"
 				U"The Demo window will now close."
 			);
+			#endif
 		}
 		forget (theReferenceToTheOnlyDemoEditor);
 	} else
@@ -92,6 +94,8 @@ static void gui_drawingarea_cb_mouse (DemoEditor me, GuiDrawingArea_MouseEvent e
 		if (my interpreterReference) {
 			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
 			my interpreterReference -> pausedByDemoWindow = false;
+			//TRACE
+			trace (U"mouse click resumes interpreter ", Melder_pointer (my interpreterReference));
 			Interpreter_resume (my interpreterReference);
 		}
 	}
@@ -116,6 +120,8 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 		if (my interpreterReference) {
 			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
 			my interpreterReference -> pausedByDemoWindow = false;
+			//TRACE
+			trace (U"key press resumes interpreter ", Melder_pointer (my interpreterReference));
 			Interpreter_resume (my interpreterReference);
 		}
 	}
@@ -194,7 +200,7 @@ void Demo_open () {
 		theReferenceToTheOnlyDemoEditor = editor.get();
 		editor.releaseToUser();
 	}
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput)
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0)
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	theCurrentPraatPicture = (PraatPicture) theReferenceToTheOnlyDemoEditor -> praatPicture;
@@ -252,23 +258,29 @@ void Demo_timer (double duration) {
 }
 
 void Demo_waitForInput (Interpreter interpreter) {
+	//TRACE
+	trace (U"entering interpreter ", Melder_pointer (interpreter));
 	/*
 		This function pauses the interpreter.
-		Key or mouse input will resume the interpreter..
+		Key or mouse input will resume the interpreter.
 	*/
 	if (! theReferenceToTheOnlyDemoEditor)
-		return;
+		Melder_throw (U"Cannot do demoWaitForInput() if the Demo window isn’t visible.");
+	trace (U"is the Demo window already waiting for input? ", theReferenceToTheOnlyDemoEditor -> waitingForInput );
 	theReferenceToTheOnlyDemoEditor -> wasBackgrounding = Melder_backgrounding;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
+	if (interpreter -> optionalParentInterpreter)
+		Melder_throw (U"Cannot do demoWaitForInput() in a script called from another script.\n"
+				U"If you want to pause a nested script, use “include” instead.");
 	//GuiThing_show (theReferenceToTheOnlyDemoEditor -> windowForm);
 	theReferenceToTheOnlyDemoEditor -> clicked = false;
 	theReferenceToTheOnlyDemoEditor -> keyPressed = false;
 	theReferenceToTheOnlyDemoEditor -> waitingForInput = true;
 	interpreter -> pausedByDemoWindow = true;
-	trace (U"setting the interpreter to ", Melder_pointer (interpreter));
+	trace (U"setting the Demo window's interpreter to ", Melder_pointer (interpreter));
 	theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
 	Melder_getCurrentFolder (& interpreter -> savedFolder);
 	if (theReferenceToTheOnlyDemoEditor -> wasBackgrounding)
@@ -278,7 +290,7 @@ void Demo_waitForInput (Interpreter interpreter) {
 void Demo_peekInput (Interpreter interpreter) {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -337,7 +349,7 @@ void Demo_peekInput (Interpreter interpreter) {
 bool Demo_clicked () {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return false;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -347,7 +359,7 @@ bool Demo_clicked () {
 double Demo_x () {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return undefined;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -365,7 +377,7 @@ double Demo_x () {
 double Demo_y () {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return undefined;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -379,7 +391,7 @@ double Demo_y () {
 bool Demo_keyPressed () {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return false;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -389,7 +401,7 @@ bool Demo_keyPressed () {
 char32 Demo_key () {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return U'\0';
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -399,7 +411,7 @@ char32 Demo_key () {
 bool Demo_shiftKeyPressed () {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return false;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -409,7 +421,7 @@ bool Demo_shiftKeyPressed () {
 bool Demo_commandKeyPressed () {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return false;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -419,7 +431,7 @@ bool Demo_commandKeyPressed () {
 bool Demo_optionKeyPressed () {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return false;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -429,7 +441,7 @@ bool Demo_optionKeyPressed () {
 bool Demo_input (conststring32 keys) {
 	if (! theReferenceToTheOnlyDemoEditor)
 		return false;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}
@@ -439,7 +451,7 @@ bool Demo_input (conststring32 keys) {
 bool Demo_clickedIn (double left, double right, double bottom, double top) {
 	if (! theReferenceToTheOnlyDemoEditor || ! theReferenceToTheOnlyDemoEditor -> clicked)
 		return false;
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput) {
+	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
 	}

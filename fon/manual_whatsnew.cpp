@@ -29,6 +29,20 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.55# (15 January 2026)
+• Plug-ins: fixed a problem introduced in 6.4.52 by which menu commands with pause forms didn’t work.
+• Scripting: fixed some problems introduced in version 6.4.52 concerning the interaction
+  between pause windows and the Demo window.
+• Opening TIFF files with @@Read from file...@, as well as @@Insert picture from file...@:
+  rid a bug that would show monochrome TIFF files in four vertical stripes.
+• Scripting: in pause forms, allow vector expressions as defaults in vector fields.
+• Backslash trigraph for apico-postalveolars: s\.v (`s\.v`), following @@Ladefoged & Maddieson (1996)@, who wanted to
+  distinguish them from the more extreme retroflexes, i.e. apico-palatals such as \s. (`\s.`).
+
+##6.4.54# (12 January 2026)
+• Windows: fixed a problem introduced in 6.4.52 by which Ctrl-mousewheel wouldn’t zoom in or out.
+• Windows: better dotted or dashed lines. 
+
 ##6.4.53# (9 January 2026)
 • Scripting: fixed some problems introduced in version 6.4.52 concerning the interaction
   between pause windows and editor scripts.

@@ -4352,7 +4352,7 @@ For details and examples, see @@Scripting 6.1. Arguments to the script@.
 
 ################################################################################
 "`runSubprocess`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2026
 
 A function that can be used in @Scripting.
 
@@ -4362,7 +4362,32 @@ Syntax and semantics
 : run the program given by the (relative or absolute) %`executableFilePath$`,
 with optional arguments given in “`...`”.
 
-For details and examples, see @@Scripting 6.5. Calling system commands@.
+If the subprocess fails in its execution, #`runSubprocess` will report
+the subprocess’ error message and stop the script.
+
+Examples
+========
+{;
+	\`{writeInfoLine}: “start”
+	\#{runSubprocess}: “C:\\Windows\Notepad.exe”
+	\`{appendInfoLine}: “end”
+}
+This script will write “start” into the Info window, then start up `Notepad.exe`,
+wait until you close `Notepad`, and only then write “end” into the Info window.
+That is, the subprocess is run %synchronously.
+
+You can use @`asynchronous` in combination with #`runSubprocess`:
+{;
+	\`{writeInfoLine}: “start”
+	\#`{asynchronous} \#{runSubprocess}: “C:\\Windows\Notepad.exe”
+	\`{appendInfoLine}: “end”
+}
+This script will write “start” into the Info window, then start up `Notepad.exe`,
+and then immediately write “end” into the Info window.
+Whatever you subsequently do in `Notepad` (including closing that app) will have no influence on your script
+or on Praat in general.
+
+For some more details and examples, see @@Scripting 6.5. Calling system commands@.
 
 ################################################################################
 "`runSubprocess$`"

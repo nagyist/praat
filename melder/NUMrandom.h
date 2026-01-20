@@ -2,7 +2,7 @@
 #define _NUMrandom_h_
 /* NUMrandom.h
  *
- * Copyright (C) 1992-2018,2020,2025 Paul Boersma
+ * Copyright (C) 1992-2018,2020,2025,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,8 @@ integer NUMrandomInteger (integer lowest, integer highest);
 
 bool NUMrandomBernoulli (double probability);
 double NUMrandomBernoulli_real (double probability);
+
+double NUMrandomImax (constVECVU const& vec);
 
 double NUMrandomGauss (double mean, double standardDeviation);
 

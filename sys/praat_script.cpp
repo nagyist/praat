@@ -298,7 +298,7 @@ bool praat_executeCommand (Interpreter interpreter, char32 *command) {
 			UiPause_comment (str32equ (command, U"pause") ? U"..." : command + 6);
 			UiPause_end (1, 1, 0, U"Continue", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, interpreter);
 		} else if (str32nequ (command, U"execute ", 8)) {
-			praat_executeScriptFromFileNameWithArguments (command + 8);
+			praat_executeScriptFromFileNameWithArguments (interpreter, command + 8);
 		} else if (str32nequ (command, U"editor", 6)) {   // deprecated
 			Melder_require (praat_commandsWithExternalSideEffectsAreAllowed (),
 				U"The script command “editor” is not available inside manuals.");
@@ -521,7 +521,7 @@ void praat_executeCommandFromStandardInput (conststring32 programName) {
 	}
 }
 
-void praat_executeScriptFromFile (MelderFile file, conststring32 arguments, Editor optionalInterpreterOwningEditor) {
+void praat_executeScriptFromFile (Interpreter optionalParentInterpreter, MelderFile file, conststring32 arguments, Editor optionalInterpreterOwningEditor) {
 	try {
 		autostring32 text = MelderFile_readText (file);
 		{// scope
@@ -529,7 +529,7 @@ void praat_executeScriptFromFile (MelderFile file, conststring32 arguments, Edit
 			autoMelderFileSetCurrentFolder folder (file);   // so that script-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalInterpreterOwningEditor);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalParentInterpreter, optionalInterpreterOwningEditor);
 		if (arguments) {
 			Interpreter_readParameters (interpreter.get(), text.get());
 			Interpreter_getArgumentsFromString (interpreter.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
@@ -541,7 +541,7 @@ void praat_executeScriptFromFile (MelderFile file, conststring32 arguments, Edit
 	}
 }
 
-void praat_runScript (conststring32 fileName, integer narg, Stackel args, Editor optionalInterpreterOwningEditor) {
+void praat_runScript (Interpreter parentInterpreter, conststring32 fileName, integer narg, Stackel args, Editor optionalInterpreterOwningEditor) {
 	structMelderFile file { };
 	Melder_relativePathToFile (fileName, & file);
 	try {
@@ -565,7 +565,7 @@ void praat_runScript (conststring32 fileName, integer narg, Stackel args, Editor
 			autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalInterpreterOwningEditor);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (parentInterpreter, optionalInterpreterOwningEditor);
 		Interpreter_readParameters (interpreter.get(), text.get());
 		Interpreter_getArgumentsFromArgs (interpreter.get(), narg, args);   // interpret caller-relative paths for infile/outfile/folder arguments
 		autoScript script = Script_createFromFile (& file);
@@ -607,7 +607,7 @@ void praat_runNotebook (conststring32 fileName, integer narg, Stackel args, Edit
 			autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalInterpreterOwningEditor);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);
 		Interpreter_readParameters (interpreter.get(), text.get());
 		autoMelderReadText readText = MelderReadText_createFromText (text.move());
 		autoManPages manPages = ManPages_createFromText (readText.get(), & file);
@@ -629,7 +629,7 @@ void praat_executeScriptFromCommandLine (conststring32 fileName, integer argc, c
 			autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, nullptr);
 		Interpreter_readParameters (interpreter.get(), text.get());
 		Interpreter_getArgumentsFromCommandLine (interpreter.get(), argc, argv);   // interpret caller-relative paths for infile/outfile/folder arguments
 		autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used inside the script
@@ -639,7 +639,7 @@ void praat_executeScriptFromCommandLine (conststring32 fileName, integer argc, c
 	}
 }
 
-void praat_executeScriptFromFileNameWithArguments (conststring32 nameAndArguments) {
+void praat_executeScriptFromFileNameWithArguments (Interpreter optionalParentInterpreter, conststring32 nameAndArguments) {
 	char32 path [256];
 	const char32 *p, *arguments;
 	structMelderFile file { };
@@ -670,7 +670,7 @@ void praat_executeScriptFromFileNameWithArguments (conststring32 nameAndArgument
 			arguments ++;
 	}
 	Melder_relativePathToFile (path, & file);
-	praat_executeScriptFromFile (& file, arguments, nullptr);
+	praat_executeScriptFromFile (optionalParentInterpreter, & file, arguments, nullptr);
 }
 
 extern "C" void praatlib_executeScript (const char *text8) {
@@ -702,7 +702,7 @@ static void secondPassThroughScript (UiForm sendingForm, integer /* narg */, Sta
 	autostring32 text = MelderFile_readText (& file);
 	autoMelderFileSetCurrentFolder folder (& file);
 	Melder_includeIncludeFiles (& text);
-	autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalInterpreterOwningEditor);
+	autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);
 	Interpreter_readParameters (interpreter.get(), text.get());
 	Interpreter_getArgumentsFromDialog (interpreter.get(), sendingForm);
 	autoPraatBackground background;
@@ -710,6 +710,7 @@ static void secondPassThroughScript (UiForm sendingForm, integer /* narg */, Sta
 }
 
 static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterOwningEditor, EditorCommand optionalCommand) {
+	UiPause_cleanUp ();
 	try {
 		autostring32 text = MelderFile_readText (file);
 		/*
@@ -732,7 +733,8 @@ static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterO
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
 
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalInterpreterOwningEditor);
+		static autoInterpreter interpreter;   // SMELL
+		interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);
 
 		autoScript script = Script_createFromFile (file);
 		Script_rememberDuringThisAppSession_move (script.move());
@@ -752,7 +754,7 @@ static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterO
 			}
 		} else {
 			autoPraatBackground background;
-			//praat_executeScriptFromFile (file, nullptr, optionalInterpreterOwningEditor);
+			//praat_executeScriptFromFile (nullptr, file, nullptr, optionalInterpreterOwningEditor);
 			{// scope
 				autoMelderFileSetCurrentFolder folder (file);   // so that callee-relative file names can be used inside the script
 				Interpreter_run (interpreter.get(), text.move(), false);
