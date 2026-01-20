@@ -37,12 +37,12 @@
 	it may occur that the first 1 after sorting came from position 3 and the second 
 	1 came from position 2.
 */
-template<typename Keys, typename Compare = std::less<>, typename Values>
-void NUMsortTogether (Keys a, Values b) {
+template <typename Keys, typename Compare, typename Values>
+void NUMsortTogether (Keys const& a, Compare compare, Values const& b) {
 	using ElementOfA = std::remove_reference_t <decltype (a [1])>;
 	using ElementOfB = std::remove_reference_t <decltype (b [1])>;
 	using std::swap;
-	Compare compare;
+
 	Melder_assert (a.size == b.size);
 	if (a.size < 2)
 		return;   // already sorted
@@ -118,6 +118,24 @@ void NUMsortTogether (Keys a, Values b) {
 			b [j] = b [i];
 		}
 	}
+}
+
+template <typename Keys, typename Values>
+void NUMsortTogether (Keys const& a, Values const& b) {
+	using ElementOfA = std::remove_reference_t <decltype (a [1])>;
+	static_assert (! std::is_pointer_v <ElementOfA>, "Pointer keys cannot be compared.");
+	NUMsortTogether (a, std::less<>{}, b);
+}
+
+template <typename Values>
+void NUMsortTogether (STRVEC const& a, Values const& b) {
+	NUMsortTogether (
+		a,
+		[] (char32 *first, char32 *last) {
+			return str32cmp (first, last) < 0;
+		},
+		b
+	);
 }
 
 void VECsort3_inplace (VEC const& a, INTVEC const& iv1, INTVEC const& iv2, bool descending); // TODO template
