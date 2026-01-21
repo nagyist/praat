@@ -197,8 +197,7 @@ void Melder_includeIncludeFiles (autostring32 *inout_text, bool onlyInCodeChunks
 				Separate out the name of the include file.
 			*/
 			includeFileName = includeLocation + 8;
-			while (Melder_isHorizontalSpace (*includeFileName))
-				includeFileName ++;
+			Melder_skipHorizontalSpace (& includeFileName);
 			tail = includeFileName;
 			while (Melder_staysWithinLine (*tail))
 				tail ++;
@@ -1020,8 +1019,7 @@ void Interpreter_getArgumentsFromString (Interpreter me, conststring32 arguments
 		/*
 			Skip spaces until next argument.
 		*/
-		while (Melder_isHorizontalSpace (*arguments))
-			arguments ++;
+		Melder_skipHorizontalSpace (& arguments);
 		/*
 			The argument is everything up to the next space, or, if it starts with a double quote,
 			everything between this quote and the matching double quote;
@@ -1051,8 +1049,7 @@ void Interpreter_getArgumentsFromString (Interpreter me, conststring32 arguments
 		Leading spaces are skipped, but trailing spaces are included.
 	*/
 	if (size > 0) {
-		while (Melder_isHorizontalSpace (*arguments))
-			arguments ++;
+		Melder_skipHorizontalSpace (& arguments);
 		my arguments [size] = Melder_dup_f (arguments);
 	}
 	convertBooleansAndChoicesToNumbersAndRelativeToAbsolutePaths (me, size);
@@ -1153,7 +1150,7 @@ InterpreterVariable Interpreter_hasVariable (Interpreter me, conststring32 key) 
 InterpreterVariable Interpreter_lookUpVariable (Interpreter me, conststring32 key) {
 	Melder_assert (key);
 	conststring32 variableNameIncludingProcedureName =
-		key [0] == U'.' ? Melder_cat (my procedureStackNames [my callDepth], key) : key;
+			( key [0] == U'.' ? Melder_cat (my procedureStackNames [my callDepth], key) : key );
 	auto it = my variablesMap. find (variableNameIncludingProcedureName);
 	if (it != my variablesMap.end())
 		return it -> second.get();
@@ -1411,8 +1408,7 @@ static void Interpreter_do_procedureCall (Interpreter me, char32 *command,
 		We just passed the `@` sign, so we continue by looking for a procedure name at the call site.
 	*/
 	char32 *p = command;
-	while (Melder_isHorizontalSpace (*p))
-		p ++;   // skip whitespace
+	Melder_skipHorizontalSpace (& p);
 	char32 *callName = p;
 	while (Melder_staysWithinInk (*p) && *p != U'(' && *p != U':')
 		p ++;
@@ -1423,8 +1419,7 @@ static void Interpreter_do_procedureCall (Interpreter me, char32 *command,
 		*p = U'\0';   // close procedure name
 		if (! parenthesisOrColonFound) {
 			p ++;   // step over first white space
-			while (Melder_isHorizontalSpace (*p))
-				p ++;   // skip more whitespace
+			Melder_skipHorizontalSpace (& p);
 			hasArguments = ( *p != U'\0' );
 			parenthesisOrColonFound = ( *p == U'(' || *p == U':' );
 			if (hasArguments && ! parenthesisOrColonFound)
@@ -1435,11 +1430,10 @@ static void Interpreter_do_procedureCall (Interpreter me, char32 *command,
 	const integer callLength = Melder_length (callName);
 	integer iline = 1;
 	for (; iline <= lines.size; iline ++) {
-		if (! str32nequ (lines [iline], U"procedure ", 10))
+		if (! str32nequ (lines [iline], U"procedure", 9) || ! Melder_isHorizontalSpace (lines [iline] [9]))
 			continue;
 		char32 *q = lines [iline] + 10;
-		while (Melder_isHorizontalSpace (*q))
-			q ++;   // skip whitespace before procedure name
+		Melder_skipHorizontalSpace (& q);   // skip whitespace before procedure name
 		char32 *const procName = q;
 		while (Melder_staysWithinInk (*q) && *q != U'(' && *q != U':')
 			q ++;
@@ -1456,18 +1450,15 @@ static void Interpreter_do_procedureCall (Interpreter me, char32 *command,
 			if (*q)
 				q ++;   // step over parenthesis or colon or first white space
 			if (! parenthesisOrColonFound) {
-				while (Melder_isHorizontalSpace (*q))
-					q ++;   // skip more whitespace
+				Melder_skipHorizontalSpace (& q);
 				if (*q == U'(' || *q == U':')
 					q ++;   // step over parenthesis or colon
 			}
 			while (*q && *q != U')' && *q != U';') {
 				static MelderString argument;
 				MelderString_empty (& argument);
-				while (Melder_isHorizontalSpace (*p))
-					p ++;
-				while (Melder_isHorizontalSpace (*q))
-					q ++;
+				Melder_skipHorizontalSpace (& p);
+				Melder_skipHorizontalSpace (& q);
 				conststring32 parameterName = q;
 				while (Melder_staysWithinInk (*q) && *q != U',' && *q != U')' && *q != U';')
 					q ++;   // collect parameter name
@@ -1610,8 +1601,7 @@ static void Interpreter_do_oldProcedureCall (Interpreter me, char32 *command,
 		Old type of procedure calls, with space separation, unquoted strings, and no array support.
 	*/
 	char32 *p = command;
-	while (Melder_isHorizontalSpace (*p))
-		p ++;   // skip whitespace
+	Melder_skipHorizontalSpace (& p);
 	char32 *callName = p;
 	while (*p != U'\0' && ! Melder_isHorizontalSpace (*p) && *p != U'(' && *p != U':')
 		p ++;
@@ -1625,8 +1615,7 @@ static void Interpreter_do_oldProcedureCall (Interpreter me, char32 *command,
 		if (! str32nequ (lines [iline], U"procedure ", 10))
 			continue;
 		char32 *q = lines [iline] + 10;
-		while (Melder_isHorizontalSpace (*q))
-			q ++;
+		Melder_skipHorizontalSpace (& q);
 		char32 *procName = q;
 		while (*q != U'\0' && ! Melder_isHorizontalSpace (*q) && *q != U'(' && *q != U':')
 			q ++;
@@ -1645,8 +1634,7 @@ static void Interpreter_do_oldProcedureCall (Interpreter me, char32 *command,
 				bool parenthesisOrColonFound = ( *q == U'(' || *q == U':' );
 				q ++;   // step over parenthesis or colon or first white space
 				if (! parenthesisOrColonFound) {
-					while (Melder_isHorizontalSpace (*q))
-						q ++;   // skip more whitespace
+					Melder_skipHorizontalSpace (& q);
 					if (*q == U'(' || *q == U':')
 						q ++;   // step over parenthesis or colon
 				}
@@ -1655,8 +1643,7 @@ static void Interpreter_do_oldProcedureCall (Interpreter me, char32 *command,
 					char32 *par, save;
 					static MelderString arg;
 					MelderString_empty (& arg);
-					while (Melder_isHorizontalSpace (*p))
-						p ++;
+					Melder_skipHorizontalSpace (& p);
 					while (Melder_isHorizontalSpace (*q) || *q == U',' || *q == U')')
 						q ++;
 					par = q;
@@ -1743,8 +1730,7 @@ static void assignToNumericVectorElement (Interpreter me, char32 *& p, const cha
 		Melder_throw (U"Element index should be numeric.");
 	}
 	p ++;   // step over closing bracket
-	while (Melder_isHorizontalSpace (*p))
-		p ++;
+	Melder_skipHorizontalSpace (& p);
 	int assignmentType = 0;
 	if (*p == U'=') {
 		p ++;   // step over equals sign
@@ -1762,8 +1748,7 @@ static void assignToNumericVectorElement (Interpreter me, char32 *& p, const cha
 		p += 2;   // step over div-gets sign
 	} else
 		Melder_throw (U"Missing '=', '+=', '-=', '*=' or '/=' after vector element ", vectorName, U" [", index.string, U"].");
-	while (Melder_isHorizontalSpace (*p))
-		p ++;   // go to first token after assignment
+	Melder_skipHorizontalSpace (& p);   // go to first token after assignment
 	if (*p == U'\0')
 		Melder_throw (U"Missing expression after vector element ", vectorName, U" [", index.string, U"].");
 	double value;
@@ -1884,8 +1869,7 @@ static void assignToNumericMatrixElement (Interpreter me, char32 *& p, const cha
 		Melder_throw (U"Column number should be numeric.");
 	}
 	p ++;   // step over closing bracket
-	while (Melder_isHorizontalSpace (*p))
-		p ++;
+	Melder_skipHorizontalSpace (& p);
 	int assignmentType = 0;
 	if (*p == U'=') {
 		p ++;   // step over equals sign
@@ -1904,8 +1888,7 @@ static void assignToNumericMatrixElement (Interpreter me, char32 *& p, const cha
 	} else
 		Melder_throw (U"Missing '=', '+=', '-=', '*=' or '/=' after matrix element ", matrixName, U" [",
 			rowFormula.string, U",", columnFormula.string, U"].");
-	while (Melder_isHorizontalSpace (*p))
-		p ++;   // go to first token after assignment
+	Melder_skipHorizontalSpace (&p);   // go to first token after assignment
 	if (*p == U'\0')
 		Melder_throw (U"Missing expression after matrix element ", matrixName, U" [",
 				rowFormula.string, U",", columnFormula.string, U"].");
@@ -1996,13 +1979,11 @@ static void assignToStringArrayElement (Interpreter me, char32 *& p, const char3
 		Melder_throw (U"Element index should be numeric.");
 	}
 	p ++;   // step over closing bracket
-	while (Melder_isHorizontalSpace (*p))
-		p ++;
+	Melder_skipHorizontalSpace (& p);
 	if (*p != U'=')
 		Melder_throw (U"Missing '=' after string vector element ", vectorName, U" [", index.string, U"].");
 	p ++;   // step over equals sign
-	while (Melder_isHorizontalSpace (*p))
-		p ++;   // go to first token after assignment
+	Melder_skipHorizontalSpace (& p);   // go to first token after assignment
 	if (*p == U'\0')
 		Melder_throw (U"Missing expression after string vector element ", vectorName, U" [", index.string, U"].");
 	autostring32 value;
@@ -2055,15 +2036,16 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 		command = endOfLine + 1;
 	}
 	/*
-		Remember line starts and labels.
+		Remember line starts, labels and procedures.
 	*/
 	my lines. resize (numberOfLines);
 	command = my text.get();   // reset
 	my labelNames. reset();
 	my labelLines. reset();
+	my procedureNames. reset();
+	my procedureStartLines. reset();
 	for (integer lineNumber = 1; lineNumber <= numberOfLines; lineNumber ++, command += Melder_length (command) + 1 + chopped) {
-		while (Melder_isHorizontalSpace (*command))
-			command ++;   // nbsp can occur for scripts copied from the manual
+		Melder_skipHorizontalSpace (& command);   // nbsp can occur for scripts copied from the manual
 		/*
 			Chop trailing spaces?
 		*/
@@ -2080,14 +2062,46 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 		#endif
 		my lines [lineNumber] = command;
 		if (str32nequ (command, U"label", 5) && Melder_isHorizontalSpace (command [5])) {
-			my labelNames. insert (0, command + 6);
+			MelderString_empty (& command2);
+			for (integer ichar = 6; ; ichar ++) {
+				if (Melder_isHorizontalSpace (command [ichar]) || command [ichar] == U';' || command [ichar] == U'\0')
+					break;
+				MelderString_appendCharacter (& command2, command [ichar]);
+			}
+			my labelNames. insert (0, command2.string);
 			my labelLines. insert (0, lineNumber);
 		}
-		NUMsortTogether (my labelNames.get(), my labelLines.get());
-		for (integer ilabel = 1; ilabel < my labelNames.size; ilabel ++)
-			if (str32equ (my labelNames [ilabel].get(), my labelNames [ilabel + 1].get()))
-				Melder_throw (U"Duplicate label \"", my labelNames [ilabel].get(), U"\".");
+		if (str32nequ (command, U"procedure", 9) && Melder_isHorizontalSpace (command [9])) {
+			MelderString_empty (& command2);
+			for (integer ichar = 10; ; ichar ++) {
+				if (Melder_isHorizontalSpace (command [ichar]) || command [ichar] == U';' || command [ichar] == U':' || command [ichar] == U'\0')
+					break;
+				MelderString_appendCharacter (& command2, command [ichar]);
+			}
+			my procedureNames. insert (0, command2.string);
+			my procedureStartLines. insert (0, lineNumber);
+		}
+		if (str32nequ (command, U"proc", 4) && Melder_isHorizontalSpace (command [4])) {
+			MelderString_empty (& command2);
+			for (integer ichar = 5; ; ichar ++) {
+				if (Melder_isHorizontalSpace (command [ichar]) || command [ichar] == U';' || command [ichar] == U':' || command [ichar] == U'\0')
+					break;
+				MelderString_appendCharacter (& command2, command [ichar]);
+			}
+			my procedureNames. insert (0, command2.string);
+			my procedureStartLines. insert (0, lineNumber);
+		}
 	}
+	NUMsortTogether (my labelNames.get(), my labelLines.get());
+	for (integer ilabel = 1; ilabel < my labelNames.size; ilabel ++)
+		if (str32equ (my labelNames [ilabel].get(), my labelNames [ilabel + 1].get()))
+			Melder_throw (U"Duplicate label \"", my labelNames [ilabel].get(),
+					U"\" on lines ", my labelLines [ilabel], U" and ", my labelLines [ilabel + 1], U".");
+	NUMsortTogether (my procedureNames.get(), my procedureStartLines.get());
+	for (integer iproc = 1; iproc < my procedureNames.size; iproc ++)
+		if (str32equ (my procedureNames [iproc].get(), my procedureNames [iproc + 1].get()))
+			Melder_throw (U"Duplicate procedure \"", my procedureNames [iproc].get(),
+					U"\" on lines ", my procedureStartLines [iproc], U" and ", my procedureStartLines [iproc + 1], U".");
 	/*
 		Connect continuation lines.
 	*/
@@ -2702,7 +2716,7 @@ void Interpreter_resume (Interpreter me) {
 						fail = true;
 						break;
 					case U'p':
-						if (str32nequ (command2.string, U"procedure ", 10)) {
+						if (str32nequ (command2.string, U"procedure", 9) && Melder_isHorizontalSpace (command2.string [9])) {
 							integer iline = my lineNumber + 1;
 							for (; iline <= numberOfLines; iline ++) {
 								if (str32nequ (lines [iline], U"endproc", 7) &&
@@ -2851,15 +2865,13 @@ void Interpreter_resume (Interpreter me) {
 							MelderString_copy (& arrayName, command2.string, U"#");
 							*p = U'#';   // put the number sign back
 							p ++;   // step over number sign
-							while (Melder_isHorizontalSpace (*p))
-								p ++;   // go to first token after array name
+							Melder_skipHorizontalSpace (& p);   // go to first token after array name
 							if (*p == U'=') {
 								/*
 									This must be an assignment to a string array variable.
 								*/
 								p ++;   // step over equals sign
-								while (Melder_isHorizontalSpace (*p))
-									p ++;   // go to first token after assignment
+								Melder_skipHorizontalSpace (& p);   // go to first token after assignment
 								if (*p == U'\0')
 									Melder_throw (U"Missing right-hand expression in assignment to string array ", arrayName.string, U".");
 								if (isCommand (p)) {
@@ -2895,8 +2907,7 @@ void Interpreter_resume (Interpreter me) {
 							trace (U"detected an assignment to a string variable");
 							char32 *endOfVariable = ++ p;
 							char32 *variableName = command2.string;
-							while (Melder_isHorizontalSpace (*p))
-								p ++;   // go to first token after variable name
+							Melder_skipHorizontalSpace (& p);   // go to first token after variable name
 							if (*p == U'[') {
 								/*
 									This must be an assignment to an indexed string variable.
@@ -2941,7 +2952,7 @@ void Interpreter_resume (Interpreter me) {
 								variableName = indexedVariableName.string;
 								p ++;   // skip closing bracket
 							}
-							while (Melder_isHorizontalSpace (*p)) p ++;   // go to first token after (perhaps indexed) variable name
+							Melder_skipHorizontalSpace (& p);   // go to first token after (perhaps indexed) variable name
 							int typeOfAssignment;   // 0, 1, 2, 3 or 4
 							if (*p == U'=') {
 								typeOfAssignment = 0;   // assignment
@@ -2964,7 +2975,7 @@ void Interpreter_resume (Interpreter me) {
 							} else Melder_throw (U"Missing “=”, “+=”, “<”, or “>” after string variable ", variableName, U".");
 							*endOfVariable = U'\0';
 							p ++;
-							while (Melder_isHorizontalSpace (*p)) p ++;   // go to first token after assignment or I/O symbol
+							Melder_skipHorizontalSpace (& p);   // go to first token after assignment or I/O symbol
 							if (*p == U'\0') {
 								if (typeOfAssignment >= 2)
 									Melder_throw (U"Missing file name after variable ", variableName, U".");
@@ -3049,14 +3060,13 @@ void Interpreter_resume (Interpreter me) {
 							MelderString_copy (& matrixName, command2.string, U'#');
 							*p = U'#';   // put the number sign back
 							p ++;   // step over last number sign
-							while (Melder_isHorizontalSpace (*p)) p ++;   // go to first token after matrix name
+							Melder_skipHorizontalSpace (& p);   // go to first token after matrix name
 							if (*p == U'=') {
 								/*
 									This must be an assignment to a matrix variable.
 								*/
 								p ++;   // step over equals sign
-								while (Melder_isHorizontalSpace (*p))
-									p ++;   // go to first token after assignment
+								Melder_skipHorizontalSpace (& p);   // go to first token after assignment
 								if (*p == U'\0')
 									Melder_throw (U"Missing right-hand expression in assignment to matrix ", matrixName.string, U".");
 								if (isCommand (p)) {
@@ -3142,7 +3152,7 @@ void Interpreter_resume (Interpreter me) {
 									This must be a formula assignment to a matrix variable.
 								*/
 								p ++;   // step over tilde
-								while (Melder_isHorizontalSpace (*p)) p ++;   // go to first token after assignment
+								Melder_skipHorizontalSpace (& p);   // go to first token after assignment
 								if (*p == U'\0')
 									Melder_throw (U"Missing formula expression for matrix ", matrixName.string, U".");
 								InterpreterVariable var = Interpreter_hasVariable (me, matrixName.string);
@@ -3171,8 +3181,7 @@ void Interpreter_resume (Interpreter me) {
 							MelderString_copy (& vectorName, command2.string, U"#");
 							*p = U'#';   // put the number sign back
 							p ++;   // step over number sign
-							while (Melder_isHorizontalSpace (*p))
-								p ++;   // go to first token after array name
+							Melder_skipHorizontalSpace (& p);   // go to first token after array name
 							if (*p == U'=') {
 								/*
 									This must be an assignment to a vector variable.
@@ -3186,8 +3195,7 @@ void Interpreter_resume (Interpreter me) {
 									interpreter_assignToVector# = interpreter_assignToVector# + 5
 								@*/
 								p ++;   // step over equals sign
-								while (Melder_isHorizontalSpace (*p))
-									p ++;   // go to first token after assignment
+								Melder_skipHorizontalSpace (& p);   // go to first token after assignment
 								if (*p == U'\0')
 									Melder_throw (U"Missing right-hand expression in assignment to vector ", vectorName.string, U".");
 								if (isCommand (p)) {
@@ -3281,8 +3289,7 @@ void Interpreter_resume (Interpreter me) {
 									This must be a formula assignment to a vector variable.
 								*/
 								p ++;   // step over tilde
-								while (Melder_isHorizontalSpace (*p))
-									p ++;   // go to first token after assignment
+								Melder_skipHorizontalSpace (& p);   // go to first token after assignment
 								if (*p == U'\0')
 									Melder_throw (U"Missing formula expression for vector ", vectorName.string, U".");
 								InterpreterVariable var = Interpreter_hasVariable (me, vectorName.string);
@@ -3317,7 +3324,7 @@ void Interpreter_resume (Interpreter me) {
 							continue;   // next line
 						}
 						char32 *endOfVariable = p;
-						while (Melder_isHorizontalSpace (*p)) p ++;
+						Melder_skipHorizontalSpace (& p);
 						if (*p == U'=' || ((*p == U'+' || *p == U'-' || *p == U'*' || *p == U'/') && p [1] == U'=')) {
 							/*
 								This must be an assignment (though: "echo = ..." ???)
@@ -3367,8 +3374,7 @@ void Interpreter_resume (Interpreter me) {
 							}
 							variableName = indexedVariableName.string;
 							p ++;   // skip closing bracket
-							while (Melder_isHorizontalSpace (*p))
-								p ++;
+							Melder_skipHorizontalSpace (& p);
 							if (*p == U'=' || ((*p == U'+' || *p == U'-' || *p == U'*' || *p == U'/') && p [1] == U'=')) {
 								typeOfAssignment = ( *p == U'+' ? 1 : *p == U'-' ? 2 : *p == U'*' ? 3 : *p == U'/' ? 4 : 0 );
 							}
@@ -3380,8 +3386,7 @@ void Interpreter_resume (Interpreter me) {
 							continue;   // next line
 						}
 						p += ( typeOfAssignment == 0 ? 1 : 2 );
-						while (Melder_isHorizontalSpace (*p))
-							p ++;
+						Melder_skipHorizontalSpace (& p);
 						if (*p == U'\0')
 							Melder_throw (U"Missing expression after variable ", variableName, U".");
 						/*
