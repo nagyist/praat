@@ -163,8 +163,10 @@ Thing_define (Interpreter, Thing) {
 	char32 choiceArguments [1+Interpreter_MAXNUM_PARAMETERS] [100];
 	autoSTRVEC labelNames;
 	autoINTVEC labelLines;
+	autoSTRVEC procedureNames;
+	autoINTVEC procedureStartLines;
 	autostring32 dialogTitle;
-	char32 procedureNames [1+Interpreter_MAX_CALL_DEPTH] [100];
+	char32 procedureStackNames [1+Interpreter_MAX_CALL_DEPTH] [100];
 	std::unordered_map <std::u32string, autoInterpreterVariable> variablesMap;
 	bool running, stopped, pausedByDemoWindow, pausedByPauseWindow;
 	structMelderFolder savedFolder;   // to remember across pausing
