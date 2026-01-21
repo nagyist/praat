@@ -1,0 +1,49 @@
+time = clock()
+numberOfJumps = 1e6
+numberOfIncrements = 20 * numberOfJumps
+a = 0
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+label LABEL
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+a += 1
+goto END a >= numberOfIncrements
+goto LABEL
+label END
+writeInfo: (clock() - time) / numberOfJumps * 1e9, " ns per jump"

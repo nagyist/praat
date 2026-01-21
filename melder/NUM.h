@@ -237,6 +237,37 @@ inline integer NUMfindLast_caseInsensitive (constSTRVEC const& strvec, conststri
 	return 0;
 }
 
+inline integer NUMfindInSorted (constSTRVEC const& strvec, conststring32 string) {
+	if (strvec.size == 0)
+		return 0;
+
+	const int atEnd = str32cmp (string, strvec [strvec.size]);
+	if (atEnd > 0)
+		return 0;
+	if (atEnd == 0)
+		return strvec.size;
+
+	const int atStart = str32cmp (string, strvec [1]);
+	if (atStart < 0)
+		return 0;
+	if (atStart == 0)
+		return 1;
+
+	integer left = 1, right = strvec.size;
+	while (left < right - 1) {
+		const integer mid = (left + right) / 2;
+		const int here = str32cmp (string, strvec [mid]);
+		if (here == 0)
+			return mid;
+		if (here > 0)
+			left = mid;
+		else
+			right = mid;
+	}
+	Melder_assert (right == left + 1);
+	return 0;
+}
+
 extern double NUMinner (constVECVU const& x, constVECVU const& y) noexcept;
 
 inline bool NUMisSquare (constMATVU const& x) noexcept {

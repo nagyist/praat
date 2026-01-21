@@ -1167,7 +1167,7 @@ InterpreterVariable Interpreter_lookUpVariable (Interpreter me, conststring32 ke
 }
 
 static integer lookupLabel (Interpreter me, conststring32 labelName) {
-	const integer position = NUMfindFirst (my labelNames.get(), labelName);
+	const integer position = NUMfindInSorted (my labelNames.get(), labelName);
 	if (position == 0)
 		Melder_throw (U"Unknown label \"", labelName, U"\" (we know of ", my labelNames.size, U" labels).");
 	return position;
@@ -2079,13 +2079,14 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 			}
 		#endif
 		my lines [lineNumber] = command;
-		if (str32nequ (command, U"label ", 6)) {
-			if (NUMfindFirst (my labelNames.get(), command + 6) != 0)
-				Melder_throw (U"Duplicate label \"", command + 6, U"\".");
+		if (str32nequ (command, U"label", 5) && Melder_isHorizontalSpace (command [5])) {
 			my labelNames. insert (0, command + 6);
 			my labelLines. insert (0, lineNumber);
 		}
-		NUMsortTogether (my labelNames.get(), my labelLines.get());   // TODO: make less superfluous (by using binary look-up)
+		NUMsortTogether (my labelNames.get(), my labelLines.get());
+		for (integer ilabel = 1; ilabel < my labelNames.size; ilabel ++)
+			if (str32equ (my labelNames [ilabel].get(), my labelNames [ilabel + 1].get()))
+				Melder_throw (U"Duplicate label \"", my labelNames [ilabel].get(), U"\".");
 	}
 	/*
 		Connect continuation lines.
