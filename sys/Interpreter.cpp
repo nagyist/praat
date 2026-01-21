@@ -1143,7 +1143,7 @@ static void Interpreter_addNumericVectorVariable (Interpreter me, conststring32 
 
 InterpreterVariable Interpreter_hasVariable (Interpreter me, conststring32 key) {
 	Melder_assert (key);
-	auto it = my variablesMap. find (key [0] == U'.' ? Melder_cat (my procedureNames [my callDepth], key) : key);
+	auto it = my variablesMap. find (key [0] == U'.' ? Melder_cat (my procedureStackNames [my callDepth], key) : key);
 	if (it != my variablesMap.end())
 		return it -> second.get();
 	else
@@ -1153,7 +1153,7 @@ InterpreterVariable Interpreter_hasVariable (Interpreter me, conststring32 key) 
 InterpreterVariable Interpreter_lookUpVariable (Interpreter me, conststring32 key) {
 	Melder_assert (key);
 	conststring32 variableNameIncludingProcedureName =
-		key [0] == U'.' ? Melder_cat (my procedureNames [my callDepth], key) : key;
+		key [0] == U'.' ? Melder_cat (my procedureStackNames [my callDepth], key) : key;
 	auto it = my variablesMap. find (variableNameIncludingProcedureName);
 	if (it != my variablesMap.end())
 		return it -> second.get();
@@ -1451,7 +1451,7 @@ static void Interpreter_do_procedureCall (Interpreter me, char32 *command,
 			*/
 			if (++ my callDepth > Interpreter_MAX_CALL_DEPTH)
 				Melder_throw (U"Call depth greater than ", Interpreter_MAX_CALL_DEPTH, U".");
-			str32cpy (my procedureNames [my callDepth], callName);
+			str32cpy (my procedureStackNames [my callDepth], callName);
 			const bool parenthesisOrColonFound = ( *q == U'(' || *q == U':' );
 			if (*q)
 				q ++;   // step over parenthesis or colon or first white space
@@ -1640,7 +1640,7 @@ static void Interpreter_do_oldProcedureCall (Interpreter me, char32 *command,
 				Melder_throw (U"Call to procedure \"", callName, U"\" has too few arguments.");
 			if (++ my callDepth > Interpreter_MAX_CALL_DEPTH)
 				Melder_throw (U"Call depth greater than ", Interpreter_MAX_CALL_DEPTH, U".");
-			str32cpy (my procedureNames [my callDepth], callName);
+			str32cpy (my procedureStackNames [my callDepth], callName);
 			if (hasParameters) {
 				bool parenthesisOrColonFound = ( *q == U'(' || *q == U':' );
 				q ++;   // step over parenthesis or colon or first white space
