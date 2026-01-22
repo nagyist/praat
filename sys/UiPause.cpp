@@ -22,7 +22,6 @@
 static autoUiForm thePauseForm;
 static int thePauseForm_clicked = 0;
 static int theCancelContinueButton = 0;
-static bool thePauseForm_wasBackgrounding = false;
 static Interpreter thePauseForm_interpreterReference;
 static bool thePauseForm_secondPass = false;
 static structMelderFolder thePauseForm_savedFolder;
@@ -73,9 +72,9 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	thePauseForm_interpreterReference -> lineNumber -= 1;   // in order to make sure we'll get a second pass
 	thePauseForm_secondPass = true;
 	thePauseForm_interpreterReference -> pausedByPauseWindow = false;
-	if (thePauseForm_wasBackgrounding)
-		praat_background ();
+	Melder_setCurrentFolder (& thePauseForm_savedFolder);
 	try {
+		autoPraatBackground background;
 		Interpreter_resume (thePauseForm_interpreterReference);
 	} catch (MelderError) {
 		if (thePauseForm_clicked == theCancelContinueButton)
@@ -122,9 +121,9 @@ static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) 
 		thePauseForm_interpreterReference -> lineNumber -= 1;   // in order to make sure we'll get a second pass
 		thePauseForm_secondPass = true;
 		thePauseForm_interpreterReference -> pausedByPauseWindow = false;
-		if (thePauseForm_wasBackgrounding)
-			praat_background ();
+		Melder_setCurrentFolder (& thePauseForm_savedFolder);
 		try {
+			autoPraatBackground background;
 			Interpreter_resume (thePauseForm_interpreterReference);
 		} catch (MelderError) {
 			Melder_flushError (U"This happened after you stopped the pause form.");
@@ -281,10 +280,7 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 		);
 		theCancelContinueButton = cancelContinueButton;
 		UiForm_finish (thePauseForm.get());
-		thePauseForm_wasBackgrounding = Melder_backgrounding;
 		//if (theCurrentPraatApplication -> batch) goto end;
-		if (thePauseForm_wasBackgrounding)
-			praat_foreground ();
 		Melder_getCurrentFolder (& thePauseForm_savedFolder);
 		thePauseForm_clicked = 0;
 		thePauseForm_interpreterReference -> pausedByPauseWindow = true;
@@ -305,7 +301,6 @@ void UiPause_cleanUp () {
 	thePauseForm. reset();
 	thePauseForm_clicked = 0;
 	theCancelContinueButton = 0;
-	thePauseForm_wasBackgrounding = false;
 	thePauseForm_interpreterReference = nullptr;
 	thePauseForm_secondPass = false;
 	MelderFolder_setToNull (& thePauseForm_savedFolder);

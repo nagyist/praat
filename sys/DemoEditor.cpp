@@ -1,6 +1,6 @@
 /* DemoEditor.cpp
  *
- * Copyright (C) 2009-2025 Paul Boersma
+ * Copyright (C) 2009-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,13 +89,10 @@ static void gui_drawingarea_cb_mouse (DemoEditor me, GuiDrawingArea_MouseEvent e
 	my optionKeyPressed = event -> optionKeyPressed;
 	if (my waitingForInput) {
 		my waitingForInput = false;
-		if (theReferenceToTheOnlyDemoEditor -> wasBackgrounding)
-			praat_background ();
 		if (my interpreterReference) {
 			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
 			my interpreterReference -> pausedByDemoWindow = false;
-			//TRACE
-			trace (U"mouse click resumes interpreter ", Melder_pointer (my interpreterReference));
+			autoPraatBackground background;
 			Interpreter_resume (my interpreterReference);
 		}
 	}
@@ -115,13 +112,10 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 	my optionKeyPressed = event -> optionKeyPressed;
 	if (my waitingForInput) {
 		my waitingForInput = false;
-		if (theReferenceToTheOnlyDemoEditor -> wasBackgrounding)
-			praat_background ();
 		if (my interpreterReference) {
 			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
 			my interpreterReference -> pausedByDemoWindow = false;
-			//TRACE
-			trace (U"key press resumes interpreter ", Melder_pointer (my interpreterReference));
+			autoPraatBackground background;
 			Interpreter_resume (my interpreterReference);
 		}
 	}
@@ -267,7 +261,6 @@ void Demo_waitForInput (Interpreter interpreter) {
 	if (! theReferenceToTheOnlyDemoEditor)
 		Melder_throw (U"Cannot do demoWaitForInput() if the Demo window isn’t visible.");
 	trace (U"is the Demo window already waiting for input? ", theReferenceToTheOnlyDemoEditor -> waitingForInput );
-	theReferenceToTheOnlyDemoEditor -> wasBackgrounding = Melder_backgrounding;
 	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
 		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 			U"Please click or type into the Demo window or close it.");
@@ -283,8 +276,6 @@ void Demo_waitForInput (Interpreter interpreter) {
 	trace (U"setting the Demo window's interpreter to ", Melder_pointer (interpreter));
 	theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
 	Melder_getCurrentFolder (& interpreter -> savedFolder);
-	if (theReferenceToTheOnlyDemoEditor -> wasBackgrounding)
-		praat_foreground ();
 }
 
 void Demo_peekInput (Interpreter interpreter) {
@@ -306,8 +297,6 @@ void Demo_peekInput (Interpreter interpreter) {
 	theReferenceToTheOnlyDemoEditor -> waitingForInput = true;
 	{// scope
 		autoMelderSaveCurrentFolder saveFolder;
-		//bool wasBackgrounding = Melder_backgrounding;
-		//if (wasBackgrounding) praat_foreground ();
 		try {
 			#if gtk
 				while (gtk_events_pending ()) {
@@ -336,7 +325,6 @@ void Demo_peekInput (Interpreter interpreter) {
 		} catch (MelderError) {
 			Melder_flushError (U"An error made it to the outer level in the Demo window; should not occur! Please write to paul.boersma@uva.nl");
 		}
-		//if (wasBackgrounding) praat_background ();
 	}
 	theReferenceToTheOnlyDemoEditor -> waitingForInput = false;
 	if (theReferenceToTheOnlyDemoEditor -> userWantsToClose) {

@@ -2,7 +2,7 @@
 #define _DemoEditor_h_
 /* DemoEditor.h
  *
- * Copyright (C) 2009-2011,2012,2015-2018,2020,2022,2024,2025 Paul Boersma
+ * Copyright (C) 2009-2011,2012,2015-2018,2020,2022,2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ Thing_define (DemoEditor, Editor) {
 	bool clicked, keyPressed, shiftKeyPressed, commandKeyPressed, optionKeyPressed;
 	integer x, y;
 	char32 key;
-	bool waitingForInput, userWantsToClose, fullScreen, wasBackgrounding;
+	bool waitingForInput, userWantsToClose, fullScreen;
 	Interpreter interpreterReference;
 
 	void v9_destroy () noexcept
