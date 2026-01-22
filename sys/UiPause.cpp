@@ -298,7 +298,11 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 }
 
 void UiPause_cleanUp () {
-	thePauseForm. reset();
+	#if defined (macintosh)
+		thePauseForm. reset();
+	#else
+		thePauseForm. releaseToUser();   // BUG: potential memory leak (but it can be a child of an editor window)
+	#endif
 	thePauseForm_clicked = 0;
 	theCancelContinueButton = 0;
 	thePauseForm_interpreterReference = nullptr;

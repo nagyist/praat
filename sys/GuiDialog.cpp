@@ -22,9 +22,12 @@ Thing_implement (GuiDialog, GuiShell, 0);
 
 #if gtk
 	static void _GuiGtkDialog_destroyCallback (GuiObject widget, gpointer void_me) {
+		//TRACE
+		trace (U"destroying dialog widget ", Melder_pointer (widget));
 		(void) widget;
 		iam (GuiDialog);
-		forget (me);
+		trace (U"destroying dialog ", Melder_pointer (me));
+		//forget (me);   // BUG: potential memory leak
 	}
 	static gboolean _GuiGtkDialog_goAwayCallback (GuiObject widget, GdkEvent *event, gpointer void_me) {
 		(void) widget;
@@ -36,9 +39,12 @@ Thing_implement (GuiDialog, GuiShell, 0);
 	}
 #elif motif
 	static void _GuiMotifDialog_destroyCallback (GuiObject widget, XtPointer void_me, XtPointer call) {
+		//TRACE
+		trace (U"destroying dialog widget ", Melder_pointer (widget));
 		(void) widget; (void) call;
 		iam (GuiDialog);
-		forget (me);
+		trace (U"destroying dialog ", Melder_pointer (me));
+		//forget (me);   // BUG: potential memory leak
 	}
 	static void _GuiMotifDialog_goAwayCallback (GuiObject widget, XtPointer void_me, XtPointer call) {
 		(void) widget; (void) call;
