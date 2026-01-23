@@ -298,8 +298,8 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 }
 
 void UiPause_cleanUp () {
-	#if defined (macintosh)
-		thePauseForm. reset();
+	#if defined (macintosh) || 1
+		thePauseForm. reset();   // TODO: this works only if pause windows aren't children of editor windows
 	#else
 		thePauseForm. releaseToUser();   // BUG: potential memory leak (but it can be a child of an editor window)
 	#endif
