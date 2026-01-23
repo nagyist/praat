@@ -1662,7 +1662,7 @@ A trick that works would be to include the procedure name into the names of thes
 	\#{endproc
 }
 This works. The six tones will be played, and \"300\" will be written to the Info window.
-But the formulation is a bit wordy, isn't it?
+But the formulation is a bit wordy, isn’t it?
 
 Fortunately, Praat allows an abbreviated version of these long names:
 just leave “playOctave” off from the names of the variables, but keep the period (`.`):
@@ -1733,6 +1733,14 @@ or even
 {;
 	@texts: ““ hello” at the top”, ““goodbye” at the bottom”
 }
+
+Restrictions
+============
+
+You can have any number of procedures in your script. The name of a procedure can have any number of characters (at least 1, of course).
+A procedure name can consist of letters (“word characters”), underscores (“_”), periods (“.”) and digits,
+but it cannot start with a digit; this is the same restriction as for variable names.
+
 Functions
 =========
 

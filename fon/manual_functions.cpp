@@ -248,6 +248,7 @@ A growing list of functions that you can use in @formulas and @scripting...
 , @`randomGauss##` (%`nrow`, %`ncol`, %`mu`, %`sigma`) – %`nrow` \xx %`ncol` independent normally distributed random numbers
 , @`randomGauss##` (%`matrix##`, %`mu`, %`sigma`) – duplicate %`matrix##`,
 	and replace all cells with independent normally distributed random numbers
+, @`randomImax` (%`vector#`) – sample from an array of relative probabilities
 , @`randomInteger` (%`min`, %`max`) – uniformly distributed integer random deviate
 , @`randomInteger#` (%`n`, %`min`, %`max`) – %`n` independent uniformly distributed random integers
 , @`randomInteger#` (%`vector#`, %`min`, %`max`) – duplicate %`vector#`,
@@ -943,9 +944,9 @@ as well as the text of the assertion (i.e. “`a < 10`”).
 
 ################################################################################
 "`asserterror`"
-© Paul Boersma 2023
+© Paul Boersma 2023,2026
 
-A keyword that can be used in @Scripting, to test whether an expected erroe message is indeed generated.
+A keyword that can be used in @Scripting, to test whether an expected error message is indeed generated.
 
 Examples
 ========
@@ -3846,6 +3847,44 @@ This is shorthand for doing
 {;
 	\#{randomGauss##} (\`{numberOfRows} (\%{model##}), \`{numberOfColumns} (\%{model##}), \%{mu}, \%{sigma})
 }
+################################################################################
+"`randomImax`"
+© Paul Boersma 2026
+
+A function that can be used in @@Formulas@.
+
+Syntax and semantics
+====================
+#`randomImax` (%`distribution#`)
+: sample from an array of relative probabilities.
+
+Example
+=======
+The following draws the outcome 1 one half of the time, the outcome 2 one sixth of the time, and the outcome 3 one third of the time:
+{
+	for i to 20
+		outcome = \#{randomImax} ({ 3.0, 1.0, 2.0 })
+		\`{appendInfoLine}: outcome
+	endfor
+}
+All elements of the vector have to be non-negative:
+{
+	\`{asserterror} Element 2 is less than zero; cannot interpret as a probability.
+	a = \#{randomImax} ({ 3.0, -1.0, 2.0 })
+}
+Some elements of the vector may be zero. The following draws the outcome 1 60 percent of the time, and the outcome 3 40 percent of the time:
+{
+	for i to 20
+		outcome = \#{randomImax} ({ 3.0, 0.0, 2.0 })
+		\`{appendInfoLine}: outcome
+	endfor
+}
+Not all elements of the vector can be zero:
+{
+	\`{asserterror} Cannot interpret a zero vector as probabilities.
+	a = \#{randomImax} ({ 0.0, 0.0, 0.0 })
+}
+
 ################################################################################
 "`randomInteger`"
 © Paul Boersma 2023

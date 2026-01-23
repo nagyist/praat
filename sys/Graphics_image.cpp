@@ -1,6 +1,6 @@
 /* Graphics_image.cpp
  *
- * Copyright (C) 1992-2021,2024,2025 Paul Boersma
+ * Copyright (C) 1992-2021,2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -965,6 +965,8 @@ void Graphics_imageFromFile (Graphics me, conststring32 relativeFileName, double
 }
 
 void Graphics_imageFromFile_embedded (Graphics me, conststring32 relativeFileName, double x1, double x2, double y1, double y2) {
+	if (Melder_endsWith_caseAware (relativeFileName, U".pdf"))
+		Melder_throw (U"Cannot embed PDF pictures. Use “Insert picture from file...” instead.");
 	structMelderFile file { };
 	Melder_relativePathToFile (relativeFileName, & file);
 	try {

@@ -32,16 +32,6 @@ static void manualInfoProc (conststring32 infoText) {
 			// FIXME: this overrides a growing info buffer, which is an O(N^2) algorithm if in a loop
 }
 
-static void collectProcedures (ManPage me, MelderString *procedures) {
-	for (integer ipar = 1; ipar <= my paragraphs.size; ipar ++) {
-		ManPage_Paragraph paragraph = & my paragraphs [ipar];
-		if (paragraph -> type == kManPage_type::SCRIPT) {
-			if (Melder_startsWith (paragraph -> text, U"\tprocedure ") && Melder_endsWith (paragraph -> text, U"\tendproc\n"))
-				MelderString_append (procedures, paragraph -> text);
-		}
-	}
-}
-
 void ManPage_runAllChunksToCache (ManPage me, Interpreter optionalInterpreterReference,
 	const kGraphics_font font, const double fontSize,
 	PraatApplication praatApplication, PraatObjects praatObjects, PraatPicture praatPicture,
@@ -73,8 +63,6 @@ void ManPage_runAllChunksToCache (ManPage me, Interpreter optionalInterpreterRef
 		all the script parts have to be run,
 		so that the outputs of drawing and info can be cached.
 	*/
-	autoMelderString procedures;
-	collectProcedures (me, & procedures);
 	integer chunkNumber = 0;
 	bool anErrorHasOccurred = false;
 	autostring32 theErrorThatOccurred;
@@ -152,7 +140,12 @@ void ManPage_runAllChunksToCache (ManPage me, Interpreter optionalInterpreterRef
 			try {
 				autoMelderString program;
 				MelderString_append (& program, paragraph -> text);
-				MelderString_append (& program, procedures.string);
+				for (integer jpar = 1; jpar <= my paragraphs.size; jpar ++) if (jpar != ipar) {
+					ManPage_Paragraph otherParagraph = & my paragraphs [jpar];
+					if (otherParagraph -> type == kManPage_type::SCRIPT)
+						if (Melder_startsWith (otherParagraph -> text, U"\tprocedure ") && Melder_endsWith (otherParagraph -> text, U"\tendproc\n"))
+							MelderString_append (& program, otherParagraph -> text);
+				}
 				Interpreter_run (interpreterReference, Melder_dup (program.string), chunkNumber > 1);
 			} catch (MelderError) {
 				anErrorHasOccurred = true;

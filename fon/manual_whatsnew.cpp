@@ -29,35 +29,27 @@ R"~~~(
 
 Latest changes in Praat.
 
-##6.4.55# (15 January 2026)
-• Plug-ins: fixed a problem introduced in 6.4.52 by which menu commands with pause forms didn’t work.
-• Scripting: fixed some problems introduced in version 6.4.52 concerning the interaction
-  between pause windows and the Demo window.
-• Opening TIFF files with @@Read from file...@, as well as @@Insert picture from file...@:
-  rid a bug that would show monochrome TIFF files in four vertical stripes.
-• Scripting: in pause forms, allow vector expressions as defaults in vector fields.
-• Backslash trigraph for apico-postalveolars: s\.v (`s\.v`), following @@Ladefoged & Maddieson (1996)@, who wanted to
-  distinguish them from the more extreme retroflexes, i.e. apico-palatals such as \s. (`\s.`).
-
-##6.4.54# (12 January 2026)
-• Windows: fixed a problem introduced in 6.4.52 by which Ctrl-mousewheel wouldn’t zoom in or out.
-• Windows: better dotted or dashed lines. 
-
-##6.4.53# (9 January 2026)
-• Scripting: fixed some problems introduced in version 6.4.52 concerning the interaction
-  between pause windows and editor scripts.
-• Scripting: @`runSubprocess` and @`runSystem` now support @`asynchronous`, with
-  which you can spawn a subprocess without waiting for it to finish. 
-
-##6.4.52# (3 January 2026)
+##6.4.56# (23 January 2026, supersedes versions 6.4.52 through 6.4.55)
 • MacOS Tahoe: support making menu choices or turning windows to full screen
   if a script is paused (by the Demo window or the Pause window),
   as on earlier MacOS versions and on Windows and Linux.
 • Windows: support horizontal scrolling in three ways (two-finger swiping on the touchpad;
   left and right tilting of the mouse’s scroll wheel; turning the mouse’s scroll wheel
   while keeping the Shift key pressed).
-• Linux: prevented a crash when a “barren” edition tried to run `runAllTests_batch.praat`.
+• Windows: better dotted or dashed thick lines. 
 • @@Sound: To PowerCepstrogram...@ now averages the power over channels instead of taking only channel 1.
+• Opening TIFF files with @@Read from file...@, as well as @@Insert picture from file...@:
+  rid a bug that would show monochrome TIFF files in four vertical stripes.
+• Mac and Linux: made @@Insert picture from file...@ work for PDF files again (bug since 6.4.28).
+• Backslash trigraph for apico-postalveolars: s\.v (`s\.v`), following @@Ladefoged & Maddieson (1996)@, who wanted to
+  distinguish them from the more extreme retroflexes, i.e. apico-palatals such as \s. (`\s.`).
+• Linux: prevented a crash when a “barren” edition tried to run `runAllTests_batch.praat`.
+• Scripting: @`runSubprocess` and @`runSystem` now support @`asynchronous`, with
+  which you can spawn a subprocess without waiting for it to finish. 
+• Scripting: @`randomImax`.
+• Scripting: in pause forms, allow vector expressions as defaults in vector fields.
+• Scripting: syntax check against duplicate procedure names.
+• Scripting: no longer any limits on the number of labels and procedures.
 
 ##6.4.51# (30 December 2025)
 • Windows: switch back to the faster version (version 6.4.50 was deliberately slower,
