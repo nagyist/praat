@@ -1029,6 +1029,21 @@ FORM (GRAPHICS_InsertPictureFromFile, U"Praat picture: Insert picture from file"
 DO
 	GRAPHICS_NONE
 		Graphics_setInner (GRAPHICS);
+		Graphics_imageFromFile (GRAPHICS, fileName, fromX, toX, fromY, toY);
+		Graphics_unsetInner (GRAPHICS);
+	GRAPHICS_NONE_END
+}
+
+FORM (GRAPHICS_InsertPictureFromFile_embedded, U"Praat picture: Insert picture from file (embedded)", U"Insert picture from file (embedded)...") {
+	INFILE (fileName, U"File name", U"~/Desktop/paul.jpg")
+	REAL (fromX, U"From x", U"0.0")
+	REAL (toX, U"To x", U"1.0")
+	REAL (fromY, U"From y", U"0.0")
+	REAL (toY, U"To y", U"1.0")
+	OK
+DO
+	GRAPHICS_NONE
+		Graphics_setInner (GRAPHICS);
 		Graphics_imageFromFile_embedded (GRAPHICS, fileName, fromX, toX, fromY, toY);
 		Graphics_unsetInner (GRAPHICS);
 	GRAPHICS_NONE_END
@@ -1900,6 +1915,7 @@ void praat_picture_init (bool showPictureWindowAtStartUp) {
 	praat_addMenuCommand (U"Picture", U"World", U"Paint circle (mm)...", nullptr, 0, GRAPHICS_PaintCircle_mm);
 	praat_addMenuCommand (U"Picture", U"World", U"-- picture --", nullptr, 0, nullptr);
 	praat_addMenuCommand (U"Picture", U"World", U"Insert picture from file...", nullptr, 0, GRAPHICS_InsertPictureFromFile);
+	praat_addMenuCommand (U"Picture", U"World", U"Insert picture from file (embedded)...", nullptr, 0, GRAPHICS_InsertPictureFromFile_embedded);
 	praat_addMenuCommand (U"Picture", U"World", U"-- axes --", nullptr, 0, nullptr);
 	praat_addMenuCommand (U"Picture", U"World", U"Axes...", nullptr, 0, GRAPHICS_Axes);
 	praat_addMenuCommand (U"Picture", U"World", U"Measure", nullptr, 0, nullptr);

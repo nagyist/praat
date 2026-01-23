@@ -148,7 +148,7 @@ Scripting 5.5. Procedures
 <code>       Play<br></code>
 <code>       Remove<br></code>
 <code>   <b>endproc</b><br></code>
-<p>This works. The six tones will be played, and  00"will be written to the Info window. But the formulation is a bit wordy, isn't it?</p>
+<p>This works. The six tones will be played, and  00"will be written to the Info window. But the formulation is a bit wordy, isn&#8217;t it?</p>
 <p>Fortunately, Praat allows an abbreviated version of these long names: just leave &#8220;playOctave&#8221; off from the names of the variables, but keep the period (<code><font size=+1>.</font></code>):</p>
 <code>   frequency = 300<br></code>
 <code>   @playOctave: 440<br></code>
@@ -201,6 +201,8 @@ Scripting 5.5. Procedures
 <code>   @texts: “" hello" at the top”, “"goodbye" at the bottom”<br></code>
 <p>or even</p>
 <code>   @texts: ““ hello” at the top”, ““goodbye” at the bottom”<br></code>
+<h2>Restrictions</h2>
+<p>You can have any number of procedures in your script. The name of a procedure can have any number of characters (at least 1, of course). A procedure name can consist of letters (&#8220;word characters&#8221;), underscores (&#8220;<sub>&#8221;</sub>), periods (&#8220;.&#8221;) and digits, but it cannot start with a digit; this is the same restriction as for variable names.</p>
 <h2>Functions</h2>
 <p>The Praat scripting language does not have the concept of a &#8220;function&#8221; like some other scripting languages do. A function is a procedure that returns a number, a string, a vector, a matrix, or a string array. For instance, you can imagine the function <code><font size=+1>squareNumber</font></code> (), which takes a number (e.g. 5) as an argument and returns the square of that number (e.g. 25). Here is an example of how you can do that, using the global availability of local variables:</p>
 <code>   @squareNumber: 5<br></code>
