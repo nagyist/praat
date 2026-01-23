@@ -27,7 +27,7 @@ Thing_implement (GuiDialog, GuiShell, 0);
 		(void) widget;
 		iam (GuiDialog);
 		trace (U"destroying dialog ", Melder_pointer (me));
-		//forget (me);   // BUG: potential memory leak
+		forget (me);   // BUG: if not forget, then potential memory leak
 	}
 	static gboolean _GuiGtkDialog_goAwayCallback (GuiObject widget, GdkEvent *event, gpointer void_me) {
 		(void) widget;
@@ -44,7 +44,7 @@ Thing_implement (GuiDialog, GuiShell, 0);
 		(void) widget; (void) call;
 		iam (GuiDialog);
 		trace (U"destroying dialog ", Melder_pointer (me));
-		//forget (me);   // BUG: potential memory leak
+		forget (me);   // BUG: if not forget, then potential memory leak
 	}
 	static void _GuiMotifDialog_goAwayCallback (GuiObject widget, XtPointer void_me, XtPointer call) {
 		(void) widget; (void) call;
@@ -80,7 +80,7 @@ GuiDialog GuiDialog_create (GuiWindow parent, int x, int y, int width, int heigh
 			static const GdkRGBA backgroundColour { 0.92, 0.92, 0.92, 1.0 };
 			gtk_widget_override_background_color (GTK_WIDGET (my d_gtkWindow), GTK_STATE_FLAG_NORMAL, & backgroundColour);
 		#endif
-		if (parent) {
+		if (parent &&0) {
 			Melder_assert (parent -> d_widget);
 			GuiObject toplevel = gtk_widget_get_ancestor (GTK_WIDGET (parent -> d_widget), GTK_TYPE_WINDOW);
 			if (toplevel) {
@@ -112,7 +112,7 @@ GuiDialog GuiDialog_create (GuiWindow parent, int x, int y, int width, int heigh
 		#endif
 		GuiShell_setTitle (me.get(), title);
 	#elif motif
-		my d_xmShell = XmCreateDialogShell (parent ? parent -> d_widget : nullptr, "dialogShell", nullptr, 0);
+		my d_xmShell = XmCreateDialogShell (/*parent ? parent -> d_widget :*/ nullptr, "dialogShell", nullptr, 0);
 		XtVaSetValues (my d_xmShell, XmNdeleteResponse, my d_goAwayCallback ? XmDO_NOTHING : XmUNMAP, XmNx, x, XmNy, y, nullptr);
 		if (my d_goAwayCallback)
 			XmAddWMProtocolCallback (my d_xmShell, 'delw', _GuiMotifDialog_goAwayCallback, (char *) me.get());
