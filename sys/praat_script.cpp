@@ -702,7 +702,7 @@ static void secondPassThroughScript (UiForm sendingForm, integer /* narg */, Sta
 	autostring32 text = MelderFile_readText (& file);
 	autoMelderFileSetCurrentFolder folder (& file);
 	Melder_includeIncludeFiles (& text);
-	autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);
+	static autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);   // SMELL
 	Interpreter_readParameters (interpreter.get(), text.get());
 	Interpreter_getArgumentsFromDialog (interpreter.get(), sendingForm);
 	autoPraatBackground background;
