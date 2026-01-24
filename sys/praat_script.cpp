@@ -529,7 +529,8 @@ void praat_executeScriptFromFile (Interpreter optionalParentInterpreter, MelderF
 			autoMelderFileSetCurrentFolder folder (file);   // so that script-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalParentInterpreter, optionalInterpreterOwningEditor);
+		static autoInterpreter interpreter;   // SMELL
+		interpreter = Interpreter_createFromEnvironment (optionalParentInterpreter, optionalInterpreterOwningEditor);   // SMELL
 		if (arguments) {
 			Interpreter_readParameters (interpreter.get(), text.get());
 			Interpreter_getArgumentsFromString (interpreter.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
@@ -565,7 +566,8 @@ void praat_runScript (Interpreter parentInterpreter, conststring32 fileName, int
 			autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (parentInterpreter, optionalInterpreterOwningEditor);
+		static autoInterpreter interpreter;   // SMELL
+		interpreter = Interpreter_createFromEnvironment (parentInterpreter, optionalInterpreterOwningEditor);
 		Interpreter_readParameters (interpreter.get(), text.get());
 		Interpreter_getArgumentsFromArgs (interpreter.get(), narg, args);   // interpret caller-relative paths for infile/outfile/folder arguments
 		autoScript script = Script_createFromFile (& file);
@@ -629,7 +631,8 @@ void praat_executeScriptFromCommandLine (conststring32 fileName, integer argc, c
 			autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, nullptr);
+		static autoInterpreter interpreter;   // SMELL
+		interpreter = Interpreter_createFromEnvironment (nullptr, nullptr);
 		Interpreter_readParameters (interpreter.get(), text.get());
 		Interpreter_getArgumentsFromCommandLine (interpreter.get(), argc, argv);   // interpret caller-relative paths for infile/outfile/folder arguments
 		autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used inside the script
@@ -675,7 +678,8 @@ void praat_executeScriptFromFileNameWithArguments (Interpreter optionalParentInt
 
 extern "C" void praatlib_executeScript (const char *text8) {
 	try {
-		autoInterpreter interpreter = Interpreter_create ();
+		autoInterpreter interpreter;   // SMELL
+		interpreter = Interpreter_create ();
 		autostring32 string = Melder_8to32 (text8);
 		Interpreter_run (interpreter.get(), string.move(), false);
 	} catch (MelderError) {
@@ -685,7 +689,8 @@ extern "C" void praatlib_executeScript (const char *text8) {
 
 void praat_executeScriptFromText (conststring32 text) {
 	try {
-		autoInterpreter interpreter = Interpreter_create ();
+		static autoInterpreter interpreter;
+		interpreter = Interpreter_create ();   // SMELL
 		autostring32 string = Melder_dup (text);   // copy, because Interpreter will change it (UGLY)
 		Interpreter_run (interpreter.get(), string.move(), false);
 	} catch (MelderError) {
@@ -702,7 +707,8 @@ static void secondPassThroughScript (UiForm sendingForm, integer /* narg */, Sta
 	autostring32 text = MelderFile_readText (& file);
 	autoMelderFileSetCurrentFolder folder (& file);
 	Melder_includeIncludeFiles (& text);
-	static autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);   // SMELL
+	static autoInterpreter interpreter;   // SMELL
+	interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);
 	Interpreter_readParameters (interpreter.get(), text.get());
 	Interpreter_getArgumentsFromDialog (interpreter.get(), sendingForm);
 	autoPraatBackground background;
