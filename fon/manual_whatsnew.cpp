@@ -29,11 +29,7 @@ R"~~~(
 
 Latest changes in Praat.
 
-##6.4.57# (24 January 2026)
-• Fixed several problems that could occur with calling a pause form indirectly
-  (such as when a plug-in added a menu command with both an initial input form and a pause form).
-
-##6.4.56# (23 January 2026, supersedes versions 6.4.52 through 6.4.55)
+##6.4.58# (25 January 2026, supersedes versions 6.4.52 through 6.4.57)
 • MacOS Tahoe: support making menu choices or turning windows to full screen
   if a script is paused (by the Demo window or the Pause window),
   as on earlier MacOS versions and on Windows and Linux.
