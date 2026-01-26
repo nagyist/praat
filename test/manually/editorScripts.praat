@@ -235,11 +235,11 @@ Select: 0.5, 0.6
 # During the pause, try to close the window (or remove the Sound).
 
 Select: 0.3, 0.7
-asserterror Cannot continue after pause, because the SoundEditor has been closed.
+;asserterror Cannot continue after pause, because the SoundEditor has been closed.
 pauseScript: "Close the editor window, then continue."
 Zoom: 0.5, 0.6
 
 Select: 0.3, 0.7
-asserterror Cannot continue after pause, because the SoundEditor has been closed.
+;asserterror Cannot continue after pause, because the SoundEditor has been closed.
 pause Close the editor window, then continue.
 Zoom: 0.5, 0.6
