@@ -2,11 +2,11 @@
 #define _Gui_h_
 /* Gui.h
  *
- * Copyright (C) 1993-2024 Paul Boersma, 2013 Tom Naughton
+ * Copyright (C) 1993-2026 Paul Boersma, 2013 Tom Naughton
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -184,9 +184,9 @@ constexpr bool theCommandKeyIsToTheLeftOfTheOptionKey =
 	 * Declarations of Xt functions.
 	 */
 	void XtAddCallback (GuiObject w, int kind, XtCallbackProc proc, XtPointer closure);
-	XtIntervalId GuiAddTimeOut (uinteger interval,
-		XtTimerCallbackProc timerProc, XtPointer closure);
-	XtWorkProcId GuiAddWorkProc (XtWorkProc workProc, XtPointer closure);
+	XtIntervalId XtAddTimeOut (uinteger interval,
+			XtTimerCallbackProc timerProc, XtPointer closure);
+	XtWorkProcId XtAddWorkProc (XtWorkProc workProc, XtPointer closure);
 	void GuiMainLoop ();
 	void GuiNextEvent (XEvent *event);
 	#define XtCalloc  Melder_calloc
@@ -298,9 +298,65 @@ constexpr bool theCommandKeyIsToTheLeftOfTheOptionKey =
 	#define XmToggleButtonSetState XmToggleButtonGadgetSetState
 
 	void motif_win_setUserMessageCallback (int (*userMessageCallback) (void));
+
+	extern void *theWinApplicationWindow;
+
+	constexpr UINT WM_APP_WORK_PROC = WM_APP + 0x5C;   // like "script"
+	struct GuiWinWorkProcWrapper_base {
+		virtual void run () = 0;
+		virtual ~GuiWinWorkProcWrapper_base () { }
+	};
+	template <typename F>
+	struct GuiWinWorkProcWrapper_derived : GuiWinWorkProcWrapper_base {
+		F function;
+		GuiWinWorkProcWrapper_derived (F&& f): function (std::move (f)) { }
+		void run () override {
+			function ();
+		}
+	};
 #else
 	typedef void *GuiObject;
 #endif
+
+template <typename F>
+static void Gui_addWorkProc (F&& function) {
+	#if gtk
+		auto *functionOnTheHeap = new std::decay_t <F> (std::forward <F> (function));
+		g_idle_add (
+			[] (gpointer data) -> gboolean {
+				auto *function = static_cast <std::decay_t <F>*> (data);
+				try {
+					(*function) ();
+				} catch (MelderError) {
+					Melder_flushError ();   // no error message should leave the event loop
+				}
+				delete function;   // called even if there was an exception
+				return G_SOURCE_REMOVE;
+			},
+			functionOnTheHeap
+		);
+	#elif cocoa
+		auto *functionOnTheHeap = new std::decay_t <F> (std::forward <F> (function));
+		CFRunLoopPerformBlock (
+			CFRunLoopGetMain (),
+			kCFRunLoopCommonModes,
+			^{
+				try {
+					(*functionOnTheHeap) ();
+				} catch (MelderError) {
+					Melder_flushError ();   // no error message should leave the event loop
+				}
+				delete functionOnTheHeap;   // called even if there was an exception
+			}
+		);
+		CFRunLoopWakeUp (CFRunLoopGetMain ());
+	#elif motif
+		auto *container = new GuiWinWorkProcWrapper_derived <F> (std::forward <F> (function));
+		PostMessage (HWND (nullptr), WM_APP_WORK_PROC, 0, reinterpret_cast <LPARAM> (container));
+	#elif
+		#error The function `Gui_addWorkProc`() is not implemented for this platform.
+	#endif
+}
 
 int Gui_getResolution (GuiObject widget);
 void Gui_getWindowPositioningBounds (double *x, double *y, double *width, double *height);

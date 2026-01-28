@@ -1208,7 +1208,7 @@ void MelderAudio_play16 (int16 *buffer, integer sampleRate, integer numberOfSamp
 				trace (U"g_idle_add");
 				my workProcId_gtk = g_idle_add (workProc_gtk, nullptr);
 			#elif motif
-				my workProcId_motif = GuiAddWorkProc (workProc_motif, nullptr);
+				my workProcId_motif = XtAddWorkProc (workProc_motif, nullptr);
 			#elif cocoa
 				CFRunLoopTimerContext context = { 0, nullptr, nullptr, nullptr, nullptr };
 				my cocoaTimer = CFRunLoopTimerCreate (nullptr, CFAbsoluteTimeGetCurrent () + 0.02,
@@ -1440,7 +1440,7 @@ void MelderAudio_play16 (int16 *buffer, integer sampleRate, integer numberOfSamp
 						}
 					}
 				} else {
-					my workProcId_motif = GuiAddWorkProc (workProc_motif, nullptr);
+					my workProcId_motif = XtAddWorkProc (workProc_motif, nullptr);
 					return;
 				}
 				flush ();

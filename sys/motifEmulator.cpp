@@ -1,6 +1,6 @@
 /* motifEmulator.cpp
  *
- * Copyright (C) 1993-2025 Paul Boersma
+ * Copyright (C) 1993-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1376,7 +1376,7 @@ void XtAddCallback (GuiObject me, int kind, XtCallbackProc proc, XtPointer closu
 	}
 }
 
-XtWorkProcId GuiAddWorkProc (XtWorkProc workProc, XtPointer closure) {
+XtWorkProcId XtAddWorkProc (XtWorkProc workProc, XtPointer closure) {
 	int i = 1;
 	while (i < 10 && theWorkProcs [i])
 		i ++;
@@ -1392,7 +1392,7 @@ void XtRemoveWorkProc (XtWorkProcId id) {
 	theNumberOfWorkProcs --;
 }
 
-XtIntervalId GuiAddTimeOut (double interval, XtTimerCallbackProc proc, XtPointer closure) {
+XtIntervalId XtAddTimeOut (double interval, XtTimerCallbackProc proc, XtPointer closure) {
 	integer i = 1;
 	while (i < 10 && theTimeOutProcs [i])
 		i ++;
@@ -1814,7 +1814,7 @@ void * GuiWin_initialize1 (conststring32 name)
 	Melder_sprint (theWindowClassName,100, U"PraatChildWindow", PRAAT_WINDOW_CLASS_NUMBER, U" ", name);
 	trace (U"Window class name <<", theWindowClassName, U">>");
 	Melder_sprint (theDrawingAreaClassName,100, U"PraatDrawingArea", PRAAT_WINDOW_CLASS_NUMBER, U" ", name);
-	HWND window = FindWindow (Melder_peek32toW (theWindowClassName), NULL);
+	HWND window = FindWindow (Melder_peek32toW (theWindowClassName), NULL);   // or theApplicationClassName?
 	return window;
 }
 void GuiWin_initialize2 (unsigned int argc, char **argv)
@@ -2353,6 +2353,16 @@ void XtDispatchEvent (XEvent *xevent) {
 	MSG *message = (MSG *) xevent;
 	if (message -> message == 0)
 		return;   // null message from PeekMessage during work proc or time out.
+	if (message -> message == WM_APP_WORK_PROC) {
+		auto *container = reinterpret_cast <GuiWinWorkProcWrapper_base *> (message -> lParam);
+		try {
+			container -> run ();
+		} catch (MelderError) {
+			Melder_flushError ();   // no error message should leave the event loop
+		}
+		delete container;   // called even if there was an exception
+		return;
+	}
 /*if (message -> message == WM_KEYDOWN || message -> message == WM_SYSKEYDOWN)
 {
 int kar = LOWORD (message -> wParam);
@@ -2549,6 +2559,15 @@ int APIENTRY WinMain (HINSTANCE instance, HINSTANCE /*previousInstance*/, LPSTR 
 	char** argv = Melder_malloc (char*, argc);
 	for (int iarg = 0; iarg < argc; iarg ++)
 		argv [iarg] = Melder_32to8 (Melder_peekWto32 (argvW [iarg])).transfer();
+	/*
+		It cannot hurt to establish the current thread as the GUI thread,
+		by calling one event-loop function (without further side effects).
+		Perhaps this will help later calls to PostMessage().
+	*/
+	{
+		MSG dummy;
+		PeekMessage (& dummy, nullptr, 0, 0, PM_NOREMOVE);
+	}
 	return main (argc, argv);
 }
 

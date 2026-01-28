@@ -1,6 +1,6 @@
 /* SoundRecorder.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1218,12 +1218,12 @@ gui_drawingarea_cb_resize (me.get(), & event);
 		#if cocoa
 			CFRunLoopTimerContext context = { 0, me.get(), nullptr, nullptr, nullptr };
 			my d_cocoaTimer = CFRunLoopTimerCreate (nullptr, CFAbsoluteTimeGetCurrent () + 0.02,
-				0.02, 0, 0, workProc, & context);
+					0.02, 0, 0, workProc, & context);
 			CFRunLoopAddTimer (CFRunLoopGetCurrent (), my d_cocoaTimer, kCFRunLoopCommonModes);
 		#elif gtk
 			g_idle_add (workProc, me.get());
 		#elif motif
-			my workProcId = GuiAddWorkProc (workProc, me.get());
+			my workProcId = XtAddWorkProc (workProc, me.get());
 		#endif
 		updateMenus (me.get());
 		return me;

@@ -61,7 +61,7 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	if (thePauseForm_clicked != theCancelContinueButton)
 		UiForm_Interpreter_addVariables (thePauseForm.get(), (Interpreter) closure);   // 'closure', not 'interpreter' or 'theInterpreter'!
 	Melder_assert (thePauseForm_clicked >= 1 && thePauseForm_clicked <= 10);
-	conststring32 clickedText = thePauseForm -> continueTexts [thePauseForm_clicked].get();
+	autostring32 clickedText = Melder_dup (thePauseForm -> continueTexts [thePauseForm_clicked].get());   // very safe
 	if (thePauseForm -> d_dialogForm)
 		GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
 	thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
@@ -73,15 +73,22 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	thePauseForm_secondPass = true;
 	thePauseForm_interpreterReference -> pausedByPauseWindow = false;
 	Melder_setCurrentFolder (& thePauseForm_savedFolder);
-	try {
-		autoPraatBackground background;
-		Interpreter_resume (thePauseForm_interpreterReference);
-	} catch (MelderError) {
-		if (thePauseForm_clicked == theCancelContinueButton)
-			Melder_flushError (U"This happened after you cancelled the pause form.");
-		else
-			Melder_flushError (U"This happened after you clicked “", clickedText, U"” in the pause form.");
-	}
+	Gui_addWorkProc (
+		[clickedText = std::move (clickedText)] () mutable {   // transfer ownership of clickedText to the lambda
+			try {
+				autoPraatBackground background;
+				Interpreter_resume (thePauseForm_interpreterReference);
+			} catch (MelderError) {
+				/*
+					These errors will often not be reached, because Interpreter_resume contains some Melder_flushError().
+				*/
+				if (thePauseForm_clicked == theCancelContinueButton)
+					Melder_throw (U"This happened after you cancelled the pause form.");
+				else
+					Melder_throw (U"This happened after you clicked “", clickedText.get(), U"” in the pause form.");
+			}
+		}
+	);
 }
 static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) {
 	if (! thePauseForm)   // BUG: perhaps there was a mistake in the script
