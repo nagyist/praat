@@ -92,8 +92,12 @@ static void gui_drawingarea_cb_mouse (DemoEditor me, GuiDrawingArea_MouseEvent e
 		if (my interpreterReference) {
 			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
 			my interpreterReference -> pausedByDemoWindow = false;
-			autoPraatBackground background;
-			Interpreter_resume (my interpreterReference);
+			Gui_addWorkProc (
+				[me] () mutable {   // TODO: transfer ownership of intepreter to the lambda
+					autoPraatBackground background;
+					Interpreter_resume (my interpreterReference);
+				}
+			);
 		}
 	}
 }
@@ -115,8 +119,12 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 		if (my interpreterReference) {
 			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
 			my interpreterReference -> pausedByDemoWindow = false;
-			autoPraatBackground background;
-			Interpreter_resume (my interpreterReference);
+			Gui_addWorkProc (
+				[me] () mutable {   // TODO: transfer ownership of intepreter to the lambda
+					autoPraatBackground background;
+					Interpreter_resume (my interpreterReference);
+				}
+			);
 		}
 	}
 }
