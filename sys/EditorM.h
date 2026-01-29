@@ -383,9 +383,30 @@ _form_inited_: \
 	OPTIONMENU_ENUM_FIELD (EnumeratedType, enumeratedVariable, labelText, defaultValue)
 
 
-#define LIST(integerVariable, labelText, strings, defaultValue)  \
+/*
+	LIST will throw if the supplied string is not in the list.
+*/
+#define LIST(integerVariable, labelText, strings, defaultOptionNumber)  \
 	static integer integerVariable; \
-	UiForm_addList (cmd -> d_uiform.get(), & integerVariable, nullptr, nullptr, labelText, strings, defaultValue);
+	UiForm_addList (cmd -> d_uiform.get(), & integerVariable, nullptr, U"" #integerVariable, \
+				labelText, strings, defaultOptionNumber);
+
+/*
+	LISTSTR will throw if the supplied string is not in the list.
+*/
+#define LISTSTR(stringVariable, labelText, strings, defaultOptionNumber)  \
+		static conststring32 stringVariable; \
+		UiForm_addList (cmd -> d_uiform.get(), nullptr, & stringVariable, U"" #stringVariable, \
+				labelText, strings, defaultOptionNumber);
+
+/*
+	If the supplied string is not in the list, LISTNUMSTR will return 0 as well as the supplied string, for later handling.
+*/
+#define LISTNUMSTR(integerVariable, stringVariable, labelText, strings, defaultOptionNumber)  \
+		static integer integerVariable; \
+		static conststring32 stringVariable; \
+		UiForm_addList (cmd -> d_uiform.get(), & integerVariable, & stringVariable, U"" #stringVariable, \
+				labelText, strings, defaultOptionNumber);
 
 /*
 	Seven optional functions to change the content of a field on the basis of the current
@@ -415,6 +436,8 @@ _form_inited_: \
 	enumeratedVariable = enumeratedValue /* type check */; \
 	UiForm_setOption (cmd -> d_uiform.get(), (int *) & enumeratedVariable, (int) enumeratedValue - (int) EnumeratedType::MIN + 1);
 
+#define SET_LIST(integerVariable, stringVariable, strings, defaultValue)  \
+	UiForm_setList (cmd -> d_uiform.get(), & integerVariable, & stringVariable, strings, defaultValue);
 
 #define DIALOG  cmd -> d_uiform
 

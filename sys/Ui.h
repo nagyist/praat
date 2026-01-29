@@ -301,6 +301,9 @@ void UiForm_setPauseForm (UiForm me,
 /* Choice and OptionMenu fields: */
 	void UiForm_setOption (UiForm me, int *p_variable, int value);
 	void UiForm_setOptionAsString (UiForm me, int *p_variable, conststring32 stringValue /* cattable */);
+/* List fields: */
+	void UiForm_setList (UiForm me, integer *p_integerVariable, conststring32 *p_stringVariable,
+			constSTRVEC strings, integer defaultValue);
 /* Colour fields: */
 	void UiForm_setColourAsGreyValue (UiForm me, MelderColour *p_variable, double greyValue);
 

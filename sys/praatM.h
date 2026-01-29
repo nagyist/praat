@@ -325,6 +325,9 @@
 			enumeratedVariable = enumeratedValue; /* just for typechecking */ \
 			UiForm_setOption (_dia_.get(), (int *) & enumeratedVariable, (int) enumeratedValue - (int) EnumeratedType::MIN + 1);
 
+#define SET_LIST(integerVariable, stringVariable, strings, defaultValue)  \
+			UiForm_setList (_dia_.get(), & integerVariable, & stringVariable, strings, defaultValue);
+
 #define DO  \
 			UiForm_do (_dia_.get(), _isModified_); \
 		} else if (! _sendingForm_) { \

@@ -2805,6 +2805,38 @@ void UiForm_setString (UiForm me, conststring32 *p_variable, conststring32 value
 	Melder_crash (U"Text field not found in command window “", my name.get(), U"”.");
 }
 
+void UiForm_setList (UiForm me, integer *p_integerVariable, conststring32 *p_stringVariable,
+		constSTRVEC strings, integer defaultValue)
+{
+	for (int ifield = 1; ifield <= my numberOfFields; ifield ++) {
+		UiField field = my field [ifield].get();
+		if (field -> integerVariable == p_integerVariable || field -> stringVariable == p_stringVariable) {
+			switch (field -> type)
+			{
+			case _kUiField_type::LIST_:
+			{
+				field -> strings = strings;
+				GuiList_deleteAllItems (field -> list);
+				for (integer i = 1; i <= strings.size; i ++)
+					GuiList_insertItem (field -> list, strings [i], 0);
+
+				if (defaultValue < 1 || defaultValue > strings.size)
+					defaultValue = 1;   // guard against invalid default
+				if (strings.size > 0)
+					GuiList_selectItem (field -> list, defaultValue);
+			}
+			break;
+			default:
+			{
+				fatalField (me);
+			}
+			}
+			return;
+		}
+	}
+	Melder_crash (U"List field not found in command window “", my name.get(), U"”.");
+}
+
 void UiForm_setColourAsGreyValue (UiForm me, MelderColour *p_variable, double greyValue) {
 	for (int ifield = 1; ifield <= my numberOfFields; ifield ++) {
 		UiField field = my field [ifield].get();
