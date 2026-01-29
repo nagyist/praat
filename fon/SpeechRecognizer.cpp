@@ -70,7 +70,35 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 		my d_modelName = Melder_dup (modelName);
 		my d_languageName = Melder_dup (languageName);
 
-		// whisperContext
+		/*
+			Change '.' to '-' in the model name to properly construct SpeechRecognizer object name
+		*/
+		autostring32 modelNameWithoutDots = Melder_dup (modelName);
+		for (char32 *p = modelNameWithoutDots.get(); *p != U'\0'; p++) {
+			if (*p == U'.')
+				*p = U'-';
+		}
+
+		/*
+			Check if selected model and language are compatible and construct SpeechRecognizer object name.
+		*/
+		if (str32str (modelName, U".en.bin")) {
+			Melder_require (str32str (languageName, U"Autodetect") || str32str (languageName, U"English"),
+					U"Model ", modelName, U" cannot be used for ", languageName, U" transcription. "
+					U"Either select a multilingual model (the model name does not include .en) "
+					U"or select \"Autodetect language\"/\"English\" from the language list."
+			);
+			my d_name = Melder_dup(modelNameWithoutDots.get());
+		} else {
+			if (str32str (languageName, U"Autodetect"))
+				my d_name = Melder_dup (Melder_cat (modelNameWithoutDots.get(), U"_Auto"));
+			else
+				my d_name = Melder_dup (Melder_cat (modelNameWithoutDots.get(), U"_", languageName));
+		}
+
+		/*
+			Create Whisper context.
+		*/
 		whisper_context_params contextParams = whisper_context_default_params();
 		contextParams.use_gpu = false;
 		contextParams.flash_attn = false;

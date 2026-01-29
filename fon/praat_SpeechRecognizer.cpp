@@ -24,7 +24,7 @@ OK
 DO
 	CREATE_ONE
 		autoSpeechRecognizer result = SpeechRecognizer_create (modelName, languageName);
-	CREATE_ONE_END (modelName, U"_", languageName)
+	CREATE_ONE_END (result -> d_name.get())
 }
 
 DIRECT (QUERY_ONE_FOR_STRING__SpeechRecognizer_getModelName) {
