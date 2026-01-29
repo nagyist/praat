@@ -556,19 +556,21 @@ DIRECT (MODIFY_TextGrid_Sound_scaleTimes) {
 }
 
 FORM (MODIFY_TextGrid_Sound_transcribeInterval, U"TextGrid & Sound: Transcribe interval", nullptr) {
-	static constSTRVEC modelNames;   // has to be static because of goto rule
-	modelNames = theSpeechRecognizerModelNames();   // cannot be called twice in the same scope
+	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
+	NATURAL (intervalNumber, STRING_INTERVAL_NUMBER, U"1")
+	LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
+	LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
+OK
+	constSTRVEC modelNames = theSpeechRecognizerModelNames();
+	constSTRVEC languageNames = theSpeechRecognizerLanguageNames();
+
 	Melder_require (modelNames.size > 0,
 		U"Found no Whisper-cpp models to do speech recognition with.\n"
 		U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
 	);
-	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
-	NATURAL (intervalNumber, STRING_INTERVAL_NUMBER, U"1")
-	LISTNUMSTR (modelIndex, modelName, U"Whisper model", modelNames,
-			static_cast <int> (NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName)))
-	LISTNUMSTR (languageIndex, languageName, U"Language", theSpeechRecognizerLanguageNames (),
-			static_cast <int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName)))
-	OK
+
+	SET_LIST (modelIndex, modelName, modelNames, NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName))
+	SET_LIST (languageIndex, languageName, languageNames, NUMfindFirst (languageNames, theSpeechRecognizerDefaultLanguageName))
 DO
 	MODIFY_FIRST_OF_ONE_AND_ONE (TextGrid, Sound)
 		TextGrid_Sound_transcribeInterval (me, you, tierNumber, intervalNumber, modelName, languageName);
