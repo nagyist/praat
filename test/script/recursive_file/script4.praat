@@ -1,0 +1,6 @@
+appendFileLine: "kanweg.txt", "script 4a"
+appendFileLine: "kanweg.txt", "script 4b"
+appendFileLine: "kanweg.txt", "script 4c"
+appendFileLine: "kanweg.txt", "script 4d"
+appendFileLine: "kanweg.txt", "script 4e"
+appendFileLine: "kanweg.txt", "script 4f"

@@ -35,5 +35,22 @@ void _private_Melder_assert (const char *fileName, int lineNumber, const char *c
 	#define Melder_assert(x)   ((x) ? (void) (0) : (_private_Melder_assert (__FILE__, __LINE__, #x), abort ()))
 #endif
 
-/* End of file melder_assert.h */
-#endif
+template <typename Tag>
+class _private_Melder_nonReentrant {
+	inline static bool entered = false;
+public:
+	_private_Melder_nonReentrant (const char *fileName, int lineNumber) {
+		if (entered) {
+			_private_Melder_assert (fileName, lineNumber, "This non-reentrant function in now entered for the second time.");
+			abort ();
+		}
+		entered = true;
+	}
+	~_private_Melder_nonReentrant () {
+		entered = false;
+	}
+};
+#define MELDER_ASSERT_NONREENTRANT \
+	_private_Melder_nonReentrant <struct _private_Melder_nonReentrant_tag_##__COUNTER__> _private_Melder_nonReentrant_guard (__FILE__, __LINE__);
+
+#endif // !_melder_assert_h_

@@ -1,10 +1,10 @@
 /* praat_EEG.cpp
  *
- * Copyright (C) 2011-2018,2020-2024 Paul Boersma
+ * Copyright (C) 2011-2018,2020-2024,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -287,7 +287,7 @@ FORM (NEW_EEG_to_ERPTier_triggers_preceded, U"To ERPTier (triggers, preceded)", 
 DO
 	CONVERT_EACH_TO_ONE (EEG)
 		autoERPTier result = EEG_to_ERPTier_triggers_preceded (me, fromTime, toTime,
-			(kMelder_string) getEveryEventWithATriggerThat, text1, andIsPrecededByATriggerThat, text2);
+				(kMelder_string) getEveryEventWithATriggerThat, text1, andIsPrecededByATriggerThat, text2);
 	CONVERT_EACH_TO_ONE_END (my name.get(), U"_trigger", text2)
 }
 
@@ -313,7 +313,8 @@ DO
 	CONVERT_EACH_TO_ONE (EEG)
 		autoMixingMatrix result = EEG_to_MixingMatrix (me,
 			startTime, endTime, numberOfCrossCorrelations, lagStep,
-			maximumNumberOfIterations, tolerance, diagonalizationMethod);
+			maximumNumberOfIterations, tolerance, diagonalizationMethod
+		);
 	CONVERT_EACH_TO_ONE_END (my name.get())
 }
 
@@ -381,7 +382,7 @@ FORM (NEW_ERP_downto_Table, U"ERP: Down to Table", nullptr) {
 DO
 	CONVERT_EACH_TO_ONE (ERP)
 		autoTable result = ERP_tabulate (me, includeSampleNumber,
-			includeTime, timeDecimals, voltageDecimals, voltageUnits);
+				includeTime, timeDecimals, voltageDecimals, voltageUnits);
 	CONVERT_EACH_TO_ONE_END (my name.get())
 }
 
@@ -411,7 +412,7 @@ FORM (GRAPHICS_ERP_drawScalp, U"ERP: Draw scalp", nullptr) {
 DO
 	GRAPHICS_EACH (ERP)
 		ERP_drawScalp (me, GRAPHICS, fromTime, toTime,
-			fromVoltage, toVoltage, kGraphics_colourScale::GREY, garnish);
+				fromVoltage, toVoltage, kGraphics_colourScale::GREY, garnish);
 	GRAPHICS_EACH_END
 }
 
@@ -427,7 +428,7 @@ FORM (GRAPHICS_ERP_drawScalp_colour, U"ERP: Draw scalp (colour)", nullptr) {
 DO
 	GRAPHICS_EACH (ERP)
 		ERP_drawScalp (me, GRAPHICS, fromTime, toTime,
-			fromVoltage, toVoltage, (kGraphics_colourScale) colourScale, garnish);
+				fromVoltage, toVoltage, (kGraphics_colourScale) colourScale, garnish);
 	GRAPHICS_EACH_END
 }
 
@@ -475,7 +476,8 @@ FORM (REAL_ERP_getMinimum, U"ERP: Get minimum", U"Sound: Get minimum...") {
 DO
 	QUERY_ONE_FOR_REAL (ERP)
 		integer channelNumber = ERP_getChannelNumber (me, channelName);
-		if (channelNumber == 0) Melder_throw (me, U": no channel named \"", channelName, U"\".");
+		if (channelNumber == 0)
+			Melder_throw (me, U": no channel named \"", channelName, U"\".");
 		double result;
 		Vector_getMinimumAndX (me, fromTime, toTime, channelNumber, peakInterpolationType, & result, nullptr);
 	QUERY_ONE_FOR_REAL_END (U" Volt")
@@ -490,8 +492,9 @@ FORM (REAL_ERP_getTimeOfMinimum, U"ERP: Get time of minimum", U"Sound: Get time 
 	OK
 DO
 	QUERY_ONE_FOR_REAL (ERP)
-		integer channelNumber = ERP_getChannelNumber (me, channelName);
-		if (channelNumber == 0) Melder_throw (me, U": no channel named \"", channelName, U"\".");
+		const integer channelNumber = ERP_getChannelNumber (me, channelName);
+		if (channelNumber == 0)
+			Melder_throw (me, U": no channel named \"", channelName, U"\".");
 		double result;
 		Vector_getMinimumAndX (me, fromTime, toTime, channelNumber, peakInterpolationType, nullptr, & result);
 	QUERY_ONE_FOR_REAL_END (U" seconds")
@@ -506,8 +509,9 @@ FORM (REAL_ERP_getMaximum, U"ERP: Get maximum", U"Sound: Get maximum...") {
 	OK
 DO
 	QUERY_ONE_FOR_REAL (ERP)
-		integer channelNumber = ERP_getChannelNumber (me, channelName);
-		if (channelNumber == 0) Melder_throw (me, U": no channel named \"", channelName, U"\".");
+		const integer channelNumber = ERP_getChannelNumber (me, channelName);
+		if (channelNumber == 0)
+			Melder_throw (me, U": no channel named \"", channelName, U"\".");
 		double result;
 		Vector_getMaximumAndX (me, fromTime, toTime, channelNumber, peakInterpolationType, & result, nullptr);
 	QUERY_ONE_FOR_REAL_END (U" Volt")
@@ -522,8 +526,9 @@ FORM (REAL_ERP_getTimeOfMaximum, U"ERP: Get time of maximum", U"Sound: Get time 
 	OK
 DO
 	QUERY_ONE_FOR_REAL (ERP)
-		integer channelNumber = ERP_getChannelNumber (me, channelName);
-		if (channelNumber == 0) Melder_throw (me, U": no channel named \"", channelName, U"\".");
+		const integer channelNumber = ERP_getChannelNumber (me, channelName);
+		if (channelNumber == 0)
+			Melder_throw (me, U": no channel named \"", channelName, U"\".");
 		double result;
 		Vector_getMaximumAndX (me, fromTime, toTime, channelNumber, peakInterpolationType, nullptr, & result);
 	QUERY_ONE_FOR_REAL_END (U" seconds")
@@ -536,9 +541,10 @@ FORM (REAL_ERP_getMean, U"ERP: Get mean", U"ERP: Get mean...") {
 	OK
 DO
 	QUERY_ONE_FOR_REAL (ERP)
-		integer channelNumber = ERP_getChannelNumber (me, channelName);
-		if (channelNumber == 0) Melder_throw (me, U": no channel named \"", channelName, U"\".");
-		double result = Vector_getMean (me, fromTime, toTime, channelNumber);
+		const integer channelNumber = ERP_getChannelNumber (me, channelName);
+		if (channelNumber == 0)
+			Melder_throw (me, U": no channel named \"", channelName, U"\".");
+		const double result = Vector_getMean (me, fromTime, toTime, channelNumber);
 	QUERY_ONE_FOR_REAL_END (U" Volt")
 }
 
@@ -569,7 +575,7 @@ FORM (MODIFY_ERP_formula_part, U"ERP: Formula (part)", U"ERP: Formula...") {
 DO
 	MODIFY_EACH_WEAK (ERP)
 		Matrix_formula_part (me, fromTime, toTime,
-			fromChannel - 0.5, toChannel + 0.5, formula, interpreter, nullptr);
+				fromChannel - 0.5, toChannel + 0.5, formula, interpreter, nullptr);
 	MODIFY_EACH_WEAK_END
 }
 
@@ -580,8 +586,9 @@ FORM (NEW_ERP_extractOneChannelAsSound, U"ERP: Extract one channel as Sound", nu
 	OK
 DO
 	CONVERT_EACH_TO_ONE (ERP)
-		integer channelNumber = ERP_getChannelNumber (me, channelName);
-		if (channelNumber == 0) Melder_throw (me, U": no channel named \"", channelName, U"\".");
+		const integer channelNumber = ERP_getChannelNumber (me, channelName);
+		if (channelNumber == 0)
+			Melder_throw (me, U": no channel named “", channelName, U"”.");
 		autoSound result = Sound_extractChannel (me, channelNumber);
 	CONVERT_EACH_TO_ONE_END (my name.get(), U"_", channelName)
 }
@@ -620,7 +627,7 @@ FORM (INTEGER_ERPTier_getChannelNumber, U"Get channel number", nullptr) {
 	OK
 DO
 	QUERY_ONE_FOR_REAL (ERPTier)
-		integer result = ERPTier_getChannelNumber (me, channelName);
+		const integer result = ERPTier_getChannelNumber (me, channelName);
 	QUERY_ONE_FOR_REAL_END (U" (number of channel ", channelName, U")")
 }
 
@@ -632,7 +639,7 @@ FORM (REAL_ERPTier_getMean, U"ERPTier: Get mean", U"ERPTier: Get mean...") {
 	OK
 DO
 	QUERY_ONE_FOR_REAL (ERPTier)
-		double result = ERPTier_getMean (me, pointNumber, channelName, fromTime, toTime);
+		const double result = ERPTier_getMean (me, pointNumber, channelName, fromTime, toTime);
 	QUERY_ONE_FOR_REAL_END (U" Volt")
 }
 

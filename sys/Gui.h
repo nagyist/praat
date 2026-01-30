@@ -299,8 +299,6 @@ constexpr bool theCommandKeyIsToTheLeftOfTheOptionKey =
 
 	void motif_win_setUserMessageCallback (int (*userMessageCallback) (void));
 
-	extern void *theWinApplicationWindow;
-
 	constexpr UINT WM_APP_WORK_PROC = WM_APP + 0x5C;   // like "script"
 	struct GuiWinWorkProcWrapper_base {
 		virtual void run () = 0;
@@ -323,14 +321,14 @@ static void Gui_addWorkProc (F&& function) {
 	#if gtk
 		auto *functionOnTheHeap = new std::decay_t <F> (std::forward <F> (function));
 		g_idle_add (
-			[] (gpointer data) -> gboolean {
-				auto *function = static_cast <std::decay_t <F>*> (data);
+			[] (gpointer closure) -> gboolean {
+				auto *functionOnTheHeapFromClosure = static_cast <std::decay_t <F>*> (closure);
 				try {
-					(*function) ();
+					(*functionOnTheHeapFromClosure) ();
 				} catch (MelderError) {
 					Melder_flushError ();   // no error message should leave the event loop
 				}
-				delete function;   // called even if there was an exception
+				delete functionOnTheHeapFromClosure;   // called even if there was an exception
 				return G_SOURCE_REMOVE;
 			},
 			functionOnTheHeap
@@ -351,8 +349,8 @@ static void Gui_addWorkProc (F&& function) {
 		);
 		CFRunLoopWakeUp (CFRunLoopGetMain ());
 	#elif motif
-		auto *container = new GuiWinWorkProcWrapper_derived <F> (std::forward <F> (function));
-		PostMessage (HWND (nullptr), WM_APP_WORK_PROC, 0, reinterpret_cast <LPARAM> (container));
+		auto *functionWrapper = new GuiWinWorkProcWrapper_derived <F> (std::forward <F> (function));
+		PostMessage (HWND (nullptr), WM_APP_WORK_PROC, 0, reinterpret_cast <LPARAM> (functionWrapper));
 	#elif
 		#error The function `Gui_addWorkProc`() is not implemented for this platform.
 	#endif

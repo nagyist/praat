@@ -1,0 +1,7 @@
+appendInfoLine: "script 3a"
+appendInfoLine: "script 3b"
+appendInfoLine: "script 3c"
+runScript: "script4.praat"
+appendInfoLine: "script 3d"
+appendInfoLine: "script 3e"
+appendInfoLine: "script 3f"
