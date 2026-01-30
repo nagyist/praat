@@ -8,20 +8,23 @@ DIRECT (HELP__SpeechRecognizer_help) {
 }
 
 FORM (CREATE_ONE__SpeechRecognizer_create, U"Create SpeechRecognizer", U"Create SpeechRecognizer...") {
-	static autoSTRVEC modelNames = copy_STRVEC (theSpeechRecognizerModelNames());   // cannot be called twice in the same scope
-	LISTNUMSTR (modelIndex, modelName, U"Whisper model", modelNames.get(),
-		static_cast <int> (NUMfindFirst (modelNames.get(), theSpeechRecognizerDefaultModelName)))
-	LISTNUMSTR (languageIndex, languageName, U"Language", theSpeechRecognizerLanguageNames(),
-		static_cast <int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName)))
-	OK
+	LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
+	LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
+OK
+	constSTRVEC modelNames = theSpeechRecognizerModelNames();
+	constSTRVEC languageNames = theSpeechRecognizerLanguageNames();
+
+	Melder_require (modelNames.size > 0,
+		U"Found no Whisper-cpp models to do speech recognition with.\n"
+		U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
+	);
+
+	SET_LIST (modelIndex, modelName, modelNames, NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName))
+	SET_LIST (languageIndex, languageName, languageNames, NUMfindFirst (languageNames, theSpeechRecognizerDefaultLanguageName))
 DO
 	CREATE_ONE
-		Melder_require (modelNames.size > 0,
-			U"Found no Whisper-cpp models to do speech recognition with.\n"
-			U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder, and restart Praat."
-		);
 		autoSpeechRecognizer result = SpeechRecognizer_create (modelName, languageName);
-	CREATE_ONE_END (modelName, U"_", languageName)
+	CREATE_ONE_END (result -> d_name.get())
 }
 
 DIRECT (QUERY_ONE_FOR_STRING__SpeechRecognizer_getModelName) {

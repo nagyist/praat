@@ -1452,29 +1452,31 @@ static void menu_cb_TranscribeInterval (TextGridArea me, EDITOR_ARGS) {
 
 static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Transcription settings", nullptr)
-		static constSTRVEC modelNames;   // has to be static because of goto rule
-		modelNames = theSpeechRecognizerModelNames();   // cannot be called twice in the same scope
+		LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
+		LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
+	EDITOR_OK
+		constSTRVEC modelNames = theSpeechRecognizerModelNames();
+		constSTRVEC languageNames = theSpeechRecognizerLanguageNames();
 		Melder_require (modelNames.size > 0,
 			U"Found no Whisper-cpp models to do speech recognition with.\n"
 			U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
 		);
-		LIST (modelIndex, U"Whisper model", modelNames,
-				static_cast <int> (NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName)))
-		LIST (languageIndex, U"Language", theSpeechRecognizerLanguageNames (),
-				static_cast <int> (NUMfindFirst (modelNames, theSpeechRecognizerDefaultLanguageName)))
-	EDITOR_OK
-		int prefModel = static_cast <int> (NUMfindFirst (modelNames, my instancePref_transcribe_model()));
+
+		integer prefModel = NUMfindFirst (modelNames, my instancePref_transcribe_model());
 		if (prefModel == 0)
-			prefModel = static_cast <int> (NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName));
+			prefModel = NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName);
 		SET_INTEGER (modelIndex, prefModel)
 
-		int prefLanguage = static_cast <int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), my instancePref_transcribe_language()));
+		integer prefLanguage = NUMfindFirst (languageNames, my instancePref_transcribe_language());
 		if (prefLanguage == 0)
-			prefLanguage = static_cast <int> (NUMfindFirst (theSpeechRecognizerLanguageNames (), theSpeechRecognizerDefaultLanguageName));
+			prefLanguage = NUMfindFirst (languageNames, theSpeechRecognizerDefaultLanguageName);
 		SET_INTEGER (languageIndex, prefLanguage)
+
+		SET_LIST (modelIndex, modelName, modelNames, prefModel)
+		SET_LIST (languageIndex, languageName, languageNames, prefLanguage)
 	EDITOR_DO
-		my setInstancePref_transcribe_model (modelNames [modelIndex]);
-		my setInstancePref_transcribe_language (theSpeechRecognizerLanguageNames () [languageIndex]);
+		my setInstancePref_transcribe_model (modelName);
+		my setInstancePref_transcribe_language (languageName);
 	EDITOR_END
 }
 
