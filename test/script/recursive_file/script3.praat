@@ -1,0 +1,7 @@
+appendFileLine: "kanweg.txt", "script 3a"
+appendFileLine: "kanweg.txt", "script 3b"
+appendFileLine: "kanweg.txt", "script 3c"
+runScript: "script4.praat"
+appendFileLine: "kanweg.txt", "script 3d"
+appendFileLine: "kanweg.txt", "script 3e"
+appendFileLine: "kanweg.txt", "script 3f"

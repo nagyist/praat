@@ -1,6 +1,6 @@
 /* manual_licenses.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -675,7 +675,7 @@ This is the license under which a diminishing fraction of the source code of Pra
 `
 ################################################################################
 "General Public License, version 3"
-© Free Software Foundation 2007; introductory sentenced by Paul Boersma 2021
+© Free Software Foundation 2007; introductory sentence by Paul Boersma 2021
 
 This is the license under which Praat as a whole is distributed (see @Acknowledgments).
 `

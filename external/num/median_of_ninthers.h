@@ -6,7 +6,7 @@
  * https://boost.org/LICENSE_1_0.txt)
  */
 
-#include "melder_assert.h"
+#include "melder.h"
 #include "median_common.h"
 
 template <class T>

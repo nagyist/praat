@@ -77,7 +77,7 @@ typedef struct structStackel {
 		InterpreterVariable variable;
 	};
 	structStackel () {
-		memset (this, 0, sizeof (structStackel));   // union-safe zeroing of all members of structStackel
+		memset ((void *) this, 0, sizeof (structStackel));   // union-safe zeroing of all members of structStackel
 		Melder_assert (our which == Stackel_NUMBER);   // check that on this computer, 0 is represented with zero bits only
 		Melder_assert (our number == 0.0);   // check that on this computer, 0.0 is represented with zero bits only
 		Melder_assert (! our _string);   // check that on this computer, a plain-old-data null pointer is represented with zero bits only
@@ -121,8 +121,8 @@ typedef struct structStackel {
 	structStackel& operator= (structStackel&& other) noexcept {   // generalized move assignment
 		if (& other != this) {
 			our reset();
-			memmove (this, & other, sizeof (structStackel));   // union-safe: even our biggest variant is bit-copied entirely
-			memset (& other, 0, sizeof (structStackel));   // union-safe: even the biggest variant in `other` is erased
+			memmove ((void *) this, & other, sizeof (structStackel));   // union-safe: even our biggest variant is bit-copied entirely
+			memset ((void *) & other, 0, sizeof (structStackel));   // union-safe: even the biggest variant in `other` is erased
 		}
 		return *this;
 	}

@@ -4216,7 +4216,9 @@ static void do_writeInfoLine () {
 	MelderInfo_drain ();
 	pushNumber (1);
 }
+
 static void do_appendInfo () {
+	MELDER_ASSERT_NONREENTRANT
 	const Stackel narg = pop;
 	Melder_assert (narg->which == Stackel_NUMBER);
 	const integer numberOfArguments = Melder_iround (narg->number);
@@ -4226,6 +4228,7 @@ static void do_appendInfo () {
 	pushNumber (1);
 }
 static void do_appendInfoLine () {
+	MELDER_ASSERT_NONREENTRANT
 	const Stackel narg = pop;
 	Melder_assert (narg->which == Stackel_NUMBER);
 	const integer numberOfArguments = Melder_iround (narg->number);
