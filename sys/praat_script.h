@@ -29,6 +29,7 @@ void praat_runScriptWithForm (conststring32 fileName);
 void praat_runNotebook (conststring32 fileName, integer narg, Stackel args, Editor optionalInterpreterOwningEditor);
 void praat_executeScriptFromCommandLine (conststring32 fileName, integer argc, char **argv);   // called only from `praat_run` (last checked 2022-10-07)
 void praat_executeScriptFromFileNameWithArguments (InterpreterStack optionalInterpreterStack, conststring32 nameAndArguments);   // called only from `execute` (deprecated) and external man pages with \SC (last checked 2022-10-07)
+void praat_runOldExecuteCommand (InterpreterStack optionalInterpreterStack, conststring32 nameAndArguments);
 void praat_executeScriptFromText (conststring32 text);
 extern "C" void praatlib_executeScript (const char *text8);
 void DO_RunTheScriptFromAnyAddedMenuCommand (UiForm sendingForm_dummy, integer narg, Stackel args, conststring32 scriptPath,
