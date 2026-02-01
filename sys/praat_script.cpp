@@ -299,7 +299,11 @@ bool praat_executeCommand (Interpreter interpreter, char32 *command) {
 			UiPause_comment (str32equ (command, U"pause") ? U"..." : command + 6);
 			UiPause_end (1, 1, 0, U"Continue", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, interpreter);
 		} else if (str32nequ (command, U"execute ", 8)) {
-			praat_executeScriptFromFileNameWithArguments (interpreter ? interpreter -> optionalInterpreterStack : nullptr, command + 8);
+			//TRACE
+			trace (U"interpreter: ", Melder_pointer (interpreter));
+			if (interpreter)
+				trace (U"stack: ", Melder_pointer (interpreter -> optionalInterpreterStack));
+			praat_runOldExecuteCommand (interpreter ? interpreter -> optionalInterpreterStack : nullptr, command + 8);
 		} else if (str32nequ (command, U"editor", 6)) {   // deprecated
 			Melder_require (praat_commandsWithExternalSideEffectsAreAllowed (),
 				U"The script command “editor” is not available inside manuals.");
@@ -731,6 +735,78 @@ void praat_executeScriptFromFileNameWithArguments (InterpreterStack optionalInte
 	}
 	Melder_relativePathToFile (path, & file);
 	praat_executeScriptFromFile (optionalInterpreterStack, & file, arguments, nullptr);
+}
+
+void praat_runOldExecuteCommand (InterpreterStack interpreterStack, conststring32 nameAndArguments) {
+	Melder_assert (interpreterStack);
+
+	char32 path [256];
+	const char32 *p, *arguments;
+	structMelderFile file { };
+	/*
+		Split into file name and arguments.
+	*/
+	p = nameAndArguments;
+	while (*p == U' ' || *p == U'\t')
+		p ++;
+	if (*p == U'\"') {
+		char32 *q = path;
+		p ++;   // skip quote
+		while (*p != U'\"' && *p != U'\0')
+			* q ++ = * p ++;
+		*q = U'\0';
+		arguments = p;
+		if (*arguments == U'\"')
+			arguments ++;
+		if (*arguments == U' ')
+			arguments ++;
+	} else {
+		char32 *q = path;
+		while (*p != U' ' && *p != U'\0')
+			* q ++ = * p ++;
+		*q = U'\0';
+		arguments = p;
+		if (*arguments == U' ')
+			arguments ++;
+	}
+	Melder_relativePathToFile (path, & file);
+
+	//TRACE
+	Interpreter parentInterpreter = interpreterStack -> current_a ();
+	if (parentInterpreter -> isInSecondPass) {
+		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
+		Melder_assert (interpreterStack -> currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
+		Interpreter childInterpreter = interpreterStack -> current_a ();
+		//interpreterStack -> currentLevel -= 1;
+		{// scope
+			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
+			structMelderFolder testedFolder;
+			Melder_getCurrentFolder (& testedFolder);
+			trace (U"setting default folder for file ", path, U" to ", & testedFolder);
+			Interpreter_resume (childInterpreter);
+		}   // back to the default directory of the caller
+	} else {
+		try {
+			autostring32 text = MelderFile_readText (& file);
+			{// scope
+				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
+				Melder_includeIncludeFiles (& text);
+			}   // back to the default directory of the caller
+			autoInterpreter me = Interpreter_createFromEnvironment (interpreterStack, Editor (nullptr));
+			MelderFile_copy (& file, & my file);   // TODO: should become a field of structInterpreter
+			if (arguments) {
+				Interpreter_readParameters (me.get(), text.get());
+				Interpreter_getArgumentsFromString (me.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
+			}
+			my text = text.move();
+			{// scope
+				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used inside the script
+				interpreterStack -> runDown (me.move(), autostring32(), false);
+			}   // back to the default directory of the caller
+		} catch (MelderError) {
+			Melder_throw (U"Script ", & file, U" not completed.");
+		}
+	}
 }
 
 extern "C" void praatlib_executeScript (const char *text8) {
