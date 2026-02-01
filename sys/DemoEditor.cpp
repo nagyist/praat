@@ -89,16 +89,25 @@ static void gui_drawingarea_cb_mouse (DemoEditor me, GuiDrawingArea_MouseEvent e
 	my optionKeyPressed = event -> optionKeyPressed;
 	if (my waitingForInput) {
 		my waitingForInput = false;
-		if (my interpreterReference) {
-			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
-			my interpreterReference -> pausedByDemoWindow = false;
+		#if 1
+			Melder_assert (my interpreterReference);
+			try {
+				autoPraatBackground background;
+				Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
+				Melder_assert (my interpreterReference -> optionalInterpreterStack);
+				my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+			} catch (MelderError) {
+				Melder_throw (U"This happened after you clicked in the Demo windowx.");
+			}
+		#else
+			my interpreterReference -> isHalted = false;
 			Gui_addWorkProc (
-				[me] () mutable {   // TODO: transfer ownership of intepreter to the lambda
+				[me] () mutable {   // TODO: transfer ownership of interpreter to the lambda
 					autoPraatBackground background;
 					Interpreter_resume (my interpreterReference);
 				}
 			);
-		}
+		#endif
 	}
 }
 
@@ -116,16 +125,27 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 	my optionKeyPressed = event -> optionKeyPressed;
 	if (my waitingForInput) {
 		my waitingForInput = false;
-		if (my interpreterReference) {
-			Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
-			my interpreterReference -> pausedByDemoWindow = false;
-			Gui_addWorkProc (
-				[me] () mutable {   // TODO: transfer ownership of intepreter to the lambda
-					autoPraatBackground background;
-					Interpreter_resume (my interpreterReference);
-				}
-			);
-		}
+		#if 1
+			Melder_assert (my interpreterReference);
+			try {
+				autoPraatBackground background;
+				Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
+				Melder_assert (my interpreterReference -> optionalInterpreterStack);
+				my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+			} catch (MelderError) {
+				Melder_throw (U"This happened after you pressed a key in the Demo windowx.");
+			}
+		#else
+			my interpreterReference -> isHalted = false;
+			if (my interpreterReference) {
+				Gui_addWorkProc (
+					[me] () mutable {   // TODO: transfer ownership of interpreter to the lambda
+						autoPraatBackground background;
+						Interpreter_resume (my interpreterReference);
+					}
+				);
+			}
+		#endif
 	}
 }
 
@@ -261,29 +281,36 @@ void Demo_timer (double duration) {
 
 void Demo_waitForInput (Interpreter interpreter) {
 	//TRACE
-	trace (U"entering interpreter ", Melder_pointer (interpreter));
-	/*
-		This function pauses the interpreter.
-		Key or mouse input will resume the interpreter.
-	*/
-	if (! theReferenceToTheOnlyDemoEditor)
-		Melder_throw (U"Cannot do demoWaitForInput() if the Demo window isn’t visible.");
-	trace (U"is the Demo window already waiting for input? ", theReferenceToTheOnlyDemoEditor -> waitingForInput );
-	if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
-		Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
-			U"Please click or type into the Demo window or close it.");
+	Melder_assert (interpreter);
+	Melder_assert (interpreter -> optionalInterpreterStack);
+
+	trace (U"is in second Pass? ", interpreter -> isInSecondPass);
+	if (interpreter -> isInSecondPass) {
+		interpreter -> isInSecondPass = false;
+	} else {
+		/*
+			This function pauses the interpreter.
+			Key or mouse input will resume the interpreter.
+		*/
+		if (! theReferenceToTheOnlyDemoEditor)
+			Melder_throw (U"Cannot do demoWaitForInput() if the Demo window isn’t visible.");
+		trace (U"is the Demo window already waiting for input? ", theReferenceToTheOnlyDemoEditor -> waitingForInput );
+		if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
+			Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
+				U"Please click or type into the Demo window or close it.");
+		}
+		//if (interpreter -> optionalParentInterpreter)
+		//	Melder_throw (U"Cannot do demoWaitForInput() in a script called from another script.\n"
+		//			U"If you want to pause a nested script, use “include” instead.");
+		//GuiThing_show (theReferenceToTheOnlyDemoEditor -> windowForm);
+		theReferenceToTheOnlyDemoEditor -> clicked = false;
+		theReferenceToTheOnlyDemoEditor -> keyPressed = false;
+		theReferenceToTheOnlyDemoEditor -> waitingForInput = true;
+		interpreter -> optionalInterpreterStack -> haltAll ();
+		trace (U"setting the Demo window's interpreter to ", Melder_pointer (interpreter));
+		theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
+		Melder_getCurrentFolder (& interpreter -> savedFolder);
 	}
-	if (interpreter -> optionalParentInterpreter)
-		Melder_throw (U"Cannot do demoWaitForInput() in a script called from another script.\n"
-				U"If you want to pause a nested script, use “include” instead.");
-	//GuiThing_show (theReferenceToTheOnlyDemoEditor -> windowForm);
-	theReferenceToTheOnlyDemoEditor -> clicked = false;
-	theReferenceToTheOnlyDemoEditor -> keyPressed = false;
-	theReferenceToTheOnlyDemoEditor -> waitingForInput = true;
-	interpreter -> pausedByDemoWindow = true;
-	trace (U"setting the Demo window's interpreter to ", Melder_pointer (interpreter));
-	theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
-	Melder_getCurrentFolder (& interpreter -> savedFolder);
 }
 
 void Demo_peekInput (Interpreter interpreter) {

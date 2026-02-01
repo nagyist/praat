@@ -45,6 +45,7 @@ Thing_declare (UiField);
 Thing_declare (Editor);
 Thing_declare (Script);
 Thing_declare (Notebook);
+Thing_declare (InterpreterStack);
 
 enum class kInterpreter_ReturnType {
 	VOID_ = 0,   // don't change; this is how it is automatically zero-initialized in structInterpreter
@@ -76,7 +77,8 @@ conststring32 kInterpreter_ReturnType_errorMessage (kInterpreter_ReturnType retu
 Thing_define (Interpreter, Thing) {
 	Script scriptReference;
 	Notebook notebookReference;
-	Interpreter optionalParentInterpreter;
+	InterpreterStack optionalInterpreterStack;
+	bool isHalted, isInSecondPass;
 
 	struct EditorEnvironment {
 		ClassInfo _optionalClass;
@@ -155,6 +157,7 @@ Thing_define (Interpreter, Thing) {
 	}
 
 	autostring32 text;
+	structMelderFile file;
 	int numberOfParameters, callDepth;
 	int types [1+Interpreter_MAXNUM_PARAMETERS], numbersOfLines [1+Interpreter_MAXNUM_PARAMETERS];
 	char32 parameters [1+Interpreter_MAXNUM_PARAMETERS] [1+Interpreter_MAX_PARAMETER_LENGTH];
@@ -168,7 +171,7 @@ Thing_define (Interpreter, Thing) {
 	autostring32 dialogTitle;
 	char32 procedureStackNames [1+Interpreter_MAX_CALL_DEPTH] [100];
 	std::unordered_map <std::u32string, autoInterpreterVariable> variablesMap;
-	bool running, stopped, pausedByDemoWindow, pausedByPauseWindow;
+	bool running, stopped;
 	structMelderFolder savedFolder;   // to remember across pausing
 	integer callStack [1 + Interpreter_MAX_CALL_DEPTH];
 	bool fromif, fromendfor;
@@ -191,7 +194,7 @@ Thing_define (Interpreter, Thing) {
 };
 
 autoInterpreter Interpreter_create ();
-autoInterpreter Interpreter_createFromEnvironment (Interpreter optionalParentInterpreter, Editor optionalInterpreterOwningEditor);
+autoInterpreter Interpreter_createFromEnvironment (InterpreterStack optionalInterpreterStack, Editor optionalInterpreterOwningEditor);
 
 void Interpreters_undangleEnvironment (Editor environment) noexcept;
 
@@ -221,6 +224,38 @@ void Interpreter_anyExpression (Interpreter me, conststring32 expression, Formul
 
 InterpreterVariable Interpreter_hasVariable (Interpreter me, conststring32 key);
 InterpreterVariable Interpreter_lookUpVariable (Interpreter me, conststring32 key);
+
+constexpr integer InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS = 20;
+
+Thing_define (InterpreterStack, Thing) {
+	Editor optionalInterpreterStackOwningEditor;   // TODO: remove
+	autoInterpreter interpreters [1 + InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS] { };
+	integer currentLevel = 0;
+
+	Interpreter current_0 () {
+		return our interpreters [our currentLevel].get();
+	}
+	Interpreter current_e () {
+		Interpreter interpreterReference = our interpreters [our currentLevel].get();
+		Melder_require (interpreterReference,
+			U"Interpreter at level ", our currentLevel, U" does not exist.");
+		return interpreterReference;
+	}
+	Interpreter current_a () {
+		Interpreter interpreterReference = our interpreters [our currentLevel].get();
+		Melder_assert (interpreterReference);
+		return interpreterReference;
+	}
+	void emptyAll ();
+	void runDown (autoInterpreter interpreter, autostring32 text, const bool reuseVariables);
+	void haltAll ();
+	void resumeFromTop ();
+	void interpreterHasFinished (Interpreter interpreter);
+};
+
+autoInterpreterStack InterpreterStack_create (Editor optionalInterpreterStackOwningEditor);
+
+extern structInterpreterStack theInterpreterStack;   // TODO: remove
 
 /* End of file Interpreter.h */
 #endif

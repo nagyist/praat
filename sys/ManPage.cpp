@@ -50,14 +50,21 @@ void ManPage_runAllChunksToCache (ManPage me, Interpreter optionalInterpreterRef
 	void praat_actions_show ();   // TODO: integrate this better
 	praat_actions_show ();   // we have to set the `executable` flags to false, in the global variable `theActions`
 
-	Interpreter interpreterReference;
-	autoInterpreter interpreter;
-	if (optionalInterpreterReference) {
-		interpreterReference = optionalInterpreterReference;
-	} else {
-		interpreter = Interpreter_create ();
-		interpreterReference = interpreter.get();
-	}
+	#if 1
+		autoInterpreterStack interpreterStack = InterpreterStack_create (Editor (nullptr));
+		interpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));
+	#else
+		Interpreter interpreterReference;
+		autoInterpreterStack interpreterStack;
+		if (optionalInterpreterReference) {
+			interpreterReference = optionalInterpreterReference;
+		} else {
+			interpreterStack = InterpreterStack_create (Editor (nullptr));
+			interpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));
+			interpreterReference = interpreterStack -> interpreters [1].get();
+		}
+	#endif
+
 	/*
 		When this page is drawn for the first time,
 		all the script parts have to be run,
@@ -146,7 +153,7 @@ void ManPage_runAllChunksToCache (ManPage me, Interpreter optionalInterpreterRef
 						if (Melder_startsWith (otherParagraph -> text, U"\tprocedure ") && Melder_endsWith (otherParagraph -> text, U"\tendproc\n"))
 							MelderString_append (& program, otherParagraph -> text);
 				}
-				Interpreter_run (interpreterReference, Melder_dup (program.string), chunkNumber > 1);
+				interpreterStack -> runDown (autoInterpreter(), Melder_dup (program.string), chunkNumber > 1);
 			} catch (MelderError) {
 				anErrorHasOccurred = true;
 				errorChunk = chunkNumber;

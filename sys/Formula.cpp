@@ -34,7 +34,7 @@
 #include "DemoEditor.h"
 
 static Interpreter theInterpreter;
-static autoInterpreter theLocalInterpreter;
+static autoInterpreterStack theLocalInterpreterStack;
 static Daata theSource;
 static conststring32 theExpression;
 static int theLevel = 1;
@@ -2304,11 +2304,16 @@ static void Formula_print (FormulaInstruction f) {
 }
 
 void Formula_compile (Interpreter interpreter, Daata data, conststring32 expression, int expressionType, bool optimize) {
+	if (interpreter)
+		Melder_assert (interpreter -> optionalInterpreterStack);
 	theInterpreter = interpreter;
 	if (! theInterpreter) {
-		if (! theLocalInterpreter)
-			theLocalInterpreter = Interpreter_create ();
-		theInterpreter = theLocalInterpreter.get();
+		if (! theLocalInterpreterStack) {
+			theLocalInterpreterStack = InterpreterStack_create (nullptr);
+			theLocalInterpreterStack -> interpreters [1] = Interpreter_create ();
+		}
+		theInterpreter = theLocalInterpreterStack -> interpreters [1].get();
+		theInterpreter -> optionalInterpreterStack = theLocalInterpreterStack.get();
 		theInterpreter -> variablesMap. clear ();
 	}
 	theSource = data;
@@ -4418,13 +4423,14 @@ static void do_runScript () {
 	Melder_require (fileName->which == Stackel_STRING,
 		U"The first argument to “runScript” should be a string (the file name), not ", fileName->whichText());
 	theLevel += 1;
-	if (theLevel > MAXIMUM_NUMBER_OF_LEVELS) {
+	if (theLevel > MAXIMUM_NUMBER_OF_LEVELS) {   // TODO: remove
 		theLevel -= 1;
 		Melder_throw (U"Cannot call runScript() more than ", MAXIMUM_NUMBER_OF_LEVELS, U" levels deep.");
 	}
 	try {
 		const Editor optionalNewInterpreterOwningWindow = theInterpreter -> optionalDynamicEnvironmentEditor();
-		praat_runScript (theInterpreter, fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
+		Melder_assert (theInterpreter -> optionalInterpreterStack);
+		praat_runScript (theInterpreter -> optionalInterpreterStack, fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
 		theLevel -= 1;
 	} catch (MelderError) {
 		theLevel -= 1;

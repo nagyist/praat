@@ -317,10 +317,20 @@ FORM (INFO_NONE__praat_calculator, U"Calculator", U"Calculator") {
 DO
 	INFO_NONE
 		Formula_Result result;
+		//TRACE
 		if (! interpreter) {
-			autoInterpreter tempInterpreter = Interpreter_create ();
-			Interpreter_anyExpression (tempInterpreter.get(), expression, & result);
+			trace (U"no interpreter");
+			static autoInterpreterStack theCalculatorInterpreterStack;
+			if (! theCalculatorInterpreterStack) {
+				theCalculatorInterpreterStack = InterpreterStack_create (nullptr);   // object-window command, so no editor
+				theCalculatorInterpreterStack -> interpreters [1] = Interpreter_create ();   // TODO: too exposed
+				theCalculatorInterpreterStack -> interpreters [1] -> optionalInterpreterStack = theCalculatorInterpreterStack.get();
+			}
+			Melder_assert (theCalculatorInterpreterStack -> interpreters [1]);   // TODO: should fire after exception
+			Melder_assert (theCalculatorInterpreterStack -> interpreters [1] -> optionalInterpreterStack);
+			Interpreter_anyExpression (theCalculatorInterpreterStack -> interpreters [1].get(), expression, & result);
 		} else {
+			trace (U"yes interpreter");
 			Interpreter_anyExpression (interpreter, expression, & result);
 		}
 		switch (result. expressionType) {
