@@ -925,7 +925,7 @@ void praat_dontUsePictureWindow () { praatP.dontUsePictureWindow = true; }
 			{// scope
 				autoPraatBackground background;
 				try {
-					praat_executeScriptFromFile (nullptr, & messageFile, nullptr, nullptr);
+					praat_executeScript_noGUI (& messageFile);
 				} catch (MelderError) {
 					Melder_flushError (Melder_upperCaseAppName(), U": message not completely handled.");
 				}
@@ -939,7 +939,7 @@ void praat_dontUsePictureWindow () { praatP.dontUsePictureWindow = true; }
 	static int cb_userMessage () {
 		autoPraatBackground background;
 		try {
-			praat_executeScriptFromFile (nullptr, & messageFile, nullptr, nullptr);
+			praat_executeScript_noGUI (& messageFile);
 		} catch (MelderError) {
 			Melder_flushError (Melder_upperCaseAppName(), U": message not completely handled.");
 		}
@@ -2004,7 +2004,7 @@ static void executeStartUpFile (MelderFolder startUpDirectory, conststring32 fil
 		if (! MelderFile_readable (& startUp))
 			return;   // it's OK if the file doesn't exist
 		try {
-			praat_executeScriptFromFile (nullptr, & startUp, nullptr, nullptr);
+			praat_executeScript_noGUI (& startUp);
 		} catch (MelderError) {
 			Melder_flushError (Melder_upperCaseAppName(), U": start-up file ", & startUp, U" not completed.");
 		}
@@ -2095,9 +2095,11 @@ void praat_run () {
 	if (! MelderFolder_isNull (Melder_preferencesFolder()) && ! praatP.ignorePlugins) {
 		trace (U"install plug-ins");
 		trace (U"locale is ", Melder_peek8to32 (setlocale (LC_ALL, nullptr)));
-		/* The Praat phase should remain praat_STARTING_UP,
-		 * because any added commands must not be included in the buttons file.
-		 */
+		/*
+			The Praat phase should remain praat_STARTING_UP,
+			because any added commands must not be included in the buttons file.
+			In plug-ins, pause windows should therefore be made modal.
+		*/
 		structMelderFile searchPattern { };
 		MelderFolder_getFile (Melder_preferencesFolder(), U"plugin_*", & searchPattern);
 		try {
@@ -2110,7 +2112,7 @@ void praat_run () {
 				if (MelderFile_readable (& plugin)) {
 					Melder_backgrounding = true;
 					try {
-						praat_executeScriptFromFile (nullptr, & plugin, nullptr, nullptr);
+						praat_executeScript_noGUI (& plugin);
 					} catch (MelderError) {
 						Melder_flushError (Melder_upperCaseAppName(), U": plugin ", & plugin, U" contains an error.");
 					}

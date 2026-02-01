@@ -107,6 +107,8 @@ Thing_implement (Interpreter, Thing, 0);
 
 static CollectionOf <structInterpreter> theReferencesToAllLivingInterpreters;
 
+/* global */ structInterpreterStack theInterpreterStack;
+
 void structInterpreter :: v9_destroy () noexcept {
 	theReferencesToAllLivingInterpreters. undangleItem (this);
 	our Interpreter_Parent :: v9_destroy ();
@@ -123,9 +125,9 @@ autoInterpreter Interpreter_create () {
 	}
 }
 
-autoInterpreter Interpreter_createFromEnvironment (Interpreter optionalParentInterpreter, Editor optionalInterpreterOwningEditor) {
+autoInterpreter Interpreter_createFromEnvironment (InterpreterStack optionalInterpreterStack, Editor optionalInterpreterOwningEditor) {
 	autoInterpreter me = Interpreter_create ();
-	my optionalParentInterpreter = optionalParentInterpreter;
+	my optionalInterpreterStack = optionalInterpreterStack;
 	my setOwningEditorEnvironmentFromOptionalEditor (optionalInterpreterOwningEditor);
 	return me;
 }
@@ -1717,7 +1719,8 @@ static void assignToNumericVectorElement (Interpreter me, char32 *& p, const cha
 			if (! inString)
 				depth --;
 		}
-		if (*p == U'"') inString = ! inString;
+		if (*p == U'"')
+			inString = ! inString;
 		p ++;
 	}
 	if (! Melder_staysWithinLine (*p))
@@ -2016,7 +2019,8 @@ static void assignToStringArrayElement (Interpreter me, char32 *& p, const char3
 }
 
 static void private_Interpreter_initialize (Interpreter me, autostring32 text, const bool reuseVariables) {
-	my text = text.move();
+	if (text)
+		my text = text.move();   // otherwise, use my existing text
 	char32 *command = my text.get();
 	autoMelderString command2;
 	integer numberOfLines = 0;
@@ -2206,6 +2210,8 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 
 void Interpreter_run (Interpreter me, autostring32 text, const bool reuseVariables) {
 	try {
+		//TRACE
+		trace (U"enter");
 		private_Interpreter_initialize (me, text.move(), reuseVariables);
 		my lineNumber = 1;
 		my callDepth = 0;
@@ -2225,11 +2231,10 @@ void Interpreter_resume (Interpreter me) {
 	*/
 	my running = true;
 	my stopped = false;
-	my pausedByDemoWindow = false;
-	my pausedByPauseWindow = false;
+	my isHalted = false;
 	bool assertionFailed = false;
 	//TRACE
-	trace (U"resuming at line ", my lineNumber);
+	trace (U"resuming at line ", my lineNumber, U" in file ", & my file);
 	try {
 		static MelderString valueString;   // to divert the info
 		autoMelderString command2;
@@ -2244,13 +2249,12 @@ void Interpreter_resume (Interpreter me) {
 			//trace (U"line ", lineNumber, U": ", lines [lineNumber]);
 		//}
 		for (; my lineNumber <= numberOfLines; my lineNumber ++) {
+			trace (U"considering to handle line ", my lineNumber, U": ", my lines [my lineNumber], U", stopped ", my stopped, U", halted ", my isHalted, U", pass ", 1 + my isInSecondPass);
 			if (my stopped)
 				break;
-			if (my pausedByDemoWindow)
+			if (my isHalted)
 				break;
-			if (my pausedByPauseWindow)
-				break;
-			trace (U"now at line ", my lineNumber, U": ", my lines [my lineNumber]);
+			trace (U"going to handle line ", my lineNumber, U": ", my lines [my lineNumber]);
 			constvector <mutablestring32> lines = my lines.get();
 			try {
 				char32 c0;
@@ -2262,7 +2266,7 @@ void Interpreter_resume (Interpreter me) {
 				/*
 					Substitute variables.
 				*/
-				trace (U"substituting variables");
+				trace (U"preprocessing line ", my lineNumber, U": ", command2.string);
 				for (char32 *p = & command2.string [0]; *p != U'\0'; p ++) if (*p == U'\'') {
 					/*
 						Found a left quote. Search for a matching right quote.
@@ -2309,7 +2313,7 @@ void Interpreter_resume (Interpreter me) {
 						p = q - 1;   // go to before next quote
 					}
 				}
-				trace (U"resume");
+				trace (U"going to parse line ", my lineNumber, U": ", command2.string);
 				c0 = command2.string [0];   // resume in order to allow things like 'c$' = 5
 				if ((! Melder_isLetter (c0) || Melder_isUpperCaseLetter (c0)) && c0 != U'@' &&
 						! (c0 == U'.' && Melder_isLetter (command2.string [1]) && ! Melder_isUpperCaseLetter (command2.string [1])))
@@ -3496,7 +3500,7 @@ void Interpreter_resume (Interpreter me) {
 				}
 			}
 		} // endfor lineNumber
-		if (! my pausedByDemoWindow && ! my pausedByPauseWindow) {
+		if (! my isHalted) {
 			//my numberOfLabels = 0;
 			my running = false;
 			my stopped = false;
@@ -3515,6 +3519,7 @@ void Interpreter_resume (Interpreter me) {
 		//my numberOfLabels = 0;
 		my running = false;
 		my stopped = false;
+		//my isHalted = false;   // TODO: needed?
 		if (Melder_hasCrash ()) {
 			throw;
 		} else if (str32equ (Melder_getError (), U"\nScript exited.\n")) {
@@ -3523,6 +3528,8 @@ void Interpreter_resume (Interpreter me) {
 			throw;
 		}
 	}
+	Melder_assert (my optionalInterpreterStack);
+	my optionalInterpreterStack -> interpreterHasFinished (me);
 }
 
 void Interpreter_stop (Interpreter me) {
@@ -3583,6 +3590,170 @@ void Interpreter_stringArrayExpression (Interpreter me, conststring32 expression
 void Interpreter_anyExpression (Interpreter me, conststring32 expression, Formula_Result *out_result) {
 	Formula_compile (me, nullptr, expression, kFormula_EXPRESSION_TYPE_UNKNOWN, false);
 	Formula_run (0, 0, out_result);
+}
+
+Thing_implement (InterpreterStack, Thing, 0);
+
+autoInterpreterStack InterpreterStack_create (Editor optionalInterpreterStackOwningEditor) {
+	try {
+		autoInterpreterStack me = Thing_new (InterpreterStack);
+		my optionalInterpreterStackOwningEditor = optionalInterpreterStackOwningEditor;
+		return me;
+	} catch (MelderError) {
+		Melder_throw (U"InterpreterStack not created.");
+	}
+}
+
+void structInterpreterStack :: emptyAll () {
+	for (integer ilevel = 1; ilevel <= our currentLevel; ilevel ++)
+		our interpreters [ilevel]. reset();
+	our currentLevel = 0;
+}
+
+void structInterpreterStack :: runDown (autoInterpreter interpreter, autostring32 text, const bool reuseVariables) {
+	//TRACE
+	trace (U"entering at level ", our currentLevel);
+	if (our currentLevel == InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS)
+		Melder_throw (U"Cannot have more than ", InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS, U" levels of nested scripts.");
+	our currentLevel += 1;
+	#if 1
+		if (interpreter)
+			our interpreters [our currentLevel] = interpreter.move();   // otherwise, use my existing interpreter
+		const integer savedLevel = our currentLevel;   // just for checking that running an interpreter to its end decrements the level
+		autoMelderFileSetCurrentFolder folder (& our interpreters [our currentLevel] -> file);
+		try {
+			Interpreter_run (our interpreters [our currentLevel].get(), text.move(), reuseVariables);
+		} catch (MelderError) {
+			our emptyAll ();   // TODO: put back
+			Melder_throw (U"Interpreter stack not run completely.");
+		}
+		trace (U"old level ", savedLevel, U", new level ", our currentLevel);
+		Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
+		//if (! our interpreters [our currentLevel] -> isHalted) {
+		//	our currentLevel -= 1;
+		//	trace (U"level lowered to ", our currentLevel);
+		//	Melder_assert (our currentLevel >= 0);
+		//}
+	#else
+		trace (U"posting running down-level ", our currentLevel);
+		Gui_addWorkProc (
+			[this, me = interpreter.get(), text = std::move (text), reuseVariables, savedCurrentLevel = our currentLevel] () mutable {   // TODO: make non-mutable by moving `text` into the Interpreter
+				TRACE
+				if (savedCurrentLevel < InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS) {
+					trace (U"resetting level ", savedCurrentLevel + 1);
+					our interpreters [savedCurrentLevel + 1]. reset();
+					trace (U"reset level ", savedCurrentLevel + 1);
+				}
+				trace (U"starting down-level ", savedCurrentLevel, U" with file ", & my file);
+				autoMelderFileSetCurrentFolder folder (& my file);
+				Interpreter_run (me, text.move(), reuseVariables);   // this will call InterpreterStack::resume near the end
+				trace (U"finished (or halted) down-level ", savedCurrentLevel);
+			}
+		);
+		our interpreters [our currentLevel] = interpreter.move();
+	#endif
+}
+
+void structInterpreterStack :: haltAll () {
+	//TRACE
+	trace (U"at level ", our currentLevel);
+	for (integer ilevel = 1; ilevel <= our currentLevel; ilevel ++) {
+		Melder_assert (our interpreters [ilevel]);
+		our interpreters [ilevel] -> isHalted = true;   // ensures fast unwinding, without processing any more lines
+		our interpreters [ilevel] -> lineNumber -= 1;   // ensure that all runScripts will get a second pass
+		our interpreters [ilevel] -> isInSecondPass = true;   // ensures that all runScripts, the pause window and demoWaitForInput will short-cut
+	}
+}
+
+void structInterpreterStack :: resumeFromTop () {
+	//TRACE
+	trace (U"enter");
+	our currentLevel = 1;
+	Melder_assert (our interpreters [1]);
+	const integer savedLevel = our currentLevel;   // just for checking that running an interpreter to its end decrements the level
+
+	/*
+		Unhalt all.
+	*/
+	for (integer ilevel = 1; ilevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS; ilevel ++)
+		if (our interpreters [ilevel])
+			our interpreters [ilevel] -> isHalted = false;
+
+	#if 1
+		autoMelderFileSetCurrentFolder (& our interpreters [1] -> file);
+		Interpreter_resume (our interpreters [1].get());
+		trace (U"old level ", savedLevel, U", new level ", our currentLevel);
+		Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
+	#else
+		Interpreter me = our interpreters [our currentLevel].get();
+		Melder_assert (me);
+		if (my isHalted) {
+			my isHalted = false;
+			trace (U"posting resumption of current level ", our currentLevel);
+			Gui_addWorkProc (
+				[this, me, savedCurrentLevel = our currentLevel] () {
+					TRACE
+					if (savedCurrentLevel < InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS) {
+						trace (U"resetting level ", savedCurrentLevel + 1);
+						our interpreters [savedCurrentLevel + 1]. reset();
+						trace (U"reset level ", savedCurrentLevel + 1);
+					}
+					trace (U"resuming level ", savedCurrentLevel);
+					autoMelderFileSetCurrentFolder folder (& my file);
+					Interpreter_resume (me);
+					trace (U"finished (or halted) level ", savedCurrentLevel);
+				}
+			);
+		} else {
+			our currentLevel -= 1;
+			if (our currentLevel > 0) {
+				me = our interpreters [our currentLevel].get();
+				my isHalted = false;
+				trace (U"posting resumption of up-level ", our currentLevel);
+				Gui_addWorkProc (
+					[this, me, savedCurrentLevel = our currentLevel] () {
+						TRACE
+						if (savedCurrentLevel < InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS) {
+							trace (U"resetting level ", savedCurrentLevel + 1);
+							our interpreters [savedCurrentLevel + 1]. reset();
+							trace (U"reset level ", savedCurrentLevel + 1);
+						}
+						trace (U"resuming up-level ", savedCurrentLevel, U" with file ", & my file);
+						autoMelderFileSetCurrentFolder folder (& my file);
+						Interpreter_resume (me);
+						trace (U"finished (or halted) up-level ", savedCurrentLevel);
+					}
+				);
+			}
+		}
+	#endif
+}
+
+void structInterpreterStack :: interpreterHasFinished (Interpreter interpreter) {
+	//TRACE
+	trace (U"entered at level ", our currentLevel);
+	Melder_assert (interpreter);
+	/*
+		We climb up.
+	*/
+	integer index;
+	for (index = 1; index <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS; index ++)
+		if (our interpreters [index].get() == interpreter)   // TODO: this is a bit rough (it works correctly if the interpreter is indeed the original member)
+			break;
+	Melder_assert (index <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
+	for (integer i = 1; i < index; i ++)
+		Melder_assert (our interpreters [i]);   // check contiguity
+	Melder_assert (index == our currentLevel);
+	trace (U"index at ", index);
+	index -= 1;
+	our currentLevel -= 1;
+	if (index == 0)
+		return;   // nothing to do
+	Melder_assert (our interpreters [index]);
+	trace (U"index lowered to ", index);
+	if (! interpreter -> isHalted)
+		our interpreters [index] -> isInSecondPass = false;   // TODO: make this *very* conditional
+	trace (U"level lowered(?) to ", our currentLevel);
 }
 
 /* End of file Interpreter.cpp */

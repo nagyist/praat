@@ -321,13 +321,13 @@ void structEditor :: v9_destroy () noexcept {
 		ScriptEditor scriptEditor = theReferencesToAllOpenScriptEditors.at [i];
 		if (scriptEditor -> optionalReferenceToOwningEditor != this)
 			continue;
-		if (scriptEditor -> dirty || scriptEditor -> interpreter && scriptEditor -> interpreter -> running) {
-			scriptEditor -> optionalReferenceToOwningEditor = nullptr;   // undangle
-			if (scriptEditor -> interpreter)
-				scriptEditor -> interpreter -> undangleEditorEnvironments();
-			Thing_setName (scriptEditor, nullptr);
-			Editor_setMenuSensitive (scriptEditor, U"Run", false);
-		} else
+//		if (scriptEditor -> dirty || scriptEditor -> interpreter && scriptEditor -> interpreter -> running) {
+//			scriptEditor -> optionalReferenceToOwningEditor = nullptr;   // undangle
+//			if (scriptEditor -> interpreter)
+//				scriptEditor -> interpreter -> undangleEditorEnvironments();
+//			Thing_setName (scriptEditor, nullptr);
+//			Editor_setMenuSensitive (scriptEditor, U"Run", false);
+//		} else
 			forget (scriptEditor);
 	}
 	Interpreters_undangleEnvironment (this);

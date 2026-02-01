@@ -316,6 +316,25 @@ constexpr bool theCommandKeyIsToTheLeftOfTheOptionKey =
 	typedef void *GuiObject;
 #endif
 
+/*
+	`Gui_addWorkProc` can post any lambda to be scheduled during an idle moment in the main event loop.
+
+	Example of usage:
+		autostring32 clickedText = ...;
+		Gui_addWorkProc (
+			[clickedText = std::move (clickedText)] () mutable {   // transfer ownership of clickedText to the lambda
+				try {
+					autoPraatBackground background;
+					Interpreter_resume (thePauseForm_interpreterReference);
+				} catch (MelderError) {
+					if (thePauseForm_clicked == theCancelContinueButton)
+						Melder_throw (U"This happened after you cancelled the pause form.");
+					else
+						Melder_throw (U"This happened after you clicked “", clickedText.get(), U"” in the pause form.");
+				}
+			}
+		);
+ */
 template <typename F>
 static void Gui_addWorkProc (F&& function) {
 	#if gtk
