@@ -600,13 +600,35 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
 			structMelderFolder testedFolder;
 			Melder_getCurrentFolder (& testedFolder);
-			trace (U"setting default folder for file ", fileName, U" to ", & testedFolder);
+			trace (U"pass 2: setting default folder for file ", fileName, U" to ", & testedFolder);
 			Interpreter_resume (childInterpreter);
 		}   // back to the default directory of the caller
 	} else {
+		structMelderFolder folderBeforeCorrection;
+		Melder_getCurrentFolder (& folderBeforeCorrection);
+		trace (U"pass 1: initial caller default folder for file ", fileName, U" is ", & folderBeforeCorrection);
+
+		autoMelderFileSetCurrentFolder correctedFolder (& parentInterpreter -> file);   // so that callee-relative file names can be used for including include files
+
+		structMelderFolder folderAfterCorrection;
+		Melder_getCurrentFolder (& folderAfterCorrection);
+		trace (U"pass 1: corrected caller default folder for file ", fileName, U" is ", & folderAfterCorrection);
+		/*
+			TODO: the following assertion can fire if a Demo window script calls runScript on `a/a.praat` and then `b/b.praat`,
+			separated by `demoWaitForInput()`. (last checked 2026-02-02)
+			Apparently, one of the functions elsewhere doesn't appropriately set the current folder (working directory) back.
+		*/
+		//Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection);
+
 		structMelderFile file { };
 		Melder_relativePathToFile (fileName, & file);
 		try {
+			{// scope
+				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
+				structMelderFolder testedFolder;
+				Melder_getCurrentFolder (& testedFolder);
+				trace (U"pass 1: callee default folder for file ", fileName, U" is ", & testedFolder);
+			}
 			autostring32 text = MelderFile_readText (& file);
 			/*
 				We switch between default directories no fewer than four times:
