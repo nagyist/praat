@@ -93,11 +93,11 @@ static void gui_drawingarea_cb_mouse (DemoEditor me, GuiDrawingArea_MouseEvent e
 			Melder_assert (my interpreterReference);
 			try {
 				autoPraatBackground background;
-				Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
+				//Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
 				Melder_assert (my interpreterReference -> optionalInterpreterStack);
 				my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
 			} catch (MelderError) {
-				Melder_throw (U"This happened after you clicked in the Demo windowx.");
+				Melder_throw (U"This happened after you clicked in the Demo window.");
 			}
 		#else
 			my interpreterReference -> isHalted = false;
@@ -133,7 +133,7 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 				Melder_assert (my interpreterReference -> optionalInterpreterStack);
 				my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
 			} catch (MelderError) {
-				Melder_throw (U"This happened after you pressed a key in the Demo windowx.");
+				Melder_throw (U"This happened after you pressed a key in the Demo window.");
 			}
 		#else
 			my interpreterReference -> isHalted = false;
