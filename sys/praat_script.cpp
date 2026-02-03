@@ -561,7 +561,7 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 	Melder_assert (interpreterStack);
 	//Melder_assert (Melder_backgrounding);
 
-	TRACE
+	//TRACE
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
 		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
