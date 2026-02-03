@@ -97,6 +97,9 @@ static void menu_cb_run (NotebookEditor me, EDITOR_ARGS) {
 		Melder_throw (U"The notebook is already running (paused). Please close or continue the pause, trust or demo window.");
 	Melder_assert (! my interpreterStack -> interpreters [1]);   // TRICKY
 	my interpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (my interpreterStack.get(), Editor (nullptr));
+	MelderFile_copy (& my file, & my interpreterStack -> interpreters [1] -> file);
+	TRACE
+	trace (U"File: ", & my file);
 	integer startOfSelection, endOfSelection;
 	autostring32 text = GuiText_getStringAndSelectionPosition (my textWidget, & startOfSelection, & endOfSelection);
 	if (Melder_startsWith (text.get(), U"\"")) {

@@ -592,8 +592,8 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 		Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection));
 
 		structMelderFile file { };
-		Melder_relativePathToFile (fileName, & file);
 		try {
+			Melder_relativePathToFile (fileName, & file);
 			{// scope
 				autoMelderFileSetCurrentFolder folder (& file);   // temporarily, for testing
 				structMelderFolder testedFolder;
@@ -638,42 +638,77 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 	}
 }
 
-void praat_runNotebook (conststring32 fileName, integer narg, Stackel args, Editor optionalInterpreterOwningEditor) {
-	structMelderFile file { };
-	Melder_relativePathToFile (fileName, & file);
-	try {
-		autostring32 text = MelderFile_readText (& file);
-		if (! Melder_startsWith (text.get(), U"\""))
-			Melder_throw (U"File ", & file, U" is not a Praat notebook.");
-		/*
-			We switch between default directories no fewer than four times:
-			1. runScript() tends to be called from a script that we call the "caller";
-			   when we enter runScript(), the default directory is the caller's folder,
-			   as was appropriate for the use of file names in the caller before runScript(),
-			   which had to be interpreted relative to the caller's folder.
-			2. runScript() will call a script that we call the "callee";
-			   include files have to be included from the callee's folder.
-			3. For expanding any infile/outfile/folder arguments to runScript(),
-			   we have to be back in the caller's folder.
-			4. Inside the callee, file names will have to be interpreted relative to the callee's folder.
-			5. After runScript() finishes, we will have to be back in the caller's folder,
-			   so that the use of file names in the caller after runScript()
-			   will be interpreted relative to the caller's folder again.
-		*/
+void praat_runNotebook (InterpreterStack interpreterStack, conststring32 fileName, integer narg, Stackel args, Editor optionalInterpreterOwningEditor) {
+	Melder_assert (interpreterStack);
+	//Melder_assert (Melder_backgrounding);
+
+	TRACE
+	Interpreter parentInterpreter = interpreterStack -> current_a ();
+	if (parentInterpreter -> isInSecondPass) {
+		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
+		Melder_assert (interpreterStack -> currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
+		Interpreter childInterpreter = interpreterStack -> current_a ();
+		//interpreterStack -> currentLevel -= 1;
 		{// scope
-			autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
-			Melder_includeIncludeFiles (& text);
+			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
+			structMelderFolder testedFolder;
+			Melder_getCurrentFolder (& testedFolder);
+			trace (U"pass 2: setting default folder for file ", fileName, U" to ", & testedFolder);
+			Interpreter_resume (childInterpreter);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);
-		MelderFile_copy (& file, & interpreter -> file);
-		Interpreter_readParameters (interpreter.get(), text.get());
-		autoMelderReadText readText = MelderReadText_createFromText (text.move());
-		autoManPages manPages = ManPages_createFromText (readText.get(), & file);
-		ManPage firstPage = manPages -> pages.at [1];
-		autoManual manual = Manual_create (firstPage -> title.get(), interpreter.get(), manPages.releaseToAmbiguousOwner(), true, true);
-		manual.releaseToUser ();
-	} catch (MelderError) {
-		Melder_throw (U"Notebook ", & file, U" not completed.");   // don't refer to 'fileName', because its contents may have changed
+	} else {
+		structMelderFolder folderBeforeCorrection;
+		Melder_getCurrentFolder (& folderBeforeCorrection);
+		trace (U"pass 1: initial caller default folder for file ", fileName, U" is ", & folderBeforeCorrection);
+
+		autoMelderFileSetCurrentFolder correctedFolder (& parentInterpreter -> file);   // the directory of the caller (or it should be)
+
+		structMelderFolder folderAfterCorrection;
+		Melder_getCurrentFolder (& folderAfterCorrection);
+		trace (U"pass 1: corrected caller default folder for file ", fileName, U" is ", & folderAfterCorrection);
+		/*
+			TODO: the following assertion can fire if a Demo window script calls runScript on `a/a.praat` and then `b/b.praat`,
+			separated by `demoWaitForInput()`. (last checked 2026-02-02)
+			Apparently, one of the functions elsewhere doesn't appropriately set the current folder (working directory) back.
+		*/
+		Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection));
+
+		structMelderFile file { };
+		try {
+			Melder_relativePathToFile (fileName, & file);
+			autostring32 text = MelderFile_readText (& file);
+			if (! Melder_startsWith (text.get(), U"\""))
+				Melder_throw (U"File ", & file, U" is not a Praat notebook.");
+			/*
+				We switch between default directories no fewer than four times:
+				1. runScript() tends to be called from a script that we call the "caller";
+				   when we enter runScript(), the default directory is the caller's folder,
+				   as was appropriate for the use of file names in the caller before runScript(),
+				   which had to be interpreted relative to the caller's folder.
+				2. runScript() will call a script that we call the "callee";
+				   include files have to be included from the callee's folder.
+				3. For expanding any infile/outfile/folder arguments to runScript(),
+				   we have to be back in the caller's folder.
+				4. Inside the callee, file names will have to be interpreted relative to the callee's folder.
+				5. After runScript() finishes, we will have to be back in the caller's folder,
+				   so that the use of file names in the caller after runScript()
+				   will be interpreted relative to the caller's folder again.
+			*/
+			{// scope
+				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
+				Melder_includeIncludeFiles (& text);
+			}   // back to the default directory of the caller
+			autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack, optionalInterpreterOwningEditor);
+			MelderFile_copy (& file, & interpreter -> file);   // TODO: should become a field of structInterpreter
+			Interpreter_readParameters (interpreter.get(), text.get());   // TODO: should become a field of structInterpreter
+			autoMelderReadText readText = MelderReadText_createFromText (text.move());
+			autoManPages manPages = ManPages_createFromText (readText.get(), & file);
+			ManPage firstPage = manPages -> pages.at [1];
+			autoManual manual = Manual_create (firstPage -> title.get(), interpreter.get(), manPages.releaseToAmbiguousOwner(), true, true);
+			manual.releaseToUser ();
+		} catch (MelderError) {
+			Melder_throw (U"Notebook ", & file, U" not completed.");   // don't refer to 'fileName', because its contents may have changed
+		}
 	}
 }
 

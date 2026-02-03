@@ -4423,7 +4423,7 @@ static void do_runScript () {
 	theLevel += 1;
 	if (theLevel > MAXIMUM_NUMBER_OF_LEVELS) {   // TODO: remove
 		theLevel -= 1;
-		Melder_throw (U"Cannot call runScript() more than ", MAXIMUM_NUMBER_OF_LEVELS, U" levels deep.");
+		//Melder_throw (U"Cannot call runScript() more than ", MAXIMUM_NUMBER_OF_LEVELS, U" levels deep.");
 	}
 	try {
 		const Editor optionalNewInterpreterOwningWindow = theInterpreter -> optionalDynamicEnvironmentEditor();
@@ -4477,7 +4477,8 @@ static void do_runNotebook () {
 	}
 	try {
 		const Editor optionalNewInterpreterOwningWindow = theInterpreter -> optionalDynamicEnvironmentEditor();
-		praat_runNotebook (fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
+		Melder_assert (theInterpreter -> optionalInterpreterStack);
+		praat_runNotebook (theInterpreter -> optionalInterpreterStack, fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
 		theLevel -= 1;
 	} catch (MelderError) {
 		theLevel -= 1;

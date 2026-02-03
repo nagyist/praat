@@ -322,7 +322,7 @@ DO
 			trace (U"no interpreter");
 			static autoInterpreterStack theCalculatorInterpreterStack;
 			if (! theCalculatorInterpreterStack) {
-				theCalculatorInterpreterStack = InterpreterStack_create (nullptr);   // object-window command, so no editor
+				theCalculatorInterpreterStack = InterpreterStack_create (Editor (nullptr));   // object-window command, so no editor
 				theCalculatorInterpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (theCalculatorInterpreterStack.get(), Editor (nullptr));   // TODO: too exposed
 			}
 			Melder_assert (theCalculatorInterpreterStack -> interpreters [1]);   // TODO: should fire after exception
