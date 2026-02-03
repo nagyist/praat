@@ -295,9 +295,7 @@ bool praat_executeCommand (Interpreter interpreter, char32 *command) {
 				return true;   // in batch we ignore pause statements
 			const Editor optionalPauseWindowOwningEditor = interpreter -> optionalDynamicEnvironmentEditor();
 			const GuiWindow parentShell = ( optionalPauseWindowOwningEditor ? optionalPauseWindowOwningEditor -> windowForm : theCurrentPraatApplication -> topShell );
-			UiPause_begin (parentShell, optionalPauseWindowOwningEditor, U"stop or continue", interpreter);
-			UiPause_comment (str32equ (command, U"pause") ? U"..." : command + 6);
-			UiPause_end (1, 1, 0, U"Continue", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, interpreter);
+			UiPause_pauseScript (parentShell, optionalPauseWindowOwningEditor, interpreter, str32equ (command, U"pause") ? U"..." : command + 6);
 		} else if (str32nequ (command, U"execute ", 8)) {
 			//TRACE
 			trace (U"interpreter: ", Melder_pointer (interpreter));

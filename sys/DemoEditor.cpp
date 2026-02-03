@@ -89,25 +89,14 @@ static void gui_drawingarea_cb_mouse (DemoEditor me, GuiDrawingArea_MouseEvent e
 	my optionKeyPressed = event -> optionKeyPressed;
 	if (my waitingForInput) {
 		my waitingForInput = false;
-		#if 1
-			Melder_assert (my interpreterReference);
-			try {
-				autoPraatBackground background;
-				//Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
-				Melder_assert (my interpreterReference -> optionalInterpreterStack);
-				my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
-			} catch (MelderError) {
-				Melder_throw (U"This happened after you clicked in the Demo window.");
-			}
-		#else
-			my interpreterReference -> isHalted = false;
-			Gui_addWorkProc (
-				[me] () mutable {   // TODO: transfer ownership of interpreter to the lambda
-					autoPraatBackground background;
-					Interpreter_resume (my interpreterReference);
-				}
-			);
-		#endif
+		Melder_assert (my interpreterReference);
+		try {
+			autoPraatBackground background;
+			Melder_assert (my interpreterReference -> optionalInterpreterStack);
+			my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+		} catch (MelderError) {
+			Melder_throw (U"This happened after you clicked in the Demo window.");
+		}
 	}
 }
 
@@ -125,27 +114,14 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 	my optionKeyPressed = event -> optionKeyPressed;
 	if (my waitingForInput) {
 		my waitingForInput = false;
-		#if 1
-			Melder_assert (my interpreterReference);
-			try {
-				autoPraatBackground background;
-				//Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
-				Melder_assert (my interpreterReference -> optionalInterpreterStack);
-				my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
-			} catch (MelderError) {
-				Melder_throw (U"This happened after you pressed a key in the Demo window.");
-			}
-		#else
-			my interpreterReference -> isHalted = false;
-			if (my interpreterReference) {
-				Gui_addWorkProc (
-					[me] () mutable {   // TODO: transfer ownership of interpreter to the lambda
-						autoPraatBackground background;
-						Interpreter_resume (my interpreterReference);
-					}
-				);
-			}
-		#endif
+		Melder_assert (my interpreterReference);
+		try {
+			autoPraatBackground background;
+			Melder_assert (my interpreterReference -> optionalInterpreterStack);
+			my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+		} catch (MelderError) {
+			Melder_throw (U"This happened after you pressed a key in the Demo window.");
+		}
 	}
 }
 
