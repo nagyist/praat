@@ -3508,11 +3508,20 @@ void Interpreter_resume (Interpreter me) {
 			my stopped = false;
 		}
 	} catch (MelderError) {
+		TRACE
+		trace (U"catch");
+		trace (U"catch ", Melder_pointer (me));
+		trace (U"catch at line number ", my lineNumber);
+		trace (U"catch with stack ", Melder_pointer (my optionalInterpreterStack));
+		trace (U"catch in file ", & my file);
+		trace (U"catch at level ", my optionalInterpreterStack -> currentLevel);
+		trace (U"catch at stack interpreter ", Melder_pointer (my optionalInterpreterStack -> current_0 ()));
 		if (my lineNumber > 0) {
 			const bool normalExplicitExit = str32nequ (my lines [my lineNumber], U"exit ", 5) || Melder_hasError (U"Script exited.");
 			if (! normalExplicitExit && ! assertionFailed) {   // don't show the message twice!
 				while (my lines [my lineNumber] [0] == U'\0') {   // did this use to be a continuation line?
 					my lineNumber --;
+					trace (U"line number lowered to ", my lineNumber);
 					Melder_assert (my lineNumber > 0);   // originally empty lines that stayed empty should not generate errors
 				}
 				Melder_appendError (U"Script line ", my lineNumber, U" not performed or completed:\n« ", my lines [my lineNumber], U" »");
@@ -3522,6 +3531,9 @@ void Interpreter_resume (Interpreter me) {
 		my running = false;
 		my stopped = false;
 		//my isHalted = false;   // TODO: needed?
+		trace (U"catch: has finished...", Melder_pointer (my optionalInterpreterStack));
+		my optionalInterpreterStack -> interpreterHasFinished (me);
+		trace (U"catch: ... has finished");
 		if (Melder_hasCrash ()) {
 			throw;
 		} else if (str32equ (Melder_getError (), U"\nScript exited.\n")) {
@@ -3607,6 +3619,8 @@ autoInterpreterStack InterpreterStack_create (Editor optionalInterpreterStackOwn
 }
 
 void structInterpreterStack :: emptyAll () {
+	//TRACE
+	trace (U"cleaning up");
 	for (integer ilevel = 1; ilevel <= our currentLevel; ilevel ++)
 		our interpreters [ilevel]. reset();
 	our currentLevel = 0;
@@ -3625,7 +3639,8 @@ void structInterpreterStack :: runDown (autoInterpreter interpreter, autostring3
 		autoMelderSetCurrentFolder folder (& our interpreters [our currentLevel] -> workingDirectory);
 		Interpreter_run (our interpreters [our currentLevel].get(), text.move(), reuseVariables);
 	} catch (MelderError) {
-		our emptyAll ();
+		if (currentLevel == 0)
+			our emptyAll ();
 		Melder_throw (U"Interpreter stack not run completely.");
 	}
 	trace (U"old level ", savedLevel, U", new level ", our currentLevel);
@@ -3657,8 +3672,14 @@ void structInterpreterStack :: resumeFromTop () {
 		if (our interpreters [ilevel])
 			our interpreters [ilevel] -> isHalted = false;
 
-	autoMelderFileSetCurrentFolder (& our interpreters [1] -> file);
-	Interpreter_resume (our interpreters [1].get());
+	try {
+		autoMelderFileSetCurrentFolder (& our interpreters [1] -> file);
+		Interpreter_resume (our interpreters [1].get());
+	} catch (MelderError) {
+		if (currentLevel == 0)
+			our emptyAll ();
+		Melder_throw (U"Interpreter stack has not run to completion.");
+	}
 	trace (U"old level ", savedLevel, U", new level ", our currentLevel);
 	Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
 }
