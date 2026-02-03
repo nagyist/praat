@@ -129,7 +129,7 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 			Melder_assert (my interpreterReference);
 			try {
 				autoPraatBackground background;
-				Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
+				//Melder_setCurrentFolder (& my interpreterReference -> savedFolder);
 				Melder_assert (my interpreterReference -> optionalInterpreterStack);
 				my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
 			} catch (MelderError) {
