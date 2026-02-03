@@ -121,7 +121,7 @@ public:
 	void reset () {
 		if (our elements) {
 			for (integer i = 1; i <= our size; i ++)
-				our elements [i - 1]. reset ();
+				our elements [i - 1]. reset();
 			MelderArray:: _free (our elements, our size);
 			our elements = nullptr;
 		}

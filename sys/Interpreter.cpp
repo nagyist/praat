@@ -3508,7 +3508,7 @@ void Interpreter_resume (Interpreter me) {
 			my stopped = false;
 		}
 	} catch (MelderError) {
-		TRACE
+		//TRACE
 		trace (U"catch");
 		trace (U"catch ", Melder_pointer (me));
 		trace (U"catch at line number ", my lineNumber);
@@ -3706,8 +3706,13 @@ void structInterpreterStack :: interpreterHasFinished (Interpreter interpreter) 
 		return;   // nothing to do
 	Melder_assert (our interpreters [index]);
 	trace (U"index lowered to ", index);
-	if (! interpreter -> isHalted)
+	if (! interpreter -> isHalted) {
 		our interpreters [index] -> isInSecondPass = false;   // TODO: check this
+		/*
+			TODO: can the interpreter at level `currentLevel + 1` be deleted?
+		*/
+		our interpreters [index + 1]. reset();
+	}
 	trace (U"level lowered(?) to ", our currentLevel);
 }
 

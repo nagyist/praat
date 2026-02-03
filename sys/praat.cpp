@@ -500,7 +500,7 @@ void praat_removeObject (integer i) {
 	praat_remove (i, true);   // dangle
 	for (integer j = i; j < theCurrentPraatObjects -> n; j ++)
 		theCurrentPraatObjects -> list [j] = std::move (theCurrentPraatObjects -> list [j + 1]);   // undangle but create second references
-	theCurrentPraatObjects -> list [theCurrentPraatObjects -> n]. name. reset ();
+	theCurrentPraatObjects -> list [theCurrentPraatObjects -> n]. name. reset();
 	theCurrentPraatObjects -> list [theCurrentPraatObjects -> n]. object = nullptr;   // undangle or remove second reference
 	theCurrentPraatObjects -> list [theCurrentPraatObjects -> n]. isSelected = 0;
 	for (int ieditor = 0; ieditor < praat_MAXNUM_EDITORS; ieditor ++)
