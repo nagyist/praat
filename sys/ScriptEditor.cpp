@@ -145,11 +145,13 @@ static void menu_cb_run (ScriptEditor me, EDITOR_ARGS) {
 	try {
 		Melder_assert (my interpreterStack);
 		my interpreterStack -> emptyAll ();
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (my interpreterStack.get(), my optionalReferenceToOwningEditor);
-		MelderFile_copy (& my file, & interpreter -> file);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (
+			my interpreterStack.get(),
+			my optionalReferenceToOwningEditor,
+			& my file);
 		autostring32 text = GuiText_getString (my textWidget);
 		if (! MelderFile_isNull (& my file))
-			MelderFile_setDefaultDir (& my file);
+			MelderFile_setDefaultDir (& my file);   // TODO: can be wrong
 		Melder_includeIncludeFiles (& text);
 		const integer npar = Interpreter_readParameters (interpreter.get(), text.get());
 		if (npar != 0) {
@@ -184,8 +186,11 @@ static void menu_cb_runSelection (ScriptEditor me, EDITOR_ARGS) {
 	try {
 		Melder_assert (my interpreterStack);
 		my interpreterStack -> emptyAll ();
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (my interpreterStack.get(), my optionalReferenceToOwningEditor);
-		MelderFile_copy (& my file, & interpreter -> file);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (
+			my interpreterStack.get(),
+			my optionalReferenceToOwningEditor,
+			& my file
+		);
 		autostring32 selectedText = GuiText_getSelection (my textWidget);
 		if (! selectedText)
 			Melder_throw (U"No text selected.");

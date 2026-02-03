@@ -1261,6 +1261,7 @@ static bool tryToSwitchToRunningPraat (bool foundTheOpenOption, bool foundTheSen
 			praat --open [OPTION]... FILE-NAME...
 		*/
 		for (integer iarg = praatP.argumentNumber; iarg < praatP.argc; iarg ++) {   // do not change praatP.argumentNumber itself (we might return false)
+			TRACE
 			structMelderFile file { };
 			Melder_relativePathToFile (Melder_peek8to32 (praatP.argv [iarg]), & file);
 			conststring32 absolutePath = MelderFile_peekPath (& file);

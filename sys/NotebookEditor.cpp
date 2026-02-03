@@ -96,8 +96,11 @@ static void menu_cb_run (NotebookEditor me, EDITOR_ARGS) {
 	if (my interpreterStack -> interpreters [1] && my interpreterStack -> interpreters [1] -> running)
 		Melder_throw (U"The notebook is already running (paused). Please close or continue the pause, trust or demo window.");
 	Melder_assert (! my interpreterStack -> interpreters [1]);   // TRICKY
-	my interpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (my interpreterStack.get(), Editor (nullptr));
-	MelderFile_copy (& my file, & my interpreterStack -> interpreters [1] -> file);
+	my interpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (
+		my interpreterStack.get(),
+		Editor (nullptr),
+		& my file
+	);
 	TRACE
 	trace (U"File: ", & my file);
 	integer startOfSelection, endOfSelection;
@@ -149,8 +152,12 @@ static void menu_cb_runChunk (NotebookEditor me, EDITOR_ARGS) {
 	Melder_includeIncludeFiles (& text);
 	autoPraatBackground background;
 	if (! MelderFile_isNull (& my file))
-		MelderFile_setDefaultDir (& my file);
-	autoInterpreter interpreter = Interpreter_createFromEnvironment (my interpreterStack.get(), Editor (nullptr));
+		MelderFile_setDefaultDir (& my file);   // TODO: probably wrong
+	autoInterpreter interpreter = Interpreter_createFromEnvironment (
+		my interpreterStack.get(),
+		Editor (nullptr),
+		MelderFile (nullptr)   // TODO: probably wrong
+	);
 	my interpreterStack -> emptyAll ();
 	my interpreterStack -> runDown (interpreter.move(), text.move(), true);
 }

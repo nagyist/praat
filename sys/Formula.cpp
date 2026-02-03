@@ -2310,7 +2310,11 @@ void Formula_compile (Interpreter interpreter, Daata data, conststring32 express
 	if (! theInterpreter) {
 		if (! theLocalInterpreterStack) {
 			theLocalInterpreterStack = InterpreterStack_create (nullptr);
-			theLocalInterpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (theLocalInterpreterStack.get(), Editor (nullptr));
+			theLocalInterpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (
+				theLocalInterpreterStack.get(),
+				Editor (nullptr),
+				MelderFile (nullptr)
+			);
 		}
 		theInterpreter = theLocalInterpreterStack -> interpreters [1].get();
 		theInterpreter -> optionalInterpreterStack = theLocalInterpreterStack.get();
@@ -6921,6 +6925,7 @@ static void do_setWorkingDirectory () {
 		structMelderFolder folder { };
 		Melder_pathToFolder (f->getString(), & folder);
 		Melder_setCurrentFolder (& folder);
+		MelderFolder_copy (& folder, & theInterpreter -> workingDirectory);
 		pushNumber (1);
 	} else {
 		Melder_throw (U"The function “setWorkingDirectory” requires a string, not ", f->whichText(), U".");

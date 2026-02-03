@@ -194,7 +194,11 @@ Thing_define (Interpreter, Thing) {
 		override;
 };
 
-autoInterpreter Interpreter_createFromEnvironment (InterpreterStack optionalInterpreterStack, Editor optionalInterpreterOwningEditor);
+autoInterpreter Interpreter_createFromEnvironment (
+	InterpreterStack owner,
+	Editor optionalEditor,
+	MelderFile optionalFile
+);
 
 void Interpreters_undangleEnvironment (Editor environment) noexcept;
 
