@@ -24,7 +24,7 @@ static int thePauseForm_clicked = 0;
 static int theCancelContinueButton = 0;
 static Interpreter thePauseForm_interpreterReference;  // TODO: this should be a weak_ptr to the InterpreterStack
 //static bool thePauseForm_secondPass = false;
-static structMelderFolder thePauseForm_savedFolder;
+static structMelderFolder thePauseForm_savedFolder;   // TODO: probably remove
 static Editor thePauseForm_savedEditorReference;
 
 static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */, Stackel /* args */,
@@ -62,76 +62,36 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 		UiForm_Interpreter_addVariables (thePauseForm.get(), (Interpreter) closure);   // 'closure', not 'interpreter' or 'theInterpreter'!
 	Melder_assert (thePauseForm_clicked >= 1 && thePauseForm_clicked <= 10);
 	autostring32 clickedText = Melder_dup (thePauseForm -> continueTexts [thePauseForm_clicked].get());   // very safe
-	if (thePauseForm -> d_dialogForm)
+	if (thePauseForm -> d_dialogForm) {
 		GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
+		//thePauseForm_interpreterReference -> isInSecondPass = false;   // TODO: corrected? and what about isHalted?
+	}
 	thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
 	Melder_assert (! thePauseForm);
 	/*
 		Resume the interpreter.
 	*/
-	//thePauseForm_interpreterReference -> lineNumber -= 1;   // in order to make sure we'll get a second pass
-	//TRACE
-	//trace (U"setting isInSecondPass to true");
-	//thePauseForm_interpreterReference -> isInSecondPass = true;
-	//thePauseForm_interpreterReference -> isHalted = false;
-	Melder_setCurrentFolder (& thePauseForm_savedFolder);
-	#if 1
-		Melder_assert (thePauseForm_interpreterReference);
-		try {
-			autoPraatBackground background;
-			Melder_assert (thePauseForm_interpreterReference -> optionalInterpreterStack);
-			thePauseForm_interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
-		} catch (MelderError) {
-			/*
-				These errors will often not be reached, because Interpreter_resume contains some Melder_flushError().
-			*/
-			if (thePauseForm_clicked == theCancelContinueButton)
-				Melder_throw (U"This happened after you cancelled the pause form.");
-			else
-				Melder_throw (U"This happened after you clicked “", clickedText.get(), U"” in the pause form.");
-		}
-	#elif 1
-		Gui_addWorkProc (
-			[clickedText = std::move (clickedText)] () mutable {   // transfer ownership of clickedText to the lambda
-				Melder_assert (thePauseForm_interpreterReference);
-				try {
-					autoPraatBackground background;
-					Melder_assert (thePauseForm_interpreterReference -> optionalInterpreterStack);
-					thePauseForm_interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
-				} catch (MelderError) {
-					/*
-						These errors will often not be reached, because Interpreter_resume contains some Melder_flushError().
-					*/
-					if (thePauseForm_clicked == theCancelContinueButton)
-						Melder_throw (U"This happened after you cancelled the pause form.");
-					else
-						Melder_throw (U"This happened after you clicked “", clickedText.get(), U"” in the pause form.");
-				}
-			}
-		);
-	#else
-		Gui_addWorkProc (
-			[clickedText = std::move (clickedText)] () mutable {   // transfer ownership of clickedText to the lambda
-				try {
-					autoPraatBackground background;
-					Interpreter_resume (thePauseForm_interpreterReference);
-				} catch (MelderError) {
-					/*
-						These errors will often not be reached, because Interpreter_resume contains some Melder_flushError().
-					*/
-					if (thePauseForm_clicked == theCancelContinueButton)
-						Melder_throw (U"This happened after you cancelled the pause form.");
-					else
-						Melder_throw (U"This happened after you clicked “", clickedText.get(), U"” in the pause form.");
-				}
-			}
-		);
-	#endif
+	//Melder_setCurrentFolder (& thePauseForm_savedFolder);   // TODO: remove
+	Melder_assert (thePauseForm_interpreterReference);
+	try {
+		autoPraatBackground background;
+		Melder_assert (thePauseForm_interpreterReference -> optionalInterpreterStack);
+		thePauseForm_interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+	} catch (MelderError) {
+		/*
+			These errors will often not be reached, because Interpreter_resume contains some Melder_flushError().
+		*/
+		if (thePauseForm_clicked == theCancelContinueButton)
+			Melder_throw (U"This happened after you cancelled the pause form.");
+		else
+			Melder_throw (U"This happened after you clicked “", clickedText.get(), U"” in the pause form.");
+	}
 }
 static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) {
 	if (! thePauseForm)   // BUG: perhaps there was a mistake in the script
 		return;
 	Melder_assert (thePauseForm_interpreterReference);
+	Melder_assert (Thing_isa (thePauseForm_interpreterReference, classInterpreter));
 	/*
 		We arrive here if the user clicked the close box of the dialog window, or if they clicked Stop.
 	*/
@@ -163,10 +123,7 @@ static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) 
 		/*
 			Resume the interpreter.
 		*/
-		//thePauseForm_interpreterReference -> lineNumber -= 1;   // in order to make sure we'll get a second pass
-		//thePauseForm_interpreterReference -> isInSecondPass = true;
-		//thePauseForm_interpreterReference -> isHalted = false;
-		Melder_setCurrentFolder (& thePauseForm_savedFolder);
+		//Melder_setCurrentFolder (& thePauseForm_savedFolder);   // TODO: remove
 		try {
 			autoPraatBackground background;
 			Melder_assert (thePauseForm_interpreterReference -> optionalInterpreterStack);
@@ -335,7 +292,6 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 		theCancelContinueButton = cancelContinueButton;
 		UiForm_finish (thePauseForm.get());
 		//if (theCurrentPraatApplication -> batch) goto end;
-		Melder_getCurrentFolder (& thePauseForm_savedFolder);   // TODO: remove
 		thePauseForm_clicked = 0;
 		Melder_assert (interpreter -> optionalInterpreterStack);
 		interpreter -> optionalInterpreterStack -> haltAll ();
@@ -371,7 +327,6 @@ void UiPause_pauseScript (GuiWindow topShell, Editor optionalPauseWindowOwningEd
 		theCancelContinueButton = 0;
 		UiForm_finish (thePauseForm.get());
 		//if (theCurrentPraatApplication -> batch) goto end;
-		Melder_getCurrentFolder (& thePauseForm_savedFolder);   // TODO: remove
 		thePauseForm_clicked = 0;
 		Melder_assert (interpreter -> optionalInterpreterStack);
 		interpreter -> optionalInterpreterStack -> haltAll ();
@@ -393,7 +348,7 @@ void UiPause_cleanUp () {
 	theCancelContinueButton = 0;
 	thePauseForm_interpreterReference = nullptr;
 	//thePauseForm_secondPass = false;   // TODO: probably remove
-	MelderFolder_setToNull (& thePauseForm_savedFolder);
+	MelderFolder_setToNull (& thePauseForm_savedFolder);   // TODO: probably remove
 	thePauseForm_savedEditorReference = nullptr;
 }
 
