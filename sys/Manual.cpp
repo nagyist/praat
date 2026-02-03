@@ -465,11 +465,12 @@ int structManual :: v_goToPage (conststring32 title) {
 		Melder_recordFromFile (& file);
 		return -1;
 	} else if (title [0] == U'\\' && title [1] == U'S' && title [2] == U'C') {
+		static autoInterpreterStack interpreterStack = InterpreterStack_create (Editor (nullptr));
 		autoMelderSetCurrentFolder saveFolder (& our manPages() -> rootDirectory);
 		autoPraatBackground background;
 		try {
 			autostring32 fileNameWithArguments = Melder_dup (title + 3);
-			praat_executeScriptFromFileNameWithArguments (nullptr, fileNameWithArguments.get());
+			praat_executeScriptFromFileNameWithArguments (fileNameWithArguments.get());
 		} catch (MelderError) {
 			Melder_flushError ();
 		}
