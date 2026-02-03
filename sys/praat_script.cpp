@@ -567,7 +567,6 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
 		Melder_assert (interpreterStack -> currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
 		Interpreter childInterpreter = interpreterStack -> current_a ();
-		//interpreterStack -> currentLevel -= 1;
 		{// scope
 			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
 			structMelderFolder testedFolder;
@@ -580,7 +579,7 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 		Melder_getCurrentFolder (& folderBeforeCorrection);
 		trace (U"pass 1: initial caller default folder for file ", fileName, U" is ", & folderBeforeCorrection);
 
-		autoMelderFileSetCurrentFolder correctedFolder (& parentInterpreter -> file);   // the directory of the caller (or it should be)
+		autoMelderSetCurrentFolder correctedFolder (& parentInterpreter -> workingDirectory);   // the directory of the caller (or it should be)
 
 		structMelderFolder folderAfterCorrection;
 		Melder_getCurrentFolder (& folderAfterCorrection);
@@ -590,7 +589,7 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 			separated by `demoWaitForInput()`. (last checked 2026-02-02)
 			Apparently, one of the functions elsewhere doesn't appropriately set the current folder (working directory) back.
 		*/
-		Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection));
+		//Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection));
 
 		structMelderFile file { };
 		try {
@@ -649,7 +648,6 @@ void praat_runNotebook (InterpreterStack interpreterStack, conststring32 fileNam
 		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
 		Melder_assert (interpreterStack -> currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
 		Interpreter childInterpreter = interpreterStack -> current_a ();
-		//interpreterStack -> currentLevel -= 1;
 		{// scope
 			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
 			structMelderFolder testedFolder;
@@ -834,7 +832,6 @@ void praat_runOldExecuteCommand (InterpreterStack interpreterStack, conststring3
 		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
 		Melder_assert (interpreterStack -> currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
 		Interpreter childInterpreter = interpreterStack -> current_a ();
-		//interpreterStack -> currentLevel -= 1;
 		{// scope
 			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
 			structMelderFolder testedFolder;

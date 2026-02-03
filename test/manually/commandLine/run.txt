@@ -17,4 +17,4 @@ praat --send "p l a y.praat" "e x a m p l e.wav" 2 &
 praat --new-send "p l a y.praat" "e x a m p l e.wav" 2 &
 
 # sending without arguments, should present a form:
-praat --send-or-form "p l a y.praat"
+praat --send-or-form "p l a y.praat" &
