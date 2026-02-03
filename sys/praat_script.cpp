@@ -589,7 +589,7 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 	Melder_assert (interpreterStack);
 	//Melder_assert (Melder_backgrounding);
 
-	//TRACE
+	TRACE
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
 		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
@@ -608,7 +608,7 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 		Melder_getCurrentFolder (& folderBeforeCorrection);
 		trace (U"pass 1: initial caller default folder for file ", fileName, U" is ", & folderBeforeCorrection);
 
-		autoMelderFileSetCurrentFolder correctedFolder (& parentInterpreter -> file);   // so that callee-relative file names can be used for including include files
+		autoMelderFileSetCurrentFolder correctedFolder (& parentInterpreter -> file);   // the directory of the caller (or it should be)
 
 		structMelderFolder folderAfterCorrection;
 		Melder_getCurrentFolder (& folderAfterCorrection);
@@ -618,13 +618,13 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 			separated by `demoWaitForInput()`. (last checked 2026-02-02)
 			Apparently, one of the functions elsewhere doesn't appropriately set the current folder (working directory) back.
 		*/
-		//Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection);
+		Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection));
 
 		structMelderFile file { };
 		Melder_relativePathToFile (fileName, & file);
 		try {
 			{// scope
-				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
+				autoMelderFileSetCurrentFolder folder (& file);   // temporarily, for testing
 				structMelderFolder testedFolder;
 				Melder_getCurrentFolder (& testedFolder);
 				trace (U"pass 1: callee default folder for file ", fileName, U" is ", & testedFolder);
