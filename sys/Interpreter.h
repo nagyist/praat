@@ -158,6 +158,8 @@ Thing_define (Interpreter, Thing) {
 
 	autostring32 text;
 	structMelderFile file;
+	structMelderFolder workingDirectory;
+
 	int numberOfParameters, callDepth;
 	int types [1+Interpreter_MAXNUM_PARAMETERS], numbersOfLines [1+Interpreter_MAXNUM_PARAMETERS];
 	char32 parameters [1+Interpreter_MAXNUM_PARAMETERS] [1+Interpreter_MAX_PARAMETER_LENGTH];
@@ -172,7 +174,6 @@ Thing_define (Interpreter, Thing) {
 	char32 procedureStackNames [1+Interpreter_MAX_CALL_DEPTH] [100];
 	std::unordered_map <std::u32string, autoInterpreterVariable> variablesMap;
 	bool running, stopped;
-	structMelderFolder savedFolder;   // to remember across pausing
 	integer callStack [1 + Interpreter_MAX_CALL_DEPTH];
 	bool fromif, fromendfor;
 
@@ -193,7 +194,6 @@ Thing_define (Interpreter, Thing) {
 		override;
 };
 
-autoInterpreter Interpreter_create ();
 autoInterpreter Interpreter_createFromEnvironment (InterpreterStack optionalInterpreterStack, Editor optionalInterpreterOwningEditor);
 
 void Interpreters_undangleEnvironment (Editor environment) noexcept;

@@ -572,6 +572,7 @@ void praat_executeScriptFromFile (InterpreterStack optionalInterpreterStack, Mel
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
 		autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalInterpreterStack, optionalInterpreterOwningEditor);
+		MelderFile_copy (file, & interpreter -> file);
 		if (arguments) {
 			Interpreter_readParameters (interpreter.get(), text.get());
 			Interpreter_getArgumentsFromString (interpreter.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
@@ -692,6 +693,7 @@ void praat_runNotebook (conststring32 fileName, integer narg, Stackel args, Edit
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
 		autoInterpreter interpreter = Interpreter_createFromEnvironment (nullptr, optionalInterpreterOwningEditor);
+		MelderFile_copy (& file, & interpreter -> file);
 		Interpreter_readParameters (interpreter.get(), text.get());
 		autoMelderReadText readText = MelderReadText_createFromText (text.move());
 		autoManPages manPages = ManPages_createFromText (readText.get(), & file);
@@ -832,8 +834,7 @@ void praat_runOldExecuteCommand (InterpreterStack interpreterStack, conststring3
 extern "C" void praatlib_executeScript (const char *text8) {
 	static autoInterpreterStack interpreterStack = InterpreterStack_create (Editor (nullptr));   // TODO: never from an editor?
 	try {
-		autoInterpreter interpreter = Interpreter_create ();
-		interpreter -> optionalInterpreterStack = interpreterStack.get();
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));
 		autostring32 string = Melder_8to32 (text8);
 		interpreterStack -> runDown (interpreter.move(), string.move(), false);
 	} catch (MelderError) {

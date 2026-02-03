@@ -1,10 +1,10 @@
 /* praat_objectMenus.cpp
  *
- * Copyright (C) 1992-2024 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -323,8 +323,7 @@ DO
 			static autoInterpreterStack theCalculatorInterpreterStack;
 			if (! theCalculatorInterpreterStack) {
 				theCalculatorInterpreterStack = InterpreterStack_create (nullptr);   // object-window command, so no editor
-				theCalculatorInterpreterStack -> interpreters [1] = Interpreter_create ();   // TODO: too exposed
-				theCalculatorInterpreterStack -> interpreters [1] -> optionalInterpreterStack = theCalculatorInterpreterStack.get();
+				theCalculatorInterpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (theCalculatorInterpreterStack.get(), Editor (nullptr));   // TODO: too exposed
 			}
 			Melder_assert (theCalculatorInterpreterStack -> interpreters [1]);   // TODO: should fire after exception
 			Melder_assert (theCalculatorInterpreterStack -> interpreters [1] -> optionalInterpreterStack);
