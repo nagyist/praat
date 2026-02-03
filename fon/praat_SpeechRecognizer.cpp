@@ -11,16 +11,17 @@ FORM (CREATE_ONE__SpeechRecognizer_create, U"Create SpeechRecognizer", U"Create 
 	LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
 	LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
 OK
-	constSTRVEC modelNames = theSpeechRecognizerModelNames();
-	constSTRVEC languageNames = theSpeechRecognizerLanguageNames();
+	static autoSTRVEC modelNames;
+	modelNames = copy_STRVEC (theCurrentSpeechRecognizerModelNames());   // cannot be called twice in the same scope
 
 	Melder_require (modelNames.size > 0,
 		U"Found no Whisper-cpp models to do speech recognition with.\n"
 		U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
 	);
 
-	SET_LIST (modelIndex, modelName, modelNames, NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName))
-	SET_LIST (languageIndex, languageName, languageNames, NUMfindFirst (languageNames, theSpeechRecognizerDefaultLanguageName))
+	SET_LIST (modelIndex, modelName, modelNames.get (), NUMfindFirst (modelNames.get (), theSpeechRecognizerDefaultModelName))
+	SET_LIST (languageIndex, languageName, theSpeechRecognizerLanguageNames(),
+		NUMfindFirst (theSpeechRecognizerLanguageNames(), theSpeechRecognizerDefaultLanguageName))
 DO
 	CREATE_ONE
 		autoSpeechRecognizer result = SpeechRecognizer_create (modelName, languageName);

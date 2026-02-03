@@ -46,7 +46,7 @@ struct autoWhisperContext {
 #include "SpeechRecognizer_def.h"
 
 // singletons to access lists of models and languages from everywhere
-constSTRVEC theSpeechRecognizerModelNames ();
+constSTRVEC theCurrentSpeechRecognizerModelNames ();
 constSTRVEC theSpeechRecognizerLanguageNames ();
 
 // default model parameters to access from everywhere (except TextGridArea_prefs.h)
