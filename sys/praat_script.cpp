@@ -556,34 +556,6 @@ void praat_executeScript_noGUI (MelderFile file) {
 	}
 }
 
-void praat_executeScriptFromFile (InterpreterStack optionalInterpreterStack, MelderFile file, conststring32 arguments, Editor optionalInterpreterOwningEditor) {
-	static autoInterpreterStack s_interpreterStack;
-	InterpreterStack interpreterStack;
-	if (optionalInterpreterStack) {
-		interpreterStack = optionalInterpreterStack;
-	} else {
-		s_interpreterStack = InterpreterStack_create (optionalInterpreterOwningEditor);   // every time anew, because of potential editor; TODO: is it necessary to have the editor in the stack? it's borrowd from `theInterpreter` in `Formula.cpp`
-		interpreterStack = s_interpreterStack.get();
-	}
-	try {
-		autostring32 text = MelderFile_readText (file);
-		{// scope
-			autoMelderFileSetCurrentFolder folder (file);   // so that script-relative file names can be used for including include files
-			Melder_includeIncludeFiles (& text);
-		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (optionalInterpreterStack, optionalInterpreterOwningEditor);
-		MelderFile_copy (file, & interpreter -> file);
-		if (arguments) {
-			Interpreter_readParameters (interpreter.get(), text.get());
-			Interpreter_getArgumentsFromString (interpreter.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
-		}
-		autoMelderFileSetCurrentFolder folder (file);   // so that script-relative file names can be used inside the script
-		interpreterStack -> runDown (interpreter.move(), text.move(), false);
-	} catch (MelderError) {
-		Melder_throw (U"Script ", file, U" not completed.");
-	}
-}
-
 void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName, integer narg, Stackel args, Editor optionalInterpreterOwningEditor) {
 	Melder_assert (interpreterStack);
 	//Melder_assert (Melder_backgrounding);
@@ -725,38 +697,56 @@ void praat_executeScriptFromCommandLine (conststring32 fileName, integer argc, c
 	}
 }
 
-void praat_executeScriptFromFileNameWithArguments (InterpreterStack optionalInterpreterStack, conststring32 nameAndArguments) {
-	char32 path [256];
-	const char32 *p, *arguments;
+void praat_executeScriptFromFileNameWithArguments (conststring32 nameAndArguments) {
 	structMelderFile file { };
-	/*
-		Split into file name and arguments.
-	*/
-	p = nameAndArguments;
-	while (*p == U' ' || *p == U'\t')
-		p ++;
-	if (*p == U'\"') {
-		char32 *q = path;
-		p ++;   // skip quote
-		while (*p != U'\"' && *p != U'\0')
-			* q ++ = * p ++;
-		*q = U'\0';
-		arguments = p;
-		if (*arguments == U'\"')
-			arguments ++;
-		if (*arguments == U' ')
-			arguments ++;
-	} else {
-		char32 *q = path;
-		while (*p != U' ' && *p != U'\0')
-			* q ++ = * p ++;
-		*q = U'\0';
-		arguments = p;
-		if (*arguments == U' ')
-			arguments ++;
+	try {
+		char32 path [256];
+		const char32 *p, *arguments;
+		/*
+			Split into file name and arguments.
+		*/
+		p = nameAndArguments;
+		while (*p == U' ' || *p == U'\t')
+			p ++;
+		if (*p == U'\"') {
+			char32 *q = path;
+			p ++;   // skip quote
+			while (*p != U'\"' && *p != U'\0')
+				* q ++ = * p ++;
+			*q = U'\0';
+			arguments = p;
+			if (*arguments == U'\"')
+				arguments ++;
+			if (*arguments == U' ')
+				arguments ++;
+		} else {
+			char32 *q = path;
+			while (*p != U' ' && *p != U'\0')
+				* q ++ = * p ++;
+			*q = U'\0';
+			arguments = p;
+			if (*arguments == U' ')
+				arguments ++;
+		}
+		Melder_relativePathToFile (path, & file);
+
+		static autoInterpreterStack interpreterStack = InterpreterStack_create (Editor (nullptr));
+		autostring32 text = MelderFile_readText (& file);
+		{// scope
+			autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used for including include files
+			Melder_includeIncludeFiles (& text);
+		}   // back to the default directory of the caller
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));
+		MelderFile_copy (& file, & interpreter -> file);
+		if (arguments) {
+			Interpreter_readParameters (interpreter.get(), text.get());
+			Interpreter_getArgumentsFromString (interpreter.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
+		}
+		autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used inside the script
+		interpreterStack -> runDown (interpreter.move(), text.move(), false);
+	} catch (MelderError) {
+		Melder_throw (U"Script ", & file, U" not completed.");
 	}
-	Melder_relativePathToFile (path, & file);
-	praat_executeScriptFromFile (optionalInterpreterStack, & file, arguments, nullptr);
 }
 
 void praat_runOldExecuteCommand (InterpreterStack interpreterStack, conststring32 nameAndArguments) {
