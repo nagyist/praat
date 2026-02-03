@@ -4372,9 +4372,7 @@ static void do_pauseScript () {
 		}
 		const Editor optionalPauseWindowOwningEditor = theInterpreter -> optionalDynamicEnvironmentEditor();
 		const GuiWindow parentShell = ( optionalPauseWindowOwningEditor ? optionalPauseWindowOwningEditor -> windowForm : theCurrentPraatApplication -> topShell );
-		UiPause_begin (parentShell, optionalPauseWindowOwningEditor, U"stop or continue", theInterpreter);
-		UiPause_comment (numberOfArguments == 0 ? U"..." : buffer.string);
-		UiPause_end (1, 1, 0, U"Continue", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, theInterpreter);
+		UiPause_pauseScript (parentShell, optionalPauseWindowOwningEditor, theInterpreter, numberOfArguments == 0 ? U"..." : buffer.string);
 	}
 	pushNumber (1);
 }

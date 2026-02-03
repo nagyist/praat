@@ -20,6 +20,8 @@
 
 #include "Ui.h"
 
+void UiPause_pauseScript (GuiWindow topShell, Editor optionalPauseWindowOwningEditor, Interpreter interpreter, conststring32 text);
+
 void UiPause_begin (GuiWindow topShell, Editor optionalPauseWindowOwningEditor, conststring32 title, Interpreter interpreter);
 
 void UiPause_real           (conststring32 label, conststring32 defaultValue);

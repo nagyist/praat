@@ -335,7 +335,7 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 		theCancelContinueButton = cancelContinueButton;
 		UiForm_finish (thePauseForm.get());
 		//if (theCurrentPraatApplication -> batch) goto end;
-		Melder_getCurrentFolder (& thePauseForm_savedFolder);
+		Melder_getCurrentFolder (& thePauseForm_savedFolder);   // TODO: remove
 		thePauseForm_clicked = 0;
 		Melder_assert (interpreter -> optionalInterpreterStack);
 		interpreter -> optionalInterpreterStack -> haltAll ();
@@ -345,6 +345,41 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 		UiForm_destroyWhenUnmanaged (thePauseForm.get());
 		UiForm_do (thePauseForm.get(), false);
 		return 0;
+	}
+}
+
+void UiPause_pauseScript (GuiWindow topShell, Editor optionalPauseWindowOwningEditor, Interpreter interpreter, conststring32 text) {
+	Melder_assert (interpreter);
+	if (interpreter -> isInSecondPass) {
+		Melder_assert (interpreter == thePauseForm_interpreterReference);
+		Melder_assert (! thePauseForm);
+		interpreter -> isInSecondPass = false;
+	} else {
+		if (thePauseForm)
+			Melder_throw (Melder_upperCaseAppName(), U" cannot have more than one pause form at a time.");
+		thePauseForm = UiForm_create (topShell, optionalPauseWindowOwningEditor, U"Pause: stop or continue",
+			thePauseFormOkCallback, interpreter,   // pass interpreter as closure!
+			nullptr, nullptr
+		);
+		UiForm_addComment (thePauseForm.get(), nullptr, text);
+		thePauseForm_interpreterReference = interpreter;
+		thePauseForm_savedEditorReference = interpreter -> optionalDynamicEnvironmentEditor();
+		UiForm_setPauseForm (thePauseForm.get(), 1, 1, 0,
+			U"Continue", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+			thePauseFormCancelCallback
+		);
+		theCancelContinueButton = 0;
+		UiForm_finish (thePauseForm.get());
+		//if (theCurrentPraatApplication -> batch) goto end;
+		Melder_getCurrentFolder (& thePauseForm_savedFolder);   // TODO: remove
+		thePauseForm_clicked = 0;
+		Melder_assert (interpreter -> optionalInterpreterStack);
+		interpreter -> optionalInterpreterStack -> haltAll ();
+		/*
+			Put the pause form on the screen.
+		*/
+		UiForm_destroyWhenUnmanaged (thePauseForm.get());
+		UiForm_do (thePauseForm.get(), false);
 	}
 }
 
