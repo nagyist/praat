@@ -114,10 +114,17 @@ void structInterpreter :: v9_destroy () noexcept {
 	our Interpreter_Parent :: v9_destroy ();
 }
 
-autoInterpreter Interpreter_createFromEnvironment (InterpreterStack optionalInterpreterStack, Editor optionalInterpreterOwningEditor) {
+autoInterpreter Interpreter_createFromEnvironment (InterpreterStack interpreterStack, Editor optionalInterpreterOwningEditor, MelderFile optionalFile) {
+	Melder_assert (interpreterStack);
 	try {
 		autoInterpreter me = Thing_new (Interpreter);
-		my optionalInterpreterStack = optionalInterpreterStack;
+		my optionalInterpreterStack = interpreterStack;
+		if (optionalFile) {
+			MelderFile_copy (optionalFile, & my file);
+			MelderFile_getParentFolder (optionalFile, & my workingDirectory);
+		} else {
+			Melder_getCurrentFolder (& my workingDirectory);   // last resort; TODO: figure out how useful this is
+		}
 		my setOwningEditorEnvironmentFromOptionalEditor (optionalInterpreterOwningEditor);
 		my variablesMap. max_load_factor (0.65f);
 		theReferencesToAllLivingInterpreters. addItem_ref (me.get());
@@ -3614,11 +3621,11 @@ void structInterpreterStack :: runDown (autoInterpreter interpreter, autostring3
 	if (interpreter)
 		our interpreters [our currentLevel] = interpreter.move();   // otherwise, use my existing interpreter
 	const integer savedLevel = our currentLevel;   // just for checking that running an interpreter to its end decrements the level
-	autoMelderFileSetCurrentFolder folder (& our interpreters [our currentLevel] -> file);
 	try {
+		autoMelderSetCurrentFolder folder (& our interpreters [our currentLevel] -> workingDirectory);
 		Interpreter_run (our interpreters [our currentLevel].get(), text.move(), reuseVariables);
 	} catch (MelderError) {
-		our emptyAll ();   // TODO: put back
+		our emptyAll ();
 		Melder_throw (U"Interpreter stack not run completely.");
 	}
 	trace (U"old level ", savedLevel, U", new level ", our currentLevel);

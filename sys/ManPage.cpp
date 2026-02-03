@@ -51,8 +51,8 @@ void ManPage_runAllChunksToCache (ManPage me, Interpreter optionalInterpreterRef
 	praat_actions_show ();   // we have to set the `executable` flags to false, in the global variable `theActions`
 
 	#if 1
-		autoInterpreterStack interpreterStack = InterpreterStack_create (Editor (nullptr));
-		interpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));
+		autoInterpreterStack interpreterStack = InterpreterStack_create (Editor (nullptr));   // BUG: overwrites existing stack, which is optionalInterpreterReference's owner
+		interpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr), MelderFile (nullptr));
 	#else
 		Interpreter interpreterReference;
 		autoInterpreterStack interpreterStack;

@@ -323,7 +323,11 @@ DO
 			static autoInterpreterStack theCalculatorInterpreterStack;
 			if (! theCalculatorInterpreterStack) {
 				theCalculatorInterpreterStack = InterpreterStack_create (Editor (nullptr));   // object-window command, so no editor
-				theCalculatorInterpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (theCalculatorInterpreterStack.get(), Editor (nullptr));   // TODO: too exposed
+				theCalculatorInterpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (   // TODO: too exposed
+					theCalculatorInterpreterStack.get(),
+					Editor (nullptr),
+					MelderFile (nullptr)
+				);
 			}
 			Melder_assert (theCalculatorInterpreterStack -> interpreters [1]);   // TODO: should fire after exception
 			Melder_assert (theCalculatorInterpreterStack -> interpreters [1] -> optionalInterpreterStack);

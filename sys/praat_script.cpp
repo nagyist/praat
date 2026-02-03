@@ -545,10 +545,11 @@ void praat_executeScript_noGUI (MelderFile file) {
 			autoMelderFileSetCurrentFolder folder (file);   // so that script-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));
-		MelderFile_copy (file, & interpreter -> file);
-		autoMelderFileSetCurrentFolder folder (file);   // so that script-relative file names can be used inside the script
-		Melder_assert (interpreterStack);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (
+			interpreterStack.get(),   // owner always needed
+			Editor (nullptr),   // never used inside an Editor window
+			file   // so that script-relative file names can be used inside the script
+		);
 		interpreterStack -> emptyAll ();
 		interpreterStack -> runDown (interpreter.move(), text.move(), false);
 	} catch (MelderError) {
@@ -620,18 +621,18 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
 				Melder_includeIncludeFiles (& text);
 			}   // back to the default directory of the caller
-			autoInterpreter me = Interpreter_createFromEnvironment (interpreterStack, optionalInterpreterOwningEditor);
-			MelderFile_copy (& file, & my file);   // TODO: should become a field of structInterpreter
+			autoInterpreter me = Interpreter_createFromEnvironment (
+				interpreterStack,   // owner always needed
+				optionalInterpreterOwningEditor,
+				& file   // so that callee-relative file names can be used inside the script
+			);
 			Interpreter_readParameters (me.get(), text.get());   // TODO: should become a field of structInterpreter
 			my text = text.move();
 			Interpreter_getArgumentsFromArgs (me.get(), narg, args);   // interpret caller-relative paths for infile/outfile/folder arguments
 			autoScript script = Script_createFromFile (& file);
 			Script_rememberDuringThisAppSession_move (script.move());
 			my scriptReference = Script_find (MelderFile_peekPath (& file));
-			{// scope
-				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used inside the script
-				interpreterStack -> runDown (me.move(), autostring32(), false);
-			}   // back to the default directory of the caller
+			interpreterStack -> runDown (me.move(), autostring32(), false);   // back to the default directory of the caller
 		} catch (MelderError) {
 			Melder_throw (U"Script ", & file, U" not completed.");   // don't refer to 'fileName', because its contents may have changed
 		}
@@ -698,8 +699,11 @@ void praat_runNotebook (InterpreterStack interpreterStack, conststring32 fileNam
 				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
 				Melder_includeIncludeFiles (& text);
 			}   // back to the default directory of the caller
-			autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack, optionalInterpreterOwningEditor);
-			MelderFile_copy (& file, & interpreter -> file);   // TODO: should become a field of structInterpreter
+			autoInterpreter interpreter = Interpreter_createFromEnvironment (
+				interpreterStack,
+				optionalInterpreterOwningEditor,
+				& file
+			);
 			Interpreter_readParameters (interpreter.get(), text.get());   // TODO: should become a field of structInterpreter
 			autoMelderReadText readText = MelderReadText_createFromText (text.move());
 			autoManPages manPages = ManPages_createFromText (readText.get(), & file);
@@ -722,7 +726,11 @@ void praat_executeScriptFromCommandLine (conststring32 fileName, integer argc, c
 			autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), nullptr);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (
+			interpreterStack.get(),
+			Editor (nullptr),
+			& file
+		);
 		Interpreter_readParameters (interpreter.get(), text.get());
 		Interpreter_getArgumentsFromCommandLine (interpreter.get(), argc, argv);   // interpret caller-relative paths for infile/outfile/folder arguments
 		autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used inside the script
@@ -771,13 +779,15 @@ void praat_executeScriptFromFileNameWithArguments (conststring32 nameAndArgument
 			autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used for including include files
 			Melder_includeIncludeFiles (& text);
 		}   // back to the default directory of the caller
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));
-		MelderFile_copy (& file, & interpreter -> file);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (
+			interpreterStack.get(),
+			Editor (nullptr),
+			& file   // so that script-relative file names can be used inside the script
+		);
 		if (arguments) {
 			Interpreter_readParameters (interpreter.get(), text.get());
 			Interpreter_getArgumentsFromString (interpreter.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
 		}
-		autoMelderFileSetCurrentFolder folder (& file);   // so that script-relative file names can be used inside the script
 		interpreterStack -> runDown (interpreter.move(), text.move(), false);
 	} catch (MelderError) {
 		Melder_throw (U"Script ", & file, U" not completed.");
@@ -839,17 +849,18 @@ void praat_runOldExecuteCommand (InterpreterStack interpreterStack, conststring3
 				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
 				Melder_includeIncludeFiles (& text);
 			}   // back to the default directory of the caller
-			autoInterpreter me = Interpreter_createFromEnvironment (interpreterStack, Editor (nullptr));
-			MelderFile_copy (& file, & my file);   // TODO: should become a field of structInterpreter
+			autoInterpreter me = Interpreter_createFromEnvironment (
+				interpreterStack,
+				Editor (nullptr),
+				& file   // so that callee-relative file names can be used inside the script
+			);
 			if (arguments) {
 				Interpreter_readParameters (me.get(), text.get());
 				Interpreter_getArgumentsFromString (me.get(), arguments);   // interpret caller-relative paths for infile/outfile/folder arguments
 			}
 			my text = text.move();
-			{// scope
-				autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used inside the script
-				interpreterStack -> runDown (me.move(), autostring32(), false);
-			}   // back to the default directory of the caller
+			interpreterStack -> runDown (me.move(), autostring32(), false);   // callee-relative file names can be used inside the script
+			// back to the default directory of the caller
 		} catch (MelderError) {
 			Melder_throw (U"Script ", & file, U" not completed.");
 		}
@@ -859,7 +870,11 @@ void praat_runOldExecuteCommand (InterpreterStack interpreterStack, conststring3
 extern "C" void praatlib_executeScript (const char *text8) {
 	static autoInterpreterStack interpreterStack = InterpreterStack_create (Editor (nullptr));   // TODO: never from an editor?
 	try {
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (
+			interpreterStack.get(),
+			Editor (nullptr),
+			MelderFile (nullptr)   // TODO: look for a file...
+		);
 		autostring32 string = Melder_8to32 (text8);
 		interpreterStack -> runDown (interpreter.move(), string.move(), false);
 	} catch (MelderError) {
@@ -870,7 +885,12 @@ extern "C" void praatlib_executeScript (const char *text8) {
 void praat_executeScriptFromText (conststring32 text) {
 	static autoInterpreterStack interpreterStack = InterpreterStack_create (Editor (nullptr));   // never from an editor (last checked 2026-02-01)
 	try {
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), Editor (nullptr));   // never from an editor (last checked 2026-02-01)
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (
+			interpreterStack.get(),
+			Editor (nullptr),   // never from an editor (last checked 2026-02-01)
+			MelderFile (nullptr)
+		);
+		Melder_getCurrentFolder (& interpreter -> workingDirectory);
 		interpreterStack -> emptyAll ();
 		interpreterStack -> runDown (interpreter.move(), Melder_dup (text), false);
 	} catch (MelderError) {
@@ -887,9 +907,15 @@ static void secondPassThroughScript (UiForm sendingForm, integer /* narg */, Sta
 	structMelderFile file { };
 	Melder_pathToFile (sendingForm -> scriptFilePath.get(), & file);
 	autostring32 text = MelderFile_readText (& file);
-	autoMelderFileSetCurrentFolder folder (& file);
-	Melder_includeIncludeFiles (& text);
-	autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), optionalInterpreterOwningEditor);
+	{// scope
+		autoMelderFileSetCurrentFolder folder (& file);
+		Melder_includeIncludeFiles (& text);
+	}
+	autoInterpreter interpreter = Interpreter_createFromEnvironment (
+		interpreterStack.get(),
+		optionalInterpreterOwningEditor,
+		& file
+	);
 	Interpreter_readParameters (interpreter.get(), text.get());
 	Interpreter_getArgumentsFromDialog (interpreter.get(), sendingForm);
 	autoPraatBackground background;
@@ -923,7 +949,11 @@ static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterO
 		}   // back to the default directory of the caller
 
 		interpreterStack = InterpreterStack_create (optionalInterpreterOwningEditor);
-		autoInterpreter interpreter = Interpreter_createFromEnvironment (interpreterStack.get(), optionalInterpreterOwningEditor);
+		autoInterpreter interpreter = Interpreter_createFromEnvironment (
+			interpreterStack.get(),
+			optionalInterpreterOwningEditor,
+			file   // so that callee-relative file names can be used inside the script
+		);
 
 		autoScript script = Script_createFromFile (file);
 		Script_rememberDuringThisAppSession_move (script.move());
@@ -944,7 +974,6 @@ static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterO
 		} else {
 			{// scope
 				autoPraatBackground background;
-				autoMelderFileSetCurrentFolder folder (file);   // so that callee-relative file names can be used inside the script
 				interpreterStack -> emptyAll ();
 				interpreterStack -> runDown (interpreter.move(), text.move(), false);
 			}
