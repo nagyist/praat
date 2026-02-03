@@ -1,3 +1,3 @@
-demoWaitForInput ()
+pauseScript: "2+ before"
 appendInfo: "2+ "
-demoWaitForInput ()
+pauseScript: "2+ after"

@@ -1,20 +1,24 @@
 writeInfo: "1a "
-pauseScript: "1a"
+pauseScript: "1b"
 appendInfo: "1b "
-demoWaitForInput ()
+pauseScript: "1c before"
 appendInfo: "1c "
-demoWaitForInput ()
-runScript: "deepDemo/folder2/script2.praat"
+pauseScript: "1c after"
+runScript: "deepPausePath/folder2/script2.praat"
+pauseScript: "1d"
 appendInfo: "1d "
-demoWaitForInput ()
+pauseScript: "1e before"
 appendInfo: "1e "
-demoWaitForInput ()
-runScript: "deepDemo/folder3/script3.praat"
+pauseScript: "1e after"
+runScript: "deepPausePath/folder3/script3.praat"
+pauseScript: "1f"
 appendInfo: "1f "
-demoWaitForInput ()
+pauseScript: "1g before"
 appendInfo: "1g "
-demoWaitForInput ()
-runScript: "deepDemo/folder4/script4.praat"
+pauseScript: "1g after"
+runScript: "deepPausePath/folder4/script4.praat"
+pauseScript: "1h before"
 appendInfo: "1h "
+pauseScript: "1h after"
 info$ = info$()
 assert info$ = "1a 1b 1c 2a 2+ 2b 1d 1e 3a 3+ 3b 1f 1g 4a 4+ 4b 1h "

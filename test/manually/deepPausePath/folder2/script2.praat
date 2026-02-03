@@ -1,7 +1,7 @@
-demoWaitForInput ()
+pauseScript: "2a before"
 appendInfo: "2a "
-demoWaitForInput ()
+pauseScript: "2a after"
 runScript: "script2+.praat"
-demoWaitForInput ()
+pauseScript: "2b before"
 appendInfo: "2b "
-demoWaitForInput ()
+pauseScript: "2b after"
