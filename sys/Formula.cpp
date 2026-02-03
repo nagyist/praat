@@ -2310,7 +2310,7 @@ void Formula_compile (Interpreter interpreter, Daata data, conststring32 express
 	if (! theInterpreter) {
 		if (! theLocalInterpreterStack) {
 			theLocalInterpreterStack = InterpreterStack_create (nullptr);
-			theLocalInterpreterStack -> interpreters [1] = Interpreter_create ();
+			theLocalInterpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (theLocalInterpreterStack.get(), Editor (nullptr));
 		}
 		theInterpreter = theLocalInterpreterStack -> interpreters [1].get();
 		theInterpreter -> optionalInterpreterStack = theLocalInterpreterStack.get();

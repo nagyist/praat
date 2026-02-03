@@ -285,7 +285,6 @@ void Demo_waitForInput (Interpreter interpreter) {
 		interpreter -> optionalInterpreterStack -> haltAll ();
 		trace (U"setting the Demo window's interpreter to ", Melder_pointer (interpreter));
 		theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
-		Melder_getCurrentFolder (& interpreter -> savedFolder);
 	}
 }
 

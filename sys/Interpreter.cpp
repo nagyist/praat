@@ -114,22 +114,17 @@ void structInterpreter :: v9_destroy () noexcept {
 	our Interpreter_Parent :: v9_destroy ();
 }
 
-autoInterpreter Interpreter_create () {
+autoInterpreter Interpreter_createFromEnvironment (InterpreterStack optionalInterpreterStack, Editor optionalInterpreterOwningEditor) {
 	try {
 		autoInterpreter me = Thing_new (Interpreter);
+		my optionalInterpreterStack = optionalInterpreterStack;
+		my setOwningEditorEnvironmentFromOptionalEditor (optionalInterpreterOwningEditor);
 		my variablesMap. max_load_factor (0.65f);
 		theReferencesToAllLivingInterpreters. addItem_ref (me.get());
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"Interpreter not created.");
 	}
-}
-
-autoInterpreter Interpreter_createFromEnvironment (InterpreterStack optionalInterpreterStack, Editor optionalInterpreterOwningEditor) {
-	autoInterpreter me = Interpreter_create ();
-	my optionalInterpreterStack = optionalInterpreterStack;
-	my setOwningEditorEnvironmentFromOptionalEditor (optionalInterpreterOwningEditor);
-	return me;
 }
 
 void Interpreters_undangleEnvironment (Editor environment) noexcept {
