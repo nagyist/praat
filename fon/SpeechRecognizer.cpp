@@ -188,7 +188,7 @@ static conststring32 theWhisperModelsFolder () {
 	return whisperModelFolderPath.get();
 }
 
-constSTRVEC theSpeechRecognizerModelNames () {
+constSTRVEC theCurrentSpeechRecognizerModelNames () {
 	static autoSTRVEC whisperModelNames;
 	try {
 		whisperModelNames = fileNames_STRVEC (Melder_cat (theWhisperModelsFolder (), U"/*.bin"));

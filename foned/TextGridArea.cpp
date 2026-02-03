@@ -1455,25 +1455,26 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 		LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
 		LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
 	EDITOR_OK
-		constSTRVEC modelNames = theSpeechRecognizerModelNames();
-		constSTRVEC languageNames = theSpeechRecognizerLanguageNames();
+		static autoSTRVEC modelNames;
+		modelNames = copy_STRVEC (theCurrentSpeechRecognizerModelNames());   // cannot be called twice in the same scope
+
 		Melder_require (modelNames.size > 0,
 			U"Found no Whisper-cpp models to do speech recognition with.\n"
 			U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
 		);
 
-		integer prefModel = NUMfindFirst (modelNames, my instancePref_transcribe_model());
+		integer prefModel = NUMfindFirst (modelNames.get (), my instancePref_transcribe_model());
 		if (prefModel == 0)
-			prefModel = NUMfindFirst (modelNames, theSpeechRecognizerDefaultModelName);
+			prefModel = NUMfindFirst (modelNames.get (), theSpeechRecognizerDefaultModelName);
 		SET_INTEGER (modelIndex, prefModel)
 
-		integer prefLanguage = NUMfindFirst (languageNames, my instancePref_transcribe_language());
+		integer prefLanguage = NUMfindFirst (theSpeechRecognizerLanguageNames(), my instancePref_transcribe_language());
 		if (prefLanguage == 0)
-			prefLanguage = NUMfindFirst (languageNames, theSpeechRecognizerDefaultLanguageName);
+			prefLanguage = NUMfindFirst (theSpeechRecognizerLanguageNames(), theSpeechRecognizerDefaultLanguageName);
 		SET_INTEGER (languageIndex, prefLanguage)
 
-		SET_LIST (modelIndex, modelName, modelNames, prefModel)
-		SET_LIST (languageIndex, languageName, languageNames, prefLanguage)
+		SET_LIST (modelIndex, modelName, modelNames.get (), prefModel)
+		SET_LIST (languageIndex, languageName, theSpeechRecognizerLanguageNames(), prefLanguage)
 	EDITOR_DO
 		my setInstancePref_transcribe_model (modelName);
 		my setInstancePref_transcribe_language (languageName);
