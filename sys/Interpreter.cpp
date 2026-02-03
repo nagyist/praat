@@ -3611,42 +3611,18 @@ void structInterpreterStack :: runDown (autoInterpreter interpreter, autostring3
 	if (our currentLevel == InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS)
 		Melder_throw (U"Cannot have more than ", InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS, U" levels of nested scripts.");
 	our currentLevel += 1;
-	#if 1
-		if (interpreter)
-			our interpreters [our currentLevel] = interpreter.move();   // otherwise, use my existing interpreter
-		const integer savedLevel = our currentLevel;   // just for checking that running an interpreter to its end decrements the level
-		autoMelderFileSetCurrentFolder folder (& our interpreters [our currentLevel] -> file);
-		try {
-			Interpreter_run (our interpreters [our currentLevel].get(), text.move(), reuseVariables);
-		} catch (MelderError) {
-			our emptyAll ();   // TODO: put back
-			Melder_throw (U"Interpreter stack not run completely.");
-		}
-		trace (U"old level ", savedLevel, U", new level ", our currentLevel);
-		Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
-		//if (! our interpreters [our currentLevel] -> isHalted) {
-		//	our currentLevel -= 1;
-		//	trace (U"level lowered to ", our currentLevel);
-		//	Melder_assert (our currentLevel >= 0);
-		//}
-	#else
-		trace (U"posting running down-level ", our currentLevel);
-		Gui_addWorkProc (
-			[this, me = interpreter.get(), text = std::move (text), reuseVariables, savedCurrentLevel = our currentLevel] () mutable {   // TODO: make non-mutable by moving `text` into the Interpreter
-				TRACE
-				if (savedCurrentLevel < InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS) {
-					trace (U"resetting level ", savedCurrentLevel + 1);
-					our interpreters [savedCurrentLevel + 1]. reset();
-					trace (U"reset level ", savedCurrentLevel + 1);
-				}
-				trace (U"starting down-level ", savedCurrentLevel, U" with file ", & my file);
-				autoMelderFileSetCurrentFolder folder (& my file);
-				Interpreter_run (me, text.move(), reuseVariables);   // this will call InterpreterStack::resume near the end
-				trace (U"finished (or halted) down-level ", savedCurrentLevel);
-			}
-		);
-		our interpreters [our currentLevel] = interpreter.move();
-	#endif
+	if (interpreter)
+		our interpreters [our currentLevel] = interpreter.move();   // otherwise, use my existing interpreter
+	const integer savedLevel = our currentLevel;   // just for checking that running an interpreter to its end decrements the level
+	autoMelderFileSetCurrentFolder folder (& our interpreters [our currentLevel] -> file);
+	try {
+		Interpreter_run (our interpreters [our currentLevel].get(), text.move(), reuseVariables);
+	} catch (MelderError) {
+		our emptyAll ();   // TODO: put back
+		Melder_throw (U"Interpreter stack not run completely.");
+	}
+	trace (U"old level ", savedLevel, U", new level ", our currentLevel);
+	Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
 }
 
 void structInterpreterStack :: haltAll () {
@@ -3674,54 +3650,10 @@ void structInterpreterStack :: resumeFromTop () {
 		if (our interpreters [ilevel])
 			our interpreters [ilevel] -> isHalted = false;
 
-	#if 1
-		autoMelderFileSetCurrentFolder (& our interpreters [1] -> file);
-		Interpreter_resume (our interpreters [1].get());
-		trace (U"old level ", savedLevel, U", new level ", our currentLevel);
-		Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
-	#else
-		Interpreter me = our interpreters [our currentLevel].get();
-		Melder_assert (me);
-		if (my isHalted) {
-			my isHalted = false;
-			trace (U"posting resumption of current level ", our currentLevel);
-			Gui_addWorkProc (
-				[this, me, savedCurrentLevel = our currentLevel] () {
-					TRACE
-					if (savedCurrentLevel < InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS) {
-						trace (U"resetting level ", savedCurrentLevel + 1);
-						our interpreters [savedCurrentLevel + 1]. reset();
-						trace (U"reset level ", savedCurrentLevel + 1);
-					}
-					trace (U"resuming level ", savedCurrentLevel);
-					autoMelderFileSetCurrentFolder folder (& my file);
-					Interpreter_resume (me);
-					trace (U"finished (or halted) level ", savedCurrentLevel);
-				}
-			);
-		} else {
-			our currentLevel -= 1;
-			if (our currentLevel > 0) {
-				me = our interpreters [our currentLevel].get();
-				my isHalted = false;
-				trace (U"posting resumption of up-level ", our currentLevel);
-				Gui_addWorkProc (
-					[this, me, savedCurrentLevel = our currentLevel] () {
-						TRACE
-						if (savedCurrentLevel < InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS) {
-							trace (U"resetting level ", savedCurrentLevel + 1);
-							our interpreters [savedCurrentLevel + 1]. reset();
-							trace (U"reset level ", savedCurrentLevel + 1);
-						}
-						trace (U"resuming up-level ", savedCurrentLevel, U" with file ", & my file);
-						autoMelderFileSetCurrentFolder folder (& my file);
-						Interpreter_resume (me);
-						trace (U"finished (or halted) up-level ", savedCurrentLevel);
-					}
-				);
-			}
-		}
-	#endif
+	autoMelderFileSetCurrentFolder (& our interpreters [1] -> file);
+	Interpreter_resume (our interpreters [1].get());
+	trace (U"old level ", savedLevel, U", new level ", our currentLevel);
+	Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
 }
 
 void structInterpreterStack :: interpreterHasFinished (Interpreter interpreter) {
@@ -3747,7 +3679,7 @@ void structInterpreterStack :: interpreterHasFinished (Interpreter interpreter) 
 	Melder_assert (our interpreters [index]);
 	trace (U"index lowered to ", index);
 	if (! interpreter -> isHalted)
-		our interpreters [index] -> isInSecondPass = false;   // TODO: make this *very* conditional
+		our interpreters [index] -> isInSecondPass = false;   // TODO: check this
 	trace (U"level lowered(?) to ", our currentLevel);
 }
 
