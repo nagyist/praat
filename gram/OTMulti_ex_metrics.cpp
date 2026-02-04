@@ -1,6 +1,6 @@
 /* OTMulti_ex_metrics.cpp
  *
- * Copyright (C) 2014-2020,2025 Paul Boersma
+ * Copyright (C) 2014-2020,2025,2026 Paul Boersma
  * Forked from OTGrammar_ex_metrics.cpp, Copyright (C) 2001-2007,2009,2011,2012 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
@@ -45,6 +45,8 @@
 #define MoraicConsonant  22
 
 #define NUMBER_OF_CONSTRAINTS  22
+
+constexpr integer MAXIMUM_NUMBER_OF_SYLLABLES = 10;
 
 static const conststring32 constraintNames [1+NUMBER_OF_CONSTRAINTS] { 0,
 	U"WSP", U"FtNonfinal", U"Iambic", U"Parse", U"FootBin", U"WFL", U"WFR", U"Main-L", U"Main-R", U"AFL", U"AFR", U"Nonfinal",
@@ -121,7 +123,10 @@ static void path (OTMulti me, conststring32 underlyingForm, integer numberOfSyll
 	int startingSyllable, bool footedToTheLeft_in [], bool footedToTheRight_in [], int underlyingWeightPattern [],
 	int overtFormsHaveSecondaryStress)
 {
-	bool footedToTheLeft [10], footedToTheRight [10];
+	Melder_assert (startingSyllable < MAXIMUM_NUMBER_OF_SYLLABLES);
+	Melder_assert (numberOfSyllables < MAXIMUM_NUMBER_OF_SYLLABLES);
+
+	bool footedToTheLeft [MAXIMUM_NUMBER_OF_SYLLABLES], footedToTheRight [MAXIMUM_NUMBER_OF_SYLLABLES];
 	integer isyll;
 	/* Localize all arguments. */
 	for (isyll = 1; isyll <= startingSyllable; isyll ++) {
@@ -157,7 +162,7 @@ static void path (OTMulti me, conststring32 underlyingForm, integer numberOfSyll
 static void fillOvertStressPattern (OTMulti me, conststring32 underlyingForm, integer numberOfSyllables, int stress [], int underlyingWeightPattern [],
 	int overtFormsHaveSecondaryStress)
 {
-	bool footedToTheLeft [10], footedToTheRight [10];
+	bool footedToTheLeft [MAXIMUM_NUMBER_OF_SYLLABLES], footedToTheRight [MAXIMUM_NUMBER_OF_SYLLABLES];
 	for (int isyll = 1; isyll <= numberOfSyllables; isyll ++)
 		footedToTheLeft [isyll] = footedToTheRight [isyll] = 0;
 	path (me, underlyingForm, numberOfSyllables, stress, 1, footedToTheLeft, footedToTheRight, underlyingWeightPattern, overtFormsHaveSecondaryStress);
