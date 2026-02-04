@@ -21,11 +21,13 @@ OK
 
 	SET_LIST (modelIndex, modelName, modelNames.get (), NUMfindFirst (modelNames.get (), theSpeechRecognizerDefaultModelName))
 	SET_LIST (languageIndex, languageName, theSpeechRecognizerLanguageNames(),
-		NUMfindFirst (theSpeechRecognizerLanguageNames(), theSpeechRecognizerDefaultLanguageName))
+			NUMfindFirst (theSpeechRecognizerLanguageNames(), theSpeechRecognizerDefaultLanguageName))
 DO
+	TRACE
 	CREATE_ONE
 		autoSpeechRecognizer result = SpeechRecognizer_create (modelName, languageName);
-	CREATE_ONE_END (result -> d_name.get())
+		Thing_setName (result.get(), Melder_cat (modelName, U"_", languageName));
+	CREATE_ONE_END (U"")
 }
 
 DIRECT (QUERY_ONE_FOR_STRING__SpeechRecognizer_getModelName) {
