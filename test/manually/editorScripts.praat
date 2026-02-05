@@ -130,7 +130,6 @@ selectObject: sound, textGrid
 View & Edit
 editor: textGrid
 	Select: 0.3, 0.7
-	asserterror Cannot continue after pause, because the TextGridEditor has been closed.
 	pauseScript: "Close the editor window, then continue."
 	asserterror Command “Zoom:” not available for current selection.
 	Zoom: 0.3, 0.7
@@ -143,7 +142,6 @@ selectObject: sound, textGrid
 View & Edit
 editor: textGrid
 	Select: 0.3, 0.7
-	asserterror Cannot continue after pause, because the TextGridEditor has been closed.
 	pause Close the editor window, then continue.
 	asserterror Command “Zoom:” not available for current selection.
 	Zoom: 0.3, 0.7
@@ -154,7 +152,7 @@ editor: textGrid
 # 2. Choose View & Edit
 # 3. Choose New editor script: check title
 # 4. Type something: check change in title
-# 5. Remove the Sound: editor closes, title changes, and Run menu becomes insensitive
+# 5. Remove the Sound: editor closes
 
 # Entirely by hand:
 
@@ -162,7 +160,7 @@ editor: textGrid
 # 2. Choose View & Edit
 # 3. Choose New editor script: check title
 # 4. Type something: check change in title
-# 5. Close the editor: title changes, and Run menu becomes insensitive
+# 5. Close the sound editor: script editor closes
 
 # Entirely by hand:
 
@@ -238,6 +236,7 @@ Select: 0.3, 0.7
 ;asserterror Cannot continue after pause, because the SoundEditor has been closed.
 pauseScript: "Close the editor window, then continue."
 Zoom: 0.5, 0.6
+# TODO: this crashes
 
 Select: 0.3, 0.7
 ;asserterror Cannot continue after pause, because the SoundEditor has been closed.

@@ -19,11 +19,10 @@ OK
 		U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
 	);
 
-	SET_LIST (modelIndex, modelName, modelNames.get (), NUMfindFirst (modelNames.get (), theSpeechRecognizerDefaultModelName))
+	SET_LIST (modelIndex, modelName, modelNames.get(), NUMfindFirst (modelNames.get(), theSpeechRecognizerDefaultModelName))
 	SET_LIST (languageIndex, languageName, theSpeechRecognizerLanguageNames(),
 			NUMfindFirst (theSpeechRecognizerLanguageNames(), theSpeechRecognizerDefaultLanguageName))
 DO
-	TRACE
 	CREATE_ONE
 		autoSpeechRecognizer result = SpeechRecognizer_create (modelName, languageName);
 		Thing_setName (result.get(), Melder_cat (modelName, U"_", languageName));
@@ -54,13 +53,13 @@ void praat_SpeechRecognizer_init () {
 
 	praat_addMenuCommand (U"Objects", U"New", U"Speech-to-text recognition", nullptr, 0, nullptr);
 		praat_addMenuCommand (U"Objects", U"New", U"SpeechRecognizer help", nullptr, 1,
-			HELP__SpeechRecognizer_help);
+				HELP__SpeechRecognizer_help);
 		praat_addMenuCommand (U"Objects", U"New", U"-- new SpeechRecognizer --", nullptr, 1, nullptr);
 		praat_addMenuCommand (U"Objects", U"New", U"Create SpeechRecognizer...", nullptr, 1,
-			CREATE_ONE__SpeechRecognizer_create);
+				CREATE_ONE__SpeechRecognizer_create);
 
 	praat_addAction1 (classSpeechRecognizer, 0, U"SpeechRecognizer help", nullptr, 0,
-		HELP__SpeechRecognizer_help);
+			HELP__SpeechRecognizer_help);
 	praat_addAction1 (classSpeechRecognizer, 0, U"Query -", nullptr, 0, nullptr);
 		praat_addAction1 (classSpeechRecognizer, 1, U"Get Whisper model name", nullptr, 1,
 				QUERY_ONE_FOR_STRING__SpeechRecognizer_getModelName);
@@ -68,5 +67,5 @@ void praat_SpeechRecognizer_init () {
 				QUERY_ONE_FOR_STRING__SpeechRecognizer_getLanguageName);
 
 	praat_addAction2 (classSpeechRecognizer, 1, classSound, 1, U"Recognize sound", nullptr, 0,
-		QUERY_ONE_AND_ONE_FOR_STRING__SpeechRecognizer_Sound_recognize);
+			QUERY_ONE_AND_ONE_FOR_STRING__SpeechRecognizer_Sound_recognize);
 }

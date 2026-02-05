@@ -1,0 +1,49 @@
+"deep.txt"
+Paul Boersma, 5 February 2026
+
+To check the InterpreterStacks, especially deep ones and those with
+interactions with pause windows, the Demo window, and editors, do the following:
+
+The automated tests:
+
+- script/recursive_info.praat (menu_cb_run)
+- script/recursive_info.praat (menu_cb_runSelection)
+- script/recursive_file.praat (menu_cb_run)
+- script/recursive_file.praat (menu_cb_runSelection)
+- script/calculator.praat
+- script/deepError.praat
+
+The manual tests:
+
+- Calculator 5*5 from Praat menu
+- plugins:
+	- praat_executeScript_noGUI on recursive setup.praat
+		- in VocalToolkit  calling buttons.praat
+
+- manually/pause.praat (one pause window in the top script):  OK
+- manually/pauseForm.praat (multiple pause windows in the top script):  OK
+- manually/deepPause.praat:  OK
+- manually/deepPause44.praat:  OK
+- manually/deepPause44-2.praat:  OK
+- manually/deepPause244-2.praat:  OK
+- a pause window in a plugin
+	- in VocalToolkit/setup.praat; TODO: at the moment this will postpone plug-in initialization after all other plug-ins,
+	  so it's better to make these pause windows modal
+- a pause window in a plugin: don't close, try to run pause.praat, close, setup.praat will finish
+	- in VocalToolkit/setup.praat
+- pauseScript.praat
+- "execute"
+	- in Pelotas dispersion/dispersion.praat: scroll through whole presentation
+- added menu command
+	- in VocalToolkit: "Whisper"
+- all the command-line commands from manually/commandLine/run.txt
+- notebooks
+	- paths
+		- in replica Roos
+	- runNotebook TODO: where is this?
+- manually/editorpause.praat
+- manually/editorScripts.praat
+
+TODO:
+- pijltjes in manual om door de hele manual te scrollen
+- check waarom er aan Manual_create() een optionele interpreter kan worden meegegeven

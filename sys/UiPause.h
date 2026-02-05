@@ -53,6 +53,7 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 	conststring32 continueText10, Interpreter interpreter);
 
 void UiPause_cleanUp ();
+void UiPause_interpreterGoesAway (Interpreter interpreter);
 
 /* End of file UiPause.h */
 #endif
