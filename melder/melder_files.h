@@ -2,11 +2,11 @@
 #define _melder_files_h_
 /* melder_files.h
  *
- * Copyright (C) 1992-2018,2020-2024 Paul Boersma
+ * Copyright (C) 1992-2018,2020-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -141,7 +141,13 @@ public:
 	}
 };
 
-class autoMelderSaveCurrentFolder {
+/*
+	In the following, `[[nodiscard]]` makes the compiler warn against misue such as
+		autoMelderSetCurrentFolder (& myFolder);
+	insted of the correct
+		autoMelderSetCurrentFolder dummyName (& myFolder);
+*/
+class [[nodiscard]] autoMelderSaveCurrentFolder {
 	structMelderFolder _savedFolder;
 public:
 	autoMelderSaveCurrentFolder () {
@@ -157,7 +163,7 @@ public:
 	autoMelderSaveCurrentFolder& operator= (const autoMelderSaveCurrentFolder&) = delete;   // disable copy assignment
 };
 
-class autoMelderSetCurrentFolder {
+class [[nodiscard]] autoMelderSetCurrentFolder {
 	structMelderFolder _savedFolder;
 public:
 	autoMelderSetCurrentFolder (MelderFolder folder) {
@@ -174,7 +180,7 @@ public:
 	autoMelderSetCurrentFolder& operator= (const autoMelderSetCurrentFolder&) = delete;   // disable copy assignment
 };
 
-class autoMelderFileSetCurrentFolder {
+class [[nodiscard]] autoMelderFileSetCurrentFolder {
 	structMelderFolder _savedFolder;
 public:
 	autoMelderFileSetCurrentFolder (MelderFile file) {

@@ -78,5 +78,6 @@ void Demo_timer (double duration);
 
 void Demo_saveToPdfFile (MelderFile file);
 
-/* End of file DemoEditor.h */
-#endif
+void Demo_interpreterGoesAway (Interpreter interpreter);
+
+#endif // !_DemoEditor_h_

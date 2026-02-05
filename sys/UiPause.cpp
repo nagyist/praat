@@ -23,14 +23,24 @@ static autoUiForm thePauseForm;
 static int thePauseForm_clicked = 0;
 static int theCancelContinueButton = 0;
 static Interpreter thePauseForm_interpreterReference;  // TODO: this should be a weak_ptr to the InterpreterStack
-//static bool thePauseForm_secondPass = false;
 static structMelderFolder thePauseForm_savedFolder;   // TODO: probably remove
 static Editor thePauseForm_savedEditorReference;
+
+void UiPause_interpreterGoesAway (Interpreter interpreter) {
+	if (interpreter == thePauseForm_interpreterReference)
+		thePauseForm_interpreterReference = nullptr;   // undangle
+}
 
 static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */, Stackel /* args */,
 	conststring32 /* sendingString */, Interpreter /* interpreter */,
 	conststring32 /* invokingButtonTitle */, bool /* modified */, void *closure, Editor optionalEditor)
 {
+	if (! thePauseForm_interpreterReference) {   // interpreter was destroyed?
+		GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
+		thePauseForm_savedEditorReference = nullptr;
+		thePauseForm. releaseToUser();
+		return;
+	}
 	if (! thePauseForm)   // BUG: perhaps there was a mistake in the script
 		return;
 	Melder_assert (thePauseForm_interpreterReference);
@@ -88,6 +98,12 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	}
 }
 static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) {
+	if (! thePauseForm_interpreterReference) {   // interpreter was destroyed?
+		GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
+		thePauseForm_savedEditorReference = nullptr;
+		thePauseForm. releaseToUser();
+		return;
+	}
 	if (! thePauseForm)   // BUG: perhaps there was a mistake in the script
 		return;
 	Melder_assert (thePauseForm_interpreterReference);

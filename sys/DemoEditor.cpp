@@ -25,6 +25,11 @@ Thing_implement (DemoEditor, Editor, 0);
 
 static DemoEditor theReferenceToTheOnlyDemoEditor;
 
+void Demo_interpreterGoesAway (Interpreter interpreter) {
+	if (theReferenceToTheOnlyDemoEditor && interpreter == theReferenceToTheOnlyDemoEditor -> interpreterReference)
+		theReferenceToTheOnlyDemoEditor -> interpreterReference = nullptr;   // undangle
+}
+
 bool Demo_hasGraphics (Graphics graphics) {
 	return theReferenceToTheOnlyDemoEditor && theReferenceToTheOnlyDemoEditor -> graphics.get() == graphics;
 }

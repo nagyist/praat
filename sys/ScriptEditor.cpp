@@ -138,7 +138,7 @@ static void args_ok_selectionOnly (UiForm sendingForm, integer /* narg */, Stack
 }
 
 static void menu_cb_run (ScriptEditor me, EDITOR_ARGS) {
-	//UiPause_cleanUp ();
+	//UiPause_cleanUp ();   // destroy the previous pause window, because it just might be using the same InterpreterStack, so its Interpreter reference will go stale
 	//if (my interpreter -> running)
 	//	//Melder_throw (U"The script is already running (paused). Please close or continue the pause, trust or demo window.");
 	//	Interpreter_stop (my interpreter.get());

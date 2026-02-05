@@ -2,7 +2,7 @@ praat ../play.praat ../../fon/examples/example.wav
 praat --run ../play.praat ../../fon/examples/example.wav
 # twice:
 praat --open ../../fon/examples/example.wav ../../fon/examples/*.TextGrid &
-praat --new-open ../../fon/examples/example.wav ../../fon/examples/*.TextGrid &
+
 # twice:
 praat --send ../play.praat ../../fon/examples/example.wav &
 praat --new-send ../play.praat ../../fon/examples/example.wav &

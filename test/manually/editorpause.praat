@@ -1,5 +1,11 @@
 #
-# This leaks in the combination of "View & Edit" and "removeObject"
+# This leaks in the combination of "View & Edit" and "removeObject".
+# it leaks 5 Things every time.
+#
+# TODO: figure out what these are.
+# Steps:
+#    1. create a Melder_debug number that aims to trace all existing Things.
+#    2. create an unordered_map that keeps track every time a Thing is created or deleted.
 #
 
 objects# = zero# (5)

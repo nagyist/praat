@@ -19,6 +19,8 @@
 #include "Interpreter.h"
 #include "praatP.h"
 #include "praat_script.h"
+#include "UiPause.h"
+#include "DemoEditor.h"
 #include "Formula.h"
 #include "../kar/UnicodeData.h"
 
@@ -111,6 +113,8 @@ static CollectionOf <structInterpreter> theReferencesToAllLivingInterpreters;
 
 void structInterpreter :: v9_destroy () noexcept {
 	theReferencesToAllLivingInterpreters. undangleItem (this);
+	UiPause_interpreterGoesAway (this);
+	Demo_interpreterGoesAway (this);
 	our Interpreter_Parent :: v9_destroy ();
 }
 
@@ -121,7 +125,13 @@ autoInterpreter Interpreter_createFromEnvironment (InterpreterStack interpreterS
 		my optionalInterpreterStack = interpreterStack;
 		if (optionalFile) {
 			MelderFile_copy (optionalFile, & my file);
-			MelderFile_getParentFolder (optionalFile, & my workingDirectory);
+			/*
+				As for the working directory, put it in canonical form, i.e. don't use only MelderFile_getParentFolder(). TODO: make MelderFile_getParentFolder canonical
+			*/
+			{// scope
+				autoMelderFileSetCurrentFolder folder (& my file);
+				Melder_getCurrentFolder (& my workingDirectory);
+			}
 		} else {
 			Melder_getCurrentFolder (& my workingDirectory);   // last resort; TODO: figure out how useful this is
 		}
@@ -2133,7 +2143,7 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 				Create variable names as-are and variable names without capitals.
 			*/
 			str32cpy (parameter, my parameters [ipar]);
-			parameterToVariable (me, my types [ipar], parameter, ipar);
+			parameterToVariable (me, my types [ipar], parameter, ipar);   // deprecated 2014? probably works only with parameter substitution
 			if (parameter [0] >= U'A' && parameter [0] <= U'Z') {
 				parameter [0] = Melder_toLowerCase (parameter [0]);
 				parameterToVariable (me, my types [ipar], parameter, ipar);
@@ -2141,6 +2151,18 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 		}
 		/*
 			Initialize some variables.
+
+			TODO: turn newline$ and tab$ into constants
+			Time path:
+				1. in 20xx, start asking for trust when assigning to these variables
+				2. ten years later, assigning to these variables becomes an error (with an appropriate warning and recipe for correction),
+				   just as with `pi`, `undefined` and `e`.
+
+			TODO: turn the remainder of these variables into functions
+			Time path:
+				1. in 20xx, add functions to the side
+				2. ten years later, start warning against undefined use of these variables
+				3. another ten years later, undefined us of these variables becomes an error (with an appropriate warning and recipe for correction)
 		*/
 		Interpreter_addStringVariable (me, U"newline$", U"\n");
 		Interpreter_addStringVariable (me, U"tab$", U"\t");
@@ -2149,7 +2171,7 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 			structMelderFolder folder { };
 			Melder_getCurrentFolder (& folder);
 			Interpreter_addStringVariable (me, U"defaultDirectory$", MelderFolder_peekPath (& folder));
-			Interpreter_addStringVariable (me, U"preferencesDirectory$", MelderFolder_peekPath (Melder_preferencesFolder()));
+			Interpreter_addStringVariable (me, U"preferencesDirectory$", MelderFolder_peekPath (Melder_preferencesFolder()));   // settingsFolder$()
 			Melder_getHomeDir (& folder);
 			Interpreter_addStringVariable (me, U"homeDirectory$", MelderFolder_peekPath (& folder));
 			Melder_getTempDir (& folder);
@@ -3627,29 +3649,24 @@ void structInterpreterStack :: emptyAll () {
 }
 
 void structInterpreterStack :: runDown (autoInterpreter interpreter, autostring32 text, const bool reuseVariables) {
-	//TRACE
-	trace (U"entering at level ", our currentLevel);
 	if (our currentLevel == InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS)
 		Melder_throw (U"Cannot have more than ", InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS, U" levels of nested scripts.");
 	our currentLevel += 1;
 	if (interpreter)
 		our interpreters [our currentLevel] = interpreter.move();   // otherwise, use my existing interpreter
-	const integer savedLevel = our currentLevel;   // just for checking that running an interpreter to its end decrements the level
+	const integer oldLevel = our currentLevel;   // sets up an assertion below
 	try {
 		autoMelderSetCurrentFolder folder (& our interpreters [our currentLevel] -> workingDirectory);
 		Interpreter_run (our interpreters [our currentLevel].get(), text.move(), reuseVariables);
 	} catch (MelderError) {
-		if (currentLevel == 0)
-			our emptyAll ();
+		//if (currentLevel == 0)
+		//	our emptyAll ();
 		Melder_throw (U"Interpreter stack not run completely.");
 	}
-	trace (U"old level ", savedLevel, U", new level ", our currentLevel);
-	Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
+	Melder_assert (our currentLevel == oldLevel - 1);   // running an interpreter to its end MUST have decremented the level
 }
 
 void structInterpreterStack :: haltAll () {
-	//TRACE
-	trace (U"at level ", our currentLevel);
 	for (integer ilevel = 1; ilevel <= our currentLevel; ilevel ++) {
 		Melder_assert (our interpreters [ilevel]);
 		our interpreters [ilevel] -> isHalted = true;   // ensures fast unwinding, without processing any more lines
@@ -3659,11 +3676,9 @@ void structInterpreterStack :: haltAll () {
 }
 
 void structInterpreterStack :: resumeFromTop () {
-	//TRACE
-	trace (U"enter");
 	our currentLevel = 1;
 	Melder_assert (our interpreters [1]);
-	const integer savedLevel = our currentLevel;   // just for checking that running an interpreter to its end decrements the level
+	const integer oldLevel = our currentLevel;   // sets up an assertion below
 
 	/*
 		Unhalt all.
@@ -3673,15 +3688,14 @@ void structInterpreterStack :: resumeFromTop () {
 			our interpreters [ilevel] -> isHalted = false;
 
 	try {
-		autoMelderFileSetCurrentFolder (& our interpreters [1] -> file);
+		autoMelderFileSetCurrentFolder folder (& our interpreters [1] -> file);
 		Interpreter_resume (our interpreters [1].get());
 	} catch (MelderError) {
-		if (currentLevel == 0)
-			our emptyAll ();
+		//if (currentLevel == 0)
+		//	our emptyAll ();
 		Melder_throw (U"Interpreter stack has not run to completion.");
 	}
-	trace (U"old level ", savedLevel, U", new level ", our currentLevel);
-	Melder_assert (our currentLevel == savedLevel - 1);   // running an interpreter to its end MUST have decremented the level
+	Melder_assert (our currentLevel == oldLevel - 1);   // running an interpreter to its end MUST have decremented the level
 }
 
 void structInterpreterStack :: interpreterHasFinished (Interpreter interpreter) {
@@ -3711,7 +3725,7 @@ void structInterpreterStack :: interpreterHasFinished (Interpreter interpreter) 
 		/*
 			TODO: can the interpreter at level `currentLevel + 1` be deleted?
 		*/
-		our interpreters [index + 1]. reset();
+		//our interpreters [index + 1]. reset();
 	}
 	trace (U"level lowered(?) to ", our currentLevel);
 }

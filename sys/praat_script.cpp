@@ -561,7 +561,6 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 	Melder_assert (interpreterStack);
 	//Melder_assert (Melder_backgrounding);
 
-	//TRACE
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
 		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
@@ -575,31 +574,14 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 			Interpreter_resume (childInterpreter);
 		}   // back to the default directory of the caller
 	} else {
-		structMelderFolder folderBeforeCorrection;
-		Melder_getCurrentFolder (& folderBeforeCorrection);
-		trace (U"pass 1: initial caller default folder for file ", fileName, U" is ", & folderBeforeCorrection);
-
-		autoMelderSetCurrentFolder correctedFolder (& parentInterpreter -> workingDirectory);   // the directory of the caller (or it should be)
-
-		structMelderFolder folderAfterCorrection;
-		Melder_getCurrentFolder (& folderAfterCorrection);
-		trace (U"pass 1: corrected caller default folder for file ", fileName, U" is ", & folderAfterCorrection);
-		/*
-			TODO: the following assertion can fire if a Demo window script calls runScript on `a/a.praat` and then `b/b.praat`,
-			separated by `demoWaitForInput()`. (last checked 2026-02-02)
-			Apparently, one of the functions elsewhere doesn't appropriately set the current folder (working directory) back.
-		*/
-		//Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection));
+		structMelderFolder workingDirectory;
+		Melder_getCurrentFolder (& workingDirectory);
+		//autoMelderSetCurrentFolder correctedFolder (& workingDirectory);   // the directory of the caller (or it should be)
+		Melder_assert (MelderFolder_equal (& workingDirectory, & parentInterpreter -> workingDirectory));
 
 		structMelderFile file { };
 		try {
 			Melder_relativePathToFile (fileName, & file);
-			{// scope
-				autoMelderFileSetCurrentFolder folder (& file);   // temporarily, for testing
-				structMelderFolder testedFolder;
-				Melder_getCurrentFolder (& testedFolder);
-				trace (U"pass 1: callee default folder for file ", fileName, U" is ", & testedFolder);
-			}
 			autostring32 text = MelderFile_readText (& file);
 			/*
 				We switch between default directories no fewer than four times:
@@ -642,7 +624,7 @@ void praat_runNotebook (InterpreterStack interpreterStack, conststring32 fileNam
 	Melder_assert (interpreterStack);
 	//Melder_assert (Melder_backgrounding);
 
-	TRACE
+	//TRACE
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
 		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
@@ -656,21 +638,9 @@ void praat_runNotebook (InterpreterStack interpreterStack, conststring32 fileNam
 			Interpreter_resume (childInterpreter);
 		}   // back to the default directory of the caller
 	} else {
-		structMelderFolder folderBeforeCorrection;
-		Melder_getCurrentFolder (& folderBeforeCorrection);
-		trace (U"pass 1: initial caller default folder for file ", fileName, U" is ", & folderBeforeCorrection);
-
-		autoMelderFileSetCurrentFolder correctedFolder (& parentInterpreter -> file);   // the directory of the caller (or it should be)
-
-		structMelderFolder folderAfterCorrection;
-		Melder_getCurrentFolder (& folderAfterCorrection);
-		trace (U"pass 1: corrected caller default folder for file ", fileName, U" is ", & folderAfterCorrection);
-		/*
-			TODO: the following assertion can fire if a Demo window script calls runScript on `a/a.praat` and then `b/b.praat`,
-			separated by `demoWaitForInput()`. (last checked 2026-02-02)
-			Apparently, one of the functions elsewhere doesn't appropriately set the current folder (working directory) back.
-		*/
-		Melder_assert (MelderFolder_equal (& folderBeforeCorrection, & folderAfterCorrection));
+		structMelderFolder workingDirectory;
+		Melder_getCurrentFolder (& workingDirectory);
+		Melder_assert (MelderFolder_equal (& workingDirectory, & parentInterpreter -> workingDirectory));
 
 		structMelderFile file { };
 		try {
@@ -681,7 +651,9 @@ void praat_runNotebook (InterpreterStack interpreterStack, conststring32 fileNam
 			/*
 				We switch between default directories no fewer than four times:
 				1. runScript() tends to be called from a script that we call the "caller";
-				   when we enter runScript(), the default directory is the caller's folder,
+				   when we enter runScript(), the working directory is the caller's folder
+				   (set upon Interpreter creation as the folder where the calling script is,
+				   though perhaps changed later in that script by `setWorkingDirectory`),
 				   as was appropriate for the use of file names in the caller before runScript(),
 				   which had to be interpreted relative to the caller's folder.
 				2. runScript() will call a script that we call the "callee";
