@@ -29,6 +29,10 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.59# (5 February 2026)
+• Made nested scripts with pause windows and/or Demo window work again.
+• Fixed a bug by which SpeechRecognizer creation could make Praat crash on some platforms.
+
 ##6.4.58# (25 January 2026, supersedes versions 6.4.52 through 6.4.57)
 • MacOS Tahoe: support making menu choices or turning windows to full screen
   if a script is paused (by the Demo window or the Pause window),

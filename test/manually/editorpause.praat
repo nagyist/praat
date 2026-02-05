@@ -1,6 +1,6 @@
 #
 # This leaks in the combination of "View & Edit" and "removeObject".
-# it leaks 5 Things every time.
+# it leaks 5 Things every time (on the Mac, not on Windows).
 #
 # TODO: figure out what these are.
 # Steps:
@@ -26,4 +26,4 @@ for i to size (objects#)
 endfor
 
 memoryReport$ = Report memory use
-appendInfoLine: mid$ (memoryReport$, 22, 142)
+appendInfoLine: mid$ (memoryReport$, 22, 160)
