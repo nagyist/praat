@@ -1,5 +1,5 @@
 # editorScripts.praat
-# Paul Boersma, 9 January 2026
+# Paul Boersma, 5 February 2026
 
 exitScript: "Use only “Run selection”."
 
@@ -69,6 +69,7 @@ editor: textGrid
 #
 # This tests whether a script without “Close” returns to the Objects window correctly.
 
+Erase all
 sound = Create Sound from formula: "sineWithNoise", 1, 0, 1, 44100, "1/2 * sin(2*pi*377*x) + randomGauss(0,0.1)"
 textGrid = To TextGrid: "Mary John Bell", "bell"
 selectObject: sound, textGrid
@@ -85,6 +86,7 @@ Draw: 0.0, 0.0, "yes", "yes", "yes"
 #
 # This tests whether a script without “endeditor” returns to the Objects window correctly.
 
+Erase all
 sound = Create Sound from formula: "sineWithNoise", 1, 0, 1, 44100, "1/2 * sin(2*pi*377*x) + randomGauss(0,0.1)"
 textGrid = To TextGrid: "Mary John Bell", "bell"
 selectObject: sound, textGrid
@@ -152,7 +154,7 @@ editor: textGrid
 # 2. Choose View & Edit
 # 3. Choose New editor script: check title
 # 4. Type something: check change in title
-# 5. Remove the Sound: editor closes
+# 5. Remove the Sound: sound editor closes, script editor closes
 
 # Entirely by hand:
 

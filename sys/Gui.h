@@ -370,7 +370,8 @@ static void Gui_addWorkProc (F&& function) {
 	#elif motif
 		auto *functionWrapper = new GuiWinWorkProcWrapper_derived <F> (std::forward <F> (function));
 		PostMessage (HWND (nullptr), WM_APP_WORK_PROC, 0, reinterpret_cast <LPARAM> (functionWrapper));
-	#elif
+	#elif defined (NO_GUI)
+	#else
 		#error The function `Gui_addWorkProc`() is not implemented for this platform.
 	#endif
 }
