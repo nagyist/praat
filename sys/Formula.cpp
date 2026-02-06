@@ -6923,9 +6923,13 @@ static void do_setWorkingDirectory () {
 	const Stackel f = pop;
 	if (f->which == Stackel_STRING) {
 		structMelderFolder folder { };
-		Melder_pathToFolder (f->getString(), & folder);
+		Melder_relativePathToFolder (f->getString(), & folder);
 		Melder_setCurrentFolder (& folder);
 		MelderFolder_copy (& folder, & theInterpreter -> workingDirectory);
+		Melder_assert (MelderFolder_equal (Melder_peekWorkingDirectory(), & theInterpreter -> workingDirectory));
+		//TRACE
+		trace (U"Set the working directory to ", Melder_peekWorkingDirectory());
+		trace (U"Set the working directory of interpreter ", Melder_pointer (theInterpreter), U" to ", & theInterpreter -> workingDirectory);
 		pushNumber (1);
 	} else {
 		Melder_throw (U"The function “setWorkingDirectory” requires a string, not ", f->whichText(), U".");

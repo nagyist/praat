@@ -530,5 +530,4 @@ autoThing Thing_newFromClassName (conststring32 className, int *out_formatVersio
 		see Thing_classFromClassName.
 */
 
-/* End of file Thing.h */
-#endif
+#endif // _Thing_h_

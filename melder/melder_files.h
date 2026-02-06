@@ -112,6 +112,7 @@ void MelderFolder_create (MelderFolder folder);
 void Melder_getCurrentFolder (MelderFolder folder);
 void Melder_setCurrentFolder (MelderFolder folder);
 void MelderFile_setDefaultDir (MelderFile file);
+MelderFolder Melder_peekWorkingDirectory ();
 
 class autofile {
 	FILE *ptr;
