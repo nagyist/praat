@@ -563,21 +563,14 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
-		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
-		Melder_assert (interpreterStack -> currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
-		Interpreter childInterpreter = interpreterStack -> current_a ();
-		{// scope
-			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
-			structMelderFolder testedFolder;
-			Melder_getCurrentFolder (& testedFolder);
-			trace (U"pass 2: setting default folder for file ", fileName, U" to ", & testedFolder);
-			Interpreter_resume (childInterpreter);
-		}   // back to the default directory of the caller
+		interpreterStack -> quicklyMoveDownInSecondPass ();
 	} else {
-		structMelderFolder workingDirectory;
-		Melder_getCurrentFolder (& workingDirectory);
-		//autoMelderSetCurrentFolder correctedFolder (& workingDirectory);   // the directory of the caller (or it should be)
-		Melder_assert (MelderFolder_equal (& workingDirectory, & parentInterpreter -> workingDirectory));
+		//TRACE
+		trace (U"File: ", fileName);
+		trace (U"The working directory is ", Melder_peekWorkingDirectory ());
+		trace (U"The working directory of interpreter ", Melder_pointer (parentInterpreter), U" is ", & parentInterpreter -> workingDirectory);
+		Melder_assert (MelderFolder_equal (Melder_peekWorkingDirectory (), & parentInterpreter -> workingDirectory));
+		//autoMelderSetCurrentFolder folder (& parentInterpreter -> workingDirectory);   // TODO: is this superfluous, i.e. does the previous assertion never fire?
 
 		structMelderFile file { };
 		try {
@@ -627,16 +620,7 @@ void praat_runNotebook (InterpreterStack interpreterStack, conststring32 fileNam
 	//TRACE
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
-		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
-		Melder_assert (interpreterStack -> currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
-		Interpreter childInterpreter = interpreterStack -> current_a ();
-		{// scope
-			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
-			structMelderFolder testedFolder;
-			Melder_getCurrentFolder (& testedFolder);
-			trace (U"pass 2: setting default folder for file ", fileName, U" to ", & testedFolder);
-			Interpreter_resume (childInterpreter);
-		}   // back to the default directory of the caller
+		interpreterStack -> quicklyMoveDownInSecondPass ();
 	} else {
 		structMelderFolder workingDirectory;
 		Melder_getCurrentFolder (& workingDirectory);
@@ -798,19 +782,9 @@ void praat_runOldExecuteCommand (InterpreterStack interpreterStack, conststring3
 	}
 	Melder_relativePathToFile (path, & file);
 
-	//TRACE
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
-		interpreterStack -> currentLevel += 1;   // TODO: fix these three statements (don't expose `currentLevel`)
-		Melder_assert (interpreterStack -> currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
-		Interpreter childInterpreter = interpreterStack -> current_a ();
-		{// scope
-			autoMelderFileSetCurrentFolder folder (& childInterpreter -> file);   // so that callee-relative file names can be used inside the script
-			structMelderFolder testedFolder;
-			Melder_getCurrentFolder (& testedFolder);
-			trace (U"setting default folder for file ", path, U" to ", & testedFolder);
-			Interpreter_resume (childInterpreter);
-		}   // back to the default directory of the caller
+		interpreterStack -> quicklyMoveDownInSecondPass ();
 	} else {
 		try {
 			autostring32 text = MelderFile_readText (& file);
@@ -894,7 +868,7 @@ static void secondPassThroughScript (UiForm sendingForm, integer /* narg */, Sta
 
 static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterOwningEditor, EditorCommand optionalCommand) {
 	static autoInterpreterStack interpreterStack;
-	UiPause_cleanUp ();
+	UiPause_cleanUp ();   // TODO: needed?
 	try {
 		autostring32 text = MelderFile_readText (file);
 		/*

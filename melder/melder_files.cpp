@@ -1,6 +1,6 @@
 /* melder_files.cpp
  *
- * Copyright (C) 1992-2008,2010-2025 Paul Boersma, 2013 Tom Naughton
+ * Copyright (C) 1992-2008,2010-2026 Paul Boersma, 2013 Tom Naughton
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -912,6 +912,12 @@ void MelderFile_setDefaultDir (MelderFile file) {
 	structMelderFolder folder { };
 	MelderFile_getParentFolder (file, & folder);
 	Melder_setCurrentFolder (& folder);
+}
+
+MelderFolder Melder_peekWorkingDirectory () {
+	static structMelderFolder s_workingDirectory;
+	Melder_getCurrentFolder (& s_workingDirectory);
+	return & s_workingDirectory;
 }
 
 void Melder_createDirectory (MelderFolder parent, conststring32 folderName, int mode) {

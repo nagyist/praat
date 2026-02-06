@@ -1,0 +1,8 @@
+writeInfo: "1a "
+runScript: "2/2.praat"
+appendInfo: "1b "
+setWorkingDirectory: "3"
+runScript: "3.praat"
+appendInfo: "1c "
+runScript: "../4/4.praat"
+appendInfo: "1d "

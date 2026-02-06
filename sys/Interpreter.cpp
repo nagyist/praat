@@ -880,7 +880,7 @@ void Interpreter_getArgumentsFromDialog (Interpreter me, UiForm dialog) {
 			{
 				const conststring32 value = UiForm_getString (dialog, parameter);
 				structMelderFile file { };
-				Melder_relativePathToFile (value, & file);   // the working directory should have been set to the script file path
+				Melder_relativePathToFile (value, & file);   // the working directory should have been set to the script file path TODO: check
 				my arguments [ipar] = Melder_dup_f (MelderFile_peekPath (& file));
 				break;
 			}
@@ -3641,8 +3641,6 @@ autoInterpreterStack InterpreterStack_create (Editor optionalInterpreterStackOwn
 }
 
 void structInterpreterStack :: emptyAll () {
-	//TRACE
-	trace (U"cleaning up");
 	for (integer ilevel = 1; ilevel <= our currentLevel; ilevel ++)
 		our interpreters [ilevel]. reset();
 	our currentLevel = 0;
@@ -3660,10 +3658,14 @@ void structInterpreterStack :: runDown (autoInterpreter interpreter, autostring3
 		Interpreter_run (our interpreters [our currentLevel].get(), text.move(), reuseVariables);
 	} catch (MelderError) {
 		//if (currentLevel == 0)
-		//	our emptyAll ();
+		//	our emptyAll ();   // TODO: figure out when precisely an interpreter can be deleted
 		Melder_throw (U"Interpreter stack not run completely.");
 	}
 	Melder_assert (our currentLevel == oldLevel - 1);   // running an interpreter to its end MUST have decremented the level
+	if (currentLevel == 0) {
+		// TODO: successful run of the whole stack; can we delete? Does it depend on halted?
+		//our emptyAll();
+	}
 }
 
 void structInterpreterStack :: haltAll () {
@@ -3678,7 +3680,6 @@ void structInterpreterStack :: haltAll () {
 void structInterpreterStack :: resumeFromTop () {
 	our currentLevel = 1;
 	Melder_assert (our interpreters [1]);
-	const integer oldLevel = our currentLevel;   // sets up an assertion below
 
 	/*
 		Unhalt all.
@@ -3688,46 +3689,39 @@ void structInterpreterStack :: resumeFromTop () {
 			our interpreters [ilevel] -> isHalted = false;
 
 	try {
-		autoMelderFileSetCurrentFolder folder (& our interpreters [1] -> file);
+		autoMelderSetCurrentFolder folder (& our interpreters [1] -> workingDirectory);
 		Interpreter_resume (our interpreters [1].get());
 	} catch (MelderError) {
 		//if (currentLevel == 0)
-		//	our emptyAll ();
+		//	our emptyAll ();   // TODO: figure out when precisely an interpreter can be deleted; perhaps always, when we're here?
 		Melder_throw (U"Interpreter stack has not run to completion.");
 	}
-	Melder_assert (our currentLevel == oldLevel - 1);   // running an interpreter to its end MUST have decremented the level
+	Melder_assert (our currentLevel == 0);   // running an interpreter to its end MUST have decremented the level
+	// TODO: successful run of the whole stack; can we delete? Does it depend on halted?
+	//our emptyAll();
 }
 
 void structInterpreterStack :: interpreterHasFinished (Interpreter interpreter) {
-	//TRACE
-	trace (U"entered at level ", our currentLevel);
 	Melder_assert (interpreter);
-	/*
-		We climb up.
-	*/
-	integer index;
-	for (index = 1; index <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS; index ++)
-		if (our interpreters [index].get() == interpreter)   // TODO: this is a bit rough (it works correctly if the interpreter is indeed the original member)
-			break;
-	Melder_assert (index <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
-	for (integer i = 1; i < index; i ++)
-		Melder_assert (our interpreters [i]);   // check contiguity
-	Melder_assert (index == our currentLevel);
-	trace (U"index at ", index);
-	index -= 1;
+	Melder_assert (interpreter == our interpreters [our currentLevel].get());
 	our currentLevel -= 1;
-	if (index == 0)
+	if (our currentLevel == 0)
 		return;   // nothing to do
-	Melder_assert (our interpreters [index]);
-	trace (U"index lowered to ", index);
+	Melder_assert (our interpreters [our currentLevel]);
 	if (! interpreter -> isHalted) {
-		our interpreters [index] -> isInSecondPass = false;   // TODO: check this
-		/*
-			TODO: can the interpreter at level `currentLevel + 1` be deleted?
-		*/
-		//our interpreters [index + 1]. reset();
+		our interpreters [our currentLevel] -> isInSecondPass = false;   // TODO: check this
+		//our interpreters [our currentLevel + 1]. reset();   // TODO: figure out when precisely an interpreter can be deleted
 	}
-	trace (U"level lowered(?) to ", our currentLevel);
+}
+
+void structInterpreterStack :: quicklyMoveDownInSecondPass () {
+	our currentLevel += 1;
+	Melder_assert (our currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
+	Interpreter childInterpreter = our current_a();
+	{// scope
+		autoMelderSetCurrentFolder folder (& childInterpreter -> workingDirectory);   // so that callee-relative file names can be used inside the script
+		Interpreter_resume (childInterpreter);
+	}   // back to the default directory of the caller
 }
 
 /* End of file Interpreter.cpp */

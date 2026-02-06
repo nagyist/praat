@@ -255,6 +255,7 @@ Thing_define (InterpreterStack, Thing) {
 	void haltAll ();
 	void resumeFromTop ();
 	void interpreterHasFinished (Interpreter interpreter);
+	void quicklyMoveDownInSecondPass ();
 };
 
 autoInterpreterStack InterpreterStack_create (Editor optionalInterpreterStackOwningEditor);
