@@ -330,7 +330,7 @@ DO
 				);
 			}
 			Melder_assert (theCalculatorInterpreterStack -> interpreters [1]);   // TODO: should fire after exception
-			Melder_assert (theCalculatorInterpreterStack -> interpreters [1] -> optionalInterpreterStack);
+			Melder_assert (theCalculatorInterpreterStack -> interpreters [1] -> owningInterpreterStack);
 			Interpreter_anyExpression (theCalculatorInterpreterStack -> interpreters [1].get(), expression, & result);
 		} else {
 			trace (U"yes interpreter");

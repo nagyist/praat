@@ -2305,7 +2305,7 @@ static void Formula_print (FormulaInstruction f) {
 
 void Formula_compile (Interpreter interpreter, Daata data, conststring32 expression, int expressionType, bool optimize) {
 	if (interpreter)
-		Melder_assert (interpreter -> optionalInterpreterStack);
+		Melder_assert (interpreter -> owningInterpreterStack);
 	theInterpreter = interpreter;
 	if (! theInterpreter) {
 		if (! theLocalInterpreterStack) {
@@ -2317,7 +2317,7 @@ void Formula_compile (Interpreter interpreter, Daata data, conststring32 express
 			);
 		}
 		theInterpreter = theLocalInterpreterStack -> interpreters [1].get();
-		theInterpreter -> optionalInterpreterStack = theLocalInterpreterStack.get();
+		theInterpreter -> owningInterpreterStack = theLocalInterpreterStack.get();
 		theInterpreter -> variablesMap. clear ();
 	}
 	theSource = data;
@@ -4431,8 +4431,8 @@ static void do_runScript () {
 	}
 	try {
 		const Editor optionalNewInterpreterOwningWindow = theInterpreter -> optionalDynamicEnvironmentEditor();
-		Melder_assert (theInterpreter -> optionalInterpreterStack);
-		praat_runScript (theInterpreter -> optionalInterpreterStack, fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
+		Melder_assert (theInterpreter -> owningInterpreterStack);
+		praat_runScript (theInterpreter -> owningInterpreterStack, fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
 		theLevel -= 1;
 	} catch (MelderError) {
 		theLevel -= 1;
@@ -4481,8 +4481,8 @@ static void do_runNotebook () {
 	}
 	try {
 		const Editor optionalNewInterpreterOwningWindow = theInterpreter -> optionalDynamicEnvironmentEditor();
-		Melder_assert (theInterpreter -> optionalInterpreterStack);
-		praat_runNotebook (theInterpreter -> optionalInterpreterStack, fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
+		Melder_assert (theInterpreter -> owningInterpreterStack);
+		praat_runNotebook (theInterpreter -> owningInterpreterStack, fileName->getString(), numberOfArguments - 1, & theStack [stackPointer + 1], optionalNewInterpreterOwningWindow);
 		theLevel -= 1;
 	} catch (MelderError) {
 		theLevel -= 1;

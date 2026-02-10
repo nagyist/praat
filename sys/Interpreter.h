@@ -77,7 +77,7 @@ conststring32 kInterpreter_ReturnType_errorMessage (kInterpreter_ReturnType retu
 Thing_define (Interpreter, Thing) {
 	Script scriptReference;
 	Notebook notebookReference;
-	InterpreterStack optionalInterpreterStack;
+	InterpreterStack owningInterpreterStack;
 	bool isHalted, isInSecondPass;
 
 	struct EditorEnvironment {
@@ -254,8 +254,7 @@ Thing_define (InterpreterStack, Thing) {
 	void runDown (autoInterpreter interpreter, autostring32 text, const bool reuseVariables);
 	void haltAll ();
 	void resumeFromTop ();
-	void interpreterHasFinished (Interpreter interpreter);
-	void quicklyMoveDownInSecondPass ();
+	void resumeNextLevelInSecondPass ();
 };
 
 autoInterpreterStack InterpreterStack_create (Editor optionalInterpreterStackOwningEditor);

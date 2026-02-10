@@ -37,6 +37,6 @@ void praat_executeScriptFromEditorCommand (Editor interpreterOwningEditor, Edito
 	Deprecated stuff.
 */
 void praat_executeScriptFromFileNameWithArguments (conststring32 nameAndArguments);   // called only from external man pages with \SC (deprecated 2026) (last checked 2026-02-03)
-void praat_runOldExecuteCommand (InterpreterStack optionalInterpreterStack, conststring32 nameAndArguments);   // called only from `execute` (deprecated 2014) (last checked 2026-02-03)
+void praat_runOldExecuteCommand (InterpreterStack owningInterpreterStack, conststring32 nameAndArguments);   // called only from `execute` (deprecated 2014) (last checked 2026-02-03)
 
 #endif // !_praat_script_h_

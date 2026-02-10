@@ -97,8 +97,8 @@ static void gui_drawingarea_cb_mouse (DemoEditor me, GuiDrawingArea_MouseEvent e
 		Melder_assert (my interpreterReference);
 		try {
 			autoPraatBackground background;
-			Melder_assert (my interpreterReference -> optionalInterpreterStack);
-			my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+			Melder_assert (my interpreterReference -> owningInterpreterStack);
+			my interpreterReference -> owningInterpreterStack -> resumeFromTop ();
 		} catch (MelderError) {
 			Melder_throw (U"This happened after you clicked in the Demo window.");
 		}
@@ -122,8 +122,8 @@ static void gui_drawingarea_cb_key (DemoEditor me, GuiDrawingArea_KeyEvent event
 		Melder_assert (my interpreterReference);
 		try {
 			autoPraatBackground background;
-			Melder_assert (my interpreterReference -> optionalInterpreterStack);
-			my interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+			Melder_assert (my interpreterReference -> owningInterpreterStack);
+			my interpreterReference -> owningInterpreterStack -> resumeFromTop ();
 		} catch (MelderError) {
 			Melder_throw (U"This happened after you pressed a key in the Demo window.");
 		}
@@ -263,11 +263,11 @@ void Demo_timer (double duration) {
 void Demo_waitForInput (Interpreter interpreter) {
 	//TRACE
 	Melder_assert (interpreter);
-	Melder_assert (interpreter -> optionalInterpreterStack);
+	Melder_assert (interpreter -> owningInterpreterStack);
 
 	trace (U"is in second Pass? ", interpreter -> isInSecondPass);
 	if (interpreter -> isInSecondPass) {
-		interpreter -> isInSecondPass = false;
+		interpreter -> isInSecondPass = false;   // TODO: needed?
 	} else {
 		/*
 			This function pauses the interpreter.
@@ -280,14 +280,11 @@ void Demo_waitForInput (Interpreter interpreter) {
 			Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
 				U"Please click or type into the Demo window or close it.");
 		}
-		//if (interpreter -> optionalParentInterpreter)
-		//	Melder_throw (U"Cannot do demoWaitForInput() in a script called from another script.\n"
-		//			U"If you want to pause a nested script, use “include” instead.");
 		//GuiThing_show (theReferenceToTheOnlyDemoEditor -> windowForm);
 		theReferenceToTheOnlyDemoEditor -> clicked = false;
 		theReferenceToTheOnlyDemoEditor -> keyPressed = false;
 		theReferenceToTheOnlyDemoEditor -> waitingForInput = true;
-		interpreter -> optionalInterpreterStack -> haltAll ();
+		interpreter -> owningInterpreterStack -> haltAll ();
 		trace (U"setting the Demo window's interpreter to ", Melder_pointer (interpreter));
 		theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
 	}
