@@ -2116,8 +2116,12 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 	NUMsortTogether (my procedureNames.get(), my procedureStartLines.get());
 	for (integer iproc = 1; iproc < my procedureNames.size; iproc ++)
 		if (str32equ (my procedureNames [iproc].get(), my procedureNames [iproc + 1].get()))
-			Melder_throw (U"Duplicate procedure \"", my procedureNames [iproc].get(),
-					U"\" on lines ", my procedureStartLines [iproc], U" and ", my procedureStartLines [iproc + 1], U".");
+			Melder_warning_once (
+				U"Duplicate procedure \"", my procedureNames [iproc].get(),
+				U"\" on lines ", my procedureStartLines [iproc], U" and ", my procedureStartLines [iproc + 1],
+				U". This is probably a bug, for which you may want to contact the author of the script. "
+				U"The script will run, but it is unpredictable which of the two procedure definitions will be chosen."
+			);   // TURNED INTO WARNING 2026, SCHEDULED FOR ERROR 2036
 	/*
 		Connect continuation lines.
 	*/
