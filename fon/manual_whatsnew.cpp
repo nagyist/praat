@@ -29,6 +29,11 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.60# (10 February 2026)
+• Scripting: fixed an interaction between pause windows and @`exitScript`.
+• Scripting: turned cases of multiple identical procedure names into
+  once-warnings instead of errors.
+
 ##6.4.59# (5 February 2026)
 • Made nested scripts with pause windows and/or Demo window work again.
 • Fixed a bug by which SpeechRecognizer creation could make Praat crash on some platforms.
