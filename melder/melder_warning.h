@@ -54,5 +54,22 @@ public:
 
 void Melder_setWarningProc (MelderWarning::Proc p_proc);
 
-/* End of file melder_warning.h */
-#endif
+//#define Melder_warning_once(...)  \
+//	do { static bool hasWarned = false; if (! hasWarned) { Melder_warning (__VA_ARGS__); hasWarned = true; } } while (0)
+
+template <int invocationSite>
+struct MelderWarningOnce {
+	inline static std::once_flag flag;
+};
+
+template <int invocationSite, typename... Args>
+inline void Melder_warning_once_template (Args&&... args)
+{
+	std::call_once (MelderWarningOnce <invocationSite> :: flag, [&] {
+		Melder_warning (std::forward <Args> (args)...);
+	});
+}
+
+#define Melder_warning_once(...)  Melder_warning_once_template <__COUNTER__> (__VA_ARGS__)
+
+#endif // !_melder_warning_h_

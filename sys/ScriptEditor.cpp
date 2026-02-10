@@ -169,9 +169,9 @@ static void menu_cb_run (ScriptEditor me, EDITOR_ARGS) {
 				Script_rememberDuringThisAppSession_move (script.move());
 				interpreter -> scriptReference = Script_find (MelderFile_peekPath (& my file));
 			}
-			Melder_assert (interpreter -> optionalInterpreterStack);
-			interpreter -> optionalInterpreterStack -> emptyAll ();   // TODO: should we create a new InterpreterStack instead, owned by the script editor?
-			interpreter -> optionalInterpreterStack -> runDown (interpreter.move(), text.move(), false);
+			Melder_assert (interpreter -> owningInterpreterStack);
+			interpreter -> owningInterpreterStack -> emptyAll ();   // TODO: should we create a new InterpreterStack instead, owned by the script editor?
+			interpreter -> owningInterpreterStack -> runDown (interpreter.move(), text.move(), false);
 		}
 	} catch (MelderError) {
 		Melder_flushError (U"The script didn’t run to its completion.");
@@ -245,9 +245,9 @@ static void menu_cb_runSelection (ScriptEditor me, EDITOR_ARGS) {
 				Script_rememberDuringThisAppSession_move (script.move());
 				interpreter -> scriptReference = Script_find (MelderFile_peekPath (& my file));
 			}
-			Melder_assert (interpreter -> optionalInterpreterStack);
-			interpreter -> optionalInterpreterStack -> emptyAll ();   // TODO: should we create a new InterpreterStack instead, owned by the script editor?
-			interpreter -> optionalInterpreterStack -> runDown (interpreter.move(), Melder_dup (textPlusProcedures.string), false);
+			Melder_assert (interpreter -> owningInterpreterStack);
+			interpreter -> owningInterpreterStack -> emptyAll ();   // TODO: should we create a new InterpreterStack instead, owned by the script editor?
+			interpreter -> owningInterpreterStack -> runDown (interpreter.move(), Melder_dup (textPlusProcedures.string), false);
 		}
 	} catch (MelderError) {
 		Melder_flushError (U"The script selection didn’t run to its completion.");

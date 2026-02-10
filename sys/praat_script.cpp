@@ -300,8 +300,8 @@ bool praat_executeCommand (Interpreter interpreter, char32 *command) {
 			//TRACE
 			trace (U"interpreter: ", Melder_pointer (interpreter));
 			if (interpreter)
-				trace (U"stack: ", Melder_pointer (interpreter -> optionalInterpreterStack));
-			praat_runOldExecuteCommand (interpreter ? interpreter -> optionalInterpreterStack : nullptr, command + 8);
+				trace (U"stack: ", Melder_pointer (interpreter -> owningInterpreterStack));
+			praat_runOldExecuteCommand (interpreter ? interpreter -> owningInterpreterStack : nullptr, command + 8);
 		} else if (str32nequ (command, U"editor", 6)) {   // deprecated
 			Melder_require (praat_commandsWithExternalSideEffectsAreAllowed (),
 				U"The script command “editor” is not available inside manuals.");
@@ -563,12 +563,8 @@ void praat_runScript (InterpreterStack interpreterStack, conststring32 fileName,
 
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
-		interpreterStack -> quicklyMoveDownInSecondPass ();
+		interpreterStack -> resumeNextLevelInSecondPass ();
 	} else {
-		//TRACE
-		trace (U"File: ", fileName);
-		trace (U"The working directory is ", Melder_peekWorkingDirectory ());
-		trace (U"The working directory of interpreter ", Melder_pointer (parentInterpreter), U" is ", & parentInterpreter -> workingDirectory);
 		Melder_assert (MelderFolder_equal (Melder_peekWorkingDirectory (), & parentInterpreter -> workingDirectory));
 		//autoMelderSetCurrentFolder folder (& parentInterpreter -> workingDirectory);   // TODO: is this superfluous, i.e. does the previous assertion never fire?
 
@@ -620,7 +616,7 @@ void praat_runNotebook (InterpreterStack interpreterStack, conststring32 fileNam
 	//TRACE
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
-		interpreterStack -> quicklyMoveDownInSecondPass ();
+		interpreterStack -> resumeNextLevelInSecondPass ();
 	} else {
 		structMelderFolder workingDirectory;
 		Melder_getCurrentFolder (& workingDirectory);
@@ -784,7 +780,7 @@ void praat_runOldExecuteCommand (InterpreterStack interpreterStack, conststring3
 
 	Interpreter parentInterpreter = interpreterStack -> current_a ();
 	if (parentInterpreter -> isInSecondPass) {
-		interpreterStack -> quicklyMoveDownInSecondPass ();
+		interpreterStack -> resumeNextLevelInSecondPass ();
 	} else {
 		try {
 			autostring32 text = MelderFile_readText (& file);

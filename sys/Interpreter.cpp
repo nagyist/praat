@@ -122,7 +122,7 @@ autoInterpreter Interpreter_createFromEnvironment (InterpreterStack interpreterS
 	Melder_assert (interpreterStack);
 	try {
 		autoInterpreter me = Thing_new (Interpreter);
-		my optionalInterpreterStack = interpreterStack;
+		my owningInterpreterStack = interpreterStack;
 		if (optionalFile) {
 			MelderFile_copy (optionalFile, & my file);
 			/*
@@ -2116,8 +2116,12 @@ static void private_Interpreter_initialize (Interpreter me, autostring32 text, c
 	NUMsortTogether (my procedureNames.get(), my procedureStartLines.get());
 	for (integer iproc = 1; iproc < my procedureNames.size; iproc ++)
 		if (str32equ (my procedureNames [iproc].get(), my procedureNames [iproc + 1].get()))
-			Melder_throw (U"Duplicate procedure \"", my procedureNames [iproc].get(),
-					U"\" on lines ", my procedureStartLines [iproc], U" and ", my procedureStartLines [iproc + 1], U".");
+			Melder_warning_once (
+				U"Duplicate procedure \"", my procedureNames [iproc].get(),
+				U"\" on lines ", my procedureStartLines [iproc], U" and ", my procedureStartLines [iproc + 1],
+				U". This is probably a bug, for which you may want to contact the author of the script. "
+				U"The script will run, but it is unpredictable which of the two procedure definitions will be chosen."
+			);   // TURNED INTO WARNING 2026, SCHEDULED FOR ERROR 2036
 	/*
 		Connect continuation lines.
 	*/
@@ -3534,10 +3538,10 @@ void Interpreter_resume (Interpreter me) {
 		trace (U"catch");
 		trace (U"catch ", Melder_pointer (me));
 		trace (U"catch at line number ", my lineNumber);
-		trace (U"catch with stack ", Melder_pointer (my optionalInterpreterStack));
+		trace (U"catch with stack ", Melder_pointer (my owningInterpreterStack));
 		trace (U"catch in file ", & my file);
-		trace (U"catch at level ", my optionalInterpreterStack -> currentLevel);
-		trace (U"catch at stack interpreter ", Melder_pointer (my optionalInterpreterStack -> current_0 ()));
+		trace (U"catch at level ", my owningInterpreterStack -> currentLevel);
+		trace (U"catch at stack interpreter ", Melder_pointer (my owningInterpreterStack -> current_0 ()));
 		if (my lineNumber > 0) {
 			const bool normalExplicitExit = str32nequ (my lines [my lineNumber], U"exit ", 5) || Melder_hasError (U"Script exited.");
 			if (! normalExplicitExit && ! assertionFailed) {   // don't show the message twice!
@@ -3553,19 +3557,18 @@ void Interpreter_resume (Interpreter me) {
 		my running = false;
 		my stopped = false;
 		//my isHalted = false;   // TODO: needed?
-		trace (U"catch: has finished...", Melder_pointer (my optionalInterpreterStack));
-		my optionalInterpreterStack -> interpreterHasFinished (me);
+		trace (U"catch: has finished...", Melder_pointer (my owningInterpreterStack));
 		trace (U"catch: ... has finished");
 		if (Melder_hasCrash ()) {
+			my owningInterpreterStack -> currentLevel -= 1;   // TODO: encapsulate
 			throw;
 		} else if (str32equ (Melder_getError (), U"\nScript exited.\n")) {
 			Melder_clearError ();
 		} else {
+			my owningInterpreterStack -> currentLevel -= 1;   // TODO: encapsulate
 			throw;
 		}
 	}
-	Melder_assert (my optionalInterpreterStack);
-	my optionalInterpreterStack -> interpreterHasFinished (me);
 }
 
 void Interpreter_stop (Interpreter me) {
@@ -3630,6 +3633,139 @@ void Interpreter_anyExpression (Interpreter me, conststring32 expression, Formul
 
 Thing_implement (InterpreterStack, Thing, 0);
 
+/*
+	Schematic code:
+
+	void Interpreter_run (Interpreter me) {
+		my lineNumber = 1;
+		Interpreter_resume (me);
+	}
+	void Interpreter_resume (Interpreter me) {
+		my isHalted = false;
+		try {
+			for (; lineNumber <= my lines.size; lineNumber ++) {
+				if (my isHalted)
+					break;
+				handleOneLine ();
+			}
+		} catch (MelderError) {
+			my owningInterpreterStack -> currentLevel -= 1;
+			throw;
+		}
+	}
+	void runScript (InterpreterStack interpreterStack, conststring32 fileName, integer narg, Stackel args, Editor optionalInterpreterOwningEditor) {
+		Melder_assert (interpreterStack);
+		Interpreter parentInterpreter = interpreterStack -> current_a ();
+		if (parentInterpreter -> isInSecondPass) {
+			interpreterStack -> resumeNextLevelInSecondPass ();
+		} else {
+			Melder_assert (MelderFolder_equal (Melder_peekWorkingDirectory (), & parentInterpreter -> workingDirectory));
+			//autoMelderSetCurrentFolder folder (& parentInterpreter -> workingDirectory);   // TODO: is this superfluous, i.e. does the previous assertion never fire?
+			structMelderFile file { };
+			try {
+				Melder_relativePathToFile (fileName, & file);
+				autostring32 text = MelderFile_readText (& file);
+				{// scope
+					autoMelderFileSetCurrentFolder folder (& file);   // so that callee-relative file names can be used for including include files
+					Melder_includeIncludeFiles (& text);
+				}   // back to the default directory of the caller
+				autoInterpreter me = Interpreter_createFromEnvironment (
+					interpreterStack,   // owner always needed
+					optionalInterpreterOwningEditor,
+					& file   // so that callee-relative file names can be used inside the script
+				);
+				Interpreter_readParameters (me.get(), text.get());   // TODO: should become a field of structInterpreter
+				my text = text.move();
+				Interpreter_getArgumentsFromArgs (me.get(), narg, args);   // interpret caller-relative paths for infile/outfile/folder arguments
+				interpreterStack -> runDown (me.move(), autostring32(), false);   // back to the default directory of the caller
+			} catch (MelderError) {
+				Melder_throw (U"Script ", & file, U" not completed.");   // don't refer to 'fileName', because its contents may have changed
+			}
+		}
+	}
+	int endPause (int numberOfContinueButtons, int defaultContinueButton, int cancelContinueButton,
+		conststring32 continueText1, conststring32 continueText2, conststring32 continueText3,
+		conststring32 continueText4, conststring32 continueText5, conststring32 continueText6,
+		conststring32 continueText7, conststring32 continueText8, conststring32 continueText9,
+		conststring32 continueText10, Interpreter interpreter)
+	{
+		Melder_assert (interpreter);
+		if (interpreter -> isInSecondPass) {
+			Melder_assert (interpreter == thePauseForm_interpreterReference);
+			Melder_assert (! thePauseForm);
+			interpreter -> isInSecondPass = false;   // TODO: needed?
+			return thePauseForm_clicked;
+		} else {
+			if (! thePauseForm)
+				Melder_throw (U"Found the function “endPause” without a preceding “beginPause”.");
+			thePauseForm_interpreterReference = interpreter;
+			thePauseForm_savedEditorReference = interpreter -> optionalDynamicEnvironmentEditor();
+			UiForm_setPauseForm (thePauseForm.get(), numberOfContinueButtons, defaultContinueButton, cancelContinueButton,
+				continueText1, continueText2, continueText3, continueText4, continueText5,
+				continueText6, continueText7, continueText8, continueText9, continueText10,
+				thePauseFormCancelCallback
+			);
+			theCancelContinueButton = cancelContinueButton;
+			UiForm_finish (thePauseForm.get());
+			thePauseForm_clicked = 0;
+			Melder_assert (interpreter -> owningInterpreterStack);
+			interpreter -> owningInterpreterStack -> haltAll ();
+			UiForm_destroyWhenUnmanaged (thePauseForm.get());
+			UiForm_do (thePauseForm.get(), false);   // put he pause form on the screen
+			return 0;
+		}
+	}
+	void Demo_waitForInput (Interpreter interpreter) {
+		Melder_assert (interpreter);
+		if (interpreter -> isInSecondPass) {
+			interpreter -> isInSecondPass = false;   // TODO: needed?
+		} else {
+			if (! theReferenceToTheOnlyDemoEditor)
+				Melder_throw (U"Cannot do demoWaitForInput() if the Demo window isn’t visible.");
+			if (theReferenceToTheOnlyDemoEditor -> waitingForInput &&0) {
+				Melder_throw (U"You cannot work with the Demo window while it is waiting for input. "
+					U"Please click or type into the Demo window or close it.");
+			}
+			//GuiThing_show (theReferenceToTheOnlyDemoEditor -> windowForm);
+			theReferenceToTheOnlyDemoEditor -> clicked = false;
+			theReferenceToTheOnlyDemoEditor -> keyPressed = false;
+			theReferenceToTheOnlyDemoEditor -> waitingForInput = true;
+			interpreter -> owningInterpreterStack -> haltAll ();
+			theReferenceToTheOnlyDemoEditor -> interpreterReference = interpreter;
+		}
+	}
+	static void thePauseFormOkCallback (void *closure) {
+		if (! thePauseForm_interpreterReference) {   // interpreter was destroyed?
+			GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
+			thePauseForm. releaseToUser();
+			return;
+		}
+		if (! thePauseForm)   // BUG: perhaps there was a mistake in the script
+			return;
+		thePauseForm_clicked = UiForm_getClickedContinueButton (thePauseForm.get());
+		if (thePauseForm_clicked != theCancelContinueButton)
+			UiForm_Interpreter_addVariables (thePauseForm.get(), (Interpreter) closure);   // 'closure', not 'interpreter' or 'theInterpreter'!
+		Melder_assert (thePauseForm_clicked >= 1 && thePauseForm_clicked <= 10);
+		autostring32 clickedText = Melder_dup (thePauseForm -> continueTexts [thePauseForm_clicked].get());   // very safe
+		if (thePauseForm -> d_dialogForm) {
+			GuiThing_hide (thePauseForm -> d_dialogForm);   // BUG: memory leak
+			//thePauseForm_interpreterReference -> isInSecondPass = false;   // TODO: corrected? and what about isHalted?
+		}
+		thePauseForm. releaseToUser();   // undangle (will be autodestroyed when unmanaged)
+		Melder_assert (! thePauseForm);
+		try {
+			autoPraatBackground background;
+			Melder_assert (thePauseForm_interpreterReference -> owningInterpreterStack);
+			thePauseForm_interpreterReference -> owningInterpreterStack -> resumeFromTop ();
+		} catch (MelderError) {
+			if (thePauseForm_clicked == theCancelContinueButton)
+				Melder_throw (U"This happened after you cancelled the pause form.");
+			else
+				Melder_throw (U"This happened after you clicked “", clickedText.get(), U"” in the pause form.");
+		}
+	}
+*/
+
 autoInterpreterStack InterpreterStack_create (Editor optionalInterpreterStackOwningEditor) {
 	try {
 		autoInterpreterStack me = Thing_new (InterpreterStack);
@@ -3653,18 +3789,26 @@ void structInterpreterStack :: runDown (autoInterpreter interpreter, autostring3
 	if (interpreter)
 		our interpreters [our currentLevel] = interpreter.move();   // otherwise, use my existing interpreter
 	const integer oldLevel = our currentLevel;   // sets up an assertion below
+	Interpreter childInterpreter = our current_a();
 	try {
-		autoMelderSetCurrentFolder folder (& our interpreters [our currentLevel] -> workingDirectory);
-		Interpreter_run (our interpreters [our currentLevel].get(), text.move(), reuseVariables);
+		autoMelderSetCurrentFolder folder (& childInterpreter -> workingDirectory);
+		Interpreter_run (childInterpreter, text.move(), reuseVariables);
 	} catch (MelderError) {
 		//if (currentLevel == 0)
 		//	our emptyAll ();   // TODO: figure out when precisely an interpreter can be deleted
-		Melder_throw (U"Interpreter stack not run completely.");
+		//Melder_throw (U"Interpreter stack not run completely.");
+		throw;
 	}
-	Melder_assert (our currentLevel == oldLevel - 1);   // running an interpreter to its end MUST have decremented the level
-	if (currentLevel == 0) {
-		// TODO: successful run of the whole stack; can we delete? Does it depend on halted?
-		//our emptyAll();
+	Melder_assert (our currentLevel == oldLevel);
+	our currentLevel -= 1;
+	if (our currentLevel == 0) {
+		//our emptyAll();   // TODO: successful run of the whole stack; can we delete? Does it depend on halted?
+		return;   // nothing else to do
+	}
+	Interpreter parentInterpreter = our current_a();
+	if (! childInterpreter -> isHalted) {   // TODO: why the child interpreter?
+		parentInterpreter -> isInSecondPass = false;   // TODO: why the parent interpreter?
+		//childInterpreter. reset();   // TODO: figure out when precisely an interpreter can be deleted
 	}
 }
 
@@ -3673,7 +3817,6 @@ void structInterpreterStack :: haltAll () {
 		Melder_assert (our interpreters [ilevel]);
 		our interpreters [ilevel] -> isHalted = true;   // ensures fast unwinding, without processing any more lines
 		our interpreters [ilevel] -> lineNumber -= 1;   // ensure that all runScripts will get a second pass
-		our interpreters [ilevel] -> isInSecondPass = true;   // ensures that all runScripts, the pause window and demoWaitForInput will short-cut
 	}
 }
 
@@ -3685,8 +3828,10 @@ void structInterpreterStack :: resumeFromTop () {
 		Unhalt all.
 	*/
 	for (integer ilevel = 1; ilevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS; ilevel ++)
-		if (our interpreters [ilevel])
+		if (our interpreters [ilevel]) {
 			our interpreters [ilevel] -> isHalted = false;
+			our interpreters [ilevel] -> isInSecondPass = true;   // ensures that all runScripts, the pause window and demoWaitForInput will short-cut
+		}
 
 	try {
 		autoMelderSetCurrentFolder folder (& our interpreters [1] -> workingDirectory);
@@ -3694,27 +3839,15 @@ void structInterpreterStack :: resumeFromTop () {
 	} catch (MelderError) {
 		//if (currentLevel == 0)
 		//	our emptyAll ();   // TODO: figure out when precisely an interpreter can be deleted; perhaps always, when we're here?
-		Melder_throw (U"Interpreter stack has not run to completion.");
+		//Melder_throw (U"Interpreter stack has not run to completion.");
+		throw;
 	}
-	Melder_assert (our currentLevel == 0);   // running an interpreter to its end MUST have decremented the level
-	// TODO: successful run of the whole stack; can we delete? Does it depend on halted?
-	//our emptyAll();
-}
-
-void structInterpreterStack :: interpreterHasFinished (Interpreter interpreter) {
-	Melder_assert (interpreter);
-	Melder_assert (interpreter == our interpreters [our currentLevel].get());
 	our currentLevel -= 1;
-	if (our currentLevel == 0)
-		return;   // nothing to do
-	Melder_assert (our interpreters [our currentLevel]);
-	if (! interpreter -> isHalted) {
-		our interpreters [our currentLevel] -> isInSecondPass = false;   // TODO: check this
-		//our interpreters [our currentLevel + 1]. reset();   // TODO: figure out when precisely an interpreter can be deleted
-	}
+	Melder_assert (our currentLevel == 0);   // running an interpreter to its end MUST have decremented the level
+	//our emptyAll();   // TODO: successful run of the whole stack; can we delete? Does it depend on halted?
 }
 
-void structInterpreterStack :: quicklyMoveDownInSecondPass () {
+void structInterpreterStack :: resumeNextLevelInSecondPass () {
 	our currentLevel += 1;
 	Melder_assert (our currentLevel <= InterpreterStack_MAXIMUM_NUMBER_OF_LEVELS);
 	Interpreter childInterpreter = our current_a();
@@ -3722,6 +3855,15 @@ void structInterpreterStack :: quicklyMoveDownInSecondPass () {
 		autoMelderSetCurrentFolder folder (& childInterpreter -> workingDirectory);   // so that callee-relative file names can be used inside the script
 		Interpreter_resume (childInterpreter);
 	}   // back to the default directory of the caller
+	our currentLevel -= 1;
+	if (our currentLevel == 0)
+		return;   // nothing to do
+	Interpreter parentInterpreter = our current_a();
+	//Melder_assert (! childInterpreter -> isHalted);   // TODO: why not parentInterpreter? and why can this fire?
+	if (! childInterpreter -> isHalted) {
+		parentInterpreter -> isInSecondPass = false;   // TODO: why not childInterpreter?
+		//our interpreters [our currentLevel + 1]. reset();   // TODO: figure out when precisely an interpreter can be deleted
+	}
 }
 
 /* End of file Interpreter.cpp */

@@ -85,8 +85,8 @@ static void thePauseFormOkCallback (UiForm /* sendingForm */, integer /* narg */
 	Melder_assert (thePauseForm_interpreterReference);
 	try {
 		autoPraatBackground background;
-		Melder_assert (thePauseForm_interpreterReference -> optionalInterpreterStack);
-		thePauseForm_interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+		Melder_assert (thePauseForm_interpreterReference -> owningInterpreterStack);
+		thePauseForm_interpreterReference -> owningInterpreterStack -> resumeFromTop ();
 	} catch (MelderError) {
 		/*
 			These errors will often not be reached, because Interpreter_resume contains some Melder_flushError().
@@ -142,8 +142,8 @@ static void thePauseFormCancelCallback (UiForm /* dia */, void * /* closure */) 
 		//Melder_setCurrentFolder (& thePauseForm_savedFolder);   // TODO: remove
 		try {
 			autoPraatBackground background;
-			Melder_assert (thePauseForm_interpreterReference -> optionalInterpreterStack);
-			thePauseForm_interpreterReference -> optionalInterpreterStack -> resumeFromTop ();
+			Melder_assert (thePauseForm_interpreterReference -> owningInterpreterStack);
+			thePauseForm_interpreterReference -> owningInterpreterStack -> resumeFromTop ();
 		} catch (MelderError) {
 			Melder_flushError (U"This happened after you stopped the pause form.");
 		}
@@ -293,7 +293,7 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 	if (interpreter -> isInSecondPass) {
 		Melder_assert (interpreter == thePauseForm_interpreterReference);
 		Melder_assert (! thePauseForm);
-		interpreter -> isInSecondPass = false;
+		interpreter -> isInSecondPass = false;   // TODO: needed?
 		return thePauseForm_clicked;
 	} else {
 		if (! thePauseForm)
@@ -309,8 +309,8 @@ int UiPause_end (int numberOfContinueButtons, int defaultContinueButton, int can
 		UiForm_finish (thePauseForm.get());
 		//if (theCurrentPraatApplication -> batch) goto end;
 		thePauseForm_clicked = 0;
-		Melder_assert (interpreter -> optionalInterpreterStack);
-		interpreter -> optionalInterpreterStack -> haltAll ();
+		Melder_assert (interpreter -> owningInterpreterStack);
+		interpreter -> owningInterpreterStack -> haltAll ();
 		/*
 			Put the pause form on the screen.
 		*/
@@ -344,8 +344,8 @@ void UiPause_pauseScript (GuiWindow topShell, Editor optionalPauseWindowOwningEd
 		UiForm_finish (thePauseForm.get());
 		//if (theCurrentPraatApplication -> batch) goto end;
 		thePauseForm_clicked = 0;
-		Melder_assert (interpreter -> optionalInterpreterStack);
-		interpreter -> optionalInterpreterStack -> haltAll ();
+		Melder_assert (interpreter -> owningInterpreterStack);
+		interpreter -> owningInterpreterStack -> haltAll ();
 		/*
 			Put the pause form on the screen.
 		*/
