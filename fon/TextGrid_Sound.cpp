@@ -384,14 +384,17 @@ void TextGrid_Sound_transcribeInterval (
 	conststring32 modelName, conststring32 languageName
 ) {
 	try {
+		//TRACE
 		IntervalTier tier = TextGrid_checkSpecifiedTierIsIntervalTier (me, tierNumber);
 		if (intervalNumber < 1 || intervalNumber > tier -> intervals.size)
 			Melder_throw (U"Interval ", intervalNumber, U" does not exist.");
 		TextInterval interval = tier -> intervals.at [intervalNumber];
+		trace (U"tier ", tierNumber, U" interval ", intervalNumber,
+				U" (", interval -> xmin, U" .. ", interval -> xmax, U" “", interval -> text.get(), U"”)");
 		autoSound soundPart = Sound_extractPart (sound, interval -> xmin, interval -> xmax,
 			kSound_windowShape::RECTANGULAR, 1.0, false);
 		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName);
-		autostring32 result = SpeechRecognizer_recognize (speechRecognizer.get (), soundPart.get ());
+		autostring32 result = SpeechRecognizer_recognize (speechRecognizer.get(), soundPart.get());
 		TextInterval_setText (interval, result.get());
 
 	} catch (MelderError) {

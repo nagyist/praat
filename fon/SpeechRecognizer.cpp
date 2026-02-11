@@ -120,15 +120,11 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 
 autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) {
 	try {
+		// TRACE
+		trace (U"Sound xmin = ", sound -> xmin, U", sound xmax = ", sound -> xmax);
+
 		whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_GREEDY);
-		params. print_progress = true;   // also default
-		params. print_special = false;   // also default
-		params. print_timestamps = true; // also default
-		params. token_timestamps = true; // also default, necessary if we want to time tokens
-		params. single_segment = true;  // force single segment output
-		params. split_on_word = true;    // not default, not clear what it is doing
-		params. debug_mode = true;       // not default, not clear what it is doing
-		//params.detect_language = true;  // default false, if true - only detecting the language and not transcribing
+		params. single_segment = false ;  // single segment is 30sec max
 
 		if (whisper_is_multilingual (my whisperContext.get ())) {
 			if (my d_languageName && ! str32str (my d_languageName.get(), U"Autodetect")) {
@@ -155,13 +151,18 @@ autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) 
 			samples32. push_back (static_cast <float> (sound -> z [1] [i]));
 
 		/*
-			Run Whisper.
+			Run Whisper and collect all segments.
 		*/
 		if (whisper_full (my whisperContext.get(), params, samples32.data(), static_cast <int> (sound -> nx)) != 0)
 			Melder_throw (U"Whisper failed to process audio");
-		autostring32 result = Melder_8to32 (whisper_full_get_segment_text (my whisperContext.get(), 0));
-
-		return result;
+		const int n_segments = whisper_full_n_segments (my whisperContext.get());
+		autoMelderString result;
+		for (int i = 0; i < n_segments; ++ i) {
+			const char *segment_text = whisper_full_get_segment_text (my whisperContext.get(), i);
+			MelderString_append (& result, Melder_peek8to32 (segment_text));
+		}
+		return Melder_dup(result.string);
+;
 	} catch (MelderError) {
 		Melder_throw (U"Sound not transcribed.");
 	}
