@@ -1,6 +1,6 @@
 /* praat_uvafon_init.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2667,7 +2667,7 @@ DO
 
 // MARK: Open
 
-FORM_READ (READ1_Strings_readFromRawTextFile, U"Read Strings from raw text file", nullptr, true) {
+FORM_READ (READ_ONE__Strings_readFromRawTextFile, U"Read Strings from raw text file", nullptr, true) {
 	READ_ONE
 		autoStrings result = Strings_readFromRawTextFile (file);
 	READ_ONE_END
@@ -2827,7 +2827,7 @@ DO
 	CREATE_ONE_END (allTierNames)
 }
 
-FORM (READ1_TextGrid_readFromEspsLabelFile, U"Read TextGrid from ESPS label file", U"Read TextGrid from ESPS label file...") {
+FORM (READ_ONE__TextGrid_readFromEspsLabelFile, U"Read TextGrid from ESPS label file", U"Read TextGrid from ESPS label file...") {
 	INFILE (soundFilePath, U"Sound file path", U"")
 	BOOLEAN (tiersArePointTiers, U"Tiers are point tiers", false)
 	INTEGER (overrideNumberOfTiers, U"Override number of tiers", U"0 (= don't override)")
@@ -3110,12 +3110,12 @@ void praat_uvafon_init () {
 		INCLUDE_LIBRARY (praat_David_generics_new_init)
 
 	praat_addMenuCommand (U"Objects", U"Open", U"Read Strings from raw text file...",
-			nullptr, 0, READ1_Strings_readFromRawTextFile);
+			nullptr, 0, READ_ONE__Strings_readFromRawTextFile);
 
 	praat_addMenuCommand (U"Objects", U"Open", U"-- read tier --", nullptr, 0, nullptr);
 	praat_addMenuCommand (U"Objects", U"Open", U"Read from special annotation file...", nullptr, 0, nullptr);
 		praat_addMenuCommand (U"Objects", U"Open", U"Read TextGrid from Xwaves... || Read TextGrid from ESPS label file...",
-				nullptr, 1, READ1_TextGrid_readFromEspsLabelFile);
+				nullptr, 1, READ_ONE__TextGrid_readFromEspsLabelFile);
 	praat_addMenuCommand (U"Objects", U"Open", U"Read Sound with adjacent annotation files...", nullptr, 0, nullptr);
 		praat_addMenuCommand (U"Objects", U"Open", U"Read Sound with adjacent annotation files (Buckeye)...",
 				nullptr, 1, NEW_Sound_readWithAdjacentAnnotationFiles_buckeye);

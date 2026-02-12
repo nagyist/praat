@@ -1,6 +1,6 @@
 /* praat_Sound.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ DIRECT (HELP__LongSound_help) {
 	HELP (U"LongSound")
 }
 
-FORM_READ (READ1_LongSound_open, U"Open long sound file", nullptr, true) {
+FORM_READ (READ_ONE__LongSound_open, U"Open long sound file", nullptr, true) {
 	READ_ONE
 		autoLongSound result = LongSound_open (file);
 	READ_ONE_END
@@ -1191,7 +1191,7 @@ FORM_READ (READ_MULTIPLE__Sound_readSeparateChannelsFromSoundFile, U"Read separa
 	READ_MULTIPLE_END
 }
 
-FORM_READ (READ1_Sound_readFromRawAlawFile, U"Read Sound from raw Alaw file", nullptr, true) {
+FORM_READ (READ_ONE__Sound_readFromRawAlawFile, U"Read Sound from raw Alaw file", nullptr, true) {
 	READ_ONE
 		autoSound result = Sound_readFromRawAlawFile (file);
 	READ_ONE_END
@@ -2278,11 +2278,11 @@ void praat_Sound_init () {
 				CREATE_ONE__Sound_createAsToneComplex);   // alternative COMPATIBILITY <= 2013
 
 	praat_addMenuCommand (U"Objects", U"Open", U"-- read sound --", nullptr, 0, nullptr);
-	praat_addMenuCommand (U"Objects", U"Open", U"Open long sound file...", nullptr, 'L', READ1_LongSound_open);
+	praat_addMenuCommand (U"Objects", U"Open", U"Open long sound file...", nullptr, 'L', READ_ONE__LongSound_open);
 	praat_addMenuCommand (U"Objects", U"Open", U"Read separate channels from sound file... || Read two Sounds from stereo file...", nullptr, 0,
 			READ_MULTIPLE__Sound_readSeparateChannelsFromSoundFile);   // alternative COMPATIBILITY <= 2010
 	praat_addMenuCommand (U"Objects", U"Open", U"Read from special sound file", nullptr, 0, nullptr);
-		praat_addMenuCommand (U"Objects", U"Open", U"Read Sound from raw Alaw file...", nullptr, GuiMenu_DEPTH_1, READ1_Sound_readFromRawAlawFile);
+		praat_addMenuCommand (U"Objects", U"Open", U"Read Sound from raw Alaw file...", nullptr, GuiMenu_DEPTH_1, READ_ONE__Sound_readFromRawAlawFile);
 
 	praat_addMenuCommand (U"Objects", U"Goodies", U"-- sound goodies --", nullptr, 0, nullptr);
 	praat_addMenuCommand (U"Objects", U"Goodies", U"Stop playing sound", nullptr, GuiMenu_ESCAPE,

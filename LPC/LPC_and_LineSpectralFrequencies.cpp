@@ -156,7 +156,7 @@ void LPC_into_LineSpectralFrequencies (constLPC inputLPC, mutableLineSpectralFre
 			const integer half_order_gdif = gdif -> numberOfCoefficients - 1;
 			double currentGridSize = gridSize;
 			integer numberOfBisections = 0, numberOfRootsFound = 0;
-			while (numberOfRootsFound  < half_order_gsum && numberOfBisections < 10) {
+			while (numberOfRootsFound < half_order_gsum && numberOfBisections < 10) {
 				numberOfRootsFound = Polynomial_into_Roots_searchOnGrid (gsum.get(), roots.get(), currentGridSize);
 				currentGridSize *= 0.5;
 				numberOfBisections++;

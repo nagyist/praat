@@ -550,15 +550,15 @@ static bool commandIsToBeIncluded (Praat_Command command, bool deprecated, bool 
 		(! includeDrawAPI && Melder_nequ (command -> nameOfCallback, U"GRAPHICS_", 9)) ||
 		(! includePlayAPI && Melder_nequ (command -> nameOfCallback, U"PLAY_", 5)) ||
 		(! includeRecordAPI && Melder_nequ (command -> nameOfCallback, U"RECORD_", 7)) ||
-		(! includeReadAPI && Melder_nequ (command -> nameOfCallback, U"READ_", 5)) ||
-		(! includeReadAPI && Melder_nequ (command -> nameOfCallback, U"READ1_", 6)) ||
+		(! includeReadAPI && Melder_nequ (command -> nameOfCallback, U"READ_MULTIPLE__", 5)) ||
+		(! includeReadAPI && Melder_nequ (command -> nameOfCallback, U"READ_ONE__", 10)) ||
 		(! includeCreateAPI && Melder_nequ (command -> nameOfCallback, U"NEW1_", 5));
 	return (command -> forceApi || ! hidden) && command -> callback != DO_RunTheScriptFromAnyAddedMenuCommand;
 }
 
 static bool commandHasFileNameArgument (Praat_Command command) {
 	const bool hasFileNameArgument =
-		Melder_nequ (command -> nameOfCallback, U"READ1_", 6) ||
+		Melder_nequ (command -> nameOfCallback, U"READ_ONE__", 10) ||
 		Melder_nequ (command -> nameOfCallback, U"SAVE_", 5)
 	;
 	return hasFileNameArgument;
@@ -567,7 +567,7 @@ static bool commandHasFileNameArgument (Praat_Command command) {
 static conststring32 getReturnType (Praat_Command command) {
 	const conststring32 returnType =
 		Melder_nequ (command -> nameOfCallback, U"NEW1_", 5) ? U"PraatObject" :
-		Melder_nequ (command -> nameOfCallback, U"READ1_", 6) ? U"PraatObject" :
+		Melder_nequ (command -> nameOfCallback, U"READ_ONE__", 10) ? U"PraatObject" :
 		Melder_nequ (command -> nameOfCallback, U"REAL_", 5) ? U"double" :
 		Melder_nequ (command -> nameOfCallback, U"INTEGER_", 8) ? U"int64_t" :
 		Melder_nequ (command -> nameOfCallback, U"STRING_", 7) ? U"char *" :
