@@ -35,6 +35,7 @@ Prefs_begin (TextGridArea)
 	InstancePrefs_addBool         (TextGridArea, align_allowSilences,      1, false)
 	InstancePrefs_addString       (TextGridArea, transcribe_model,         1, U"ggml-base.bin")
 	InstancePrefs_addString       (TextGridArea, transcribe_language,      1, U"Autodetect language")
+	InstancePrefs_addBool		  (TextGridArea, transcribe_includeWords,  1, false)
 
 Prefs_end (TextGridArea)
 

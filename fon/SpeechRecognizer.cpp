@@ -71,16 +71,7 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 		my d_languageName = Melder_dup (languageName);
 
 		/*
-			Change '.' to '-' in the model name to properly construct SpeechRecognizer object name
-		*/
-		autostring32 modelNameWithoutDots = Melder_dup (modelName);
-		for (char32 *p = modelNameWithoutDots.get(); *p != U'\0'; p++) {
-			if (*p == U'.')
-				*p = U'-';
-		}
-
-		/*
-			Check if selected model and language are compatible and construct SpeechRecognizer object name.
+			Check if selected model and language are compatible.
 		*/
 		if (str32str (modelName, U".en.bin")) {
 			Melder_require (str32str (languageName, U"Autodetect") || str32str (languageName, U"English"),
@@ -88,12 +79,6 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 					U"Either select a multilingual model (the model name does not include .en) "
 					U"or select \"Autodetect language\"/\"English\" from the language list."
 			);
-			my d_name = Melder_dup(modelNameWithoutDots.get());
-		} else {
-			if (str32str (languageName, U"Autodetect"))
-				my d_name = Melder_dup (Melder_cat (modelNameWithoutDots.get(), U"_Auto"));
-			else
-				my d_name = Melder_dup (Melder_cat (modelNameWithoutDots.get(), U"_", languageName));
 		}
 
 		/*
@@ -118,23 +103,20 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 	}
 }
 
-autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) {
+bool isSentenceEndingPunctuation(conststring32 word) {
+	if (! word || word [0] == U'\0')
+		return false;
+
+	size_t word_length = Melder_length (word);
+	char32 last_char = word [word_length - 1];
+	return last_char == U'.' || last_char == U'!' || last_char == U'?' ||
+		last_char == U'。' || last_char == U'！' || last_char == U'？';
+}
+
+WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) {
 	try {
-		// TRACE
+		//TRACE
 		trace (U"Sound xmin = ", sound -> xmin, U", sound xmax = ", sound -> xmax);
-
-		whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_GREEDY);
-		params. single_segment = false ;  // single segment is 30sec max
-
-		if (whisper_is_multilingual (my whisperContext.get ())) {
-			if (my d_languageName && ! str32str (my d_languageName.get(), U"Autodetect")) {
-				autostring32 name = Melder_dup (my d_languageName.get());
-				name [0] = Melder_toLowerCase (name [0]);   // e.g. "Dutch" -> "dutch"
-				params. language = whisper_lang_str (whisper_lang_id (Melder_peek32to8 (name.get())));
-			} else {
-				params. language = "auto";
-			}
-		}
 
 		/*
 			Resample the sound to 16kHz if needed.
@@ -151,18 +133,108 @@ autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) 
 			samples32. push_back (static_cast <float> (sound -> z [1] [i]));
 
 		/*
-			Run Whisper and collect all segments.
+			Set up Whisper parameters for word segmentation.
+		*/
+		whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_GREEDY);
+		params.max_len = 1;				// maximum length of a segment (in symbols)
+		params.token_timestamps = true;	// must be true with max_len=1, otherwise segfault
+		params.split_on_word = true;	// with max_len=1, it ensures that the minimal segment is a word (and not a symbol)
+		if (whisper_is_multilingual (my whisperContext.get ())) {
+			if (my d_languageName && ! str32str (my d_languageName.get(), U"Autodetect")) {
+				autostring32 name = Melder_dup (my d_languageName.get());
+				name [0] = Melder_toLowerCase (name [0]);   // e.g. "Dutch" -> "dutch"
+				params. language = whisper_lang_str (whisper_lang_id (Melder_peek32to8 (name.get())));
+			} else {
+				params. language = "auto";
+			}
+		}
+
+		/*
+			Run Whisper, collect all word segments, construct sentences and the full transcription string.
 		*/
 		if (whisper_full (my whisperContext.get(), params, samples32.data(), static_cast <int> (sound -> nx)) != 0)
 			Melder_throw (U"Whisper failed to process audio");
-		const int n_segments = whisper_full_n_segments (my whisperContext.get());
-		autoMelderString result;
-		for (int i = 0; i < n_segments; ++ i) {
-			const char *segment_text = whisper_full_get_segment_text (my whisperContext.get(), i);
-			MelderString_append (& result, Melder_peek8to32 (segment_text));
+		const int n_words = whisper_full_n_segments (my whisperContext.get());
+		autoMelderString full_text;
+		autoMelderString sentence_text;
+		autovector <WhisperSegment> words = newvectorzero <WhisperSegment> (0);
+		autovector <WhisperSegment> sentences = newvectorzero <WhisperSegment> (0);
+
+		double sentence_tmin = 0.0;
+		bool isFirstWordInSentence = true;
+
+		for (int i = 0; i < n_words; ++ i) {
+			/*
+				Extract word segment information.
+			*/
+			double word_tmin = whisper_full_get_segment_t0 (my whisperContext.get(), i) / 100.0;
+			double word_tmax = whisper_full_get_segment_t1 (my whisperContext.get(), i) / 100.0;
+			if (word_tmax == word_tmin) // skip segments of the length 0
+				continue;
+			autostring32 word_text = Melder_8to32 (whisper_full_get_segment_text (my whisperContext.get(), i));
+
+			/*
+				Mark sentence start.
+			*/
+			if (isFirstWordInSentence) {
+				sentence_tmin = word_tmin;
+				isFirstWordInSentence = false;
+			}
+
+			/*
+				Add word to the sentence and to the full transcription text.
+			*/
+			MelderString_append (& sentence_text, word_text.get());
+			MelderString_append (& full_text, word_text.get());
+
+			/*
+				Create and store sentence segment if sentence is complete.
+			*/
+			bool isLastWordInSentence = isSentenceEndingPunctuation (word_text.get());
+			bool isLastWordOverall = (i == n_words - 1);
+			if (isLastWordInSentence || isLastWordOverall) {
+				WhisperSegment *sentence = sentences.append();
+				sentence -> text = Melder_dup (sentence_text.string);
+				sentence -> tmin = sentence_tmin;
+				sentence -> tmax = word_tmax;
+				trace (U"Sentence segment: [ ", sentence -> tmin, U" - ", sentence -> tmax, U" ] ", sentence -> text.get());
+
+				MelderString_empty (& sentence_text);
+				isFirstWordInSentence = true;
+			}
+
+			/*
+				Remove sentence-ending punctuation from word if necessary.
+			*/
+			if (isLastWordInSentence) {
+				integer length = Melder_length (word_text.get());
+				Melder_assert (length > 0);
+				word_text [length - 1] = U'\0';
+			}
+
+			/*
+				Create and store word segment without punctuation.
+			*/
+			WhisperSegment *word = words.append();
+			word -> text = word_text.move();
+			word -> tmin = word_tmin;
+			word -> tmax = word_tmax;
+			trace (U"Word segment ", i, U": [ ", word -> tmin, U" - ", word -> tmax, U" ]", word -> text.get());
 		}
-		return Melder_dup(result.string);
-;
+
+		WhisperTranscription transcription;
+		transcription.fullTranscription.text = Melder_dup (full_text.string);
+		transcription.fullTranscription.tmin = sound -> xmin;
+		transcription.fullTranscription.tmax = sound -> xmax;
+		transcription.words = words.move();
+		transcription.sentences = sentences.move();
+
+		trace (U"Full transcription:",
+			U" [ ", transcription.fullTranscription.tmin, U" - ",
+			transcription.fullTranscription.tmax, U" ]", transcription.fullTranscription.text.get());
+
+		return transcription;
+
 	} catch (MelderError) {
 		Melder_throw (U"Sound not transcribed.");
 	}

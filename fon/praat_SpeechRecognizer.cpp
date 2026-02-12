@@ -43,8 +43,8 @@ DIRECT (QUERY_ONE_FOR_STRING__SpeechRecognizer_getLanguageName) {
 
 DIRECT (QUERY_ONE_AND_ONE_FOR_STRING__SpeechRecognizer_Sound_recognize) {
 	QUERY_ONE_AND_ONE_FOR_STRING (SpeechRecognizer, Sound)
-		autostring32 text = SpeechRecognizer_recognize (me, you);
-		conststring32 result = text.get();
+		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (me, you);
+		conststring32 result = whisperTranscription.fullTranscription.text.get();
 	QUERY_ONE_AND_ONE_FOR_STRING_END
 }
 

@@ -379,26 +379,104 @@ again:
 	}
 }
 
+void splitIntervalIntoWhisperSegments (const IntervalTier& tier, double original_tmin, double original_tmax,
+	const autovector<WhisperSegment>& segments) {
+
+	for (integer i = 1; i <= segments.size; ++ i) {
+		WhisperSegment& segment = segments [i];
+
+		double current_tmin = original_tmin + segment.tmin;
+		double current_tmax = original_tmin + segment.tmax;
+		if (i == segments.size) {
+			current_tmax = original_tmax;
+		}
+
+		if (i == 1) {
+			integer originalIntervalNumber = IntervalTier_hasTime (tier, original_tmin);
+			TextInterval originalInterval = tier -> intervals.at [originalIntervalNumber];
+			originalInterval -> xmax = current_tmax;
+			TextInterval_setText (originalInterval, segment.text.get());
+		} else {
+			autoTextInterval newInterval = TextInterval_create (current_tmin, current_tmax, segment.text.get());
+			tier -> intervals. addItem_move (newInterval.move ());
+		}
+	}
+}
+
 void TextGrid_Sound_transcribeInterval (
-	const TextGrid me, const Sound sound, integer tierNumber, integer intervalNumber,
-	conststring32 modelName, conststring32 languageName
+	const TextGrid me, const Sound sound,
+	const integer tierNumber, const integer intervalNumber,
+	const conststring32 modelName, const conststring32 languageName,
+	const bool includeWords
 ) {
 	try {
 		//TRACE
-		IntervalTier tier = TextGrid_checkSpecifiedTierIsIntervalTier (me, tierNumber);
-		if (intervalNumber < 1 || intervalNumber > tier -> intervals.size)
+		IntervalTier headTier = TextGrid_checkSpecifiedTierIsIntervalTier (me, tierNumber);
+		if (intervalNumber < 1 || intervalNumber > headTier -> intervals.size)
 			Melder_throw (U"Interval ", intervalNumber, U" does not exist.");
-		TextInterval interval = tier -> intervals.at [intervalNumber];
-		trace (U"tier ", tierNumber, U" interval ", intervalNumber,
-				U" (", interval -> xmin, U" .. ", interval -> xmax, U" “", interval -> text.get(), U"”)");
-		autoSound soundPart = Sound_extractPart (sound, interval -> xmin, interval -> xmax,
+		if (str32str (headTier -> name.get(), U"/"))
+			Melder_throw (U"The current tier already has a slash (\"/\") in its name. Cannot create a word tier from it.");
+
+		TextInterval originalInterval = headTier -> intervals.at [intervalNumber];
+		double original_tmin = originalInterval -> xmin;
+		double original_tmax = originalInterval -> xmax;
+
+		trace (U"tier ", tierNumber, U" interval ", intervalNumber,	U" (", original_tmin, U" .. ", original_tmax, U")");
+		autoSound soundPart = Sound_extractPart (sound, original_tmin, original_tmax,
 			kSound_windowShape::RECTANGULAR, 1.0, false);
 		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName);
-		autostring32 result = SpeechRecognizer_recognize (speechRecognizer.get(), soundPart.get());
-		TextInterval_setText (interval, result.get());
+		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (
+			speechRecognizer.get(), soundPart.get());
 
+		/*
+			Create one interval per utterance in the head tier.
+		*/
+		autovector<WhisperSegment> sentenceSegments = whisperTranscription.sentences.move();
+		splitIntervalIntoWhisperSegments (headTier, original_tmin, original_tmax, sentenceSegments);
+		if (! IntervalTier_check (headTier))
+			Melder_throw (U"Tier ", tierNumber, U" is out of order.");
+
+		if (includeWords) {
+			/*
+				Make sure that the word tier exists.
+			*/
+			integer wordTierNumber = 0;
+			IntervalTier wordTier = nullptr;
+			autoMelderString newWordTierName;
+			MelderString_copy (& newWordTierName, headTier -> name.get(), U"/word");
+			for (integer i = 1; i <= my tiers->size; i ++) {
+				Function tier = my tiers->at [i];
+				if (Melder_equ (newWordTierName.string, tier -> name.get())
+						&& tier -> classInfo != classIntervalTier) {
+					Melder_throw (U"A tier with the prospective word tier name (", tier -> name.get(),
+							U") already exists, but it is not an interval tier."
+							U"\nPlease change its name or remove it.");
+					wordTierNumber = i;
+					break;
+				}
+			}
+			if (! wordTierNumber) {
+				autoIntervalTier newWordTier = IntervalTier_create (my xmin, my xmax);
+				Thing_setName (newWordTier.get(), newWordTierName.string);
+				my tiers -> addItemAtPosition_move (newWordTier.move(), wordTierNumber = tierNumber + 1);
+			}
+			Melder_assert (wordTierNumber >= 1 && wordTierNumber <= my tiers -> size);
+			wordTier = dynamic_cast <IntervalTier> (my tiers -> at [wordTierNumber]);
+
+			/*
+				Make sure that the word tier has boundaries at the edges of the original interval.
+			*/
+			IntervalTier_insertIntervalDestructively (wordTier, original_tmin, original_tmax);
+
+			/*
+				Split this big interval into the set of intervals, one interval per word.
+			*/
+			autovector<WhisperSegment> wordSegments = whisperTranscription.words.move();
+			splitIntervalIntoWhisperSegments (wordTier, original_tmin, original_tmax, wordSegments);
+			if (! IntervalTier_check (wordTier))
+				Melder_throw (U"Tier ", wordTierNumber, U"(word tier) is out of order.");
+		}
 	} catch (MelderError) {
-		// anySound for including long sound
 		Melder_throw (me, U" & ", sound, U": interval not transcribed.");
 	}
 }
