@@ -43,19 +43,31 @@ struct autoWhisperContext {
 	}
 };
 
+struct WhisperSegment {
+	autostring32 text;
+	double tmin;
+	double tmax;
+};
+
+struct WhisperTranscription {
+	WhisperSegment fullTranscription;
+	autovector <WhisperSegment> words;
+	autovector <WhisperSegment> sentences;
+};
+
 #include "SpeechRecognizer_def.h"
 
-// singletons to access lists of models and languages from everywhere
+// functions to access lists of models and languages from everywhere
 constSTRVEC theCurrentSpeechRecognizerModelNames ();
 constSTRVEC theSpeechRecognizerLanguageNames ();
 
-// default model parameters to access from everywhere (except TextGridArea_prefs.h)
+// default model parameters
 inline conststring32 theSpeechRecognizerDefaultModelName = U"ggml-base.bin";
 inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect language";
 
 // class SpeechRecognizer functions
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName);
-autostring32 SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound);
+WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound);
 
 /* End of file SpeechRecognizer.h */
 #endif

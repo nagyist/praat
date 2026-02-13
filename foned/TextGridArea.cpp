@@ -1445,13 +1445,14 @@ static void menu_cb_TranscribeInterval (TextGridArea me, EDITOR_ARGS) {
 		const autoMelderProgressOff noprogress;
 		FunctionArea_save (me, U"Transcribe interval");
 		TextGrid_Sound_transcribeInterval (my textGrid(), my borrowedSoundArea -> sound(), my selectedTier, intervalNumber,
-				my instancePref_transcribe_model(), my instancePref_transcribe_language());
+				my instancePref_transcribe_model(), my instancePref_transcribe_language(), my instancePref_transcribe_includeWords ());
 	}
 	FunctionArea_broadcastDataChanged (me);
 }
 
 static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Transcription settings", nullptr)
+		BOOLEAN (includeWords,    U"Include words", my default_transcribe_includeWords ())
 		LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
 		LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
 	EDITOR_OK
@@ -1462,6 +1463,8 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 			U"Found no Whisper-cpp models to do speech recognition with.\n"
 			U"You can install them into the subfolders “whispercpp” of the folder “models” in the Praat preferences folder."
 		);
+
+		SET_BOOLEAN (includeWords, my instancePref_transcribe_includeWords())
 
 		integer prefModel = NUMfindFirst (modelNames.get (), my instancePref_transcribe_model());
 		if (prefModel == 0)
@@ -1478,6 +1481,7 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_DO
 		my setInstancePref_transcribe_model (modelName);
 		my setInstancePref_transcribe_language (languageName);
+		my setInstancePref_transcribe_includeWords (includeWords);
 	EDITOR_END
 }
 
