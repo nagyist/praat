@@ -2,7 +2,7 @@
 #define _Thing_h_
 /* Thing.h
  *
- * Copyright (C) 1992-2009,2011-2020,2022,2024,2025 Paul Boersma
+ * Copyright (C) 1992-2009,2011-2020,2022,2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,6 +82,7 @@ extern struct structClassInfo theClassInfo_Thing;
 struct structThing {
 	ClassInfo classInfo;   // the Praat class pointer (every object also has a C++ class pointer initialized by C++ "new")
 	autostring32 name;
+	integer idOfExistingThing;   // 0 for most Things
 	void * operator new (size_t size) { return Melder_calloc (char, (int64) size); }
 	void operator delete (void *ptr, size_t /* size */) { Melder_free (ptr); }
 
@@ -529,5 +530,11 @@ autoThing Thing_newFromClassName (conststring32 className, int *out_formatVersio
 	Side effect:
 		see Thing_classFromClassName.
 */
+
+struct SharedThing {
+	Thing thing;
+};
+extern std::unordered_map <integer, SharedThing> theSharedThings;
+void Thing_share (Thing me);
 
 #endif // _Thing_h_

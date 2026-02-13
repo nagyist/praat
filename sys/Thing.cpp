@@ -1,6 +1,6 @@
 /* Thing.cpp
  *
- * Copyright (C) 1992-2012,2014-2025 Paul Boersma
+ * Copyright (C) 1992-2012,2014-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,6 +158,8 @@ void _Thing_forget_nozero (Thing me) {
 		Melder_casual (U"destroying ", my classInfo -> className);
 	//Melder_casual (U"_Thing_forget_nozero before");
 	my v9_destroy ();
+	if (my idOfExistingThing)
+		theSharedThings. erase (my idOfExistingThing);
 	//Melder_casual (U"_Thing_forget_nozero after");
 	theTotalNumberOfThings -= 1;
 }
@@ -168,6 +170,8 @@ void _Thing_forget (Thing me) {
 	if (Melder_debug == 40)
 		Melder_casual (U"destroying ", my classInfo -> className);
 	my v9_destroy ();
+	if (my idOfExistingThing)
+		theSharedThings. erase (my idOfExistingThing);
 	trace (U"destroyed ", my classInfo -> className, U" ", Melder_pointer (me));
 	//Melder_free (me);
 	delete me;
@@ -248,6 +252,14 @@ void Thing_swap (Thing me, Thing thee) {
 		*p = *q;
 		*q = tmp;
 	}
+}
+
+std::unordered_map <integer, SharedThing> theSharedThings;
+
+void Thing_share (Thing me) {
+	static integer s_idOfExistingThing = 0;
+	my idOfExistingThing = ++ s_idOfExistingThing;
+	theSharedThings. emplace (s_idOfExistingThing, SharedThing { me });
 }
 
 /* End of file Thing.cpp */
