@@ -2238,7 +2238,7 @@ static int publishPlayedProc () {
 /***** buttons *****/
 
 void praat_Sound_init () {
-	Thing_recognizeClassesByName (classSound, classLongSound, classSoundList, classSoundSet, nullptr);
+	Thing_recognizeClassesByName (classSound, classLongSound, classSoundList, classSoundSet);
 
 	Data_recognizeFileType (soundFileRecognizer);
 	Data_recognizeFileType (movieFileRecognizer);

@@ -1,10 +1,10 @@
 /* praat_ExperimentMFC.cpp
  *
- * Copyright (C) 2001-2007,2009-2012,2015-2018 Paul Boersma
+ * Copyright (C) 2001-2007,2009-2012,2015-2018,2019,2021,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -130,7 +130,7 @@ DIRECT (NEW1_ResultsMFCs_to_Table) {
 // MARK: - buttons
 
 void praat_ExperimentMFC_init () {
-	Thing_recognizeClassesByName (classExperimentMFC, classResultsMFC, nullptr);
+	Thing_recognizeClassesByName (classExperimentMFC, classResultsMFC);
 
 	praat_addAction1 (classCategories, 0, U"Sort", U"Append category...", 1, MODIFY_Categories_sort);
 	praat_addAction1 (classCategories, 1, U"Get entropy", U"Get fraction different", 1, REAL_Categories_getEntropy);

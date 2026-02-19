@@ -174,7 +174,7 @@ void praat_MultiSampledSpectrograms_generics (ClassInfo klas) {
 void praat_MultiSampledSpectrogram_init ();
 void praat_MultiSampledSpectrogram_init () {
 	Thing_recognizeClassesByName (classAnalyticSound, classConstantQLog2FSpectrogram, classFrequencyBin,
-		classGaborSpectrogram, classMultiSampledSpectrogram, nullptr);
+			classGaborSpectrogram, classMultiSampledSpectrogram);
 
 	praat_addAction1 (classAnalyticSound, 0, U"To Intensity", nullptr, 0, 
 			CONVERT_EACH_TO_ONE__AnalyticSound_toIntensity);

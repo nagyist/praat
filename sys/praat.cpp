@@ -1075,7 +1075,7 @@ extern "C" void praatlib_init () {
 	Melder_setAppName (U"Praatlib");
 	theCurrentPraatApplication -> batch = true;
 	Melder_getHomeDir (& homeDir);
-	Thing_recognizeClassesByName (classCollection, classStrings, classManPages, classStringSet, nullptr);
+	Thing_recognizeClassesByName (classCollection, classStrings, classManPages, classStringSet);
 	Thing_recognizeClassByOtherName (classStringSet, U"SortedSetOfString");
 	Melder_backgrounding = true;
 	praat_addMenus (nullptr);
@@ -1946,7 +1946,7 @@ void praat_init (conststring32 title,
 		GuiThing_show (raam);
 		trace (U"after objects window shows locale ", Melder_peek8to32 (setlocale (LC_ALL, nullptr)));
 	}
-	Thing_recognizeClassesByName (classCollection, classStrings, classManPages, classStringSet, nullptr);
+	Thing_recognizeClassesByName (classCollection, classStrings, classManPages, classStringSet);
 	Thing_recognizeClassByOtherName (classStringSet, U"SortedSetOfString");
 	if (Melder_batch) {
 		Melder_backgrounding = true;

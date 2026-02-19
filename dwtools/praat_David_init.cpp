@@ -1,6 +1,6 @@
 /* praat_David_init.cpp
  *
- * Copyright (C) 1993-2025 David Weenink, 2015,2023-2025 Paul Boersma
+ * Copyright (C) 1993-2025 David Weenink, 2015,2023-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8935,8 +8935,7 @@ void praat_David_generics_new_init () {
 
 	Thing_recognizeClassesByName (
 		classPermutation,
-		classPolynomial, classLegendreSeries, classChebyshevSeries, classMSpline, classISpline,
-		nullptr
+		classPolynomial, classLegendreSeries, classChebyshevSeries, classMSpline, classISpline
 	);
 
 	praat_addMenuCommand (U"Objects", U"New", U"Create Permutation...", nullptr, 1,
@@ -8978,7 +8977,8 @@ void praat_David_init () {
 		classMelFilter, classMelSpectrogram, classNavigationContext,
 		classPatternList, classPCA, classRoots,
 		classSimpleString, classStringsIndex, classSpeechSynthesizer, classSPINET, classSSCP,
-		classSVD, classTextGridNavigator, classTextGridTierNavigator, nullptr);
+		classSVD, classTextGridNavigator, classTextGridTierNavigator
+	);
 
 	Thing_recognizeClassByOtherName (classExcitationList, U"Excitations");
 	Thing_recognizeClassByOtherName (classActivationList, U"Activation");

@@ -923,7 +923,7 @@ autoSound Sound_createGammaTone (double minimumTime, double maximumTime, double 
 			const double f = frequency + addition / (NUM2pi * t);
 			if (f > 0 && f < samplingFrequency / 2)
 				my z [1] [i] = pow (t, gamma - 1.0) * exp (- NUM2pi * bandwidth * t) *
-					cos (NUM2pi * frequency * t + addition * log (t) + initialPhase);
+						cos (NUM2pi * frequency * t + addition * log (t) + initialPhase);
 		}
 		if (scaleAmplitudes)
 			Vector_scale (me.get(), 0.99996948);
@@ -1124,20 +1124,21 @@ autoSound Sound_filterByGammaToneFilter (Sound me, double centre_frequency, doub
 Sound Sound_createShepardTone (double minimumTime, double maximumTime, double samplingFrequency,
 	double baseFrequency, double frequencyShiftFraction, double maximumFrequency, double amplitudeRange)
 {
-	Sound me; integer i, j, nComponents = 1 + log2 (maximumFrequency / 2 / baseFrequency);
+	Sound me;
+	integer i, j, nComponents = 1 + log2 (maximumFrequency / 2 / baseFrequency);
 	double lmin = pow (10, - amplitudeRange / 10);
 	double twoPi = NUM2pi, f = baseFrequency * (1 + frequencyShiftFraction);
 	if (nComponents < 2)
 		Melder_warning (U"Sound_createShepardTone: only 1 component.");
 	Melder_casual (U"Sound_createShepardTone: ", nComponents, U" components.");
 	if (! (me = Sound_create2 (minimumTime, maximumTime, samplingFrequency)))
-		return nullptr;
+		return nullptr;   // BUG: pre-2014 error handling
 
 	for (j=1; j <= nComponents; j ++) {
-		double fj = f * pow (2, j-1), wj = twoPi * fj;
-		double amplitude = lmin + (1 - lmin) *
-			(1 - cos (twoPi * log (fj + 1) / log (maximumFrequency + 1))) / 2;
-		for (i=1; i <= my nx; i ++)
+		const double fj = f * pow (2, j-1), wj = twoPi * fj;
+		const double amplitude = lmin + (1 - lmin) *
+				(1 - cos (twoPi * log (fj + 1) / log (maximumFrequency + 1))) / 2;
+		for (i = 1; i <= my nx; i ++)
 			my z [1] [i] += amplitude * sin (wj * (i - 0.5) * my dx);
 	}
 	Vector_scale (me, 0.99996948);

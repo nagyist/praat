@@ -130,7 +130,7 @@ DO
 }
 
 void praat_uvafon_sensors_init () {
-	Thing_recognizeClassesByName (classElectroglottogram, classEMA, classEMArawData, nullptr);
+	Thing_recognizeClassesByName (classElectroglottogram, classEMA, classEMArawData);
 
 	Data_recognizeFileType (CarstensEMA50xV3PosFileRecognizer);
 	Data_recognizeFileType (CarstensEMA50xV3AmpFileRecognizer);

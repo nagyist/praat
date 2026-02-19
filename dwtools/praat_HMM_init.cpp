@@ -1,10 +1,10 @@
 /* praat_HMM_init.cpp
  *
- * Copyright (C) 2010-2023 David Weenink
+ * Copyright (C) 2010-2024,2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -687,7 +687,7 @@ DO
 
 void praat_HMM_init ();
 void praat_HMM_init () {
-	Thing_recognizeClassesByName (classHMM, classHMMState, classHMMObservation, classHMMObservationSequence, classHMMStateSequence, classGaussianMixture, nullptr);
+	Thing_recognizeClassesByName (classHMM, classHMMState, classHMMObservation, classHMMObservationSequence, classHMMStateSequence, classGaussianMixture);
 
 	praat_addMenuCommand (U"Objects", U"New", U"Markov models", nullptr, GuiMenu_HIDDEN, nullptr);
 	praat_addMenuCommand (U"Objects", U"New", U"Create HMM...", nullptr, GuiMenu_DEPTH_1 | GuiMenu_HIDDEN,

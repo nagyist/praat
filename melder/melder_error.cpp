@@ -1,6 +1,6 @@
 /* melder_error.cpp
  *
- * Copyright (C) 1992-2025 Paul Boersma
+ * Copyright (C) 1992-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ void _private_Melder_crash (const MelderArg& arg1,
 	throw MelderError ();
 }
 
-void _private_Melder_assert (const char *pathName, int lineNumber, const char *condition) {
+static void _assert (const char *pathName, int lineNumber, const char *condition, conststring32 intro) {
 	/*
 		This function tries to make sure that it allocates no heap memory.
 		Hence, character conversion is done in place rather than with Melder_peek8to32(),
@@ -168,7 +168,7 @@ void _private_Melder_assert (const char *pathName, int lineNumber, const char *c
 	snprintf (lineNumberBuffer8,40, "%d", lineNumber);
 	Melder_8to32_inplace (lineNumberBuffer8, lineNumberBuffer, kMelder_textInputEncoding::UTF8);
 	MelderError__appendOneString (crashMessage ());
-	MelderError__appendOneString (U"Assertion failed in Praat ");
+	MelderError__appendOneString (intro);
 	MelderError__appendOneString (Melder_appVersionSTR());
 	MelderError__appendOneString (U" in file \"");
 	MelderError__appendOneString (fileName);
@@ -179,6 +179,16 @@ void _private_Melder_assert (const char *pathName, int lineNumber, const char *c
 	MelderError__appendOneString (U"\n\n");
 	trace (U"CRASH: ", theErrorBuffer);
 	throw MelderError ();
+}
+
+void _private_Melder_assert (const char *pathName, int lineNumber, const char *condition) {
+	_assert (pathName, lineNumber, condition, U"Assertion failed in Praat ");
+}
+void _private_Melder_pre (const char *pathName, int lineNumber, const char *condition) {
+	_assert (pathName, lineNumber, condition, U"Precondition failed in Praat ");
+}
+void _private_Melder_post (const char *pathName, int lineNumber, const char *condition) {
+	_assert (pathName, lineNumber, condition, U"Postcondition failed in Praat ");
 }
 
 /* End of file melder_error.cpp */

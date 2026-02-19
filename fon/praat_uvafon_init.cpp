@@ -3044,8 +3044,7 @@ void praat_uvafon_init () {
 		classTransition,
 		classManipulation, classTextPoint, classTextInterval, classTextTier,
 		classIntervalTier, classTextGrid, classWordList, classSpellingChecker,
-		classCorpus,
-		nullptr
+		classCorpus
 	);
 	Thing_recognizeClassByOtherName (classManipulation, U"Psola");      // obsolete name (pre-1997)
 	Thing_recognizeClassByOtherName (classManipulation, U"Analysis");   // obsolete name (pre-2001)
@@ -3094,8 +3093,8 @@ void praat_uvafon_init () {
 	praat_addMenuCommand (U"Objects", U"New", U"Generics", nullptr, 0, nullptr);
 		praat_Matrix_init ();
 		praat_addMenuCommand (U"Objects", U"New", U"Polygon", nullptr, 1, nullptr);
-		praat_addMenuCommand (U"Objects", U"New", U"Create Polygon from values...", nullptr, 2,
-			NEW1_Polygon_createFromValues);
+		praat_addMenuCommand (U"Objects", U"New", U"Create Polygon from values...",
+				nullptr, 2, NEW1_Polygon_createFromValues);
 		praat_addMenuCommand (U"Objects", U"New", U"-- new strings --",
 				nullptr, 1, nullptr);
 		praat_addMenuCommand (U"Objects", U"New", U"Strings", nullptr, 1, nullptr);

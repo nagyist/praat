@@ -831,7 +831,7 @@ static autoDaata imageFileRecognizer (integer /* nread */, const char * /* heade
 // MARK: - buttons
 
 void praat_Matrix_init () {
-	Thing_recognizeClassesByName (classMatrix, classPhoto, classMovie, nullptr);
+	Thing_recognizeClassesByName (classMatrix, classPhoto, classMovie);
 
 	Data_recognizeFileType (imageFileRecognizer);
 

@@ -1078,7 +1078,7 @@ void praat_uvafon_stat_init ();
 void praat_uvafon_stat_init () {
 
 	Thing_recognizeClassesByName (classTableOfReal, classDistributions, classPairDistribution,
-			classTable, classLinearRegression, classLogisticRegression, nullptr);
+			classTable, classLinearRegression, classLogisticRegression);
 
 	structTableEditor :: f_preferences ();
 
