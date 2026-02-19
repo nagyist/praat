@@ -1,6 +1,6 @@
 /* Thing.cpp
  *
- * Copyright (C) 1992-2012,2014-2025 Paul Boersma
+ * Copyright (C) 1992-2012,2014-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,50 +58,36 @@ autoThing Thing_newFromClass (ClassInfo classInfo) {
 	return me;
 }
 
-static integer theNumberOfReadableClasses = 0;
-static ClassInfo theReadableClasses [1 + 1000];
-static void _Thing_addOneReadableClass (ClassInfo readableClass) {
-	if (++ theNumberOfReadableClasses > 1000)
-		Melder_crash (U"(Thing_recognizeClassesByName:) Too many (1001) readable classes.");
-	theReadableClasses [theNumberOfReadableClasses] = readableClass;
-	readableClass -> sequentialUniqueIdOfReadableClass = theNumberOfReadableClasses;
-}
-void Thing_recognizeClassesByName (ClassInfo readableClass, ...) {
-	va_list arg;
-	if (! readableClass)
-		return;
-	va_start (arg, readableClass);
-	_Thing_addOneReadableClass (readableClass);
-	ClassInfo klas;
-	while ((klas = va_arg (arg, ClassInfo)) != nullptr)
-		_Thing_addOneReadableClass (klas);
-	va_end (arg);
+#pragma mark - READABLE CLASSES
+
+std::unordered_map <std::u32string_view, ClassInfo> theReadableClasses;
+void Thing_recognizeClassesByName (ClassInfo readableClass) {   // base case (there is a template for multiple arguments)
+	Melder_pre (readableClass);
+	theReadableClasses. emplace (readableClass -> className, readableClass);
+	readableClass -> sequentialUniqueIdOfReadableClass = uinteger_to_integer_a (theReadableClasses.size());
 }
 
-integer Thing_listReadableClasses () {
+void Thing_listReadableClasses () {
 	MelderInfo_open ();
-	for (integer iclass = 1; iclass <= theNumberOfReadableClasses; iclass ++) {
-		ClassInfo klas = theReadableClasses [iclass];
+	for (auto element : theReadableClasses) {
+		ClassInfo klas = element. second;
 		MelderInfo_writeLine (klas -> sequentialUniqueIdOfReadableClass, U"\t", klas -> className);
 	}
 	MelderInfo_close ();
-	return theNumberOfReadableClasses;
 }
 
-static integer theNumberOfAliases = 0;
-static struct {
-	ClassInfo readableClass;
-	conststring32 otherName;
-} theAliases [1 + 100];
+#pragma mark - ALTERNATIVE CLASS NAMES
 
-void Thing_recognizeClassByOtherName (ClassInfo readableClass, conststring32 otherName) {
-	theAliases [++ theNumberOfAliases]. readableClass = readableClass;
-	theAliases [theNumberOfAliases]. otherName = otherName;
+std::unordered_map <std::u32string_view, ClassInfo> theAliases;
+void Thing_recognizeClassByOtherName (ClassInfo readableClass, conststring32 alternativeClassName) {
+	Melder_pre (readableClass);
+	Melder_pre (alternativeClassName);
+	theAliases. emplace (alternativeClassName, readableClass);
 }
 
-ClassInfo Thing_classFromClassName (conststring32 klas, int *out_formatVersion) {
+ClassInfo Thing_classFromClassName (conststring32 className, int *out_formatVersion) {
 	static char32 buffer [1+100];
-	str32ncpy (buffer, klas ? klas : U"", 100);
+	str32ncpy (buffer, className ? className : U"", 100);
 	buffer [100] = U'\0';
 	char32 *space = str32chr (buffer, U' ');
 	if (space) {
@@ -116,21 +102,14 @@ ClassInfo Thing_classFromClassName (conststring32 klas, int *out_formatVersion) 
 	/*
 		First try the class names that were registered with Thing_recognizeClassesByName.
 	*/
-	for (integer i = 1; i <= theNumberOfReadableClasses; i ++) {
-		ClassInfo classInfo = theReadableClasses [i];
-		if (str32equ (buffer, classInfo -> className))
-			return classInfo;
-	}
+	if (auto search = theReadableClasses. find (buffer); search != theReadableClasses.end())
+		return search -> second;
 
 	/*
 		Then try the aliases that were registered with Thing_recognizeClassByOtherName.
 	*/
-	for (integer i = 1; i <= theNumberOfAliases; i ++) {
-		if (str32equ (buffer, theAliases [i]. otherName)) {
-			ClassInfo classInfo = theAliases [i]. readableClass;
-			return classInfo;
-		}
-	}
+	if (auto search = theAliases. find (buffer); search != theAliases.end())
+		return search -> second;
 
 	Melder_throw (U"Class “", buffer, U"” not recognized.");
 }
@@ -158,6 +137,8 @@ void _Thing_forget_nozero (Thing me) {
 		Melder_casual (U"destroying ", my classInfo -> className);
 	//Melder_casual (U"_Thing_forget_nozero before");
 	my v9_destroy ();
+	if (my idOfExistingThing)
+		theSharedThings. erase (my idOfExistingThing);
 	//Melder_casual (U"_Thing_forget_nozero after");
 	theTotalNumberOfThings -= 1;
 }
@@ -168,6 +149,8 @@ void _Thing_forget (Thing me) {
 	if (Melder_debug == 40)
 		Melder_casual (U"destroying ", my classInfo -> className);
 	my v9_destroy ();
+	if (my idOfExistingThing)
+		theSharedThings. erase (my idOfExistingThing);
 	trace (U"destroyed ", my classInfo -> className, U" ", Melder_pointer (me));
 	//Melder_free (me);
 	delete me;
@@ -248,6 +231,14 @@ void Thing_swap (Thing me, Thing thee) {
 		*p = *q;
 		*q = tmp;
 	}
+}
+
+std::unordered_map <integer, SharedThing> theSharedThings;
+
+void Thing_share (Thing me) {
+	static integer s_idOfExistingThing = 0;
+	my idOfExistingThing = ++ s_idOfExistingThing;
+	theSharedThings. emplace (s_idOfExistingThing, SharedThing { me });
 }
 
 /* End of file Thing.cpp */

@@ -1134,7 +1134,7 @@ DO
 
 void praat_DataModeler_init ();
 void praat_DataModeler_init () {
-	Thing_recognizeClassesByName (classDataModeler, classFormantModeler, classOptimalCeilingTier, classOptimalCeilingTierEditor, nullptr);
+	Thing_recognizeClassesByName (classDataModeler, classFormantModeler, classOptimalCeilingTier, classOptimalCeilingTierEditor);
 
 	structOptimalCeilingTierArea :: f_preferences ();
 

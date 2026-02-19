@@ -2,7 +2,7 @@
 #define _melder_assert_h_
 /* melder_assert.h
  *
- * Copyright (C) 1992-2018 Paul Boersma
+ * Copyright (C) 1992-2018,2025,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +28,17 @@
 */
 
 void _private_Melder_assert (const char *fileName, int lineNumber, const char *condition);
+void _private_Melder_pre    (const char *fileName, int lineNumber, const char *condition);
+void _private_Melder_post   (const char *fileName, int lineNumber, const char *condition);
 
 #ifdef NDEBUG
 	#define Melder_assert(x)   ((void) 0)
+	#define Melder_pre(x)      ((void) 0)
+	#define Melder_post(x)     ((void) 0)
 #else
 	#define Melder_assert(x)   ((x) ? (void) (0) : (_private_Melder_assert (__FILE__, __LINE__, #x), abort ()))
+	#define Melder_pre(x)      ((x) ? (void) (0) : (_private_Melder_pre (__FILE__, __LINE__, #x), abort ()))
+	#define Melder_post(x)     ((x) ? (void) (0) : (_private_Melder_post (__FILE__, __LINE__, #x), abort ()))
 #endif
 
 template <typename Tag>

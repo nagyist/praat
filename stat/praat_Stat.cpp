@@ -1,10 +1,10 @@
 /* praat_Stat.cpp
  *
- * Copyright (C) 1992-2019,2021-2024 Paul Boersma
+ * Copyright (C) 1992-2019,2021-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -254,25 +254,25 @@ DO
 
 // MARK: Open
 
-FORM_READ (READ1_Table_readFromTableFile, U"Read Table from table file", nullptr, true) {
+FORM_READ (READ_ONE__Table_readFromTableFile, U"Read Table from table file", nullptr, true) {
 	READ_ONE
 		autoTable result = Table_readFromTableFile (file);
 	READ_ONE_END
 }
 
-FORM_READ (READ1_Table_readFromCommaSeparatedFile, U"Read Table from comma-separated file", nullptr, true) {
+FORM_READ (READ_ONE__Table_readFromCommaSeparatedFile, U"Read Table from comma-separated file", nullptr, true) {
 	READ_ONE
 		autoTable result = Table_readFromCharacterSeparatedTextFile (file, U',', true);
 	READ_ONE_END
 }
 
-FORM_READ (READ1_Table_readFromSemicolonSeparatedFile, U"Read Table from semicolon-separated file", nullptr, true) {
+FORM_READ (READ_ONE__Table_readFromSemicolonSeparatedFile, U"Read Table from semicolon-separated file", nullptr, true) {
 	READ_ONE
 		autoTable result = Table_readFromCharacterSeparatedTextFile (file, U';', true);
 	READ_ONE_END
 }
 
-FORM_READ (READ1_Table_readFromTabSeparatedFile, U"Read Table from tab-separated file", nullptr, true) {
+FORM_READ (READ_ONE__Table_readFromTabSeparatedFile, U"Read Table from tab-separated file", nullptr, true) {
 	READ_ONE
 		autoTable result = Table_readFromCharacterSeparatedTextFile (file, U'\t', false);
 	READ_ONE_END
@@ -1068,7 +1068,7 @@ DO
 	CREATE_ONE_END (name)
 }
 
-FORM_READ (READ1_TableOfReal_readFromHeaderlessSpreadsheetFile, U"Read TableOfReal from headerless spreadsheet file", nullptr, true) {
+FORM_READ (READ_ONE__TableOfReal_readFromHeaderlessSpreadsheetFile, U"Read TableOfReal from headerless spreadsheet file", nullptr, true) {
 	READ_ONE
 		autoTableOfReal result = TableOfReal_readFromHeaderlessSpreadsheetFile (file);
 	READ_ONE_END
@@ -1078,7 +1078,7 @@ void praat_uvafon_stat_init ();
 void praat_uvafon_stat_init () {
 
 	Thing_recognizeClassesByName (classTableOfReal, classDistributions, classPairDistribution,
-			classTable, classLinearRegression, classLogisticRegression, nullptr);
+			classTable, classLinearRegression, classLogisticRegression);
 
 	structTableEditor :: f_preferences ();
 
@@ -1093,15 +1093,15 @@ void praat_uvafon_stat_init () {
 	praat_addMenuCommand (U"Objects", U"Open", U"-- open table --",
 			nullptr, 0, nullptr);
 	praat_addMenuCommand (U"Objects", U"Open", U"Read Table from tab-separated file...",
-			nullptr, 0, READ1_Table_readFromTabSeparatedFile);
+			nullptr, 0, READ_ONE__Table_readFromTabSeparatedFile);
 	praat_addMenuCommand (U"Objects", U"Open", U"Read Table from comma-separated file...",
-			nullptr, 0, READ1_Table_readFromCommaSeparatedFile);
+			nullptr, 0, READ_ONE__Table_readFromCommaSeparatedFile);
 	praat_addMenuCommand (U"Objects", U"Open", U"Read Table from semicolon-separated file...",
-			nullptr, 0, READ1_Table_readFromSemicolonSeparatedFile);
+			nullptr, 0, READ_ONE__Table_readFromSemicolonSeparatedFile);
 	praat_addMenuCommand (U"Objects", U"Open", U"Read Table from whitespace-separated file... || Read Table from table file...",
-			nullptr, 0, READ1_Table_readFromTableFile);   // alternative GuiMenu_DEPRECATED_2011
+			nullptr, 0, READ_ONE__Table_readFromTableFile);   // alternative GuiMenu_DEPRECATED_2011
 	praat_addMenuCommand (U"Objects", U"Open", U"Read TableOfReal from headerless spreadsheet file...",
-			nullptr, 0, READ1_TableOfReal_readFromHeaderlessSpreadsheetFile);
+			nullptr, 0, READ_ONE__TableOfReal_readFromHeaderlessSpreadsheetFile);
 
 	praat_addAction1 (classDistributions, 0, U"Distributions help", nullptr, 0,
 			HELP__Distributions_help);

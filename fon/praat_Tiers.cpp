@@ -1,6 +1,6 @@
 /* praat_Tiers.cpp
  *
- * Copyright (C) 1992-2018,2020-2025 Paul Boersma
+ * Copyright (C) 1992-2018,2020-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1793,8 +1793,8 @@ void praat_Tiers_init () {
 		classRealPoint, classRealTier,
 		classPitchTier, classIntensityTier, classDurationTier, classAmplitudeTier,
 		classSpectrumTier, classH1minusH2Tier,
-		classFormantPoint, classFormantTier, classFormantGrid,
-		nullptr);
+		classFormantPoint, classFormantTier, classFormantGrid
+	);
 
 	praat_addMenuCommand (U"Objects", U"New", U"Tiers", nullptr, 0, nullptr);
 		praat_addMenuCommand (U"Objects", U"New", U"Create empty PointProcess...",

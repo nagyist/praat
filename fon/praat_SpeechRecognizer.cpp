@@ -49,7 +49,7 @@ DIRECT (QUERY_ONE_AND_ONE_FOR_STRING__SpeechRecognizer_Sound_recognize) {
 }
 
 void praat_SpeechRecognizer_init () {
-	Thing_recognizeClassesByName (classSpeechRecognizer, nullptr);
+	Thing_recognizeClassesByName (classSpeechRecognizer);
 
 	praat_addMenuCommand (U"Objects", U"New", U"Speech-to-text recognition", nullptr, 0, nullptr);
 		praat_addMenuCommand (U"Objects", U"New", U"SpeechRecognizer help", nullptr, 1,

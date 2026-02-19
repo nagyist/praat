@@ -1,10 +1,10 @@
 /* praat_Artsynth.cpp
  *
- * Copyright (C) 1992-2009,2011,2012,2014-2024 Paul Boersma
+ * Copyright (C) 1992-2009,2011,2012,2014-2024,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -327,7 +327,7 @@ void manual_Artsynth_init (ManPages me);
 
 void praat_uvafon_Artsynth_init ();
 void praat_uvafon_Artsynth_init () {
-	Thing_recognizeClassesByName (classArt, classArtword, classSpeaker, nullptr);
+	Thing_recognizeClassesByName (classArt, classArtword, classSpeaker);
 
 	praat_addMenuCommand (U"Objects", U"New", U"Articulatory synthesis",
 			nullptr, 0, nullptr);

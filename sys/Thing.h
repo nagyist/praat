@@ -2,7 +2,7 @@
 #define _Thing_h_
 /* Thing.h
  *
- * Copyright (C) 1992-2009,2011-2020,2022,2024,2025 Paul Boersma
+ * Copyright (C) 1992-2009,2011-2020,2022,2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,6 +82,7 @@ extern struct structClassInfo theClassInfo_Thing;
 struct structThing {
 	ClassInfo classInfo;   // the Praat class pointer (every object also has a C++ class pointer initialized by C++ "new")
 	autostring32 name;
+	integer idOfExistingThing;   // 0 for most Things
 	void * operator new (size_t size) { return Melder_calloc (char, (int64) size); }
 	void operator delete (void *ptr, size_t /* size */) { Melder_free (ptr); }
 
@@ -188,26 +189,30 @@ bool Thing_isSubclass (ClassInfo klas, ClassInfo ancestor);
 void Thing_info (Thing me);
 void Thing_infoWithIdAndFile (Thing me, integer id, MelderFile file);
 
-void Thing_recognizeClassesByName (ClassInfo readableClass, ...);
 /*
 	Function:
-		make Thing_classFromClassName () and Thing_newFromClassName ()
+		to make Thing_classFromClassName () and Thing_newFromClassName ()
 		recognize a class from its name (a string).
 	Arguments:
-		as many classes as you want; finish with a nullptr.
+		as many classes as you want.
 		It is not an error if a class occurs more than once in the list.
 	Behaviour:
-		calling this routine more than once, each time for different classes,
+		calling this function more than once, each time for different classes,
 		has the same result as calling it once for all these classes together.
-		Thing can remember up to 1000 string-readable classes.
 	Usage:
-		you should call this routine for all classes that you want to read by name,
+		you should call this function for all classes that you want to read by name,
 		e.g., with Data_readFromTextFile () or Data_readFromBinaryFile (),
 		or with Data_readText () or Data_readBinary () if the object is a Collection.
-		Calls to this routine should preferably be put in the beginning of main ().
+		Calls to this function should preferably be put in the beginning of main ().
 */
+void Thing_recognizeClassesByName (ClassInfo readableClass);
+template <typename... ClassInfoType>
+void Thing_recognizeClassesByName (ClassInfoType... classInfos) {
+	( Thing_recognizeClassesByName (classInfos), ... );   // folded over comma
+}
 void Thing_recognizeClassByOtherName (ClassInfo readableClass, conststring32 otherName);
-integer Thing_listReadableClasses ();
+
+void Thing_listReadableClasses ();
 
 ClassInfo Thing_classFromClassName (conststring32 className, int *formatVersion);
 /*
@@ -529,5 +534,11 @@ autoThing Thing_newFromClassName (conststring32 className, int *out_formatVersio
 	Side effect:
 		see Thing_classFromClassName.
 */
+
+struct SharedThing {
+	Thing thing;
+};
+extern std::unordered_map <integer, SharedThing> theSharedThings;
+void Thing_share (Thing me);
 
 #endif // _Thing_h_

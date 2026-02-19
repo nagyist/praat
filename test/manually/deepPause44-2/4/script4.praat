@@ -1,9 +1,9 @@
 appendInfo: "4a "
 beginPause: "Test deep pause (1 of 2)"
-	word: "Letter", "A"
+	natural: "Number", "13"
 endPause: "OK", 1
-appendInfo: "4b", letter$, " "
+appendInfo: "4b", number, " "
 beginPause: "Test deep pause (2 of 2)"
-	word: "Letter", "B"
+	natural: "Number", "15"
 endPause: "OK", 1
-appendInfo: "4c", letter$, " "
+appendInfo: "4c", number, " "

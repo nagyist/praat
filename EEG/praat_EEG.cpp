@@ -733,7 +733,7 @@ static autoDaata bdfFileRecognizer (integer nread, const char [] /* header */, M
 void praat_EEG_init ();
 void praat_EEG_init () {
 
-	Thing_recognizeClassesByName (classEEG, classERPTier, classERP, nullptr);
+	Thing_recognizeClassesByName (classEEG, classERPTier, classERP);
 
 	Data_recognizeFileType (bdfFileRecognizer);
 

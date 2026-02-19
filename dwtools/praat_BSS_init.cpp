@@ -4,7 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -496,7 +496,7 @@ DIRECT (CONVERT_EACH_TO_ONE__TableOfReal_to_MixingMatrix) {
 
 void praat_BSS_init ();
 void praat_BSS_init () {
-	Thing_recognizeClassesByName (classDiagonalizer, classMixingMatrix, classCrossCorrelationTable, classCrossCorrelationTableList, nullptr);
+	Thing_recognizeClassesByName (classDiagonalizer, classMixingMatrix, classCrossCorrelationTable, classCrossCorrelationTableList);
 	Thing_recognizeClassByOtherName (classCrossCorrelationTableList, U"CrossCorrelationTables");
 
 	praat_addMenuCommand (U"Objects", U"New", U"Create simple CrossCorrelationTable...", U"Create simple Covariance...", GuiMenu_DEPTH_1 | GuiMenu_HIDDEN,

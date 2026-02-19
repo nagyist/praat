@@ -1,10 +1,10 @@
 /* praat_Matrix.cpp
  *
- * Copyright (C) 1992-2005,2007,2011-2024 Paul Boersma
+ * Copyright (C) 1992-2005,2007,2011-2024,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -90,13 +90,13 @@ DO
 
 // MARK: Open
 
-FORM_READ (READ1_Matrix_readFromRawTextFile, U"Read Matrix from raw text file", nullptr, true) {
+FORM_READ (READ_ONE__Matrix_readFromRawTextFile, U"Read Matrix from raw text file", nullptr, true) {
 	READ_ONE
 		autoMatrix result = Matrix_readFromRawTextFile (file);
 	READ_ONE_END
 }
 
-FORM_READ (READ1_Matrix_readAP, U"Read Matrix from LVS AP file", nullptr, true) {
+FORM_READ (READ_ONE__Matrix_readAP, U"Read Matrix from LVS AP file", nullptr, true) {
 	READ_ONE
 		autoMatrix result = Matrix_readAP (file);
 	READ_ONE_END
@@ -788,7 +788,7 @@ DIRECT (MODIFY_Photo_Matrix_replaceTransparency) {
 
 // MARK: - MOVIE
 
-FORM_READ (READ1_Movie_openFromSoundFile, U"Open movie file", nullptr, true) {
+FORM_READ (READ_ONE__Movie_openFromSoundFile, U"Open movie file", nullptr, true) {
 	READ_ONE
 		autoMovie result = Movie_openFromSoundFile (file);
 	READ_ONE_END   // but loses data when saving, if object is associated only with the sound file
@@ -831,7 +831,7 @@ static autoDaata imageFileRecognizer (integer /* nread */, const char * /* heade
 // MARK: - buttons
 
 void praat_Matrix_init () {
-	Thing_recognizeClassesByName (classMatrix, classPhoto, classMovie, nullptr);
+	Thing_recognizeClassesByName (classMatrix, classPhoto, classMovie);
 
 	Data_recognizeFileType (imageFileRecognizer);
 
@@ -844,10 +844,10 @@ void praat_Matrix_init () {
 		praat_addMenuCommand (U"Objects", U"New", U"Create simple Photo...", nullptr, 2, NEW1_Photo_createSimple);
 
 	praat_addMenuCommand (U"Objects", U"Open", U"-- read movie --", nullptr, GuiMenu_HIDDEN, nullptr);
-	praat_addMenuCommand (U"Objects", U"Open", U"Open movie file...", nullptr, GuiMenu_HIDDEN, READ1_Movie_openFromSoundFile);
+	praat_addMenuCommand (U"Objects", U"Open", U"Open movie file...", nullptr, GuiMenu_HIDDEN, READ_ONE__Movie_openFromSoundFile);
 	praat_addMenuCommand (U"Objects", U"Open", U"-- read raw --", nullptr, 0, nullptr);
-	praat_addMenuCommand (U"Objects", U"Open", U"Read Matrix from raw text file...", nullptr, 0, READ1_Matrix_readFromRawTextFile);
-	praat_addMenuCommand (U"Objects", U"Open", U"Read Matrix from LVS AP file...", nullptr, GuiMenu_HIDDEN, READ1_Matrix_readAP);
+	praat_addMenuCommand (U"Objects", U"Open", U"Read Matrix from raw text file...", nullptr, 0, READ_ONE__Matrix_readFromRawTextFile);
+	praat_addMenuCommand (U"Objects", U"Open", U"Read Matrix from LVS AP file...", nullptr, GuiMenu_HIDDEN, READ_ONE__Matrix_readAP);
 
 	praat_addAction1 (classMatrix, 0, U"Matrix help", nullptr, 0, HELP_Matrix_help);
 	praat_addAction1 (classMatrix, 1, U"Save as matrix text file... || Write to matrix text file...", nullptr, 0,

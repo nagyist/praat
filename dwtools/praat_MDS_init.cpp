@@ -1392,7 +1392,7 @@ void praat_TableOfReal_extras (ClassInfo klas) {
 void praat_MDS_new_init ();
 void praat_MDS_new_init () {
 	Thing_recognizeClassesByName (classAffineTransform, classProcrustes, classContingencyTable, classDissimilarity, classMDSVec,
-		classSimilarity, classConfiguration, classDistance, classSalience, classScalarProduct, classWeight, nullptr);
+			classSimilarity, classConfiguration, classDistance, classSalience, classScalarProduct, classWeight);
 	Thing_recognizeClassByOtherName (classProcrustes, U"Procrustus");
 
 	praat_addMenuCommand (U"Objects", U"New", U"Multidimensional scaling", nullptr, 1, nullptr);

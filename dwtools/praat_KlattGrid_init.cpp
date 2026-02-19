@@ -1,6 +1,6 @@
 /* praat_KlattGrid_init.cpp
  *
- * Copyright (C) 2009-2021 David Weenink
+ * Copyright (C) 2009-2021 David Weenink, 2011,2012,2014-2019,2021-2024,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -889,7 +889,7 @@ DO
 void praat_KlattGrid_init ();
 void praat_KlattGrid_init () {
 
-	Thing_recognizeClassesByName (classKlattGrid, nullptr);
+	Thing_recognizeClassesByName (classKlattGrid);
 
 	structKlattGrid_OpenPhaseTierArea       :: f_preferences();
 	structKlattGrid_CollisionPhaseTierArea  :: f_preferences();
