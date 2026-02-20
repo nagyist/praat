@@ -66,7 +66,7 @@ inline conststring32 theSpeechRecognizerDefaultModelName = U"ggml-base.bin";
 inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect language";
 
 // class SpeechRecognizer functions
-autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName);
+autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName, bool useDtw);
 WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound);
 
 /* End of file SpeechRecognizer.h */
