@@ -424,7 +424,7 @@ void TextGrid_Sound_transcribeInterval (
 		trace (U"tier ", tierNumber, U" interval ", intervalNumber,	U" (", original_tmin, U" .. ", original_tmax, U")");
 		autoSound soundPart = Sound_extractPart (sound, original_tmin, original_tmax,
 			kSound_windowShape::RECTANGULAR, 1.0, false);
-		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName);
+		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName, true);
 		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (
 			speechRecognizer.get(), soundPart.get());
 
