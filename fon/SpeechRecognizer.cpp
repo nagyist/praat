@@ -55,7 +55,7 @@ autoWhisperContext& autoWhisperContext :: operator= (autoWhisperContext&& other)
 	return *this;
 }
 
-Thing_implement (SpeechRecognizer, Daata, 0);
+Thing_implement (SpeechRecognizer, Daata, 1);
 
 void structSpeechRecognizer :: v1_info () {
 	SpeechRecognizer_Parent :: v1_info ();

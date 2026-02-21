@@ -1,6 +1,6 @@
 /* SpeechRecognizer_def.h
  *
- * Copyright (C) 2025 Anastasia Shchupak
+ * Copyright (C) 2025,2026 Anastasia Shchupak
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@ oo_DEFINE_CLASS (SpeechRecognizer, Daata)
 
 	oo_STRING (d_modelName)
 	oo_STRING (d_languageName)
-	oo_BOOLEAN (d_useDtw)
+	oo_FROM (1)
+		oo_BOOLEAN (d_useDtw)
+	oo_ENDFROM
 
 	#if oo_DECLARING
 		void v1_info () override;
