@@ -426,7 +426,7 @@ void TextGrid_Sound_transcribeInterval (
 			kSound_windowShape::RECTANGULAR, 1.0, false);
 		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName, true);
 		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (
-			speechRecognizer.get(), soundPart.get());
+			speechRecognizer.get(), soundPart.get(), true);
 
 		/*
 			Create one interval per utterance in the head tier.
