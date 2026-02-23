@@ -8054,6 +8054,29 @@ float whisper_full_get_token_p(struct whisper_context * ctx, int i_segment, int 
     return ctx->state->result_all[i_segment].tokens[i_token].p;
 }
 
+int whisper_full_n_vad_segments(struct whisper_context * ctx) {
+	if (!ctx->state->has_vad_segments) {
+		return 0;
+	}
+	return static_cast<int>(ctx->state->vad_segments.size());
+}
+
+int64_t whisper_full_get_vad_segment_orig_start(struct whisper_context * ctx, int i_vad_segment) {
+	return ctx->state->vad_segments[i_vad_segment].orig_start;
+}
+
+int64_t whisper_full_get_vad_segment_orig_end(struct whisper_context * ctx, int i_vad_segment) {
+	return ctx->state->vad_segments[i_vad_segment].orig_end;
+}
+
+int64_t whisper_full_get_vad_segment_vad_start(struct whisper_context * ctx, int i_vad_segment) {
+	return ctx->state->vad_segments[i_vad_segment].vad_start;
+}
+
+int64_t whisper_full_get_vad_segment_vad_end(struct whisper_context * ctx, int i_vad_segment) {
+	return ctx->state->vad_segments[i_vad_segment].vad_end;
+}
+
 float whisper_full_get_segment_no_speech_prob(struct whisper_context * ctx, int i_segment) {
     return ctx->state->result_all[i_segment].no_speech_prob;
 }

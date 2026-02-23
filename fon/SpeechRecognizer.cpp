@@ -151,7 +151,7 @@ bool isSentenceEndingPunctuation(conststring32 word) {
 		last_char == U'。' || last_char == U'！' || last_char == U'？';
 }
 
-WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound) {
+WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound, bool useVad) {
 	try {
 		//TRACE
 		trace (U"Sound xmin = ", sound -> xmin, U", sound xmax = ", sound -> xmax);
@@ -175,6 +175,17 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		*/
 		whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_GREEDY);
 		params.token_timestamps = true;	// must be true to use t0 and t1 (non-DTW) token timestamps
+		if (useVad) {
+			params.vad = true; // enable Silero VAD (Voice Activity Detection used to chop away the silences)
+			conststring32 vadModelPath = Melder_cat (theWhisperModelsFolder(), U"/ggml-silero-v6.2.0.bin");
+			structMelderFile vadFile { };
+			Melder_pathToFile (vadModelPath, & vadFile);
+			Melder_require (MelderFile_readable (& vadFile),
+				U"Cannot find VAD model file: ", vadModelPath,
+				U". Please download ggml-silero-v6.2.0.bin and place it in ", theWhisperModelsFolder(), U".");
+			params.vad_model_path = Melder_peek32to8 (vadModelPath);
+			params.vad_params = whisper_vad_default_params();
+		}
 		if (whisper_is_multilingual (my whisperContext.get ())) {
 			if (my d_languageName && ! str32str (my d_languageName.get(), U"Autodetect")) {
 				autostring32 name = Melder_dup (my d_languageName.get());
@@ -186,12 +197,39 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		}
 
 		/*
-			Run Whisper and collect all tokens using DTW (there are multiple tokens per segment) into one flat list.
+			Run Whisper.
 		*/
 		if (whisper_full (my whisperContext.get(), params, samples32.data(), static_cast <int> (sound -> nx)) != 0)
 			Melder_throw (U"Whisper failed to process audio");
-		const int n_segments = whisper_full_n_segments (my whisperContext.get());
 
+		/*
+			Collect VAD segments.
+		*/
+		const int n_vad_segments = whisper_full_n_vad_segments (my whisperContext.get());
+		struct VadSegment {
+			double orig_start;
+			double orig_end;
+			double vad_start;
+			double vad_end;
+		};
+		autovector <VadSegment> vadSegments = newvectorzero<VadSegment>(n_vad_segments);
+		for (int i = 1; i <= n_vad_segments; ++ i) {
+			vadSegments [i].orig_start =
+				static_cast<double> (whisper_full_get_vad_segment_orig_start (my whisperContext.get(), i - 1)) / 100.0;
+			vadSegments [i].orig_end =
+				static_cast<double> (whisper_full_get_vad_segment_orig_end   (my whisperContext.get(), i - 1)) / 100.0;
+			vadSegments [i].vad_start  =
+				static_cast<double> (whisper_full_get_vad_segment_vad_start  (my whisperContext.get(), i - 1)) / 100.0;
+			vadSegments [i].vad_end  =
+				static_cast<double> (whisper_full_get_vad_segment_vad_end    (my whisperContext.get(), i - 1)) / 100.0;
+			trace (U"VAD segment ", i, U", orig_start = ", vadSegments [i]. orig_start, U", orig_end = ", vadSegments [i]. orig_end,
+				U", vad_start = ", vadSegments [i]. vad_start, U", vad_end = ", vadSegments [i]. vad_end);
+		}
+
+		/*
+			Collect all tokens (there are multiple tokens per segment) into one flat list, including silences in case of VAD.
+		*/
+		const int n_segments = whisper_full_n_segments (my whisperContext.get());
 		struct Token {
 			autostring32 text;
 			double t_dtw;   // DTW timestamp (end of token), in seconds, or -0.01 if unavailable
@@ -199,16 +237,49 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		};
 		autovector <Token> allTokens = newvectorzero <Token> (0);
 
+		/*
+			Insert a silence token in case speech does not start directly from the beginning of the sound.
+		*/
+		if (n_vad_segments > 0 && vadSegments [1]. orig_start > sound -> xmin) {
+			Token *silence = allTokens.append();
+			silence -> text = Melder_dup (U" ");
+			silence -> t_dtw = vadSegments [1]. orig_start;
+			silence -> t1    = vadSegments [1]. orig_start;
+		}
+
+		int current_vad_segment = 1;
 		for (int i = 0; i < n_segments; ++ i) {
 			const int n_tokens = whisper_full_n_tokens (my whisperContext.get(), i);
 			for (int j = 0; j < n_tokens; ++ j) {
 				whisper_token_data tdata = whisper_full_get_token_data (my whisperContext.get(), i, j);
 				if (tdata.id >= whisper_token_eot (my whisperContext.get()))
 					continue;   // skip special tokens
+
+				double t_dtw = tdata.t_dtw / 100.0;
+				double t1 = tdata.t1 / 100.0;
+
+				/*
+					Translate timestamps back to original time and insert silence tokens between VAD segments.
+				*/
+				if (useVad) {
+					if (current_vad_segment < n_vad_segments
+							&& t_dtw > vadSegments [current_vad_segment + 1]. vad_start) {
+						Token *silence = allTokens.append(); // insert a silence token in case we progressed into a new VAD segment
+						silence -> text = Melder_dup (U" ");
+						silence -> t_dtw = vadSegments [current_vad_segment + 1]. orig_start;
+						silence -> t1 = vadSegments [current_vad_segment + 1]. orig_start;
+						++ current_vad_segment;
+					}
+					t_dtw += vadSegments [current_vad_segment]. orig_start - vadSegments [current_vad_segment]. vad_start;
+					t_dtw = std::min (t_dtw, vadSegments [current_vad_segment]. orig_end);
+					t1 += vadSegments [current_vad_segment]. orig_start - vadSegments [current_vad_segment]. vad_start;
+					t1 = std::min (t1, vadSegments [current_vad_segment]. orig_end);
+				}
+
 				Token *token = allTokens.append();
 				token -> text = Melder_8to32 (whisper_full_get_token_text (my whisperContext.get(), i, j));
-				token -> t_dtw = tdata.t_dtw / 100.0;
-				token -> t1 = tdata.t1 / 100.0;
+				token -> t_dtw = t_dtw;
+				token -> t1 = t1;
 				trace (U"Segment ", i, U"; token ", allTokens.size, U": text = ", token -> text.get(),
 						U", t_dtw = ", token -> t_dtw, U", t1 = ", token -> t1);
 			}
@@ -297,8 +368,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				word -> tmin = token_tmin;
 				word -> tmax = token_tmax;
 				trace (U"Word ", words.size, U": [ ", word -> tmin, U" - ", word -> tmax, U" ]", word -> text.get());
-			} else if (i > 1) { // continuation token: merge into last word
-				Melder_assert (words.size > 0);
+			} else if (words.size > 0) { // continuation token: merge into last word
 				WhisperSegment & word = words [words.size];
 				word.text = Melder_dup (Melder_cat (word.text.get(), token_text));
 				word.tmax = token_tmax;

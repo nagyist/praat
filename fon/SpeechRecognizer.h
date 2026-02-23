@@ -67,7 +67,7 @@ inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect langu
 
 // class SpeechRecognizer functions
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName, bool useDtw);
-WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound);
+WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound, bool useVad);
 
 /* End of file SpeechRecognizer.h */
 #endif
