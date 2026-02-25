@@ -41,7 +41,7 @@ struct WhisperSegment;
 void splitIntervalIntoWhisperSegments (const IntervalTier& tier, double original_tmin, double original_tmax,
 	const autovector<WhisperSegment>& segments);
 void TextGrid_Sound_transcribeInterval (TextGrid me, Sound sound, integer tierNumber, integer intervalNumber,
-	conststring32 modelName, conststring32 languageName, bool includeWords);
+	conststring32 modelName, conststring32 languageName, bool includeWords, bool useDtw, bool useVad);
 
 autoSound Sound_readWithAdjacentAnnotationFiles_buckeye (conststring32 soundFileName, autoTextGrid *out_textgrid);
 autoSound Sound_readWithAdjacentAnnotationFiles_timit   (conststring32 soundFileName, autoTextGrid *out_textgrid);
