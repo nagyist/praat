@@ -141,7 +141,7 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 	}
 }
 
-bool isSentenceEndingPunctuation(conststring32 word) {
+bool endsWithTerminalPunctuation(conststring32 word) {
 	if (! word || word [0] == U'\0')
 		return false;
 
@@ -227,7 +227,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		}
 
 		/*
-			Collect all tokens (there are multiple tokens per segment) into one flat list, including silences in case of VAD.
+			Collect all tokens, including silences in case of VAD, into one flat list.
 		*/
 		const int n_segments = whisper_full_n_segments (my whisperContext.get());
 		struct Token {
@@ -247,25 +247,32 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			silence -> t1    = vadSegments [1]. orig_start;
 		}
 
+		/*
+			Collect tokens from each segment.
+		*/
 		int current_vad_segment = 1;
 		for (int i = 0; i < n_segments; ++ i) {
 			const int n_tokens = whisper_full_n_tokens (my whisperContext.get(), i);
 			for (int j = 0; j < n_tokens; ++ j) {
-				whisper_token_data tdata = whisper_full_get_token_data (my whisperContext.get(), i, j);
-				if (tdata.id >= whisper_token_eot (my whisperContext.get()))
-					continue;   // skip special tokens
+				autostring32 token_text = Melder_8to32 (whisper_full_get_token_text (my whisperContext.get(), i, j));
+				whisper_token_data token_data = whisper_full_get_token_data (my whisperContext.get(), i, j);
+				double t_dtw = token_data.t_dtw / 100.0;
+				double t1 = token_data.t1 / 100.0;
 
-				double t_dtw = tdata.t_dtw / 100.0;
-				double t1 = tdata.t1 / 100.0;
+				if (token_data.id >= whisper_token_eot (my whisperContext.get())) {
+					trace (U"Skipping special token: ", token_text.get());
+					continue;   // skip special tokens
+				}
 
 				/*
-					Translate timestamps back to original time and insert silence tokens between VAD segments.
+					Translate timestamps back to original time and insert silence tokens (" ") between VAD segments.
 				*/
 				if (useVad) {
+					bool isPunctuation = (Melder_length (token_text.get()) == 1) && ! Melder_isAlphanumeric (token_text.get() [0]);
 					if (current_vad_segment < n_vad_segments
-							&& t_dtw > vadSegments [current_vad_segment + 1]. vad_start) {
+							&& t_dtw > vadSegments [current_vad_segment + 1]. vad_start && !isPunctuation) {
 						Token *silence = allTokens.append(); // insert a silence token in case we progressed into a new VAD segment
-						silence -> text = Melder_dup (U" ");
+						silence -> text = Melder_dup (U" "); // silence token is " "
 						silence -> t_dtw = vadSegments [current_vad_segment + 1]. orig_start;
 						silence -> t1 = vadSegments [current_vad_segment + 1]. orig_start;
 						++ current_vad_segment;
@@ -280,7 +287,8 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				token -> text = Melder_8to32 (whisper_full_get_token_text (my whisperContext.get(), i, j));
 				token -> t_dtw = t_dtw;
 				token -> t1 = t1;
-				trace (U"Segment ", i, U"; token ", allTokens.size, U": text = ", token -> text.get(),
+				trace (U"Segment ", i, U"; VAD segment ", current_vad_segment,
+						U"; token ", allTokens.size, U": text = ", token -> text.get(),
 						U", t_dtw = ", token -> t_dtw, U", t1 = ", token -> t1);
 			}
 		}
@@ -312,34 +320,38 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			double token_tmax = useDtw ? allTokens [i]. t_dtw : allTokens [i]. t1;
 			if (i > 1)
 				token_tmin = useDtw ? allTokens [i - 1]. t_dtw : allTokens [i - 1]. t1;
-
+			bool isSilentToken = ! Melder_length (allTokens [i].text.get()) ||
+				((Melder_length (allTokens [i].text.get()) == 1) && allTokens [i].text.get() [0] == U' ');
 			/*
-				Add word to the sentence and to the full transcription text.
+				Add token to the sentence and to the full transcription text, unless it is a silence token.
 			*/
-			MelderString_append (& sentence_text, allTokens [i].text.get());
-			MelderString_append (& full_text, allTokens [i].text.get());
+			if (! isSilentToken) {
+				MelderString_append (& sentence_text, allTokens [i].text.get());
+				MelderString_append (& full_text, allTokens [i].text.get());
+			}
 
 			/*
 				Store start of sentence timestamp.
 			*/
 			if (isFirstTokenInSentence) {
 				sentence_tmin = token_tmin;
-				isFirstTokenInSentence = false;
 			}
 
 			/*
 				Create and store sentence segment if sentence is complete.
 			*/
-			bool isLastTokenInSentence = isSentenceEndingPunctuation (allTokens [i].text.get());
+			bool isLastTokenInSentence = endsWithTerminalPunctuation (allTokens [i].text.get());
 			bool isLastTokenOverall = (i == allTokens.size);
-			if (isLastTokenInSentence || isLastTokenOverall) {
+			if (isLastTokenInSentence || isLastTokenOverall || (isSilentToken && isFirstTokenInSentence)) {
 				WhisperSegment *sentence = sentences.append();
 				sentence -> text = Melder_dup (sentence_text.string);
 				sentence -> tmin = sentence_tmin;
 				sentence -> tmax = token_tmax;
 				trace (U"Sentence: [ ", sentence -> tmin, U" - ", sentence -> tmax, U" ] ",	sentence -> text.get());
 				MelderString_empty (& sentence_text);
-				isFirstTokenInSentence = true;
+				isFirstTokenInSentence = true;  // current sentence is finalized, start with the new one on the next iteration
+			} else {
+				isFirstTokenInSentence = false; // continue with the current sentence
 			}
 
 			/*
@@ -362,7 +374,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			if (token_tmax == token_tmin)
 				isNewWord = false;	// zero length token -> merge into previous one
 
-			if (isNewWord) { // new word: trip leading space from text
+			if (isNewWord) { // new word: strip leading space from text
 				WhisperSegment *word = words.append();
 				word -> text = Melder_dup (token_text);
 				word -> tmin = token_tmin;
