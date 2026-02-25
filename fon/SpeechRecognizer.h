@@ -64,6 +64,7 @@ constSTRVEC theSpeechRecognizerLanguageNames ();
 // default model parameters
 inline conststring32 theSpeechRecognizerDefaultModelName = U"ggml-base.bin";
 inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect language";
+inline conststring32 theSpeechRecognizerDefaultVadModelName = U"ggml-silero-v6.2.0.bin";
 
 // class SpeechRecognizer functions
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName, bool useDtw);
