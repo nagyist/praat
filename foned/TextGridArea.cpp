@@ -1445,14 +1445,17 @@ static void menu_cb_TranscribeInterval (TextGridArea me, EDITOR_ARGS) {
 		const autoMelderProgressOff noprogress;
 		FunctionArea_save (me, U"Transcribe interval");
 		TextGrid_Sound_transcribeInterval (my textGrid(), my borrowedSoundArea -> sound(), my selectedTier, intervalNumber,
-				my instancePref_transcribe_model(), my instancePref_transcribe_language(), my instancePref_transcribe_includeWords ());
+				my instancePref_transcribe_model(), my instancePref_transcribe_language(), my instancePref_transcribe_includeWords (),
+				my instancePref_transcribe_useDtw (), my instancePref_transcribe_useVad ());
 	}
 	FunctionArea_broadcastDataChanged (me);
 }
 
 static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Transcription settings", nullptr)
-		BOOLEAN (includeWords,    U"Include words", my default_transcribe_includeWords ())
+		BOOLEAN (includeWords, U"Include words", my default_transcribe_includeWords ())
+		BOOLEAN (useDtw, U"Use DTW", my default_transcribe_useDtw ())
+		BOOLEAN (useVad, U"Allow silences", my default_transcribe_useVad ())
 		LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
 		LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
 	EDITOR_OK
@@ -1465,6 +1468,8 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 		);
 
 		SET_BOOLEAN (includeWords, my instancePref_transcribe_includeWords())
+		SET_BOOLEAN (useDtw, my instancePref_transcribe_useDtw())
+		SET_BOOLEAN (useVad, my instancePref_transcribe_useVad())
 
 		integer prefModel = NUMfindFirst (modelNames.get (), my instancePref_transcribe_model());
 		if (prefModel == 0)
@@ -1482,6 +1487,8 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 		my setInstancePref_transcribe_model (modelName);
 		my setInstancePref_transcribe_language (languageName);
 		my setInstancePref_transcribe_includeWords (includeWords);
+		my setInstancePref_transcribe_useDtw (useDtw);
+		my setInstancePref_transcribe_useVad (useVad);
 	EDITOR_END
 }
 
