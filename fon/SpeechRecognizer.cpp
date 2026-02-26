@@ -55,7 +55,7 @@ autoWhisperContext& autoWhisperContext :: operator= (autoWhisperContext&& other)
 	return *this;
 }
 
-Thing_implement (SpeechRecognizer, Daata, 1);
+Thing_implement (SpeechRecognizer, Daata, 0);
 
 void structSpeechRecognizer :: v1_info () {
 	SpeechRecognizer_Parent :: v1_info ();
@@ -64,12 +64,11 @@ void structSpeechRecognizer :: v1_info () {
 }
 
 static conststring32 theWhisperModelsFolder ();
-autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName, bool useDtw) {
+autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName) {
 	try {
 		autoSpeechRecognizer me = Thing_new (SpeechRecognizer);
 		my d_modelName = Melder_dup (modelName);
 		my d_languageName = Melder_dup (languageName);
-		my d_useDtw = false;
 
 		/*
 			Check if selected model and language are compatible.
@@ -92,37 +91,34 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 		/*
 			Enable DTW (Dynamic Time Warping algorithm used for more precise token boundaries).
 		*/
-		if (useDtw) {
-			Melder_assert (! contextParams.flash_attn);
-			my d_useDtw = true;
-			contextParams.dtw_token_timestamps = true;
-			if (str32str (modelName, U"tiny.en"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_TINY_EN;
-			else if (str32str (modelName, U"tiny"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_TINY;
-			else if (str32str (modelName, U"base.en"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_BASE_EN;
-			else if (str32str (modelName, U"base"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_BASE;
-			else if (str32str (modelName, U"small.en"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_SMALL_EN;
-			else if (str32str (modelName, U"small"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_SMALL;
-			else if (str32str (modelName, U"medium.en"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_MEDIUM_EN;
-			else if (str32str (modelName, U"medium"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_MEDIUM;
-			else if (str32str (modelName, U"large-v3-turbo") || str32str (modelName, U"turbo"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_LARGE_V3_TURBO;
-			else if (str32str (modelName, U"large-v3"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_LARGE_V3;
-			else if (str32str (modelName, U"large-v2"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_LARGE_V2;
-			else if (str32str (modelName, U"large-v1") || str32str (modelName, U"large"))
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_LARGE_V1;
-			else
-				contextParams.dtw_aheads_preset = WHISPER_AHEADS_N_TOP_MOST;
-		}
+		Melder_assert (! contextParams.flash_attn);
+		contextParams.dtw_token_timestamps = true;
+		if (str32str (modelName, U"tiny.en"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_TINY_EN;
+		else if (str32str (modelName, U"tiny"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_TINY;
+		else if (str32str (modelName, U"base.en"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_BASE_EN;
+		else if (str32str (modelName, U"base"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_BASE;
+		else if (str32str (modelName, U"small.en"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_SMALL_EN;
+		else if (str32str (modelName, U"small"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_SMALL;
+		else if (str32str (modelName, U"medium.en"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_MEDIUM_EN;
+		else if (str32str (modelName, U"medium"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_MEDIUM;
+		else if (str32str (modelName, U"large-v3-turbo") || str32str (modelName, U"turbo"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_LARGE_V3_TURBO;
+		else if (str32str (modelName, U"large-v3"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_LARGE_V3;
+		else if (str32str (modelName, U"large-v2"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_LARGE_V2;
+		else if (str32str (modelName, U"large-v1") || str32str (modelName, U"large"))
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_LARGE_V1;
+		else
+			contextParams.dtw_aheads_preset = WHISPER_AHEADS_N_TOP_MOST;
 
 		conststring32 modelPath = Melder_cat (theWhisperModelsFolder(), U"/", modelName);
 		conststring8 utf8ModelPath = Melder_peek32to8 (modelPath);
@@ -279,7 +275,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				autostring32 raw_token_text = Melder_8to32 (whisper_full_get_token_text (my whisperContext.get(), i, j));
 				conststring32 token_text = raw_token_text.get();
 				integer length_token_text = Melder_length (token_text);
-				double tmax = my d_useDtw ? token_data.t_dtw / 100.0 : token_data.t1 / 100.0;
+				double tmax = token_data.t_dtw / 100.0;
 				bool isPunctuation = length_token_text == 1 && endsWithPunctuation (token_text);
 
 				/*

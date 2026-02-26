@@ -67,7 +67,7 @@ inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect langu
 inline conststring32 theSpeechRecognizerDefaultVadModelName = U"ggml-silero-v6.2.0.bin";
 
 // class SpeechRecognizer functions
-autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName, bool useDtw);
+autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName);
 WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound, bool useVad);
 
 /* End of file SpeechRecognizer.h */

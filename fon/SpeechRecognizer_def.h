@@ -22,9 +22,6 @@ oo_DEFINE_CLASS (SpeechRecognizer, Daata)
 
 	oo_STRING (d_modelName)
 	oo_STRING (d_languageName)
-	oo_FROM (1)
-		oo_BOOLEAN (d_useDtw)
-	oo_ENDFROM
 
 	#if oo_DECLARING
 		void v1_info () override;

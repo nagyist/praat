@@ -24,7 +24,7 @@ OK
 			NUMfindFirst (theSpeechRecognizerLanguageNames(), theSpeechRecognizerDefaultLanguageName))
 DO
 	CREATE_ONE
-		autoSpeechRecognizer result = SpeechRecognizer_create (modelName, languageName, false);
+		autoSpeechRecognizer result = SpeechRecognizer_create (modelName, languageName);
 		Thing_setName (result.get(), Melder_cat (modelName, U"_", languageName));
 	CREATE_ONE_END (U"")
 }
