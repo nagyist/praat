@@ -87,7 +87,7 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 		*/
 		whisper_context_params contextParams = whisper_context_default_params();
 		contextParams.use_gpu = false;
-		contextParams.flash_attn = false; // Needs to be false to use DTW!!!
+		contextParams.flash_attn = false;   // needs to be false to use DTW!!!
 
 		/*
 			Enable DTW (Dynamic Time Warping algorithm used for more precise token boundaries).
@@ -161,15 +161,16 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, 
 		Set Whisper parameters.
 	*/
 	whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_GREEDY);
-	params.token_timestamps = true;	// must be true to use t0 and t1 (non-DTW) token timestamps
+	params.token_timestamps = true;   // must be true to use t0 and t1 (non-DTW) token timestamps
 	if (useVad) {
-		params.vad = true; // Enable Silero VAD (Voice Activity Detection used to chop away the silences)
+		params.vad = true;   // Enable Silero VAD (Voice Activity Detection used to chop away the silences)
 		conststring32 vadModelPath = Melder_cat (theWhisperModelsFolder(), U"/", theSpeechRecognizerDefaultVadModelName);
 		structMelderFile vadFile { };
 		Melder_pathToFile (vadModelPath, & vadFile);
 		Melder_require (MelderFile_readable (& vadFile),
 			U"Cannot find VAD model file: ", vadModelPath,
-			U". Please download ", theSpeechRecognizerDefaultVadModelName, U" and place it in ", theWhisperModelsFolder(), U".");
+			U". Please download ", theSpeechRecognizerDefaultVadModelName, U" and place it in ", theWhisperModelsFolder(), U"."
+		);
 		params.vad_model_path = Melder_peek32to8 (vadModelPath);
 		params.vad_params = whisper_vad_default_params();
 	}
@@ -228,15 +229,15 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		autovector <VadSegment> vadSegments = newvectorzero<VadSegment>(n_vad_segments);
 		for (int i = 1; i <= n_vad_segments; ++ i) {
 			vadSegments [i].orig_start =
-				static_cast<double> (whisper_full_get_vad_segment_orig_start (my whisperContext.get(), i - 1)) / 100.0;
+					static_cast<double> (whisper_full_get_vad_segment_orig_start (my whisperContext.get(), i - 1)) / 100.0;
 			vadSegments [i].orig_end =
-				static_cast<double> (whisper_full_get_vad_segment_orig_end (my whisperContext.get(), i - 1)) / 100.0;
+					static_cast<double> (whisper_full_get_vad_segment_orig_end (my whisperContext.get(), i - 1)) / 100.0;
 			vadSegments [i].vad_start  =
-				static_cast<double> (whisper_full_get_vad_segment_vad_start (my whisperContext.get(), i - 1)) / 100.0;
+					static_cast<double> (whisper_full_get_vad_segment_vad_start (my whisperContext.get(), i - 1)) / 100.0;
 			vadSegments [i].vad_end  =
-				static_cast<double> (whisper_full_get_vad_segment_vad_end (my whisperContext.get(), i - 1)) / 100.0;
+					static_cast<double> (whisper_full_get_vad_segment_vad_end (my whisperContext.get(), i - 1)) / 100.0;
 			trace (U"VAD segment ", i, U", orig_start = ", vadSegments [i]. orig_start, U", orig_end = ", vadSegments [i]. orig_end,
-				U", vad_start = ", vadSegments [i]. vad_start, U", vad_end = ", vadSegments [i]. vad_end);
+					U", vad_start = ", vadSegments [i]. vad_start, U", vad_end = ", vadSegments [i]. vad_end);
 		}
 
 		/*
@@ -245,7 +246,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		const int n_segments = whisper_full_n_segments (my whisperContext.get());
 		struct Token {
 			autostring32 text;
-			double tmax;   // DTW timestamp (end of token) or "inference time trick" timestamp (end of token), in seconds
+			double tmax;   // DTW timestamp (end of token), in seconds
 			bool isPunctuation;
 			bool isSilence;
 			bool isNewWord;
@@ -281,13 +282,18 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				double tmax = my d_useDtw ? token_data.t_dtw / 100.0 : token_data.t1 / 100.0;
 				bool isPunctuation = length_token_text == 1 && endsWithPunctuation (token_text);
 
-				if (useVad) { // translate timestamps back to original time and insert silence tokens (" ") between VAD segment
+				/*
+					In case of VAD, translate timestamps back to original time and insert silence tokens (" ") between VAD segments.
+				*/
+				if (useVad) {
 					/*
 						Insert a silence token if we progressed into the next VAD segment
 						and current token is more than just one punctuation symbol.
 					*/
-					if (current_vad_segment < n_vad_segments && tmax > vadSegments [current_vad_segment + 1]. vad_start
-							&& ! isPunctuation) {
+					if (current_vad_segment < n_vad_segments
+						&& tmax > vadSegments [current_vad_segment + 1]. vad_start
+						&& ! isPunctuation
+					) {
 						Token *silence = allTokens.append();
 						silence -> tmax = vadSegments [current_vad_segment + 1]. orig_start;
 						silence -> isPunctuation = false;
@@ -299,17 +305,16 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 						++ current_vad_segment;
 					}
 					tmax += vadSegments [current_vad_segment]. orig_start - vadSegments [current_vad_segment]. vad_start;
-					tmax = std::min (tmax, vadSegments [current_vad_segment]. orig_end); // clamp to the size of VAD interval
+					tmax = std::min (tmax, vadSegments [current_vad_segment]. orig_end);   // clamp to the size of VAD interval
 				}
 
 				Token *token = allTokens.append();
 				token -> tmax = tmax;
 				token -> isPunctuation = isPunctuation;
-				token -> isSilence = ! length_token_text; // if there is no text in a token, mark it as a silence as well
+				token -> isSilence = ! length_token_text;   // if there is no text in a token, mark it as a silence as well
 				token -> isNewWord = ! length_token_text || token_text [0] == U' ';
-				if (token -> isNewWord && ! token -> isSilence) {
+				if (token -> isNewWord && ! token -> isSilence)
 					token_text ++;
-				}
 				token -> text = Melder_dup (token_text);
 				trace (U"Segment ", i, U"; VAD segment ", current_vad_segment,
 						U"; token ", allTokens.size, U": text = ", token -> text.get(),
@@ -338,8 +343,8 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		autovector <WhisperSegment> words = newvectorzero <WhisperSegment> (0);
 		autovector <WhisperSegment> sentences = newvectorzero <WhisperSegment> (0);
 
-		double token_tmin = 0.0; // default for first token
-		double sentence_tmin = 0.0; // default for first sentence
+		double token_tmin = 0.0;   // default for first token
+		double sentence_tmin = 0.0;   // default for first sentence
 		bool isFirstTokenInSentence = true;
 		bool isFirstSentence = true;
 
@@ -372,9 +377,8 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			/*
 				Store start of sentence timestamp.
 			*/
-			if (isFirstTokenInSentence) {
+			if (isFirstTokenInSentence)
 				sentence_tmin = token_tmin;
-			}
 
 			/*
 				Remove punctuation from the end of the token, preserving information about the end of the sentence.
@@ -382,11 +386,11 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			bool isLastTokenInSentence = false;
 			if (endsWithTerminalPunctuation (token_text))
 				isLastTokenInSentence = true;
-			else if (isPunctuationToken) { // if punctuation is not terminal, divide it's interval between the right and left neighbours
+			else if (isPunctuationToken) {   // if punctuation is not terminal, divide it's interval between the right and left neighbours
 				token_tmax = (token_tmax + token_tmin) / 2;
 				allTokens [i]. tmax = token_tmax;
 			}
-			if (endsWithPunctuation (token_text)) { // if ends with any punctuation, strip it
+			if (endsWithPunctuation (token_text)) {   // if ends with any punctuation, strip it
 				integer length_token_text = Melder_length (token_text);
 				Melder_assert (length_token_text > 0);
 				token_text [length_token_text - 1] = U'\0';
@@ -397,13 +401,13 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				Create word-level segment (making sure there are no zero-length word segments).
 			*/
 			Melder_assert (token_tmax >= token_tmin);
-			if ((isNewWord || words.size == 0) && token_tmax > token_tmin) { // new word
+			if ((isNewWord || words.size == 0) && token_tmax > token_tmin) {   // new word
 				WhisperSegment *word = words.append();
 				word -> text = Melder_dup (token_text);
 				word -> tmin = token_tmin;
 				word -> tmax = token_tmax;
 				trace (U"Word ", words.size, U": [ ", word -> tmin, U" - ", word -> tmax, U" ]", word -> text.get());
-			} else if (words.size > 0) { // continuation token: merge into last word
+			} else if (words.size > 0) {   // continuation token: merge into last word
 				WhisperSegment & word = words [words.size];
 				word.text = Melder_dup (Melder_cat (word.text.get(), token_text));
 				word.tmax = token_tmax;
@@ -421,11 +425,11 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				sentence -> tmax = token_tmax;
 				trace (U"Sentence: [ ", sentence -> tmin, U" - ", sentence -> tmax, U" ] \"",	sentence -> text.get(), U"\"");
 				MelderString_empty (& sentence_text);
-				isFirstTokenInSentence = true; // current sentence is finalized, start with the new one on the next iteration
+				isFirstTokenInSentence = true;   // current sentence is finalized, start with the new one on the next iteration
 				if (isFirstSentence && ! isSilentToken)
 					isFirstSentence = false;
 			} else {
-				isFirstTokenInSentence = false; // continue with the current sentence
+				isFirstTokenInSentence = false;   // continue with the current sentence
 			}
 		}
 
@@ -437,8 +441,8 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		transcription.sentences = sentences.move();
 
 		trace (U"Full transcription:",
-			U" [ ", transcription.fullTranscription.tmin, U" - ",
-			transcription.fullTranscription.tmax, U" ]", transcription.fullTranscription.text.get());
+				U" [ ", transcription.fullTranscription.tmin, U" - ",
+				transcription.fullTranscription.tmax, U" ]", transcription.fullTranscription.text.get());
 
 		return transcription;
 
