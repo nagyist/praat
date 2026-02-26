@@ -257,7 +257,6 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		*/
 		if (useVad && n_vad_segments > 0 && vadSegments [1]. orig_start > sound -> xmin) {
 			Token *silence = allTokens.append();
-			//silence -> text = Melder_dup (U"");
 			silence -> tmax = vadSegments [1]. orig_start;
 			silence -> isPunctuation = false;
 			silence -> isSilence = true;
@@ -290,7 +289,6 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 					if (current_vad_segment < n_vad_segments && tmax > vadSegments [current_vad_segment + 1]. vad_start
 							&& ! isPunctuation) {
 						Token *silence = allTokens.append();
-						//silence -> text = Melder_dup (U"");
 						silence -> tmax = vadSegments [current_vad_segment + 1]. orig_start;
 						silence -> isPunctuation = false;
 						silence -> isSilence = true;
@@ -317,6 +315,19 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 						U"; token ", allTokens.size, U": text = ", token -> text.get(),
 						U", tmax = ", token -> tmax);
 			}
+		}
+
+		/*
+			Insert trailing silence.
+		*/
+		if (allTokens [allTokens.size]. tmax < sound -> xmax) {
+			Token *silence = allTokens.append();
+			silence -> tmax = sound -> xmax;
+			silence -> isPunctuation = false;
+			silence -> isSilence = true;
+			silence -> isNewWord = true;
+			trace (U"Trailing silence token: ", allTokens.size, U": text = \"", silence -> text.get(),
+					U"\", tmax = ", silence -> tmax);
 		}
 
 		/*
