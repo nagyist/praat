@@ -407,7 +407,7 @@ void TextGrid_Sound_transcribeInterval (
 	const TextGrid me, const Sound sound,
 	const integer tierNumber, const integer intervalNumber,
 	const conststring32 modelName, const conststring32 languageName,
-	const bool includeWords, const bool useDtw, const bool useVad
+	const bool includeWords, const bool useVad
 ) {
 	try {
 		//TRACE
@@ -424,7 +424,7 @@ void TextGrid_Sound_transcribeInterval (
 		trace (U"tier ", tierNumber, U" interval ", intervalNumber,	U" (", original_tmin, U" .. ", original_tmax, U")");
 		autoSound soundPart = Sound_extractPart (sound, original_tmin, original_tmax,
 			kSound_windowShape::RECTANGULAR, 1.0, false);
-		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName, useDtw);
+		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName);
 		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (
 			speechRecognizer.get(), soundPart.get(), useVad);
 
