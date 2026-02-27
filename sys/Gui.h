@@ -810,6 +810,11 @@ Thing_define (GuiMenuItem, GuiThing) {
 #define GuiMenu_OPTION  (1 << 24)
 #define GuiMenu_SHIFT  (1 << 25)
 #define GuiMenu_COMMAND  (1 << 26)
+#if cocoa
+	#define GuiMenu_COMMAND_EXTRA  (GuiMenu_OPTION | GuiMenu_COMMAND)   /* standard on the Mac (where the keys are next to each other) */
+#else
+	#define GuiMenu_COMMAND_EXTRA  (GuiMenu_SHIFT | GuiMenu_COMMAND)   /* standard on Windows (where the keys are next to each other, *and* Ctrl-Alt can mean Alt-GR) */
+#endif
 // 1 is the short form of GuiMenu_DEPTH_1
 // 2 is the short form of GuiMenu_DEPTH_2
 // 3 is the short form of GuiMenu_DEPTH_3

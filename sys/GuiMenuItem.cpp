@@ -1,10 +1,10 @@
 /* GuiMenuItem.cpp
  *
- * Copyright (C) 1992-2018,2020,2022-2024 Paul Boersma, 2013 Tom Naughton
+ * Copyright (C) 1992-2018,2020,2022-2024,2026 Paul Boersma, 2013 Tom Naughton
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -67,9 +67,9 @@ Thing_implement (GuiMenuItem, GuiThing, 0);
 			};
 			const conststring32 keyString = keyStrings [acc] ? keyStrings [acc] : U"???";
 			MelderString_copy (& title, _GuiWin_expandAmpersands (my name.get()), U"\t",
-				modifiers & _motif_COMMAND_MASK ? U"Ctrl-" : nullptr,
-				modifiers & _motif_OPTION_MASK ? U"Alt-" : nullptr,
-				modifiers & _motif_SHIFT_MASK ? U"Shift-" : nullptr, keyString
+				modifiers & _motif_COMMAND_MASK ? U"Ctrl+" : nullptr,
+				modifiers & _motif_OPTION_MASK ? U"Alt+" : nullptr,
+				modifiers & _motif_SHIFT_MASK ? U"Shift+" : nullptr, keyString
 			);
 		}
 		ModifyMenu (my nat.entry.handle, my nat.entry.id, MF_BYCOMMAND | MF_STRING, my nat.entry.id, Melder_peek32toW (title.string));
