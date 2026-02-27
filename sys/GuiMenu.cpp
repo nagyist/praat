@@ -1,6 +1,6 @@
 /* GuiMenu.cpp
  *
- * Copyright (C) 1992-2005,2007-2025 Paul Boersma,
+ * Copyright (C) 1992-2005,2007-2026 Paul Boersma,
  *               2008 Stefan de Konink, 2010 Franz Brausse, 2013 Tom Naughton
  *
  * This code is free software; you can redistribute it and/or modify
@@ -154,7 +154,7 @@ Thing_implement (GuiMenu, GuiThing, 0);
 								We probably got in this branch by pressing Ctrl-Y.
 								People sometimes press that because it means "yank" (= Paste) in Emacs,
 								and indeed sending this key combination on, as we do here,
-								implements (together with Ctrl-K = "kil" = Cut)
+								implements (together with Ctrl-K = "kill" = Cut)
 								a special cut & paste operation in text fields.
 							*/
 							// do nothing, i.e. send on
@@ -173,7 +173,7 @@ Thing_implement (GuiMenu, GuiThing, 0);
 					2. pressing Enter in a window with a multiline text widget (TextGrid window) would invoke the Enter menu shortcut.
 					Then we might indeed need to overwrite the behaviour of Enter,
 					but not on the present low level, because when the keyboard is e.g. Japanese (Romaji)
-					the Enter key should be used for selection the intended characters;
+					the Enter key should be used for selecting the intended characters;
 					for instance, try typing: "seikou Space Space Space Enter Enter seikou Space Space Enter Enter Enter";
 					only the fifth of these Enters should invoke the menu command.
 					See GuiText_create() for where to capture Enter in an NSTextView,

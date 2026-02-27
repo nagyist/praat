@@ -220,7 +220,7 @@ void structFormantGridArea :: v_createMenus () {
 	FunctionAreaMenu_addCommand (menu, U"Add point at...", 0,
 			menu_cb_addPointAt, this);
 	FunctionAreaMenu_addCommand (menu, U"-- remove point --", 0, nullptr, this);
-	FunctionAreaMenu_addCommand (menu, U"Remove point(s)", GuiMenu_OPTION | 'T',
+	FunctionAreaMenu_addCommand (menu, U"Remove point(s)", GuiMenu_COMMAND_EXTRA | 'T',
 			menu_cb_removePoints, this);
 	if (our v_hasSourceMenu ()) {
 		menu = Editor_addMenu (our functionEditor(), U"Source", 0);

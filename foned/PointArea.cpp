@@ -245,7 +245,7 @@ void structPointArea :: v_createMenus () {
 	FunctionAreaMenu_addCommand (menu, U"Add point at...", 0,
 			MODIFY_DATA__addPointAt, this);
 	FunctionAreaMenu_addCommand (menu, U"-- remove point --", 0, nullptr, this);
-	FunctionAreaMenu_addCommand (menu, U"Remove point(s)", GuiMenu_OPTION | 'P',
+	FunctionAreaMenu_addCommand (menu, U"Remove point(s)", GuiMenu_COMMAND_EXTRA | 'P',
 			MODIFY_DATA__removePoints, this);
 
 	FunctionAreaMenu_addCommand (menu, U"- Query selected pulses:", 0, nullptr, this);

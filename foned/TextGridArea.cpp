@@ -1974,7 +1974,7 @@ void structTextGridArea :: v_createMenus () {
 
 	if (our spellingChecker) {
 		EditorMenu spellMenu = Editor_addMenu (our functionEditor(), U"Spell", 0);
-		FunctionAreaMenu_addCommand (spellMenu, U"Check spelling in tier", GuiMenu_COMMAND | GuiMenu_OPTION | 'L',
+		FunctionAreaMenu_addCommand (spellMenu, U"Check spelling in tier", GuiMenu_COMMAND_EXTRA | 'L',
 				menu_cb_CheckSpelling, this);
 		FunctionAreaMenu_addCommand (spellMenu, U"Check spelling in interval", 0,
 				menu_cb_CheckSpellingInInterval, this);
