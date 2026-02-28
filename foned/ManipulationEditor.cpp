@@ -1,10 +1,10 @@
 /* ManipulationEditor.cpp
  *
- * Copyright (C) 1992-2024 Paul Boersma
+ * Copyright (C) 1992-2024,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -67,7 +67,7 @@ void structManipulationPulsesArea :: v_createMenus () {
 	FunctionAreaMenu_addCommand (menu, U"Add pulse at...", 0,
 			menu_cb_addPulseAt, this);
 	FunctionAreaMenu_addCommand (menu, U"-- remove pulses --", 0, nullptr, this);
-	FunctionAreaMenu_addCommand (menu, U"Remove pulse(s)", GuiMenu_OPTION | 'P',
+	FunctionAreaMenu_addCommand (menu, U"Remove pulse(s)", GuiMenu_COMMAND_EXTRA | 'P',
 			menu_cb_removePulses, this);
 }
 
@@ -289,7 +289,7 @@ void structManipulationPitchTierArea :: v_createMenus () {
 			menu_cb_addPitchPointAtSlice, this);
 	FunctionAreaMenu_addCommand (menu, U"Add pitch point at...", 1,
 			menu_cb_addPitchPointAt, this);
-	FunctionAreaMenu_addCommand (menu, U"Remove pitch point(s)", GuiMenu_OPTION | 'T' | GuiMenu_DEPTH_1,
+	FunctionAreaMenu_addCommand (menu, U"Remove pitch point(s)", GuiMenu_COMMAND_EXTRA | 'T' | GuiMenu_DEPTH_1,
 			menu_cb_removePitchPoints, this);
 
 	FunctionAreaMenu_addCommand (menu, U"- Modify selected pitch:", 0, nullptr, this);
@@ -374,7 +374,7 @@ void structManipulationDurationTierArea :: v_createMenus () {
 			menu_cb_addDurationPointAtCursor, this);
 	FunctionAreaMenu_addCommand (menu, U"Add duration point at...", 1,
 			menu_cb_addDurationPointAt, this);
-	FunctionAreaMenu_addCommand (menu, U"Remove duration point(s)", GuiMenu_OPTION | 'D' | GuiMenu_DEPTH_1,
+	FunctionAreaMenu_addCommand (menu, U"Remove duration point(s)", GuiMenu_COMMAND_EXTRA | 'D' | GuiMenu_DEPTH_1,
 			menu_cb_removeDurationPoints, this);
 }
 

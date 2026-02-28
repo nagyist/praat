@@ -9567,9 +9567,9 @@ void praat_David_init () {
 			HELP__EditCostsTable_help);
 	praat_addAction1 (classEditCostsTable, 0, U"Query -", nullptr, 0, nullptr);
 	praat_addAction1 (classEditCostsTable, 1, U"Get target index...", nullptr, 1, 
-		QUERY_ONE_FOR_INTEGER__EditCostsTable_getTargetIndex);
+			QUERY_ONE_FOR_INTEGER__EditCostsTable_getTargetIndex);
 	praat_addAction1 (classEditCostsTable, 1, U"Get source index...", nullptr, 1,
-		QUERY_ONE_FOR_INTEGER__EditCostsTable_getSourceIndex);
+			QUERY_ONE_FOR_INTEGER__EditCostsTable_getSourceIndex);
 	praat_addAction1 (classEditCostsTable, 1, U"Get insertion costs...", nullptr, 1,
 			QUERY_ONE_FOR_REAL__EditCostsTable_getInsertionCosts);
 	praat_addAction1 (classEditCostsTable, 1, U"Get insertion cost...", nullptr, GuiMenu_DEPRECATED_2017,
@@ -10154,7 +10154,7 @@ void praat_David_init () {
 			GRAPHICS_EACH__Roots_draw);
 	praat_addAction1 (classRoots, 1, U"Query -", nullptr, 0, nullptr);
 	praat_addAction1 (classRoots, 1, U"Get number of roots", nullptr, 1,
-		QUERY_ONE_FOR_INTEGER__Roots_getNumberOfRoots);
+			QUERY_ONE_FOR_INTEGER__Roots_getNumberOfRoots);
 	praat_addAction1 (classRoots, 1, U"-- roots --", nullptr, 1, 0);
 	praat_addAction1 (classRoots, 1, U"Get root...", nullptr, 1,
 			COMPLEX_Roots_getRoot);
@@ -10377,9 +10377,9 @@ void praat_David_init () {
 			HELP__SVD_help);
 	praat_addAction1 (classSVD, 0, U"Query -", nullptr, 0, nullptr);
 	praat_addAction1 (classSVD, 1, U"Get number of rows", nullptr, 1, 
-		QUERY_ONE_FOR_INTEGER__SVD_getNumberOfRows);
+			QUERY_ONE_FOR_INTEGER__SVD_getNumberOfRows);
 	praat_addAction1 (classSVD, 1, U"Get number of columns", nullptr, 1,
-		QUERY_ONE_FOR_INTEGER__SVD_getNumberOfColumns);
+			QUERY_ONE_FOR_INTEGER__SVD_getNumberOfColumns);
 	praat_addAction1 (classSVD, 1, U"Get rank", nullptr, 1,
 			QUERY_ONE_FOR_REAL__SVD_getRank);
 	praat_addAction1 (classSVD, 1, U"Get condition number", nullptr, 1,
@@ -10392,7 +10392,7 @@ void praat_David_init () {
 	praat_addAction1 (classSVD, 1, U"Get sum of singular values (fraction)...", nullptr, 1,
 			QUERY_ONE_FOR_REAL__SVD_getSumOfSingularValuesAsFractionOfTotal);
 	praat_addAction1 (classSVD, 1, U"Get minimum number of singular values...", nullptr, 1,
-		QUERY_ONE_FOR_INTEGER__SVD_getMinimumNumberOfSingularValues);
+			QUERY_ONE_FOR_INTEGER__SVD_getMinimumNumberOfSingularValues);
 	praat_addAction1 (classSVD, 1, U"Get shrinkage parameter...", nullptr, 1,
 			QUERY_ONE_FOR_REAL__SVD_getShrinkageParameter);	
 	praat_addAction1 (classSVD, 1, U"Get effective degrees of freedom...", nullptr, 1,
@@ -10487,15 +10487,15 @@ void praat_David_init () {
 			CONVERT_EACH_TO_ONE__Table_to_StringsIndex_column);
 	praat_addAction1 (classTableOfReal, 0, U"Multivariate tests -", U"Get column stdev (label)...", 1, nullptr);
 		praat_addAction1 (classTableOfReal, 1, U"Report multivariate normality...", U"Multivariate tests -",
-			GuiMenu_DEPTH_2, INFO_ONE__TableOfReal_reportMultivariateNormality);
+				GuiMenu_DEPTH_2, INFO_ONE__TableOfReal_reportMultivariateNormality);
 		praat_addAction1 (classTableOfReal, 1, U"Report covariance sphericity...", U"Report multivariate normality...",
-			GuiMenu_DEPTH_2, INFO_ONE__TableOfReal_reportSphericityOfCovariance);
+				GuiMenu_DEPTH_2, INFO_ONE__TableOfReal_reportSphericityOfCovariance);
 		praat_addAction1 (classTableOfReal, 1, U"Report covariance compound symmetry...",  U"Report covariance sphericity...",
-			GuiMenu_DEPTH_2, INFO_ONE__TableOfReal_reportCompoundSymmetryOfCovariance);
+				GuiMenu_DEPTH_2, INFO_ONE__TableOfReal_reportCompoundSymmetryOfCovariance);
 		praat_addAction1 (classTableOfReal, 1, U"Report covariance identity...",  U"Report covariance compound symmetry...",
-			GuiMenu_DEPTH_2, INFO_ONE__TableOfReal_reportCovarianceIdentity);
+				GuiMenu_DEPTH_2, INFO_ONE__TableOfReal_reportCovarianceIdentity);
 		praat_addAction1 (classTableOfReal, 2, U"Report equality of covariances...",  U"Report covariance identity...",
-			GuiMenu_DEPTH_2, INFO_TWO__TableOfReal_reportEqualityOfCovariances);
+				GuiMenu_DEPTH_2, INFO_TWO__TableOfReal_reportEqualityOfCovariances);
 	praat_addAction1 (classTableOfReal, 0, U"Append columns", U"Append", 1, 
 			COMBINE_ALL_LISTED_TO_ONE__TableOfReal_appendColumns);
 	praat_addAction1 (classTableOfReal, 0, U"Multivariate statistics -", nullptr, 0, nullptr);
@@ -10619,50 +10619,50 @@ void praat_David_init () {
 	praat_addAction1 (classTextGridNavigator, 0, U"Query -", nullptr, 0, nullptr);
 		praat_TimeFunction_query_init (classTextGridNavigator); 
 		praat_addAction1 (classTextGridNavigator, 1, U"Get start time...", nullptr, 1,
-			QUERY_ONE_FOR_REAL__TextGridNavigator_getStartTime);
+				QUERY_ONE_FOR_REAL__TextGridNavigator_getStartTime);
 		praat_addAction1 (classTextGridNavigator, 1, U"Get label...", nullptr, 1,
-			QUERY_ONE_FOR_STRING__TextGridNavigator_getLabel);
+				QUERY_ONE_FOR_STRING__TextGridNavigator_getLabel);
 		praat_addAction1 (classTextGridNavigator, 1, U"Get end time...", nullptr, 1,
-			QUERY_ONE_FOR_REAL__TextGridNavigator_getEndTime);
+				QUERY_ONE_FOR_REAL__TextGridNavigator_getEndTime);
 		praat_addAction1 (classTextGridNavigator, 1, U"Get index...", nullptr, 1,
-			QUERY_ONE_FOR_INTEGER__TextGridNavigator_getIndex);
+				QUERY_ONE_FOR_INTEGER__TextGridNavigator_getIndex);
 		praat_addAction1 (classTextGridNavigator, 1, U"-- number of matches --", nullptr, 1, nullptr);
 		praat_addAction1 (classTextGridNavigator, 1, U"List indices...", nullptr, 1,
-			QUERY_ONE_FOR_REAL_VECTOR__TextGridNavigator_listIndices);
+				QUERY_ONE_FOR_REAL_VECTOR__TextGridNavigator_listIndices);
 		praat_addAction1 (classTextGridNavigator, 1, U"List start times...", nullptr, 1,
-			QUERY_ONE_FOR_REAL_VECTOR__TextGridNavigator_listStartTimes);
+				QUERY_ONE_FOR_REAL_VECTOR__TextGridNavigator_listStartTimes);
 		praat_addAction1 (classTextGridNavigator, 1, U"List labels...", nullptr, 1,
-			QUERY_ONE_FOR_STRING_ARRAY__TextGridNavigator_listLabels);
+				QUERY_ONE_FOR_STRING_ARRAY__TextGridNavigator_listLabels);
 		praat_addAction1 (classTextGridNavigator, 1, U"List end times...", nullptr, 1,
-			QUERY_ONE_FOR_REAL_VECTOR__TextGridNavigator_listEndTimes);
+				QUERY_ONE_FOR_REAL_VECTOR__TextGridNavigator_listEndTimes);
 		praat_addAction1 (classTextGridNavigator, 1, U"List domains...", nullptr, 1,
-			QUERY_ONE_FOR_MATRIX__TextGridNavigator_listDomains);
+				QUERY_ONE_FOR_MATRIX__TextGridNavigator_listDomains);
 		praat_addAction1 (classTextGridNavigator, 1, U"Get number of matches", nullptr, 1,
-			QUERY_ONE_FOR_INTEGER__TextGridNavigator_getNumberOfMatches);
+				QUERY_ONE_FOR_INTEGER__TextGridNavigator_getNumberOfMatches);
 		praat_addAction1 (classTextGridNavigator, 1, U"Get number of Topic matches...", nullptr, 1,
-			QUERY_ONE_FOR_INTEGER__TextGridNavigator_getNumberOfTopicMatches);
+				QUERY_ONE_FOR_INTEGER__TextGridNavigator_getNumberOfTopicMatches);
 		praat_addAction1 (classTextGridNavigator, 1, U"Get number of Before matches...", nullptr, 1,
-			QUERY_ONE_FOR_INTEGER__TextGridNavigator_getNumberOfBeforeMatches);
+				QUERY_ONE_FOR_INTEGER__TextGridNavigator_getNumberOfBeforeMatches);
 		praat_addAction1 (classTextGridNavigator, 1, U"Get number of After matches...", nullptr, 1,
-			QUERY_ONE_FOR_INTEGER__TextGridNavigator_getNumberOfAfterMatches);
+				QUERY_ONE_FOR_INTEGER__TextGridNavigator_getNumberOfAfterMatches);
 	praat_addAction1 (classTextGridNavigator, 0, U"Modify -", nullptr, 0, nullptr);
 		praat_addAction1 (classTextGridNavigator, 0, U"Modify Topic match criterion...", nullptr, 1,
-			MODIFY_EACH__TextGridNavigator_modifyTopicCriterion);
+				MODIFY_EACH__TextGridNavigator_modifyTopicCriterion);
 		praat_addAction1 (classTextGridNavigator, 0, U"Modify Before match criterion...", nullptr, 1,
-			MODIFY_EACH__TextGridNavigator_modifyBeforeCriterion);
+				MODIFY_EACH__TextGridNavigator_modifyBeforeCriterion);
 		praat_addAction1 (classTextGridNavigator, 0, U"Modify After match criterion...", nullptr, 1,
-			MODIFY_EACH__TextGridNavigator_modifyAfterCriterion);
+				MODIFY_EACH__TextGridNavigator_modifyAfterCriterion);
 		praat_addAction1 (classTextGridNavigator, 0, U"Modify combination criterion...", nullptr, 1,
-			MODIFY_EACH__TextGridNavigator_modifyCombinationCriterion);
+				MODIFY_EACH__TextGridNavigator_modifyCombinationCriterion);
 		praat_addAction1 (classTextGridNavigator, 0, U"Modify match domain...", nullptr, 1,
-			MODIFY_EACH__TextGridNavigator_modifyMatchDomain);
+				MODIFY_EACH__TextGridNavigator_modifyMatchDomain);
 		praat_addAction1 (classTextGridNavigator, 0, U"Modify match domain alignment...", nullptr, 1,
-			MODIFY_EACH__TextGridNavigator_modifyMatchDomainAlignment);
+				MODIFY_EACH__TextGridNavigator_modifyMatchDomainAlignment);
 		praat_addAction1 (classTextGridNavigator, 0, U"-- search range extensions --", nullptr, 1, nullptr);
 		praat_addAction1 (classTextGridNavigator, 0, U"Modify Before range...", nullptr, 1,
-			MODIFY_EACH__TextGridNavigator_modifyBeforeRange);
+				MODIFY_EACH__TextGridNavigator_modifyBeforeRange);
 		praat_addAction1 (classTextGridNavigator, 0, U"Modify After range...", nullptr, 1,
-			MODIFY_EACH__TextGridNavigator_modifyAfterRange);
+				MODIFY_EACH__TextGridNavigator_modifyAfterRange);
 
 	praat_addAction2 (classTextGridNavigator, 1, classNavigationContext, 1, U"Replace navigation context...", nullptr, 0,
 			MODIFY_FIRST_OF_ONE_AND_ONE__TextGridNavigator_replaceNavigationContext);

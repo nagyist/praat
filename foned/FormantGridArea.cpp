@@ -1,10 +1,10 @@
 /* FormantGridArea.cpp
  *
- * Copyright (C) 2008-2022,2024 Paul Boersma & David Weenink
+ * Copyright (C) 2008-2022,2024,2026 Paul Boersma & David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -220,7 +220,7 @@ void structFormantGridArea :: v_createMenus () {
 	FunctionAreaMenu_addCommand (menu, U"Add point at...", 0,
 			menu_cb_addPointAt, this);
 	FunctionAreaMenu_addCommand (menu, U"-- remove point --", 0, nullptr, this);
-	FunctionAreaMenu_addCommand (menu, U"Remove point(s)", GuiMenu_OPTION | 'T',
+	FunctionAreaMenu_addCommand (menu, U"Remove point(s)", GuiMenu_COMMAND_EXTRA | 'T',
 			menu_cb_removePoints, this);
 	if (our v_hasSourceMenu ()) {
 		menu = Editor_addMenu (our functionEditor(), U"Source", 0);

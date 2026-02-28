@@ -1,10 +1,10 @@
 /* PointArea.cpp
  *
- * Copyright (C) 1992-2024 Paul Boersma
+ * Copyright (C) 1992-2024,2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -245,7 +245,7 @@ void structPointArea :: v_createMenus () {
 	FunctionAreaMenu_addCommand (menu, U"Add point at...", 0,
 			MODIFY_DATA__addPointAt, this);
 	FunctionAreaMenu_addCommand (menu, U"-- remove point --", 0, nullptr, this);
-	FunctionAreaMenu_addCommand (menu, U"Remove point(s)", GuiMenu_OPTION | 'P',
+	FunctionAreaMenu_addCommand (menu, U"Remove point(s)", GuiMenu_COMMAND_EXTRA | 'P',
 			MODIFY_DATA__removePoints, this);
 
 	FunctionAreaMenu_addCommand (menu, U"- Query selected pulses:", 0, nullptr, this);
