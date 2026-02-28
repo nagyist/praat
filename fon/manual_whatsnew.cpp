@@ -29,6 +29,16 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.61# (28 February 2026)
+• ##Transcribe interval# (via automatic speech recognition): better word alignment via Whisper’s built-in DTW.
+• ##Transcribe interval# (via automatic speech recognition): option for silence removal (via an additionally installed AI model).
+• Windows: Ctrl+Alt+Letter menu shortcuts have become Ctrl+Shift+Letter, because that’s the
+  way it’s nowadays done in e.g. browsers and NotePad, and because Ctrl+Alt+Letter combinations
+  can stand for actual Alt-GR characters on some keyboards. On the Mac we still use Option+Command+Letter.
+  Note that on most Windows keyboards the Ctrl and Alt keys are adjacent, as as the Option and Command
+  keys on most Mac keyboards.
+• Manual: menu shortcuts for ##Previous page# and ##Next page#.
+
 ##6.4.60# (10 February 2026)
 • Scripting: fixed an interaction between pause windows and @`exitScript`.
 • Scripting: turned cases of multiple identical procedure names into
