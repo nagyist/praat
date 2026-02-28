@@ -2251,14 +2251,17 @@ NORMAL (U"The contribution is defined as:")
 EQUATION (U"\\Si__%i=%from..%to_ %%eigenvalue[i]% / \\Si__%i=1..%numberOfEigenvalues_ %%eigenvalue[i]%")
 MAN_END
 
-MAN_BEGIN (U"Eigen: Get eigenvalue...", U"djmw", 20040225)
-INTRO (U"A command to query the selected @Eigen for the %i^^th^ "
-	"eigenvalue.")
+MAN_BEGIN (U"Eigen: Get eigenvalue...", U"djmw", 20260228)
+INTRO (U"A command to query the selected @Eigen for one of its eigenvalues.")
 MAN_END
 
 MAN_BEGIN (U"Eigen: Get eigenvector element...", U"djmw", 20040225)
 INTRO (U"A command to query the selected @Eigen for the %j^^th^ element of the "
 	"%i^^th^ eigenvector.")
+MAN_END
+
+MAN_BEGIN (U"Eigen: Get eigenvector...", U"djmw", 20260228)
+INTRO (U"A command to query the selected @Eigen for one of its eigenvectors.")
 MAN_END
 
 MAN_BEGIN (U"Eigen: Extract eigenvector...", U"djmw", 20160617)
@@ -6599,6 +6602,11 @@ NORMAL (U"H. Sakoe & S. Chiba (1978): \"Dynamic programming algorithm optimizati
 	"%%Transactions on ASSP% #26: 43\\--49.")
 MAN_END
 
+MAN_BEGIN (U"Sanchez (2012)", U"djmw", 20260219)
+	NORMAL (U"C.A. Sanchez (2012): \"mtpsd documentation.\" "
+	"%%https://github.com/cantonios/mtpsd/.")
+MAN_END
+
 MAN_BEGIN (U"Sandwell (1987)", U"djmw", 20170915)
 NORMAL (U"D.T. Sandwell (1987): \"Biharmonic spline interpolation of GEOS-3 and SEASAT altimeter data.\", "
 		"%%Geophysica Research Letters% #14: 139\\--142.")
@@ -6623,6 +6631,12 @@ MAN_BEGIN (U"Slaney (1993)", U"djmw", 19980712)
 NORMAL (U"M. Slaney (1993): \"An efficient implementation of the "
 	"Patterson-Holdsworth auditory filterbank.\" "
 	"%%Apple Computer Technical Report% #35, 41 pages.")
+MAN_END
+
+MAN_BEGIN (U"Slapian (1977)", U"djmw", 20260219)
+NORMAL (U"D. Slapian (1977): \"Program to compute discrete prolate spheroidal wave functions, "
+	"sequences, and eigenvalues.\" "
+	"%%Technical Report% TM 77-1218-8, Bell Telephone Laboratories.")
 MAN_END
 
 MAN_BEGIN (U"Ten Berge (1991)", U"djmw", 20191221)

@@ -2,7 +2,7 @@
 #define _Eigen_h_
 /* Eigen.h
  *
- * Copyright (C) 1993-2020 David Weenink
+ * Copyright (C) 1993-2020, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ void Eigen_init (Eigen me, integer numberOfEigenvalues, integer dimension);
 
 void Eigen_initFromSymmetricMatrix (Eigen me, constMATVU const& a);
 
+void Eigen_initFromSymmetricTridiagonal (Eigen, constVEC const& diagonal, constVEC const& offDiagonal);
+
 void Eigen_initFromSquareRoot (Eigen me, constMATVU const& a);
 /*
 	Calculate eigenstructure for symmetric matrix A'A (e.g. covariance matrix),
@@ -54,6 +56,8 @@ double Eigen_getCumulativeContributionOfComponents (Eigen me, integer from, inte
 integer Eigen_getDimensionOfFraction (Eigen me, double fraction);
 
 double Eigen_getEigenvectorElement (Eigen me, integer ivec, integer element);
+
+autoVEC Eigen_getEigenvector (Eigen me, integer ivec);
 
 double Eigen_getSumOfEigenvalues (Eigen me, integer from, integer to);
 

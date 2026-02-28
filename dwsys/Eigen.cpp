@@ -1,6 +1,6 @@
 /* Eigen.cpp
  *
- * Copyright (C) 1993-2020 David Weenink
+ * Copyright (C) 1993-2020, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,7 +159,7 @@ void Eigen_initFromSquareRootPair (Eigen me, constMAT a, constMAT b) {
 		& ac [1] [1], m, & bc [1] [1], p, & alpha [1], & beta [1], nullptr, m,
 		nullptr, p, & q [1] [1], n, work.asArgumentToFunctionThatExpectsZeroBasedArray(), iwork.asArgumentToFunctionThatExpectsZeroBasedArray(), & info);
 	Melder_require (info == 0,
-		U"dggsvd fails with code ", info, U".");
+		U"LAPACK dggsvd fails with code ", info, U".");
 	/*
 		Calculate the eigenvalues (alpha [i] / beta [i])^2 and store in alpha [i].
 	*/
@@ -207,6 +207,29 @@ void Eigen_initFromSymmetricMatrix (Eigen me, constMATVU const& a) {
 	MAT_getEigenSystemFromSymmetricMatrix_preallocated (my eigenvectors.get(), my eigenvalues.get(), a, false);
 }
 
+void Eigen_initFromSymmetricTridiagonal (Eigen me, constVEC const& diagonal, constVEC const& offDiagonal) {
+	Melder_assert (diagonal.size == my dimension);
+	Melder_assert (offDiagonal.size >= my dimension - 1);
+	const char *jobz = "V", *safe = "S";
+	const char *range = ( my numberOfEigenvalues < my dimension ? "I" : "A" );
+	integer il = 1, iu = my numberOfEigenvalues, evLeadingDimension = my dimension;
+	integer lwork = 20 * my dimension, liwork = 10 * my dimension;
+	double vl = 0.0, vu = 0.0, abstol = 2.0 * dlamch_ (safe);
+	autoVEC work = raw_VEC (lwork);
+	autoINTVEC iwork = raw_INTVEC (liwork), isuppz = raw_INTVEC (2 * my numberOfEigenvalues);
+	autoVEC diagonalCopy = copy_VEC (diagonal), offDiagonalCopy = copy_VEC (offDiagonal);
+	integer numberOfEigenvaluesFound, info = 0;
+	(void) NUMlapack_dstevr (jobz, range, my dimension, & diagonalCopy [1], & offDiagonalCopy [1], 
+		vl, vu, il, iu, abstol, & numberOfEigenvaluesFound, & my eigenvalues [1],
+		& my eigenvectors [1][1], evLeadingDimension, & isuppz [1], & work [1], lwork,
+		& iwork [1], liwork, & info);
+	Melder_require (info == 0,
+		U"LAPACK dstevr fails with code ", info, U".");
+	Melder_require (numberOfEigenvaluesFound == my numberOfEigenvalues,
+		U"The number of eigenvalues found (", numberOfEigenvaluesFound, U") differs from the number "
+		"of eigenvalues wanted (", my numberOfEigenvalues, U").");
+}
+
 autoEigen Eigen_create (integer numberOfEigenvalues, integer dimension) {
 	try {
 		autoEigen me = Thing_new (Eigen);
@@ -225,6 +248,17 @@ double Eigen_getEigenvectorElement (Eigen me, integer ivec, integer element) {
 	if (ivec > my numberOfEigenvalues || element < 1 || element > my dimension)
 		return undefined;
 	return my eigenvectors [ivec] [element];
+}
+
+autoVEC Eigen_getEigenvector (Eigen me, integer ivec) {
+	try {
+		Melder_require (ivec >= 1 and ivec <= my numberOfEigenvalues,
+			U"The eigenvector number should be in the interval from 1 to ", my numberOfEigenvalues, U".");
+		autoVEC eigenvector = copy_VEC (my eigenvectors.row (ivec));
+		return eigenvector;
+	} catch (MelderError) {
+		Melder_throw (me, U": cannot get eigenvector.");
+	}
 }
 
 integer Eigen_getDimensionOfComponents (Eigen me) {
