@@ -2307,6 +2307,15 @@ DO
 	QUERY_ONE_FOR_REAL_END (U" (eigenvector [", eigenvectorNumber, U"] element [", elementNumber, U"])")
 }
 
+FORM (QUERY_ONE_FOR_REAL_VECTOR__Eigen_getEigenvector, U"Eigen: Get eigenvector", U"Eigen: Get eigenvector...") {
+	NATURAL (eigenvectorNumber, U"Eigenvector number", U"1")
+	OK
+DO
+	QUERY_ONE_FOR_REAL_VECTOR (Eigen)
+		autoVEC result = Eigen_getEigenvector (me, eigenvectorNumber);
+	QUERY_ONE_FOR_REAL_VECTOR_END
+}
+
 FORM (MODIFY_Eigen_invertEigenvector, U"Eigen: Invert eigenvector", nullptr) {
 	NATURAL (eigenvectorNumber, U"Eigenvector number", U"1")
 	OK
@@ -9636,6 +9645,8 @@ void praat_David_init () {
 			QUERY_ONE_FOR_INTEGER__Eigen_getEigenvectorDimension);
 		praat_addAction1 (classEigen, 1, U"Get eigenvector element...", nullptr, 1,
 				QUERY_ONE_FOR_REAL__Eigen_getEigenvectorElement);
+		praat_addAction1 (classEigen, 1, U"Get eigenvector...", nullptr, 1,
+				QUERY_ONE_FOR_REAL_VECTOR__Eigen_getEigenvector);
 	praat_addAction1 (classEigen, 0, U"Modify -", nullptr, 0, nullptr);
 		praat_addAction1 (classEigen, 1, U"Invert eigenvector...", nullptr, 1,
 				MODIFY_Eigen_invertEigenvector);
