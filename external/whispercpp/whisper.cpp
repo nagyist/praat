@@ -4758,6 +4758,39 @@ struct whisper_vad_context * whisper_vad_init_from_file_with_params(
     return ctx;
 }
 
+struct whisper_vad_context * whisper_vad_init_from_memory_with_params (
+		void * data, size_t size,
+		whisper_vad_context_params params) {
+    WHISPER_LOG_INFO("%s: loading VAD model from memory\n", __func__);
+	struct SileroVadStream {
+		void * data;
+		size_t size;
+		size_t pos;
+	};
+	SileroVadStream stream {
+		data,
+		size,
+		0
+	};
+	whisper_model_loader loader {};
+	loader.context = &stream;
+
+	loader.read = [](void * ctx, void * output, size_t read_size) -> size_t {
+		auto * s = (SileroVadStream *)ctx;
+		size_t available = s->size - s->pos;
+		size_t to_read = std::min(read_size, available);
+		memcpy(output, (unsigned char *)s->data + s->pos, to_read);
+		s->pos += to_read;
+		return to_read;
+	};
+	loader.eof = [](void * ctx) -> bool {
+		auto * s = (SileroVadStream *)ctx;
+		return s->pos >= s->size;
+	};
+	loader.close = [](void * ctx) { };
+	return whisper_vad_init_with_params(&loader, params);
+}
+
 struct whisper_vad_context * whisper_vad_init_with_params(
             struct whisper_model_loader * loader,
             struct whisper_vad_context_params params) {
@@ -5987,6 +6020,8 @@ struct whisper_full_params whisper_full_default_params(enum whisper_sampling_str
 
         /*.vad                         =*/ false,
         /*.vad_model_path              =*/ nullptr,
+    	/*.vad_model_data		       =*/ nullptr,
+    	/*.vad_model_data_size		   =*/ 0,
 
         /* vad_params =*/ whisper_vad_default_params(),
     };
@@ -6621,7 +6656,12 @@ static bool whisper_vad(
 
     if (state->vad_context == nullptr) {
         struct whisper_vad_context_params vad_ctx_params = whisper_vad_default_context_params();
-        struct whisper_vad_context * vctx = whisper_vad_init_from_file_with_params(params.vad_model_path, vad_ctx_params);
+        struct whisper_vad_context * vctx = nullptr;
+    	if (params.vad_model_data && params.vad_model_data_size) {
+    		vctx = whisper_vad_init_from_memory_with_params((void*)params.vad_model_data, params.vad_model_data_size, vad_ctx_params);
+    	} else {
+    		vctx = whisper_vad_init_from_file_with_params(params.vad_model_path, vad_ctx_params);
+    	}
         if (vctx == nullptr) {
             WHISPER_LOG_ERROR("%s: failed to initialize VAD context\n", __func__);
             return false;

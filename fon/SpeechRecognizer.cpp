@@ -20,6 +20,7 @@
 #include "Sound.h"
 #include "whisper.h"
 #include "melder.h"
+#include "ggml-silero-vad-model-data.h"
 
 #include "oo_DESTROY.h"
 #include "SpeechRecognizer_def.h"
@@ -160,14 +161,8 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, 
 	params.token_timestamps = true;   // must be true to use t0 and t1 (non-DTW) token timestamps
 	if (useVad) {
 		params.vad = true;   // Enable Silero VAD (Voice Activity Detection used to chop away the silences)
-		conststring32 vadModelPath = Melder_cat (theWhisperModelsFolder(), U"/", theSpeechRecognizerDefaultVadModelName);
-		structMelderFile vadFile { };
-		Melder_pathToFile (vadModelPath, & vadFile);
-		Melder_require (MelderFile_readable (& vadFile),
-			U"Cannot find VAD model file: ", vadModelPath,
-			U". Please download ", theSpeechRecognizerDefaultVadModelName, U" and place it in ", theWhisperModelsFolder(), U"."
-		);
-		params.vad_model_path = Melder_peek32to8 (vadModelPath);
+		params.vad_model_data = ggml_silero_v6_2_0_bin;   // set up either params.vad_model_data or params.vad_model_path
+		params.vad_model_data_size = ggml_silero_v6_2_0_bin_len;
 		params.vad_params = whisper_vad_default_params();
 	}
 	if (whisper_is_multilingual (my whisperContext.get ())) {
