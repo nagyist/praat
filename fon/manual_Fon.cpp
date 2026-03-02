@@ -810,33 +810,39 @@ INTRO (U"To %%Command-click% means to click while the %%Command key% is pressed.
 	"or to the key that is marked \"Ctrl\" if you are on a Windows or Linux computer.")
 MAN_END
 
-MAN_BEGIN (U"Keyboard shortcuts", U"ppgb", 20220701)
+MAN_BEGIN (U"Keyboard shortcuts", U"ppgb", 20220701)  // 2026
 INTRO (U"To accelerate menu commands in Praat, you can sometimes choose them with the keyboard, "
 	"sometimes while also pressing the Command key, Option key, or Shift key. "
 	"All of these commands can also be chosen from a menu.")
 NORMAL (U"When mentioning the %%Command key%, this manual refers to the key that is marked with an apple "
 	"or the word \"command\" on Apple keyboards "
 	"or to the key that is marked \"Ctrl\" if you are on a Windows or Linux computer.")
-NORMAL (U"When mentioning the %%Option key%, this manual refers to the key marked \"alt\" or \"option\". "
-	"In Praat, this key is sometimes used together with the Command key "
+NORMAL (U"When mentioning the %%Option key%, this manual refers to the key that is marked with "
+	"the word \"option\" on Apple keyboards or with \"Alt\" if you are on Windows or Linux.")
+NORMAL (U"When mentioning the %%Extra-Command key%, this manual refers to "
+	"pressing the “Command” and “Shift” keys together (on Windows) "
+	"or pressing the “Command” and “Option” keys together (on the Mac). "
+	"In Praat, Extra-Command is sometimes used "
 	"for destructive actions that are the reverse of the actions invoked by using the Command key only. "
 	"For instance, if Command-T means \"add a target at the cursor position\", "
-	"Option-Command-T may mean \"remove the selected targets\".")
+	"Extra-Command-T may mean \"remove the selected targets\".")
 ENTRY (U"Shortcuts")
 LIST_ITEM (U"Command-A: Zoom all")
 LIST_ITEM (U"Command-C: Copy (the selected text, or the selected sound, or the selected part of the Picture window)")
 LIST_ITEM (U"Command-D (in Manipulation window): Insert duration point at cursor")
-LIST_ITEM (U"Option-Command-D (in Manipulation window): Remove selected duration points")
+LIST_ITEM (U"Extra-Command-D (in Manipulation window): Remove selected duration points")
 LIST_ITEM (U"Command-E (in Picture window): Erase all")
 LIST_ITEM (U"Command-E (in OT windows): Edit ranking")
 LIST_ITEM (U"Command-F: Find")
+LIST_ITEM (U"Extra-Command-F: Replace (yes, this is destructive...)")
 LIST_ITEM (U"Command-G: Find again")
+LIST_ITEM (U"Extra-Command-G: Replace again (yes, this is destructive...)")
 LIST_ITEM (U"Command-H (in script window): Paste history")
-LIST_ITEM (U"Shift-Command-H: Move cursor to maximum pitch")
+LIST_ITEM (U"Extra-Command-H: Move cursor to maximum pitch")
 LIST_ITEM (U"Command-I: Zoom in")
 LIST_ITEM (U"Command-L (in Objects window): @@Open long sound file...@")
 LIST_ITEM (U"Command-L (in sound windows): @@Intro 3.6. Viewing a spectral slice|View spectral slice@")
-LIST_ITEM (U"Shift-Command-L: Move cursor to minimum pitch")
+LIST_ITEM (U"Extra-Command-L: Move cursor to minimum pitch")
 LIST_ITEM (U"Command-M: Search Praat manual...")
 LIST_ITEM (U"Command-N: Zoom to selection")
 LIST_ITEM (U"Command-O (in Objects window): @@Read from file...@")
@@ -844,7 +850,7 @@ LIST_ITEM (U"Command-O (in sound windows): Zoom out")
 LIST_ITEM (U"Command-P (in Picture window): Print")
 LIST_ITEM (U"Command-P (in PointProcess window): Add point at cursor")
 LIST_ITEM (U"Command-P (in Manipulation window): Add pulse at cursor")
-LIST_ITEM (U"Option-Command-P (in Manipulation window): Remove selected pulses")
+LIST_ITEM (U"Extra-Command-P (in Manipulation window): Remove selected pulses")
 LIST_ITEM (U"Command-Q: Quit")
 LIST_ITEM (U"Command-R (in Script window): Run")
 LIST_ITEM (U"Command-R: Reverse selection")
@@ -852,9 +858,11 @@ LIST_ITEM (U"Command-S: Save")
 LIST_ITEM (U"Command-T (in script window): Run selection")
 LIST_ITEM (U"Command-T (in PitchTier/DurationTier/RealTier/FormantGrid window): Add point at cursor")
 LIST_ITEM (U"Command-T (in Manipulation window): Add pitch point at cursor")
-LIST_ITEM (U"Option-Command-T (in Manipulation window): Remove selected pitch points")
+LIST_ITEM (U"Extra-Command-T (in Manipulation window): Remove selected pitch points")
 LIST_ITEM (U"Command-U: @@Calculator...@")
-LIST_ITEM (U"Command-V: Paste (insert the text or sound clipboard over the selected text or the selected sound)")
+LIST_ITEM (U"Command-V (in text window or TextGrid window): Paste (insert over the selected text")
+LIST_ITEM (U"Command-V (in Sound window): Paste after selection (insert the sound clipboard after the selected sound)")
+LIST_ITEM (U"Extra-Command-V (in Sound window): Paste over selection (insert the sound clipboard over the selected sound)")
 LIST_ITEM (U"Command-W: Close window")
 LIST_ITEM (U"Command-X: Cut (the selected text or the selected sound)")
 LIST_ITEM (U"Command-Y: Redo")
