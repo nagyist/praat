@@ -1153,8 +1153,10 @@ static void Interpreter_addNumericVectorVariable (Interpreter me, conststring32 
 }
 
 InterpreterVariable Interpreter_hasVariable (Interpreter me, conststring32 key) {
-	Melder_assert (key);
-	auto it = my variablesMap. find (key [0] == U'.' ? Melder_cat (my procedureStackNames [my callDepth], key) : key);
+	Melder_pre (key);
+	conststring32 variableNameIncludingProcedureName =
+			( key [0] == U'.' ? Melder_cat (my procedureStackNames [my callDepth], key) : key );
+	auto it = my variablesMap. find (variableNameIncludingProcedureName);
 	if (it != my variablesMap.end())
 		return it -> second.get();
 	else
@@ -1162,7 +1164,7 @@ InterpreterVariable Interpreter_hasVariable (Interpreter me, conststring32 key) 
 }
 
 InterpreterVariable Interpreter_lookUpVariable (Interpreter me, conststring32 key) {
-	Melder_assert (key);
+	Melder_pre (key);
 	conststring32 variableNameIncludingProcedureName =
 			( key [0] == U'.' ? Melder_cat (my procedureStackNames [my callDepth], key) : key );
 	auto it = my variablesMap. find (variableNameIncludingProcedureName);
@@ -1210,8 +1212,8 @@ static bool isCommand (conststring32 string) {
 }
 
 static void parameterToVariable (Interpreter me, int type, conststring32 in_parameter, int ipar) {
+	Melder_pre (type != 0);
 	char32 parameter [200];
-	Melder_assert (type != 0);
 	str32cpy (parameter, in_parameter);
 	if (type >= Interpreter_MINIMUM_TYPE_FOR_NUMERIC_VARIABLE && type <= Interpreter_MAXIMUM_TYPE_FOR_NUMERIC_VARIABLE) {
 		Interpreter_addNumericVariable (me, parameter, Melder_atof (my arguments [ipar].get()));
