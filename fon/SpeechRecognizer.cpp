@@ -180,6 +180,9 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, 
 	*/
 	if (whisper_full (my whisperContext.get(), params, samples32.data(), static_cast <int> (sound -> nx)) != 0)
 		Melder_throw (U"Whisper failed to process audio");
+
+	if (Melder_debug == 2001)
+		whisper_print_timings(my whisperContext.get());
 }
 
 static bool endsWithTerminalPunctuation(conststring32 token) {
@@ -205,7 +208,26 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 	try {
 		//TRACE
 		trace (U"Sound xmin = ", sound -> xmin, U", sound xmax = ", sound -> xmax);
+		/*
+			Run Whisper and control for blank audio.
+		*/
 		SpeechRecognizer_runWhisper (me, sound, useVad);
+		const int n_segments = whisper_full_n_segments (my whisperContext.get());
+		if (! n_segments) {
+			WhisperTranscription transcription;
+			transcription.fullTranscription.text = Melder_dup (U"[BLANK_AUDIO]");
+			transcription.fullTranscription.tmin = sound -> xmin;
+			transcription.fullTranscription.tmax = sound -> xmax;
+			transcription.words = newvectorzero <WhisperSegment> (1);
+			transcription.words [1].text = Melder_dup (U"BLANKAUDIO");
+			transcription.words [1].tmin = sound -> xmin;
+			transcription.words [1].tmax = sound -> xmax;
+			transcription.sentences = newvectorzero <WhisperSegment> (1);
+			transcription.sentences [1].text = Melder_dup (U"[BLANK_AUDIO]");
+			transcription.sentences [1].tmin = sound -> xmin;
+			transcription.sentences [1].tmax = sound -> xmax;
+			return transcription;
+		}
 
 		/*
 			Collect VAD segments.
@@ -234,7 +256,6 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		/*
 			Collect all tokens, including silences in case of VAD, into one flat list.
 		*/
-		const int n_segments = whisper_full_n_segments (my whisperContext.get());
 		struct Token {
 			autostring32 text;
 			double tmax;   // DTW timestamp (end of token), in seconds
@@ -247,7 +268,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		/*
 			First, insert a silence token in case speech does not start directly from the beginning of the sound.
 		*/
-		if (useVad && n_vad_segments > 0 && vadSegments [1]. orig_start > sound -> xmin) {
+		if (useVad && n_vad_segments && vadSegments [1]. orig_start > sound -> xmin) {
 			Token *silence = allTokens.append();
 			silence -> tmax = vadSegments [1]. orig_start;
 			silence -> isPunctuation = false;
@@ -276,7 +297,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				/*
 					In case of VAD, translate timestamps back to original time and insert silence tokens (" ") between VAD segments.
 				*/
-				if (useVad) {
+				if (useVad && n_vad_segments) {
 					/*
 						Insert a silence token if we progressed into the next VAD segment
 						and current token is more than just one punctuation symbol.
