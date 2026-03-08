@@ -50,55 +50,58 @@ static void IntervalTier_insertIntervalDestructively (IntervalTier me, double tm
 	Melder_assert (tmin >= my xmin);
 	Melder_assert (tmax <= my xmax);
 	/*
-		Make sure that the tier has boundaries at the edges of the interval.
+		Make sure a boundary exists at tmin.
 	*/
-	integer firstIntervalNumber = IntervalTier_hasTime (me, tmin);
-	if (! firstIntervalNumber) {
-		integer intervalNumber = IntervalTier_timeToIndex (me, tmin);
-		if (intervalNumber == 0)
-			Melder_throw (U"Cannot add a boundary at ", Melder_fixed (tmin, 6), U" seconds, because this is outside the time domain of the intervals.");
-		TextInterval interval = my intervals.at [intervalNumber];
+	if (! IntervalTier_hasTime (me, tmin)) {   // tmin is not a border but in the middle of some interval
+		integer intervalNumber = IntervalTier_timeToIndex (me, tmin);   // this is the interval we will split in two
+		Melder_require (intervalNumber > 0,
+				U"Cannot add a boundary at ", Melder_fixed (tmin, 6),
+				U" seconds, because this is outside the time domain of the intervals.");
+		TextInterval leftPart = my intervals.at [intervalNumber];
 		/*
 			Move the text to the left of the boundary.
 		*/
-		autoTextInterval newInterval = TextInterval_create (tmin, interval -> xmax, U"");
-		interval -> xmax = tmin;
-		my intervals. addItem_move (newInterval.move());
-		firstIntervalNumber = IntervalTier_hasTime (me, interval -> xmin);
+		autoTextInterval rightPart = TextInterval_create (tmin, leftPart -> xmax, U"");
+		leftPart -> xmax = tmin;
+		my intervals. addItem_move (rightPart.move());
 	}
-	Melder_assert (firstIntervalNumber >= 1 && firstIntervalNumber <= my intervals.size);
-	integer lastIntervalNumber = IntervalTier_hasTime (me, tmax);
-	if (! lastIntervalNumber) {
-		integer intervalNumber = IntervalTier_timeToIndex (me, tmax);
-		if (intervalNumber == 0)
-			Melder_throw (U"Cannot add a boundary at ", Melder_fixed (tmin, 6), U" seconds, because this is outside the time domain of the intervals.");
-		TextInterval interval = my intervals.at [intervalNumber];
+
+	/*
+		Make sure a boundary exists at tmax.
+	*/
+	if (! IntervalTier_hasTime (me, tmax)) {   // tmin is not a border but in the middle of some interval
+		integer intervalNumber = IntervalTier_timeToIndex (me, tmax);   // this is the interval we will split in two
+		Melder_require (intervalNumber > 0,
+				U"Cannot add a boundary at ", Melder_fixed (tmax, 6),
+				U" seconds, because this is outside the time domain of the intervals.");
+		TextInterval rightPart = my intervals.at [intervalNumber];
 		/*
 			Move the text to the right of the boundary.
 		*/
-		autoTextInterval newInterval = TextInterval_create (interval -> xmin, tmax, U"");
-		interval -> xmin = tmax;
-		my intervals. addItem_move (newInterval.move());
-		lastIntervalNumber = IntervalTier_hasTime (me, interval -> xmax);
+		autoTextInterval leftPart = TextInterval_create (rightPart -> xmin, tmax, U"");
+		rightPart -> xmin = tmax;
+		my intervals. addItem_move (leftPart.move());
 	}
-	Melder_assert (lastIntervalNumber >= 1 && lastIntervalNumber <= my intervals.size);
+
 	/*
-		Empty the interval in the word tier.
+		Collapse all intervals between tmin and tmax into one empty interval.
 	*/
-	trace (U"Empty interval ", lastIntervalNumber, U" down to ", U".", firstIntervalNumber);
-	for (integer iinterval = lastIntervalNumber; iinterval >= firstIntervalNumber; iinterval --) {
+	integer firstIntervalNumber = IntervalTier_timeToIndex (me, tmin);
+	integer lastIntervalNumber = IntervalTier_hasTime (me, tmax);   // either last or one after last
+	Melder_assert (my intervals.at [firstIntervalNumber] -> xmin == tmin);
+	Melder_assert (firstIntervalNumber >= 1 && firstIntervalNumber <= my intervals.size);
+	Melder_assert (lastIntervalNumber >= 1 && lastIntervalNumber <= my intervals.size);
+
+	trace (U"Remove intervals from ", lastIntervalNumber, U" down to (but not including) ", firstIntervalNumber);
+	for (integer iinterval = lastIntervalNumber; iinterval > firstIntervalNumber; iinterval --) {
 		TextInterval interval = my intervals.at [iinterval];
-		if (interval -> xmin > tmin && interval -> xmin < tmax) {
-			Melder_assert (iinterval > 1);
-			TextInterval previous = my intervals.at [iinterval - 1];
-			previous -> xmax = tmax;   // collapse left and right intervals into left interval
-			TextInterval_setText (previous, U"");
-			my intervals. removeItem (iinterval);   // remove right interval
-		}
-		if (interval -> xmax == tmax) {
-			TextInterval_setText (interval, U"");
-		}
+		if (interval -> xmin < tmax)   // excluding the last one if it is in fact after last
+			my intervals. removeItem (iinterval);
 	}
+	trace (U"Extend interval ", firstIntervalNumber, U" (starting at ", tmin, U") to ", tmax);
+	TextInterval newEmptyInterval = my intervals.at [firstIntervalNumber];
+	newEmptyInterval -> xmax = tmax;
+	TextInterval_setText (newEmptyInterval, U"");
 }
 
 static double IntervalTier_boundaryTimeClosestTo (IntervalTier me, double tmin, double tmax) {
