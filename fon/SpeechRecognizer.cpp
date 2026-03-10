@@ -64,6 +64,19 @@ void structSpeechRecognizer :: v1_info () {
 	MelderInfo_writeLine (U"Language: ", our d_languageName.get());
 }
 
+static void whisper_log_silent (ggml_log_level level, const char * text, void * user_data) {
+	(void) level;
+	(void) text;
+	(void) user_data;
+}
+
+static void supressWhisperLogging () {
+	if (Melder_debug == 2001)
+		whisper_log_set(nullptr, nullptr);
+	else
+		whisper_log_set(whisper_log_silent, nullptr);
+}
+
 static conststring32 theWhisperModelsFolder ();
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName) {
 	try {
@@ -127,6 +140,7 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 		/*
 			Initialise Whisper model.
 		*/
+		supressWhisperLogging();
 		whisper_context *ctx = whisper_init_from_file_with_params (utf8ModelPath, contextParams);
 		if (! ctx)
 			Melder_throw (U"Cannot create Whisper context from: ", modelPath, U". Model file not found?");
@@ -178,11 +192,10 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, 
 	/*
 		Run Whisper.
 	*/
+	supressWhisperLogging ();
 	if (whisper_full (my whisperContext.get(), params, samples32.data(), static_cast <int> (sound -> nx)) != 0)
 		Melder_throw (U"Whisper failed to process audio");
-
-	if (Melder_debug == 2001)
-		whisper_print_timings(my whisperContext.get());
+	whisper_print_timings(my whisperContext.get());
 }
 
 static bool endsWithTerminalPunctuation(conststring32 token) {
@@ -476,7 +489,8 @@ static conststring32 theWhisperModelsFolder () {
 			if (! MelderFolder_exists (& whispercppFolder))
 				MelderFolder_create (& whispercppFolder);
 			whisperModelFolderPath = Melder_dup (MelderFolder_peekPath (& whispercppFolder));
-			Melder_casual (whisperModelFolderPath.get());
+			if (Melder_debug == 2001)
+				Melder_casual (U"Whispercpp model folder path: ", whisperModelFolderPath.get());
 		} catch (MelderError) {
 			Melder_clearError ();
 		}
