@@ -379,9 +379,10 @@ again:
 	}
 }
 
-void splitIntervalIntoWhisperSegments (const IntervalTier& tier, double original_tmin, double original_tmax,
-	const autovector<WhisperSegment>& segments) {
-
+void splitIntervalIntoWhisperSegments (const IntervalTier& tier, const integer tierNumber,
+	const double original_tmin, const double original_tmax,
+	const autovector<WhisperSegment>& segments
+) {
 	for (integer i = 1; i <= segments.size; ++ i) {
 		WhisperSegment& segment = segments [i];
 
@@ -401,6 +402,9 @@ void splitIntervalIntoWhisperSegments (const IntervalTier& tier, double original
 			tier -> intervals. addItem_move (newInterval.move ());
 		}
 	}
+
+	if (! IntervalTier_check (tier))
+		Melder_throw (U"Tier ", tierNumber, U" is out of order.");
 }
 
 void TextGrid_Sound_transcribeInterval (
@@ -432,9 +436,7 @@ void TextGrid_Sound_transcribeInterval (
 			Create one interval per utterance in the head tier.
 		*/
 		autovector<WhisperSegment> sentenceSegments = whisperTranscription.sentences.move();
-		splitIntervalIntoWhisperSegments (headTier, original_tmin, original_tmax, sentenceSegments);
-		if (! IntervalTier_check (headTier))
-			Melder_throw (U"Tier ", tierNumber, U" is out of order.");
+		splitIntervalIntoWhisperSegments (headTier, tierNumber, original_tmin, original_tmax, sentenceSegments);
 
 		if (includeWords) {
 			/*
@@ -472,9 +474,7 @@ void TextGrid_Sound_transcribeInterval (
 				Split this big interval into the set of intervals, one interval per word.
 			*/
 			autovector<WhisperSegment> wordSegments = whisperTranscription.words.move();
-			splitIntervalIntoWhisperSegments (wordTier, original_tmin, original_tmax, wordSegments);
-			if (! IntervalTier_check (wordTier))
-				Melder_throw (U"Tier ", wordTierNumber, U"(word tier) is out of order.");
+			splitIntervalIntoWhisperSegments (wordTier, wordTierNumber, original_tmin, original_tmax, wordSegments);
 		}
 	} catch (MelderError) {
 		Melder_throw (me, U" & ", sound, U": interval not transcribed.");

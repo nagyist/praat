@@ -21,12 +21,13 @@
 #include "Sound.h"
 
 struct whisper_context;
-struct whisper_full_params;
+struct whisper_vad_context;
+struct whisper_vad_segments;
 
 struct autoWhisperContext {
 	whisper_context *ptr;
 
-	autoWhisperContext (whisper_context *p = nullptr) : ptr(p) {}
+	autoWhisperContext (whisper_context * p = nullptr) : ptr(p) {}
 	~autoWhisperContext ();
 
 	autoWhisperContext (const autoWhisperContext&) = delete;
@@ -38,10 +39,45 @@ struct autoWhisperContext {
 	autoWhisperContext& operator= (autoWhisperContext&& other) noexcept;
 
 	[[nodiscard]]
-	whisper_context * get () const {
-		return ptr;
-	}
+	whisper_context * get () const { return ptr; }
 };
+
+struct autoWhisperVadContext {
+	whisper_vad_context * ptr;
+
+	autoWhisperVadContext (whisper_vad_context * p = nullptr) : ptr (p) {}
+	~autoWhisperVadContext ();
+
+	autoWhisperVadContext (const autoWhisperVadContext &) = delete;
+	autoWhisperVadContext & operator= (const autoWhisperVadContext &) = delete;
+
+	autoWhisperVadContext (autoWhisperVadContext && other) noexcept : ptr (other.ptr) {
+		other.ptr = nullptr;
+	}
+	autoWhisperVadContext & operator= (autoWhisperVadContext && other) noexcept;
+
+	[[nodiscard]]
+	whisper_vad_context * get () const { return ptr; }
+};
+
+struct autoWhisperVadSegments {
+	whisper_vad_segments * ptr;
+
+	autoWhisperVadSegments (whisper_vad_segments * p = nullptr) : ptr (p) {}
+	~autoWhisperVadSegments ();
+
+	autoWhisperVadSegments (const autoWhisperVadSegments &) = delete;
+	autoWhisperVadSegments & operator= (const autoWhisperVadSegments &) = delete;
+
+	autoWhisperVadSegments (autoWhisperVadSegments && other) noexcept : ptr (other.ptr) {
+		other.ptr = nullptr;
+	}
+	autoWhisperVadSegments & operator= (autoWhisperVadSegments && other) noexcept;
+
+	[[nodiscard]]
+	whisper_vad_segments * get () const { return ptr; }
+};
+
 
 struct WhisperSegment {
 	autostring32 text;
@@ -57,18 +93,30 @@ struct WhisperTranscription {
 
 #include "SpeechRecognizer_def.h"
 
-// functions to access lists of models and languages from everywhere
+/*
+	Functions to access lists of models and languages from everywhere.
+*/
 constSTRVEC theCurrentSpeechRecognizerModelNames ();
 constSTRVEC theSpeechRecognizerLanguageNames ();
 
-// default model parameters
+/*
+	Default model parameters.
+*/
 inline conststring32 theSpeechRecognizerDefaultModelName = U"ggml-base.bin";
 inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect language";
-inline conststring32 theSpeechRecognizerDefaultVadModelName = U"ggml-silero-v6.2.0.bin";
 
-// class SpeechRecognizer functions
+/*
+	Class SpeechRecognizer functions.
+*/
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName);
 WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound, bool useVad);
+
+/*
+	SileroVAD functions.
+*/
+autovector <WhisperSegment> doSileroVad (constSound sound, const double speechProbabilityThreshold,
+	const double minSpeechDuration, const double minNonSpeechDuration, const double speechPad,
+	conststring32 speechLabel, conststring32 nonSpeechLabel);
 
 /* End of file SpeechRecognizer.h */
 #endif

@@ -41,19 +41,34 @@
 #include "oo_DESCRIPTION.h"
 #include "SpeechRecognizer_def.h"
 
-autoWhisperContext :: ~autoWhisperContext () {
-	if (ptr)
-		whisper_free (ptr);
-}
-
+autoWhisperContext :: ~autoWhisperContext () { whisper_free (ptr); }
 autoWhisperContext& autoWhisperContext :: operator= (autoWhisperContext&& other) noexcept {
 	if (this != & other) {
-		if (ptr)
-			whisper_free (ptr);
+		whisper_free (ptr);
 		ptr = other.ptr;
 		other.ptr = nullptr;
 	}
-	return *this;
+	return * this;
+}
+
+autoWhisperVadContext :: ~autoWhisperVadContext () { whisper_vad_free (ptr); }
+autoWhisperVadContext & autoWhisperVadContext :: operator= (autoWhisperVadContext && other) noexcept {
+	if (this != & other) {
+		whisper_vad_free (ptr);
+		ptr = other.ptr;
+		other.ptr = nullptr;
+	}
+	return * this;
+}
+
+autoWhisperVadSegments :: ~autoWhisperVadSegments () { whisper_vad_free_segments (ptr); }
+autoWhisperVadSegments & autoWhisperVadSegments :: operator= (autoWhisperVadSegments && other) noexcept {
+	if (this != & other) {
+		whisper_vad_free_segments (ptr);
+		ptr = other.ptr;
+		other.ptr = nullptr;
+	}
+	return * this;
 }
 
 Thing_implement (SpeechRecognizer, Daata, 0);
@@ -78,6 +93,7 @@ static void supressWhisperLogging () {
 }
 
 static conststring32 theWhisperModelsFolder ();
+
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName) {
 	try {
 		autoSpeechRecognizer me = Thing_new (SpeechRecognizer);
@@ -153,7 +169,7 @@ autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststri
 	}
 }
 
-static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, bool useVad) {
+static std::vector <float> resampleForWhisper (constSound sound) {
 	/*
 		Resample the sound to 16kHz if needed.
 	*/
@@ -167,6 +183,15 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, 
 	samples32. reserve (integer_to_uinteger_a (sound -> nx));
 	for (integer i = 1; i <= sound -> nx; ++ i)
 		samples32. push_back (static_cast <float> (sound -> z [1] [i]));
+
+	return samples32;
+}
+
+static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, bool useVad) {
+	/*
+		Prepare sound for Whispercpp.
+	*/
+	std::vector <float> samples32 = resampleForWhisper (sound);
 
 	/*
 		Set Whisper parameters.
@@ -193,7 +218,7 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, 
 		Run Whisper.
 	*/
 	supressWhisperLogging ();
-	if (whisper_full (my whisperContext.get(), params, samples32.data(), static_cast <int> (sound -> nx)) != 0)
+	if (whisper_full (my whisperContext.get(), params, samples32.data(), static_cast <int> (samples32.size())) != 0)
 		Melder_throw (U"Whisper failed to process audio");
 	whisper_print_timings(my whisperContext.get());
 }
@@ -215,6 +240,103 @@ static bool endsWithPunctuation(conststring32 token) {
 	size_t token_length = Melder_length (token);
 	char32 last_char = token [token_length - 1];
 	return ! Melder_isAlphanumeric (last_char) && last_char != U' ';
+}
+
+autovector <WhisperSegment> doSileroVad (constSound sound, const double speechProbabilityThreshold,
+		const double minSpeechDuration, const double minNonSpeechDuration, const double speechPad,
+		conststring32 speechLabel, conststring32 nonSpeechLabel
+) {
+	try {
+		//TRACE
+		trace (U"Sound xmin = ", sound -> xmin, U", sound xmax = ", sound -> xmax);
+		supressWhisperLogging ();
+
+		/*
+			Remember original sound -> xmin and sound -> xmax before resampling; and resample.
+		*/
+		double soundStart = sound -> xmin;
+		double soundEnd = sound -> xmax;
+		std::vector <float> samples32 = resampleForWhisper (sound);
+
+		/*
+			Initialize VAD context.
+		*/
+		whisper_vad_context_params vad_ctx_params = whisper_vad_default_context_params();
+		autoWhisperVadContext vad_ctx = whisper_vad_init_from_memory_with_params(
+			ggml_silero_v6_2_0_bin, ggml_silero_v6_2_0_bin_len, vad_ctx_params);
+		if (! vad_ctx.get())
+			Melder_throw (U"Failed to initialize VAD context.");
+
+		/*
+			Set VAD parameters and run Silero VAD.
+		*/
+		whisper_vad_params vad_params = whisper_vad_default_params();
+		vad_params.threshold = speechProbabilityThreshold;
+		vad_params.min_speech_duration_ms = minSpeechDuration * 1000.0;
+		vad_params.min_silence_duration_ms = minNonSpeechDuration * 1000.0;
+		vad_params.speech_pad_ms = speechPad * 1000.0;
+		autoWhisperVadSegments vad_segments = whisper_vad_segments_from_samples(
+			vad_ctx.get(), vad_params, samples32.data(), static_cast <int> (samples32.size()));
+		if (!vad_segments.get()) {
+			Melder_throw (U"Failed to obtain VAD segments.");
+		}
+
+		/*
+			Collect all VAD segments and wrap them with "non-voice" intervals.
+		*/
+		int nVadSegments = whisper_vad_segments_n_segments (vad_segments.get());
+		autovector <WhisperSegment> allIntervals = newvectorzero<WhisperSegment>(0);
+
+		for (int i = 0; i < nVadSegments; ++ i) {
+			double t0 = whisper_vad_segments_get_segment_t0 (vad_segments.get(), i) / 100.0;
+			double t1 = whisper_vad_segments_get_segment_t1 (vad_segments.get(), i) / 100.0;
+
+			/*
+				Insert a non-voice interval before the first voice interval or between two voice intervals.
+			*/
+			double previousEnd = (i == 0) ? soundStart : whisper_vad_segments_get_segment_t1 (vad_segments.get(), i - 1) / 100.0;
+			if (t0 > previousEnd) {
+				WhisperSegment * nonVoiceInterval = allIntervals. append ();
+				nonVoiceInterval -> text = Melder_dup (nonSpeechLabel);
+				nonVoiceInterval -> tmin = previousEnd;
+				nonVoiceInterval -> tmax = t0;
+				trace (U"Non-voice: t0 = ", allIntervals [allIntervals.size]. tmin, U", t1 = ", allIntervals [allIntervals.size]. tmax);
+			}
+			/*
+				Insert the voice interval.
+			*/
+			WhisperSegment *voiceInterval = allIntervals.append();
+			voiceInterval -> text = Melder_dup(speechLabel);
+			voiceInterval -> tmin = t0;
+			voiceInterval -> tmax = t1;
+			trace (U"VAD segment ", i + 1, U": t0 = ", allIntervals [allIntervals.size]. tmin, U", t1 = ", allIntervals [allIntervals.size]. tmax);
+
+			/*
+				After the last voice interval, add non-voice if there is remaining audio.
+			*/
+			if (i == nVadSegments - 1 && t1 < soundEnd) {
+				WhisperSegment * nonVoiceInterval = allIntervals. append ();
+				nonVoiceInterval -> text = Melder_dup (nonSpeechLabel);
+				nonVoiceInterval -> tmin = t1;
+				nonVoiceInterval -> tmax = soundEnd;
+				trace (U"Non-voice: t0 = ", allIntervals [allIntervals.size]. tmin, U", t1 = ", allIntervals [allIntervals.size]. tmax);
+			}
+		}
+
+		/*
+			If no voice activity detected at all, then entire sound is non-voice.
+		*/
+		if (! nVadSegments) {
+			WhisperSegment * nonVoice = allIntervals. append ();
+			nonVoice -> text = Melder_dup (nonSpeechLabel);
+			nonVoice -> tmin = soundStart;
+			nonVoice -> tmax = soundEnd;
+		}
+
+		return allIntervals;
+	} catch (MelderError) {
+		Melder_throw (U"Voice Activity not detected for sound.");
+	}
 }
 
 WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound, bool useVad) {
