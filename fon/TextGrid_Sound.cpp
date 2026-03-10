@@ -446,11 +446,11 @@ void TextGrid_Sound_transcribeInterval (
 			MelderString_copy (& newWordTierName, headTier -> name.get(), U"/word");
 			for (integer i = 1; i <= my tiers->size; i ++) {
 				Function tier = my tiers->at [i];
-				if (Melder_equ (newWordTierName.string, tier -> name.get())
-						&& tier -> classInfo != classIntervalTier) {
-					Melder_throw (U"A tier with the prospective word tier name (", tier -> name.get(),
-							U") already exists, but it is not an interval tier."
-							U"\nPlease change its name or remove it.");
+				if (Melder_equ (newWordTierName.string, tier -> name.get())) {
+					if (tier -> classInfo != classIntervalTier)
+						Melder_throw (U"A tier with the prospective word tier name (", tier -> name.get(),
+								U") already exists, but it is not an interval tier."
+								U"\nPlease change its name or remove it.");
 					wordTierNumber = i;
 					break;
 				}
