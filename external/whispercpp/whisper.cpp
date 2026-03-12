@@ -4759,11 +4759,11 @@ struct whisper_vad_context * whisper_vad_init_from_file_with_params(
 }
 
 struct whisper_vad_context * whisper_vad_init_from_memory_with_params (
-		void * data, size_t size,
+		const void * data, size_t size,
 		whisper_vad_context_params params) {
     WHISPER_LOG_INFO("%s: loading VAD model from memory\n", __func__);
 	struct SileroVadStream {
-		void * data;
+		const void * data;
 		size_t size;
 		size_t pos;
 	};
@@ -4779,7 +4779,7 @@ struct whisper_vad_context * whisper_vad_init_from_memory_with_params (
 		auto * s = (SileroVadStream *)ctx;
 		size_t available = s->size - s->pos;
 		size_t to_read = std::min(read_size, available);
-		memcpy(output, (unsigned char *)s->data + s->pos, to_read);
+		memcpy(output, (const unsigned char *)s->data + s->pos, to_read);
 		s->pos += to_read;
 		return to_read;
 	};
