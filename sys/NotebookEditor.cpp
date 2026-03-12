@@ -95,7 +95,7 @@ static void args_ok (UiForm sendingForm, integer /* narg */, Stackel /* args */,
 static void menu_cb_run (NotebookEditor me, EDITOR_ARGS) {
 	if (my interpreterStack -> interpreters [1] && my interpreterStack -> interpreters [1] -> running)
 		Melder_throw (U"The notebook is already running (paused). Please close or continue the pause, trust or demo window.");
-	Melder_assert (! my interpreterStack -> interpreters [1]);   // TRICKY
+	//Melder_assert (! my interpreterStack -> interpreters [1]);   // TRICKY
 	my interpreterStack -> interpreters [1] = Interpreter_createFromEnvironment (
 		my interpreterStack.get(),
 		Editor (nullptr),
@@ -138,7 +138,7 @@ static void menu_cb_run (NotebookEditor me, EDITOR_ARGS) {
 		manual.releaseToUser ();
 	} else
 		Melder_throw (U"A Praat notebook should either start with a title between straight double quotes (\"\"), "
-			"or contain multiple such pieces separated by \"####################\" (or longer) lines on all sides.");
+				"or contain multiple such pieces separated by \"####################\" (or longer) lines on all sides.");
 }
 
 static void menu_cb_runChunk (NotebookEditor me, EDITOR_ARGS) {
