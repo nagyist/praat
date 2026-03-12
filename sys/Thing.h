@@ -553,7 +553,7 @@ public:
 	}
 	T *get() {
 		auto it = theSharedThings. find (our _id);
-		return it == theSharedThings.end() ? nullptr : it -> second.get(). thing;
+		return it == theSharedThings.end() ? nullptr : it -> second. thing;
 	}
 	explicit operator bool () const noexcept {
 		return theSharedThings. find (our _id) != theSharedThings.end();
