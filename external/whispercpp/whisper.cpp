@@ -2505,7 +2505,7 @@ static struct ggml_cgraph * whisper_build_graph_decoder(
 
     const float KQscale = pow(float(n_state_head), -0.25);
 
-    struct ggml_tensor * KQ_mask = ggml_new_tensor_3d(ctx0, GGML_TYPE_F32, n_kv, GGML_PAD(n_tokens, GGML_KQ_MASK_PAD), 1);
+    struct ggml_tensor * KQ_mask = ggml_new_tensor_3d(ctx0, GGML_TYPE_F32, n_kv, n_tokens, 1);
     ggml_set_name(KQ_mask, "KQ_mask");
     ggml_set_input(KQ_mask);
 
@@ -2929,7 +2929,7 @@ static bool whisper_decode_internal(
                     }
                 }
 
-                for (int i = n_tokens; i < GGML_PAD(n_tokens, GGML_KQ_MASK_PAD); ++i) {
+                for (int i = n_tokens; i < n_tokens; ++i) {
                     for (int j = 0; j < n_kv; ++j) {
                         data[h*(n_kv*n_tokens) + i*n_kv + j] = -INFINITY;
                     }
@@ -4758,10 +4758,15 @@ struct whisper_vad_context * whisper_vad_init_from_file_with_params(
     return ctx;
 }
 
+/*
+	Function whisper_vad_init_from_memory_with_params() is added by Anastasia Shchupak on behalf of inclusion into Praat.
+	In the original whisper.cpp version, whisper_vad_init_from_file_with_params() is always used.
+	Praat contains Silero-VAD model in memory, therefore whisper_vad_init_from_memory_with_params() is added.
+*/
 struct whisper_vad_context * whisper_vad_init_from_memory_with_params (
 		const void * data, size_t size,
 		whisper_vad_context_params params) {
-    WHISPER_LOG_INFO("%s: loading VAD model from memory\n", __func__);
+	WHISPER_LOG_INFO("%s: loading VAD model from memory\n", __func__);
 	struct SileroVadStream {
 		const void * data;
 		size_t size;
@@ -6020,8 +6025,13 @@ struct whisper_full_params whisper_full_default_params(enum whisper_sampling_str
 
         /*.vad                         =*/ false,
         /*.vad_model_path              =*/ nullptr,
-    	/*.vad_model_data		       =*/ nullptr,
-    	/*.vad_model_data_size		   =*/ 0,
+    	/*
+			Following two variables are added by Anastasia Shchupak on behalf of inclusion into Praat.
+			In the original whisper.cpp version, VAD model is loaded from a binary file.
+			Praat contains Silero-VAD model in memory, therefore it needs variables to access this memory.
+		*/
+		/*.vad_model_data		       =*/ nullptr,
+		/*.vad_model_data_size		   =*/ 0,
 
         /* vad_params =*/ whisper_vad_default_params(),
     };
@@ -6061,6 +6071,19 @@ static inline bool should_split_on_word(const char * txt, bool split_on_word) {
     return txt[0] == ' ';
 }
 
+// Count UTF-8 characters (not bytes) in a string
+static int utf8_len(const char * str) {
+    int count = 0;
+    while (*str) {
+        // Skip continuation bytes (10xxxxxx)
+        if ((*str & 0xC0) != 0x80) {
+            count++;
+        }
+        str++;
+    }
+    return count;
+}
+
 static void whisper_exp_compute_token_level_timestamps_dtw(
             struct whisper_context * ctx,
               struct whisper_state * state,
@@ -6089,7 +6112,7 @@ static int whisper_wrap_segment(struct whisper_context & ctx, struct whisper_sta
         }
 
         const auto txt = whisper_token_to_str(&ctx, token.id);
-        const int cur = strlen(txt);
+        const int cur = utf8_len(txt);  // Use UTF-8 character count instead of byte count
 
         if (acc + cur > max_len && i > 0 && should_split_on_word(txt, split_on_word)) {
             state.result_all.back().text = std::move(text);
@@ -6654,20 +6677,25 @@ static bool whisper_vad(
     state->vad_mapping_table.clear();
     state->has_vad_segments = false;
 
-    if (state->vad_context == nullptr) {
-        struct whisper_vad_context_params vad_ctx_params = whisper_vad_default_context_params();
-        struct whisper_vad_context * vctx = nullptr;
-    	if (params.vad_model_data && params.vad_model_data_size) {
-    		vctx = whisper_vad_init_from_memory_with_params((void*)params.vad_model_data, params.vad_model_data_size, vad_ctx_params);
-    	} else {
-    		vctx = whisper_vad_init_from_file_with_params(params.vad_model_path, vad_ctx_params);
-    	}
-        if (vctx == nullptr) {
-            WHISPER_LOG_ERROR("%s: failed to initialize VAD context\n", __func__);
-            return false;
-        }
-        state->vad_context = vctx;
-    }
+	if (state->vad_context == nullptr) {
+		struct whisper_vad_context_params vad_ctx_params = whisper_vad_default_context_params();
+		/*
+			Following conditional is added by Anastasia Shchupak on behalf of inclusion into Praat.
+			In the original whisper.cpp version, whisper_vad_init_from_file_with_params() is always used.
+			Praat contains Silero-VAD model in memory, therefore whisper_vad_init_from_memory_with_params() is added.
+		*/
+		struct whisper_vad_context * vctx = nullptr;
+		if (params.vad_model_data && params.vad_model_data_size) {
+			vctx = whisper_vad_init_from_memory_with_params((void*)params.vad_model_data, params.vad_model_data_size, vad_ctx_params);
+		} else {
+			vctx = whisper_vad_init_from_file_with_params(params.vad_model_path, vad_ctx_params);
+		}
+		if (vctx == nullptr) {
+			WHISPER_LOG_ERROR("%s: failed to initialize VAD context\n", __func__);
+			return false;
+		}
+		state->vad_context = vctx;
+	}
     auto vctx = state->vad_context;
 
     const whisper_vad_params & vad_params = params.vad_params;
@@ -6733,7 +6761,7 @@ static bool whisper_vad(
             }
 
             segment_start_samples = std::min(segment_start_samples, n_samples - 1);
-            segment_end_samples = std::min(segment_end_samples, n_samples);
+            segment_end_samples = std::min(segment_end_samples, n_samples - 1);
             int segment_length = segment_end_samples - segment_start_samples;
             if (segment_length > 0) {
                 whisper_state::vad_segment_info segment;
@@ -8094,6 +8122,10 @@ float whisper_full_get_token_p(struct whisper_context * ctx, int i_segment, int 
     return ctx->state->result_all[i_segment].tokens[i_token].p;
 }
 
+/*
+	Following five functions are added by Anastasia Shchupak on behalf of inclusion into Praat.
+	It provides direct access to VAD segments.
+*/
 int whisper_full_n_vad_segments(struct whisper_context * ctx) {
 	if (!ctx->state->has_vad_segments) {
 		return 0;
@@ -8116,6 +8148,8 @@ int64_t whisper_full_get_vad_segment_vad_start(struct whisper_context * ctx, int
 int64_t whisper_full_get_vad_segment_vad_end(struct whisper_context * ctx, int i_vad_segment) {
 	return ctx->state->vad_segments[i_vad_segment].vad_end;
 }
+
+
 
 float whisper_full_get_segment_no_speech_prob(struct whisper_context * ctx, int i_segment) {
     return ctx->state->result_all[i_segment].no_speech_prob;

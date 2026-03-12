@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ggml-cpu-common.h"
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {
