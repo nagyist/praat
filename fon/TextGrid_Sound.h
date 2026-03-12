@@ -38,8 +38,8 @@ void TextGrid_anySound_alignInterval (TextGrid me, Function anySound, integer ti
 	conststring32 languageName, bool includeWords, bool includePhonemes);
 
 struct WhisperSegment;
-void splitIntervalIntoWhisperSegments (const IntervalTier& tier, double original_tmin, double original_tmax,
-	const autovector<WhisperSegment>& segments);
+void splitIntervalIntoWhisperSegments (const IntervalTier& tier, integer tierNumber,
+	double original_tmin, double original_tmax, const autovector<WhisperSegment>& segments);
 void TextGrid_Sound_transcribeInterval (TextGrid me, Sound sound, integer tierNumber, integer intervalNumber,
 	conststring32 modelName, conststring32 languageName, bool includeWords, bool useVad);
 
