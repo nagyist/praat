@@ -126,7 +126,7 @@ autoThing Thing_newFromClassName (conststring32 className, int *out_formatVersio
 Thing _Thing_dummyObject (ClassInfo classInfo) {
 	if (! classInfo -> dummyObject)
 		classInfo -> dummyObject = classInfo -> _new ();
-	Melder_assert (classInfo -> dummyObject);
+	Melder_post (classInfo -> dummyObject);
 	return classInfo -> dummyObject;
 }
 
@@ -171,7 +171,7 @@ bool Thing_isa (Thing me, ClassInfo klas) {
 }
 
 void Thing_infoWithIdAndFile (Thing me, integer id, MelderFile file) {
-	Melder_assert (me);
+	Melder_pre (me);
 	Melder_clearInfo ();
 	MelderInfo_open ();
 	if (id != 0)
@@ -222,7 +222,7 @@ void Thing_setName (Thing me, conststring32 name /* cattable */) {
 }
 
 void Thing_swap (Thing me, Thing thee) {
-	Melder_assert (my classInfo == thy classInfo);
+	Melder_pre (my classInfo == thy classInfo);
 	const integer n = my classInfo -> size;
 	char *p, *q;
 	integer i;
@@ -236,7 +236,7 @@ void Thing_swap (Thing me, Thing thee) {
 std::unordered_map <integer, SharedThing> theSharedThings;
 
 void Thing_share (Thing me) {
-	static integer s_idOfExistingThing = 0;
+	static integer s_idOfExistingThing = 20'000'000;   // to make them a bit recognizable (in the alphabet, T = 20)
 	my idOfExistingThing = ++ s_idOfExistingThing;
 	theSharedThings. emplace (s_idOfExistingThing, SharedThing { me });
 }

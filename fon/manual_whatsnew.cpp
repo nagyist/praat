@@ -35,7 +35,7 @@ Latest changes in Praat.
 • Windows: Ctrl+Alt+Letter menu shortcuts have become Ctrl+Shift+Letter, because that’s the
   way it’s nowadays done in e.g. browsers and NotePad, and because Ctrl+Alt+Letter combinations
   can stand for actual Alt-GR characters on some keyboards. On the Mac we still use Option+Command+Letter.
-  Note that on most Windows keyboards the Ctrl and Alt keys are adjacent, as as the Option and Command
+  Note that on most Windows keyboards the Ctrl and Alt keys are adjacent, as are the Option and Command
   keys on most Mac keyboards.
 • Manual: menu shortcuts for ##Previous page# and ##Next page#.
 

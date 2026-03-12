@@ -53,6 +53,7 @@ struct structClassInfo {
 	typedef struct struct##klas *mutable##klas; \
 	typedef const struct struct##klas *const##klas; \
 	typedef autoSomeThing <struct##klas> auto##klas; \
+	typedef SomeThingHandle <struct##klas> klas##Handle; \
 	extern struct structClassInfo theClassInfo_##klas; \
 	extern ClassInfo class##klas
 
@@ -540,5 +541,28 @@ struct SharedThing {
 };
 extern std::unordered_map <integer, SharedThing> theSharedThings;
 void Thing_share (Thing me);
+
+template <class T>
+class SomeThingHandle {
+	integer _id;
+public:
+	SomeThingHandle (T *me) {
+		if (my idOfExistingThing == 0)
+			Thing_share (me);
+		our _id = my idOfExistingThing;
+	}
+	T *get() {
+		auto it = theSharedThings. find (our _id);
+		return it == theSharedThings.end() ? nullptr : it -> second.get(). thing;
+	}
+	explicit operator bool () const noexcept {
+		return theSharedThings. find (our _id) != theSharedThings.end();
+	}
+	integer getId () {
+		return our _id;   // this can be an obsolete handle; that's fine (nice for debugging)
+	}
+};
+
+typedef SomeThingHandle<structThing> ThingHandle;
 
 #endif // _Thing_h_
