@@ -586,7 +586,12 @@ extern "C" {
         // Voice Activity Detection (VAD) params
         bool         vad;                         // Enable VAD
         const char * vad_model_path;              // Path to VAD model
-    	// Praat: added 01-03-2026
+
+    	/*
+			Following two variables are added by Anastasia Shchupak on behalf of inclusion into Praat.
+			In the original whisper.cpp version, VAD model is loaded from a binary file.
+			Praat contains Silero-VAD model in memory, therefore it needs variables to access this memory.
+		*/
     	const void * vad_model_data;		      // Pointer to in-memory model data
     	size_t       vad_model_data_size;         // Size of in-memory model data
 
@@ -692,7 +697,12 @@ extern "C" {
 
     WHISPER_API struct whisper_vad_context * whisper_vad_init_from_file_with_params(const char * path_model,              struct whisper_vad_context_params params);
     WHISPER_API struct whisper_vad_context * whisper_vad_init_with_params          (struct whisper_model_loader * loader, struct whisper_vad_context_params params);
-	// Praat: added 01-03-2025
+
+	/*
+		Function whisper_vad_init_from_memory_with_params() is added by Anastasia Shchupak on behalf of inclusion into Praat.
+		In the original whisper.cpp version, whisper_vad_init_from_file_with_params() is always used.
+		Praat contains Silero-VAD model in memory, therefore whisper_vad_init_from_memory_with_params() is added.
+	*/
 	WHISPER_API struct whisper_vad_context * whisper_vad_init_from_memory_with_params(const void * data, size_t size, struct whisper_vad_context_params params);
 
     WHISPER_API bool whisper_vad_detect_speech(
@@ -723,7 +733,10 @@ extern "C" {
     WHISPER_API void whisper_vad_free_segments(struct whisper_vad_segments * segments);
     WHISPER_API void whisper_vad_free         (struct whisper_vad_context  * ctx);
 
-	// Praat: added 22-02-2026
+	/*
+		Following five functions are added by Anastasia Shchupak on behalf of inclusion into Praat.
+		It provides direct access to VAD segments.
+	*/
 	WHISPER_API int whisper_full_n_vad_segments(struct whisper_context * ctx);
 	WHISPER_API int64_t whisper_full_get_vad_segment_orig_start(struct whisper_context * ctx, int i_vad_segment);
 	WHISPER_API int64_t whisper_full_get_vad_segment_orig_end(struct whisper_context * ctx, int i_vad_segment);

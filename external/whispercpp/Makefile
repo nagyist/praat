@@ -2,22 +2,34 @@
 
 include ../../makefile.defs
 
-WHISPER_OBJECTS = \
+#CPPFLAGS = -march=native
+
+WHISPER_AND_GGML_OBJECTS = \
 	whisper.o \
 	ggml.o \
+	ggml-cpp.o \
 	ggml-backend.o \
+	ggml-backend-dl.o \
 	ggml-backend-reg.o \
 	ggml-alloc.o \
 	ggml-threading.o \
 	ggml-quants.o \
-	ggml-cpu_.o \
+	ggml-opt.o \
+	gguf.o
+
+GGML_CPU_OBJECTS = \
 	ggml-cpu.o \
+	ggml-cpu-cpp.o \
 	traits.o \
 	quants.o \
+	ops.o \
+	vec.o \
 	unary-ops.o \
 	binary-ops.o \
-	vec.o \
-	ops.o
+	repack.o \
+	hbm.o
+
+WHISPER_OBJECTS = $(WHISPER_AND_GGML_OBJECTS) $(GGML_CPU_OBJECTS)
 
 .PHONY: all clean
 
