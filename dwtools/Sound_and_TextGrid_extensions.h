@@ -2,11 +2,11 @@
 #define _Sound_and_TextGrid_extensions_h_
 /* Sound_and_TextGrid_extensions.h
  *
- * Copyright (C) 1993-2023 David Weenink
+ * Copyright (C) 1993-2023 David Weenink, 2026 Anastasia Shchupak
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -28,7 +28,7 @@ autoTextGrid Sound_to_TextGrid_detectSilences (Sound me, double minPitch, double
 	double silenceThreshold, double minSilenceDuration, double minSoundingDuration,
 	conststring32 silentLabel, conststring32 soundingLabel);
 
-autoTextGrid Sound_to_TextGrid_speechActivitySileroVad (Sound me, double speechProbabilityThreshold,
+autoTextGrid Sound_to_TextGrid_speechActivity_silero (Sound me, double speechProbabilityThreshold,
 	double minSpeechDuration, double minNonSpeechDuration, double speechPad,
 	conststring32 speechLabel, conststring32 nonSpeechLabel);
 
