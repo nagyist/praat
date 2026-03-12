@@ -236,7 +236,7 @@ void Thing_swap (Thing me, Thing thee) {
 std::unordered_map <integer, SharedThing> theSharedThings;
 
 void Thing_share (Thing me) {
-	static integer s_idOfExistingThing = 1'000'000;   // to make them a bit recognizable
+	static integer s_idOfExistingThing = 20'000'000;   // to make them a bit recognizable (in the alphabet, T = 20)
 	my idOfExistingThing = ++ s_idOfExistingThing;
 	theSharedThings. emplace (s_idOfExistingThing, SharedThing { me });
 }
