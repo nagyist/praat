@@ -32,8 +32,8 @@ autoTextGrid Sound_to_TextGrid_speechActivity_silero (Sound me, double speechPro
 	double minSpeechDuration, double minNonSpeechDuration, double speechPad,
 	conststring32 speechLabel, conststring32 nonSpeechLabel);
 
-autoTextGrid Sound_to_TextGrid_speechActivity_lsfm (Sound me, double timeStep, double longTermWindow_r,
-	double shorttimeAveragingWindow, double lowFrequencyThreshold, double highFrequencyThreshold, double lsfmThreshold, 
+autoTextGrid Sound_to_TextGrid_speechActivity_ltsf (Sound me, double timeStep, double longTermWindow_r,
+	double shorttimeAveragingWindow, double lowFrequencyThreshold, double highFrequencyThreshold, double ltsfThreshold,
 	double nonspeechThreshold_dB, double minNonspeechDuration, 
 	double minSpeechDuration,	conststring32 nonSpeechLabel, conststring32 speechLabel);
 
