@@ -29,6 +29,16 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.62# (13 March 2026)
+• @@Sound: To TextGrid (speech activity, Silero)...@: “voice activity detection” by AI.
+• TextGrid window: fixed a bug from 2013 or earlier that could cause Praat to crash during interval alignment.
+• Fixed a bug that caused Praat to crash if a notebook was run twice.
+• Linux: support horizontal scrolling in three ways (two-finger swiping on the touchpad;
+  left and right tilting of the mouse’s scroll wheel; turning the mouse’s scroll wheel
+  while keeping the Shift key pressed).
+• Linux: support zooming by turning the mouse’s scroll wheel
+  while keeping the Ctrl key pressed).
+
 ##6.4.61# (28 February 2026)
 • ##Transcribe interval# (via automatic speech recognition): better word alignment via Whisper’s built-in DTW.
 • ##Transcribe interval# (via automatic speech recognition): option for silence removal (via an additionally installed AI model).
