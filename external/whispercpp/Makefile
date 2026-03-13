@@ -2,32 +2,25 @@
 
 include ../../makefile.defs
 
-#CPPFLAGS = -march=native
-
 WHISPER_AND_GGML_OBJECTS = \
 	whisper.o \
 	ggml.o \
-	ggml-cpp.o \
 	ggml-backend.o \
 	ggml-backend-dl.o \
 	ggml-backend-reg.o \
 	ggml-alloc.o \
 	ggml-threading.o \
-	ggml-quants.o \
-	ggml-opt.o \
-	gguf.o
+	ggml-quants.o
 
 GGML_CPU_OBJECTS = \
 	ggml-cpu.o \
 	ggml-cpu-cpp.o \
 	traits.o \
 	quants.o \
-	ops.o \
-	vec.o \
 	unary-ops.o \
 	binary-ops.o \
-	repack.o \
-	hbm.o
+	ops.o \
+	vec.o
 
 WHISPER_OBJECTS = $(WHISPER_AND_GGML_OBJECTS) $(GGML_CPU_OBJECTS)
 

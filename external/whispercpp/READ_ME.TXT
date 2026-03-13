@@ -1,45 +1,78 @@
 praat/external/whispercpp/READ_ME.TXT
-Anastasia Shchupak, 12 March 2026
+Anastasia Shchupak, 13 March 2026
 
 This file describes the adaptations to the Whisper.cpp current sources
 that are needed to make them compatible with Praat.
 Last maintenance release of Whisper.cpp as of 12 March 2026 was v1.8.3 (Jan 15, 2025).
-But source code in this edition was taken from 5 March 2026, commit hash is 30c5194c9691e4e9a98b3dea9f19727397d3f46e.
+The source code in this edition was taken from commit 30c5194c9691e4e9a98b3dea9f19727397d3f46e.
 
 
 1. Selecting files and flattening the file structure.
 -----------------------------------------------------
 
-The Whisper.cpp sources are distributed over multiple folders, which are in different deep
-branches of the whisper.cpp root folder. We use only a subset of files and flatten this hierarchy as shown below.
+The Whisper.cpp sources are distributed over multiple folders, which are in different deep branches
+of the whisper.cpp root folder. We use only a subset of files and flatten this hierarchy as shown below.
 
-cp whisper.cpp/src/*.c          praat/external/whispercpp/
-cp whisper.cpp/src/*.cpp        praat/external/whispercpp/
-cp whisper.cpp/src/*.h          praat/external/whispercpp/
+whisper.cpp
+    include
+        whisper.h
+    src
+        whisper-arch.h
+        whisper.cpp
+    ggml
+        include
+            ggml-alloc.h
+            ggml-backend.h
+            ggml-cpp.h
+            ggml-cpu.h
+            ggml.h
+            gguf.h
+        src
+            ggml-alloc.c
+            ggml-backend-dl.cpp
+            ggml-backend-dl.h
+            ggml-backend-impl.h
+            ggml-backend-reg.cpp
+            ggml-backend.cpp
+            ggml-common.h
+            ggml-quants.c
+            ggml.c
+        ggml-cpu
+            amx
+                amx.h
+            arch-fallback.h
+            binary-ops.cpp
+            binary-ops.h
+            common.h
+            ggml-cpu.c
+            ggml-cpu.cpp -> ggml-cpu-cpp.cpp
+            ggml-cpu-impl.h
+            ops.cpp
+            ops.h
+            quants.c
+            quants.h
+            repack.h
+            simd-gemm.h
+            simd-mappings.h
+            traits.cpp
+            traits.h
+            unary-ops.cpp
+            unary-ops.h
+            vec.cpp
+            vec.h
+            ggml-impl.h
+            ggml-quants.h
+            ggml-threading.cpp
+            ggml-threading.h
 
-cp whisper.cpp/ggml/src/*.c     praat/external/whispercpp/
-cp whisper.cpp/ggml/src/*.cpp   praat/external/whispercpp/
-cp whisper.cpp/ggml/src/*.h     praat/external/whispercpp/
-
-cp whisper.cpp/ggml/src/ggml-cpu/*.c        praat/external/whispercpp/
-cp whisper.cpp/ggml/src/ggml-cpu/*.cpp      praat/external/whispercpp/
-cp whisper.cpp/ggml/src/ggml-cpu/*.h        praat/external/whispercpp/
-cp whisper.cpp/ggml/src/ggml-cpu/amx/amx.h  praat/external/whispercpp/
-
-cp whisper.cpp/include/*.h      praat/external/whispercpp/
-cp whisper.cpp/ggml/include/*.h praat/external/whispercpp/
-
-cd praat/external/whispercpp/
-mv ggml.cpp         ggml-cpp.cpp
-mv ggml-cpu.cpp     ggml-cpu-cpp.cpp
-
+All these files are put into the single external/whispercpp source folder.
 
 2. File modifications.
 ----------------------
 2.1. ggml.h
 -----------
 To make GGML and Whisper-cpp compatible with Praat, we add the following to the top of `ggml.h`:
-
+```
 #define WHISPER_VERSION  "1.8.3"
 #define GGML_VERSION  "0.9.7"
 #define GGML_COMMIT  "unknown"
@@ -48,13 +81,13 @@ To make GGML and Whisper-cpp compatible with Praat, we add the following to the 
 #if ! defined (_GNU_SOURCE)
 	#define _GNU_SOURCE
 #endif
-
+```
 This works because `ggml.h` is included, directly or indirectly,
 at the very top of all `ggml` and `whisper` files (last checked 20260312), except:
 ggml-common.h, ggml-backend-dl.cpp, ggml-backend-dl.h, unary-ops.cpp, and unary-ops.h.
 
 2.2. whisper.h and whisper.cpp
---------------
+------------------------------
 2.2.1.
 ------
 To use silero model for speech detection from memory rather than from the external binary file,
@@ -169,13 +202,13 @@ is changed to these lines:
 
 3. Bringing Silero-VAD model to Praat source code.
 --------------------------------------------------
-First, we downloaded the ggml Silero model from the original whisper.cpp repository:
+First, we download the ggml Silero model from the original whisper.cpp repository:
 ```
 whisper.cpp/models/download-vad-model.sh silero-v6.2.0
 ```
 The result is `ggml-silero-v6.2.0.bin`, which is a C-compatible binary file, which can be loaded by whisper.cpp.
 
-We then converted this binary to a C header using `xxd` and copied it to external/whispercpp directory:
+We then convert this binary to a C header using `xxd` and copy it to external/whispercpp directory:
 ```
 xxd -i whisper.cpp/models/ggml-silero-v6.2.0.bin > praat/external/whispercpp/ggml-silero-vad-model-data.h
 ```
