@@ -5698,7 +5698,7 @@ DO
 	CONVERT_EACH_TO_ONE_END (my name.get())
 }
 
-FORM (CONVERT_EACH_TO_ONE__Sound_to_TextGrid_speechActivity, U"Sound: To TextGrid (speech activity)", U"Sound: To TextGrid (speech activity)...") {
+FORM (CONVERT_EACH_TO_ONE__Sound_to_TextGrid_speechActivity, U"Sound: To TextGrid (speech activity, LTSF)", U"Sound: To TextGrid (speech activity, LTSF)...") {
 	REAL (timeStep, U"Time step (s)", U"0.0 (= auto)")
 	POSITIVE (longtermWindow, U"Long term window (s)", U"0.3")
 	POSITIVE (shorttermWindow, U"Short term window (s)", U"0.1")
@@ -5713,8 +5713,8 @@ FORM (CONVERT_EACH_TO_ONE__Sound_to_TextGrid_speechActivity, U"Sound: To TextGri
 	OK
 DO
 	CONVERT_EACH_TO_ONE (Sound)
-		autoTextGrid result = Sound_to_TextGrid_speechActivity_lsfm (me, timeStep, longtermWindow, shorttermWindow,
-			fmin, fmax, flatnessThreshold, nonspeechThreshold_dB, minimumNonspeechDuration, minimumSpeechDuration, 
+		autoTextGrid result = Sound_to_TextGrid_speechActivity_ltsf (me, timeStep, longtermWindow, shorttermWindow,
+			fmin, fmax, flatnessThreshold, nonspeechThreshold_dB, minimumNonspeechDuration, minimumSpeechDuration,
 			nonspeechLabel, speechLabel
 		);
 	CONVERT_EACH_TO_ONE_END (my name.get())
@@ -10188,7 +10188,7 @@ void praat_David_init () {
 
 	praat_addAction1 (classSound, 0, U"To TextGrid (silences)...", U"To IntervalTier", 1,
 			CONVERT_EACH_TO_ONE__Sound_to_TextGrid_detectSilences);
-	praat_addAction1 (classSound, 0, U"To TextGrid (speech activity)... || To TextGrid (voice activity)...", U"To IntervalTier", 1,
+	praat_addAction1 (classSound, 0, U"To TextGrid (speech activity, LTSF)... || To TextGrid (speech activity)... || To TextGrid (voice activity)...", U"To IntervalTier", 1,
 			CONVERT_EACH_TO_ONE__Sound_to_TextGrid_speechActivity);
 	praat_addAction1 (classSound, 0, U"To TextGrid (high, mid, low)...", U"To IntervalTier", GuiMenu_HIDDEN | GuiMenu_DEPTH_1,
 			CONVERT_EACH_TO_ONE__Sound_to_TextGrid_highMidLowIntervals);

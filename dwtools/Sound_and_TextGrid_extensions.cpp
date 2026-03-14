@@ -1,10 +1,10 @@
 /* Sound_and_TextGrid_extensions.cpp
  *
- * Copyright (C) 1993-2022 David Weenink, 2024 Paul Boersma
+ * Copyright (C) 1993-2022 David Weenink, 2024,2025 Paul Boersma, 2026 Anastasia Shchupak
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or (at
+ * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
  *
  * This code is distributed in the hope that it will be useful, but
@@ -21,6 +21,8 @@
 #include "Sound_and_TextGrid_extensions.h"
 #include "Sound_and_Spectrum.h"
 #include "Sound_to_Intensity.h"
+#include "SpeechRecognizer.h"
+#include "TextGrid_Sound.h"
 
 autoIntervalTier Sound_to_IntervalTier_highMidLowIntervals (Sound me, double min, double max) {
 	try {
@@ -114,6 +116,24 @@ autoSound Sound_IntervalTier_cutPartsMatchingLabel (Sound me, IntervalTier thee,
 		return him;
 	} catch (MelderError) {
 		Melder_throw (me, U": intervals not trimmed.");
+	}
+}
+
+autoTextGrid Sound_to_TextGrid_speechActivity_silero (Sound me, double speechProbabilityThreshold,
+	double minSpeechDuration, double minNonSpeechDuration, double speechPad,
+	conststring32 speechLabel, conststring32 nonSpeechLabel
+) {
+	try {
+		autovector <WhisperSegment> vadIntervals = doSileroVad (me, speechProbabilityThreshold,
+				minSpeechDuration, minNonSpeechDuration, speechPad, speechLabel, nonSpeechLabel);
+
+		autoTextGrid thee = TextGrid_create (my xmin, my xmax, U"VAD", U"");
+		const IntervalTier vadTier = static_cast <IntervalTier> (thy tiers->at [1]);
+		splitIntervalIntoWhisperSegments (vadTier, 1, my xmin, my xmax, vadIntervals);
+
+		return thee;
+	} catch (MelderError) {
+		Melder_throw (me, U": could not detect speech activity.");
 	}
 }
 

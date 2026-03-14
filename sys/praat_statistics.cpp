@@ -206,6 +206,16 @@ void praat_reportSystemProperties () {
 	#else
 		MelderInfo_writeLine (U"Built for processor type: ", sizeof (void *) == 4 ? U"intel32" : U"intel64");
 	#endif
+	#if defined (__ARM_ARCH)
+		MelderInfo_writeLine (U"__ARM_ARCH: defined");
+	#else
+		MelderInfo_writeLine (U"__ARM_ARCH: undefined");
+	#endif
+	#if defined (__ARM_NEON)
+		MelderInfo_writeLine (U"__ARM_NEON: defined");
+	#else
+		MelderInfo_writeLine (U"__ARM_NEON: undefined");
+	#endif
 	structMelderFolder homeFolder {};
 	Melder_getHomeDir (& homeFolder);
 	MelderInfo_writeLine (U"Home folder: ", MelderFolder_peekPath (& homeFolder));

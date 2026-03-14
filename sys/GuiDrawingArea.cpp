@@ -186,36 +186,100 @@ Thing_implement (GuiDrawingArea, GuiControl, 0);
 		}
 		return false;
 	}
+	static void _guiGtkDrawingArea_handleZoom (GuiObject widget, double delta) {
+		iam_drawingarea;
+		if (my d_zoomCallback) {
+			struct structGuiDrawingArea_ZoomEvent event { me };
+			event. delta = delta;
+			try {
+				my d_zoomCallback (my d_zoomBoss, & event);
+			} catch (MelderError) {
+				Melder_flushError (U"Zoom not completely handled.");
+			}
+		}
+	}
 	static gboolean _guiGtkDrawingArea_swipeCallback (GuiObject w, GdkEventScroll *event, gpointer void_me) {
 		iam (GuiDrawingArea);
 		trace (U"_guiGtkDrawingArea_swipeCallback ", Melder_pointer (my d_horizontalScrollBar), Melder_pointer (my d_verticalScrollBar));
-		if (my d_horizontalScrollBar) {
+		constexpr double zoomStepSize = 12.0;
+		const bool shiftKeyPressed = (event -> state & GDK_SHIFT_MASK) != 0;
+		const bool controlKeyPressed = (event -> state & GDK_CONTROL_MASK) != 0;
+		if (controlKeyPressed && my d_zoomCallback) {
+			double zoomDelta = 0.0;
+			switch (event -> direction) {
+				case GDK_SCROLL_UP:
+					zoomDelta = zoomStepSize;
+					break;
+				case GDK_SCROLL_DOWN:
+					zoomDelta = - zoomStepSize;
+					break;
+				case GDK_SCROLL_LEFT:
+					zoomDelta = - zoomStepSize;
+					break;
+				case GDK_SCROLL_RIGHT:
+					zoomDelta = zoomStepSize;
+					break;
+				#ifdef GDK_SCROLL_SMOOTH
+				case GDK_SCROLL_SMOOTH:
+					if (event -> delta_y != 0.0)
+						zoomDelta = - event -> delta_y * zoomStepSize;
+					else if (event -> delta_x != 0.0)
+						zoomDelta = - event -> delta_x * zoomStepSize;
+					break;
+				#endif
+			}
+			if (zoomDelta != 0.0)
+				_guiGtkDrawingArea_handleZoom (w, zoomDelta);
+			return true;
+		}
+		const bool mapVerticalToHorizontal = (my d_horizontalScrollBar && (! my d_verticalScrollBar || shiftKeyPressed));
+		double hSteps = 0.0;
+		double vSteps = 0.0;
+		switch (event -> direction) {
+			case GDK_SCROLL_LEFT:
+				hSteps -= 1.0;
+				break;
+			case GDK_SCROLL_RIGHT:
+				hSteps += 1.0;
+				break;
+			case GDK_SCROLL_UP:
+				if (mapVerticalToHorizontal)
+					hSteps -= 1.0;
+				else
+					vSteps -= 1.0;
+				break;
+			case GDK_SCROLL_DOWN:
+				if (mapVerticalToHorizontal)
+					hSteps += 1.0;
+				else
+					vSteps += 1.0;
+				break;
+			#ifdef GDK_SCROLL_SMOOTH
+			case GDK_SCROLL_SMOOTH:
+				if (event -> delta_x != 0.0)
+					hSteps += event -> delta_x;
+				if (event -> delta_y != 0.0) {
+					if (mapVerticalToHorizontal)
+						hSteps += event -> delta_y;
+					else
+						vSteps += event -> delta_y;
+				}
+				break;
+			#endif
+		}
+		if (my d_horizontalScrollBar && hSteps != 0.0) {
 			double hv = gtk_range_get_value (GTK_RANGE (my d_horizontalScrollBar -> d_widget));
 			GtkAdjustment *adjustment = gtk_range_get_adjustment (GTK_RANGE (my d_horizontalScrollBar -> d_widget));
 			gdouble hi;
 			g_object_get (adjustment, "step_increment", & hi, nullptr);
-			switch (event -> direction) {
-				case GDK_SCROLL_LEFT:
-					gtk_range_set_value (GTK_RANGE (my d_horizontalScrollBar -> d_widget), hv - hi);
-					break;
-				case GDK_SCROLL_RIGHT:
-					gtk_range_set_value (GTK_RANGE (my d_horizontalScrollBar -> d_widget), hv + hi);
-					break;
-			}
+			gtk_range_set_value (GTK_RANGE (my d_horizontalScrollBar -> d_widget), hv + hSteps * hi);
 		}
-		if (my d_verticalScrollBar) {
+		if (my d_verticalScrollBar && vSteps != 0.0) {
 			double vv = gtk_range_get_value (GTK_RANGE (my d_verticalScrollBar -> d_widget));
 			GtkAdjustment *adjustment = gtk_range_get_adjustment (GTK_RANGE (my d_verticalScrollBar -> d_widget));
 			gdouble vi;
 			g_object_get (adjustment, "step_increment", & vi, nullptr);
-			switch (event -> direction) {
-				case GDK_SCROLL_UP:
-					gtk_range_set_value (GTK_RANGE (my d_verticalScrollBar -> d_widget), vv - vi);
-					break;
-				case GDK_SCROLL_DOWN:
-					gtk_range_set_value (GTK_RANGE (my d_verticalScrollBar -> d_widget), vv + vi);
-					break;
-			}
+			gtk_range_set_value (GTK_RANGE (my d_verticalScrollBar -> d_widget), vv + vSteps * vi);
 		}
 		return true;
 	}

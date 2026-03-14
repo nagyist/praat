@@ -1558,8 +1558,8 @@ static autoIntensity Spectrogram_to_Intensity_silenceDetection (Spectrogram me) 
 	}
 }
 
-autoTextGrid Sound_to_TextGrid_speechActivity_lsfm (Sound me, double timeStep, double longTermWindow, double shorttimeWindow, double fmin, double fmax, 
-	double lsfmThreshold, double nonspeechThreshold_dB, double minNonspeechDuration, double minSpeechDuration, 
+autoTextGrid Sound_to_TextGrid_speechActivity_ltsf (Sound me, double timeStep, double longTermWindow, double shorttimeWindow, double fmin, double fmax,
+	double ltsfThreshold, double nonspeechThreshold_dB, double minNonspeechDuration, double minSpeechDuration,
 	conststring32 nonspeechLabel, conststring32 speechLabel)
 {
 	try {
@@ -1574,7 +1574,7 @@ autoTextGrid Sound_to_TextGrid_speechActivity_lsfm (Sound me, double timeStep, d
 		const double maximumTimeOversampling = 8.0, maximumFreqOversampling = 8.0;
 		autoSpectrogram spectrogram = Sound_to_Spectrogram_e (me, effectiveAnalysisWidth, fmax, timeStep, minimumFreqStep,
 			kSound_to_Spectrogram_windowShape::HANNING, maximumTimeOversampling, maximumFreqOversampling);
-		autoMatrix lsfmMatrix = Spectrogram_getLongtermSpectralFlatness (spectrogram.get(), longTermWindow, shorttimeWindow, fmin, fmax);
+		autoMatrix ltsfMatrix = Spectrogram_getLongtermSpectralFlatness (spectrogram.get(), longTermWindow, shorttimeWindow, fmin, fmax);
 		autoTextGrid thee = TextGrid_create (my xmin, my xmax, U"VAD", U"");
 		const IntervalTier vadTier = (IntervalTier) thy tiers->at [1];
 		TextInterval_setText (vadTier -> intervals.at [1], speechLabel);
@@ -1583,13 +1583,13 @@ autoTextGrid Sound_to_TextGrid_speechActivity_lsfm (Sound me, double timeStep, d
 		/*
 			Step 1. Find activity intervals
 		*/
-		VEC lsfm = lsfmMatrix -> z.row (1);
+		VEC ltsf = ltsfMatrix -> z.row (1);
 		conststring32 label;
 		integer iinterval = 1;
-		bool activityInterval = ( lsfm [1] < lsfmThreshold );
-		for (integer index = 2; index <= lsfm.size; index ++) {
+		bool activityInterval = ( ltsf [1] < ltsfThreshold );
+		for (integer index = 2; index <= ltsf.size; index ++) {
 			bool addBoundary = false;
-			if (lsfm [index] < lsfmThreshold) {
+			if (ltsf [index] < ltsfThreshold) {
 				if (! activityInterval) {   // start of activity
 					addBoundary = true;
 					activityInterval = true;
@@ -1604,7 +1604,7 @@ autoTextGrid Sound_to_TextGrid_speechActivity_lsfm (Sound me, double timeStep, d
 			}
 
 			if (addBoundary) {
-				const double time = Sampled_indexToX (lsfmMatrix.get(), index);
+				const double time = Sampled_indexToX (ltsfMatrix.get(), index);
 				IntervalTier_addBoundaryUnsorted (vadTier, iinterval, time, label);
 				iinterval ++;
 			}

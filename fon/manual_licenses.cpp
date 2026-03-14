@@ -25,7 +25,7 @@ MAN_PAGES_BEGIN
 R"~~~(
 ################################################################################
 "Acknowledgments"
-© Paul Boersma 2002,2003,2005–2008,2010–2016,2020–2025
+© Paul Boersma 2002,2003,2005–2008,2010–2016,2020–2026
 
 The following people contributed source code to Praat:
 
@@ -40,7 +40,8 @@ The following people contributed source code to Praat:
 	@@feedforward neural networks@, @@principal component analysis@, @@multidimensional scaling@, @@discriminant analysis@, @LPC,
 	@@KlattGrid|Acoustic synthesis (Klatt)@, automatic alignment, @VowelEditor, @FormantPath,
 	and adaptation of GSL, LAPACK, fftpack, regular expressions, eSpeak, Ogg Vorbis, Opus and LAME.
-, Anastasia Shchupak: speech recognition, automatic orthographic transcription, and adaptation of Whisper.cpp.
+, Anastasia Shchupak: speech recognition, automatic orthographic transcription and alignment,
+	and adaptation of Whisper.cpp.
 , Stefan de Konink and Franz Brauße: major help in port to GTK.
 , Tom Naughton: major help in port to Cocoa.
 , Erez Volk: adaptation of FLAC and MAD.
@@ -76,7 +77,8 @@ We included the following freely available software libraries in Praat (sometime
 , Regular expressions by Henry Spencer, Mark Edel, Christopher Conrad, Eddy De Greef (@@General Public License, version 2|GPL 2@ or later).
 , Unicode Character Database by Unicode Inc., version 16.0 of August 2024 (@@Unicode Inc. license agreement@).
 , Quickselect and Median of ninthers, by Andrei Alexandrescu 2016 (@@Boost Software License 1.0@).
-, Whisper.cpp, by Georgi Gerganov and many others (@@MIT License@).
+, GGML (version 0.9.7) and Whisper.cpp (version 1.8.3), by Georgi Gerganov and many others (@@MIT License@),
+	using separately installed Whisper models by OpenAI (also MIT License).
 
 Our own parts of the source code of Praat are distributed either under the
 @@General Public License, version 2@ or later, or under the @@General Public License, version 3@ or later.

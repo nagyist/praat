@@ -2440,9 +2440,9 @@ void structSoundAnalysisArea :: v_createMenus () {
 		FunctionAreaMenu_addCommand (menu, U"Get maximum pitch", GuiMenu_F5 | GuiMenu_SHIFT | GuiMenu_DEPTH_1,
 				QUERY_DATA_FOR_REAL__getMaximumPitch, this);
 		FunctionAreaMenu_addCommand (menu, U"- Select by pitch:", 0, nullptr, this);
-		FunctionAreaMenu_addCommand (menu, U"Move cursor to minimum pitch", GuiMenu_SHIFT | 'L' | GuiMenu_DEPTH_1,
+		FunctionAreaMenu_addCommand (menu, U"Move cursor to minimum pitch", GuiMenu_COMMAND_EXTRA | 'L' | GuiMenu_DEPTH_1,
 				menu_cb_moveCursorToMinimumPitch, this);
-		FunctionAreaMenu_addCommand (menu, U"Move cursor to maximum pitch", GuiMenu_SHIFT | 'H' | GuiMenu_DEPTH_1,
+		FunctionAreaMenu_addCommand (menu, U"Move cursor to maximum pitch", GuiMenu_COMMAND_EXTRA | 'H' | GuiMenu_DEPTH_1,
 				menu_cb_moveCursorToMaximumPitch, this);
 		FunctionAreaMenu_addCommand (menu, U"- Draw pitch to picture window:", 0, nullptr, this);
 		FunctionAreaMenu_addCommand (menu, U"Draw visible pitch contour...", 1,

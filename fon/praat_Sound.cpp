@@ -22,6 +22,7 @@
 #include "Sound_and_Spectrogram.h"
 #include "Sound_and_Spectrum.h"
 #include "Sound_extensions.h"
+#include "Sound_and_TextGrid_extensions.h"
 #include "Sound_to_Cochleagram.h"
 #include "Sound_to_Formant.h"
 #include "Sound_to_Harmonicity.h"
@@ -1885,6 +1886,24 @@ DO
 	CONVERT_EACH_TO_ONE_END (my name.get())
 }
 
+FORM (CONVERT_EACH_TO_ONE__Sound_to_TextGrid_speechActivity_silero,
+	U"Sound: To TextGrid (speech activity, Silero)",
+	U"Sound: To TextGrid (speech activity, Silero)...")
+{
+	POSITIVE (speechProbabilityThreshold, U"Speech probability threshold (0-1, higher - less sensitive, fewer false positive)", U"0.5")
+	POSITIVE (minNonSpeechDuration, U"Min. non-speech interval (s)", U"0.1")
+	POSITIVE (minSpeechDuration, U"Min. speech interval (s)", U"0.25")
+	POSITIVE (speechPad, U"Padding added around each speech segment (s)", U"0.03")
+	WORD (nonSpeechLabel, U"Non-speech interval label", U"non-speech")
+	WORD (speechLabel, U"Speech interval label", U"speech")
+	OK
+DO
+	CONVERT_EACH_TO_ONE (Sound)
+		autoTextGrid result = Sound_to_TextGrid_speechActivity_silero (
+				me, speechProbabilityThreshold, minSpeechDuration, minNonSpeechDuration, speechPad, speechLabel, nonSpeechLabel);
+	CONVERT_EACH_TO_ONE_END (my name.get())
+}
+
 DIRECT (CONVERT_EACH_TO_ONE__Sound_to_TextTier) {
 	CONVERT_EACH_TO_ONE (Sound)
 		autoTextTier result = TextTier_create (my xmin, my xmax);
@@ -2516,6 +2535,8 @@ void praat_Sound_init () {
 		praat_addAction1 (classSound, 0, U"-- to text grid --", nullptr, 1, nullptr);
 		praat_addAction1 (classSound, 0, U"To TextGrid...", nullptr, 1,
 				CONVERT_EACH_TO_ONE__Sound_to_TextGrid);
+		praat_addAction1 (classSound, 0, U"To TextGrid (speech activity, Silero)...", nullptr, 1,
+				CONVERT_EACH_TO_ONE__Sound_to_TextGrid_speechActivity_silero);
 		praat_addAction1 (classSound, 0, U"To TextTier", nullptr, GuiMenu_DEPTH_1 | GuiMenu_HIDDEN,
 				CONVERT_EACH_TO_ONE__Sound_to_TextTier);
 		praat_addAction1 (classSound, 0, U"To IntervalTier", nullptr, GuiMenu_DEPTH_1 | GuiMenu_HIDDEN,

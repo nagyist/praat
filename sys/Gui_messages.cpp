@@ -1,6 +1,6 @@
 /* Gui_messages.cpp
  *
- * Copyright (C) 1992-2018,2020-2025 Paul Boersma,
+ * Copyright (C) 1992-2018,2020-2026 Paul Boersma,
  *               2008 Stefan de Konink, 2010 Franz Brausse, 2013 Tom Naughton
  *
  * This code is free software; you can redistribute it and/or modify
@@ -158,7 +158,8 @@ static void _Melder_dia_init (GuiDialog *dia, GuiProgressBar *scale, GuiLabel *l
 		#else
 			nullptr, nullptr,
 		#endif
-		GuiDialog_Modality::MODELESS);
+		GuiDialog_Modality::MODELESS
+	);
 
 	trace (U"creating the labels");
 	*label1 = GuiLabel_createShown (*dia, 3, 503, 0, Gui_LABEL_HEIGHT, U"label1", 0);
@@ -177,7 +178,8 @@ static void _Melder_dia_init (GuiDialog *dia, GuiProgressBar *scale, GuiLabel *l
 		#else
 			nullptr, nullptr,
 		#endif
-		0);
+		0
+	);
 	trace (U"end");
 }
 

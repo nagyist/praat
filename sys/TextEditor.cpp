@@ -1,6 +1,6 @@
 /* TextEditor.cpp
  *
- * Copyright (C) 1997-2025 Paul Boersma, 2010 Franz Brausse
+ * Copyright (C) 1997-2026 Paul Boersma, 2010 Franz Brausse
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -204,23 +204,28 @@ static void menu_cb_open (TextEditor me, EDITOR_ARGS) {
 				150, 70,
 				Gui_LEFT_DIALOG_SPACING + 3 * buttonWidth + 2 * buttonSpacing + Gui_RIGHT_DIALOG_SPACING,
 				Gui_TOP_DIALOG_SPACING + Gui_TEXTFIELD_HEIGHT + Gui_VERTICAL_DIALOG_SPACING_SAME + 2 * Gui_BOTTOM_DIALOG_SPACING + Gui_PUSHBUTTON_HEIGHT,
-				U"Text changed", nullptr, nullptr, GuiDialog_Modality::MODAL);
+				U"Text changed", nullptr, nullptr, GuiDialog_Modality::MODAL
+			);
 			GuiLabel_createShown (my dirtyOpenDialog,
 				Gui_LEFT_DIALOG_SPACING, - Gui_RIGHT_DIALOG_SPACING,
 				Gui_TOP_DIALOG_SPACING, Gui_TOP_DIALOG_SPACING + Gui_LABEL_HEIGHT,
-				U"The text has changed! Save changes?", 0);
+				U"The text has changed! Save changes?", 0
+			);
 			int x = Gui_LEFT_DIALOG_SPACING, y = - Gui_BOTTOM_DIALOG_SPACING;
 			GuiButton_createShown (my dirtyOpenDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Discard & Open", gui_button_cb_discardAndOpen, cmd, 0);
+				U"Discard & Open", gui_button_cb_discardAndOpen, cmd, 0
+			);
 			x += buttonWidth + buttonSpacing;
 			GuiButton_createShown (my dirtyOpenDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Cancel", gui_button_cb_cancelOpen, cmd, 0);
+				U"Cancel", gui_button_cb_cancelOpen, cmd, 0
+			);
 			x += buttonWidth + buttonSpacing;
 			GuiButton_createShown (my dirtyOpenDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Save & Open", gui_button_cb_saveAndOpen, cmd, 0);
+				U"Save & Open", gui_button_cb_saveAndOpen, cmd, 0
+			);
 		}
 		GuiThing_show (my dirtyOpenDialog);
 	} else {
@@ -261,24 +266,29 @@ static void menu_cb_new (TextEditor me, EDITOR_ARGS) {
 			int buttonWidth = 120, buttonSpacing = 20;
 			my dirtyNewDialog = GuiDialog_create (my windowForm,
 				150, 70, Gui_LEFT_DIALOG_SPACING + 3 * buttonWidth + 2 * buttonSpacing + Gui_RIGHT_DIALOG_SPACING,
-					Gui_TOP_DIALOG_SPACING + Gui_TEXTFIELD_HEIGHT + Gui_VERTICAL_DIALOG_SPACING_SAME + 2 * Gui_BOTTOM_DIALOG_SPACING + Gui_PUSHBUTTON_HEIGHT,
-				U"Text changed", nullptr, nullptr, GuiDialog_Modality::MODAL);
+				Gui_TOP_DIALOG_SPACING + Gui_TEXTFIELD_HEIGHT + Gui_VERTICAL_DIALOG_SPACING_SAME + 2 * Gui_BOTTOM_DIALOG_SPACING + Gui_PUSHBUTTON_HEIGHT,
+				U"Text changed", nullptr, nullptr, GuiDialog_Modality::MODAL
+			);
 			GuiLabel_createShown (my dirtyNewDialog,
 				Gui_LEFT_DIALOG_SPACING, - Gui_RIGHT_DIALOG_SPACING,
 				Gui_TOP_DIALOG_SPACING, Gui_TOP_DIALOG_SPACING + Gui_LABEL_HEIGHT,
-				U"The text has changed! Save changes?", 0);
+				U"The text has changed! Save changes?", 0
+			);
 			int x = Gui_LEFT_DIALOG_SPACING, y = - Gui_BOTTOM_DIALOG_SPACING;
 			GuiButton_createShown (my dirtyNewDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Discard & New", gui_button_cb_discardAndNew, cmd, 0);
+				U"Discard & New", gui_button_cb_discardAndNew, cmd, 0
+			);
 			x += buttonWidth + buttonSpacing;
 			GuiButton_createShown (my dirtyNewDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Cancel", gui_button_cb_cancelNew, cmd, 0);
+				U"Cancel", gui_button_cb_cancelNew, cmd, 0
+			);
 			x += buttonWidth + buttonSpacing;
 			GuiButton_createShown (my dirtyNewDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Save & New", gui_button_cb_saveAndNew, cmd, 0);
+				U"Save & New", gui_button_cb_saveAndNew, cmd, 0
+			);
 		}
 		GuiThing_show (my dirtyNewDialog);
 	} else {
@@ -307,19 +317,23 @@ static void menu_cb_reopen (TextEditor me, EDITOR_ARGS) {
 			my dirtyReopenDialog = GuiDialog_create (my windowForm,
 				150, 70, Gui_LEFT_DIALOG_SPACING + 2 * buttonWidth + 1 * buttonSpacing + Gui_RIGHT_DIALOG_SPACING,
 					Gui_TOP_DIALOG_SPACING + Gui_TEXTFIELD_HEIGHT + Gui_VERTICAL_DIALOG_SPACING_SAME + 2 * Gui_BOTTOM_DIALOG_SPACING + Gui_PUSHBUTTON_HEIGHT,
-				U"Text changed", nullptr, nullptr, GuiDialog_Modality::MODAL);
+				U"Text changed", nullptr, nullptr, GuiDialog_Modality::MODAL
+			);
 			GuiLabel_createShown (my dirtyReopenDialog,
 				Gui_LEFT_DIALOG_SPACING, - Gui_RIGHT_DIALOG_SPACING,
 				Gui_TOP_DIALOG_SPACING, Gui_TOP_DIALOG_SPACING + Gui_LABEL_HEIGHT,
-				U"The text in the editor contains changes! Reopen nevertheless?", 0);
+				U"The text in the editor contains changes! Reopen nevertheless?", 0
+			);
 			int x = Gui_LEFT_DIALOG_SPACING, y = - Gui_BOTTOM_DIALOG_SPACING;
 			GuiButton_createShown (my dirtyReopenDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Keep visible version", gui_button_cb_cancelReopen, cmd, GuiButton_CANCEL);
+				U"Keep visible version", gui_button_cb_cancelReopen, cmd, GuiButton_CANCEL
+			);
 			x += buttonWidth + buttonSpacing;
 			GuiButton_createShown (my dirtyReopenDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Replace with version from disk", gui_button_cb_discardAndReopen, cmd, GuiButton_DEFAULT);
+				U"Replace with version from disk", gui_button_cb_discardAndReopen, cmd, GuiButton_DEFAULT
+			);
 		}
 		GuiThing_show (my dirtyReopenDialog);
 	} else {
@@ -380,23 +394,28 @@ void structTextEditor :: v_goAway () {
 			our dirtyCloseDialog = GuiDialog_create (our windowForm,
 				150, 70, Gui_LEFT_DIALOG_SPACING + 3 * buttonWidth + 2 * buttonSpacing + Gui_RIGHT_DIALOG_SPACING,
 					Gui_TOP_DIALOG_SPACING + Gui_TEXTFIELD_HEIGHT + Gui_VERTICAL_DIALOG_SPACING_SAME + 2 * Gui_BOTTOM_DIALOG_SPACING + Gui_PUSHBUTTON_HEIGHT,
-				U"Text changed", nullptr, nullptr, GuiDialog_Modality::MODAL);
+				U"Text changed", nullptr, nullptr, GuiDialog_Modality::MODAL
+			);
 			GuiLabel_createShown (our dirtyCloseDialog,
 				Gui_LEFT_DIALOG_SPACING, - Gui_RIGHT_DIALOG_SPACING,
 				Gui_TOP_DIALOG_SPACING, Gui_TOP_DIALOG_SPACING + Gui_LABEL_HEIGHT,
-				U"The text has changed! Save changes?", 0);
+				U"The text has changed! Save changes?", 0
+			);
 			int x = Gui_LEFT_DIALOG_SPACING, y = - Gui_BOTTOM_DIALOG_SPACING;
 			GuiButton_createShown (our dirtyCloseDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Discard & Close", gui_button_cb_discardAndClose, this, 0);
+				U"Discard & Close", gui_button_cb_discardAndClose, this, 0
+			);
 			x += buttonWidth + buttonSpacing;
 			GuiButton_createShown (our dirtyCloseDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Cancel", gui_button_cb_cancelClose, this, 0);
+				U"Cancel", gui_button_cb_cancelClose, this, 0
+			);
 			x += buttonWidth + buttonSpacing;
 			GuiButton_createShown (our dirtyCloseDialog,
 				x, x + buttonWidth, y - Gui_PUSHBUTTON_HEIGHT, y,
-				U"Save & Close", gui_button_cb_saveAndClose, this, 0);
+				U"Save & Close", gui_button_cb_saveAndClose, this, 0
+			);
 		}
 		if (our dirtyNewDialog)
 			GuiThing_hide (our dirtyNewDialog);
@@ -826,7 +845,7 @@ void structTextEditor :: v_createMenus () {
 	if (v_fileBased ()) {
 		Editor_addCommand (this, U"File", U"New", 'N', menu_cb_new);
 		Editor_addCommand (this, U"File", U"Open...", 'O', menu_cb_open);
-		Editor_addCommand (this, U"File", U"Reopen from disk", GuiMenu_SHIFT | 'O', menu_cb_reopen);
+		Editor_addCommand (this, U"File", U"Reopen from disk", GuiMenu_COMMAND_EXTRA | 'O', menu_cb_reopen);
 	} else {
 		Editor_addCommand (this, U"File", U"Clear", 'N', menu_cb_clear);
 	}
@@ -852,8 +871,8 @@ void structTextEditor :: v_createMenus () {
 	Editor_addMenu (this, U"Search", 0);
 	Editor_addCommand (this, U"Search", U"Find...", 'F', menu_cb_find);
 	Editor_addCommand (this, U"Search", U"Find again", 'G', menu_cb_findAgain);
-	Editor_addCommand (this, U"Search", U"Replace...", GuiMenu_SHIFT | 'F', menu_cb_replace);
-	Editor_addCommand (this, U"Search", U"Replace again", GuiMenu_SHIFT | 'G', menu_cb_replaceAgain);
+	Editor_addCommand (this, U"Search", U"Replace...", GuiMenu_COMMAND_EXTRA | 'F', menu_cb_replace);
+	Editor_addCommand (this, U"Search", U"Replace again", GuiMenu_COMMAND_EXTRA | 'G', menu_cb_replaceAgain);
 	Editor_addCommand (this, U"Search", U"Use selection for find", 'E', menu_cb_useSelectionForFind);
 	Editor_addCommand (this, U"Search", U"-- line --", 0, nullptr);
 	Editor_addCommand (this, U"Search", U"Where am I?", 0, menu_cb_whereAmI);
