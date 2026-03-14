@@ -251,10 +251,10 @@ procedure test_additiveConstant
 	# Check with top of table 18.3 where a value of 1.291 is given
 
 	.distance = Create TableOfReal: "18.1", 4, 4
-	.row1# = {0, pi, pi/4, pi/2}
-	.row2# = {pi, 0, 3*pi/4, pi/2}
-	.row3# = {pi/4, 3*pi/4, 0, 3*pi/4}
-	.row4# = {pi/2, pi/2, 3*pi/4, 0}
+	.row1# = {0,    pi,     pi/4,   pi/2}
+	.row2# = {pi,   0,      3*pi/4, pi/2}
+	.row3# = {pi/4, 3*pi/4, 0,      3*pi/4}
+	.row4# = {pi/2, pi/2,   3*pi/4, 0}
 	for .icol to 4
 		for .irow to 4
 		Set value: .irow, .icol, .row'.irow'# [.icol]

@@ -62,7 +62,7 @@ void structCCA :: v1_info () {
 	MelderInfo_writeLine (U"nx: ", x -> dimension);
 }
 
-Thing_implement (CCA, Daata, 0);
+Thing_implement (CCA, Daata, 1);
 
 autoCCA CCA_create (integer numberOfCoefficients, integer ny, integer nx) {
 	try {

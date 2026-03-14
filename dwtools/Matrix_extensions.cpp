@@ -1,6 +1,6 @@
 /* Matrix_extensions.cpp
  *
- * Copyright (C) 1993-2023 David Weenink
+ * Copyright (C) 1993-2023, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 */
 
 #include "Matrix_extensions.h"
+#include "MAT_numerics.h"
 #include "Eigen.h"
 #include "NUM2.h"
 #include "Permutation.h"
@@ -542,6 +543,14 @@ autoEigen Matrix_to_Eigen (Matrix me) {
 	} catch (MelderError) {
 		Melder_throw (U"Cannot create Eigen from Matrix.");
 	}
+}
+
+autoEigen Matrix_to_Eigen_special (Matrix me, kMAT_TYPE matType, integer numberOfEigenvalues) {
+	Melder_require (my nx == my ny,
+		U"The number of rows and the number of columns should be equal.");
+	if (numberOfEigenvalues < 1 || numberOfEigenvalues > my ny)
+		numberOfEigenvalues = my ny;
+	return MAT_to_Eigen (my z.get(), matType, numberOfEigenvalues);
 }
 
 void Matrix_Eigen_complex (Matrix me, autoMatrix *out_eigenvectors, autoMatrix *out_eigenvalues) {

@@ -2287,12 +2287,14 @@ DO
 	QUERY_ONE_FOR_REAL_END (U" (eigenvalue [", eigenvalueNumber, U"])")
 }
 
-FORM (QUERY_ONE_FOR_REAL__Eigen_getSumOfEigenvalues, U"Eigen:Get sum of eigenvalues", U"Eigen: Get sum of eigenvalues...") {
-	INTEGER (fromEigenvalue, U"left Eigenvalue range",  U"0")
-	INTEGER (toEigenvalue, U"right Eigenvalue range", U"0")
+FORM (QUERY_ONE_FOR_REAL__Eigen_getSumOfEigenvalues, U"Eigen: Get sum of eigenvalues", U"Eigen: Get sum of eigenvalues...") {
+	INTEGER (fromEigenvalue, U"left Eigenvalue range",  U"1")
+	INTEGER (toEigenvalue, U"right Eigenvalue range", U"0 (=all)")
 	OK
 DO
 	QUERY_ONE_FOR_REAL (Eigen)
+		if (toEigenvalue == 0)
+			toEigenvalue = my numberOfEigenvalues;
 		const double result = Eigen_getSumOfEigenvalues (me, fromEigenvalue, toEigenvalue);
 	QUERY_ONE_FOR_REAL_END (U" (sum of eigenvalues [", fromEigenvalue, U"..", toEigenvalue, U"])")
 }
@@ -3688,6 +3690,16 @@ DIRECT (CONVERT_EACH_TO_ONE__Matrix_to_ActivationList) {
 DIRECT (CONVERT_EACH_TO_ONE__Matrix_to_Eigen) {
 	CONVERT_EACH_TO_ONE (Matrix)
 		autoEigen result = Matrix_to_Eigen (me);
+	CONVERT_EACH_TO_ONE_END (my name.get())
+}
+
+FORM (CONVERT_EACH_TO_ONE__Matrix_to_Eigen_special, U"Matrix: To Eigen", U"Matrix: To Eigen") {
+	OPTIONMENU_ENUM (kMAT_TYPE, matType, U"Matrix type", kMAT_TYPE::SYMMETRIC)
+	INTEGER (numberOfEigenvalues, U"Number of eigenvalues", U"0 (=all)")
+	OK
+DO
+	CONVERT_EACH_TO_ONE (Matrix)
+		autoEigen result = Matrix_to_Eigen_special (me, matType, numberOfEigenvalues);
 	CONVERT_EACH_TO_ONE_END (my name.get())
 }
 
@@ -9812,8 +9824,10 @@ void praat_David_init () {
 			U"To VocalTract", 1, CONVERT_EACH_TO_ONE__Matrix_to_PatternList);
 	praat_addAction1 (classMatrix, 0, U"To ActivationList || To Activation",
 			U"To PatternList...", 1, CONVERT_EACH_TO_ONE__Matrix_to_ActivationList);
-	praat_addAction1 (classMatrix, 0, U"To Eigen", U"Eigen", GuiMenu_HIDDEN,
+	praat_addAction1 (classMatrix, 0, U"To Eigen", U"Eigen", GuiMenu_DEPRECATED_2026,
 			CONVERT_EACH_TO_ONE__Matrix_to_Eigen);
+	praat_addAction1 (classMatrix, 0, U"To Eigen (special)...", U"Eigen", GuiMenu_HIDDEN,
+			CONVERT_EACH_TO_ONE__Matrix_to_Eigen_special);
 	praat_addAction1 (classMatrix, 0, U"To SVD", U"To Eigen", GuiMenu_HIDDEN,
 			CONVERT_EACH_TO_ONE__Matrix_to_SVD);
 	praat_addAction1 (classMatrix, 0, U"To NMF (m.u.)...", U"To SVD", GuiMenu_HIDDEN,
