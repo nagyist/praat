@@ -138,6 +138,12 @@ void NUMsortTogether (STRVEC const& a, Values const& b) {
 	);
 }
 
+template <typename T>
+void NUMreverseOrder (T const& vec) {
+	for (integer i = 1; i <= vec.size / 2; i ++)
+		std::swap (vec [i], vec [vec.size + 1 - i]);
+}
+
 void VECsort3_inplace (VEC const& a, INTVEC const& iv1, INTVEC const& iv2, bool descending); // TODO template
 /* Sort a together with iv1  and iv2 */
 

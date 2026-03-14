@@ -2,7 +2,7 @@
  *
  * Principal Component Analysis
  *
- * Copyright (C) 1993-2021 David Weenink
+ * Copyright (C) 1993-2021, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@
 #include "oo_DESCRIPTION.h"
 #include "PCA_def.h"
 
-Thing_implement (PCA, Eigen, 0);
+Thing_implement (PCA, Eigen, 1);
 
 void structPCA :: v1_info () {
 	structDaata :: v1_info ();

@@ -32,9 +32,20 @@ oo_DEFINE_CLASS (CCA, Daata)
 	oo_INTEGER (numberOfObservations)
 	oo_OBJECT (Strings, 0, yLabels)
 	oo_OBJECT (Strings, 0, xLabels)
-	oo_OBJECT (Eigen, 0, y)
-	oo_OBJECT (Eigen, 0, x)
-
+	
+	#if oo_READING
+		oo_VERSION_UNTIL (1)
+			oo_OBJECT (Eigen, 0, y)
+			oo_OBJECT (Eigen, 0, x)
+		oo_VERSION_ELSE
+			oo_OBJECT (Eigen, 1, y)
+			oo_OBJECT (Eigen, 1, x)
+		oo_VERSION_END
+	#else
+		oo_OBJECT (Eigen, 1, y)
+		oo_OBJECT (Eigen, 1, x)
+	#endif
+		
 	#if oo_DECLARING
 		void v1_info ()
 			override;

@@ -71,8 +71,11 @@ double Matrix_getMean (Matrix me, double xmin, double xmax, double ymin, double 
 
 double Matrix_getStandardDeviation (Matrix me, double xmin, double xmax, double ymin, double ymax);
 
-autoEigen Matrix_to_Eigen (Matrix me);
+autoEigen Matrix_to_Eigen (Matrix me); // deprecated feb 2026
 /* Symmetric matrix */
+
+autoEigen Matrix_to_Eigen_special (Matrix me, kMAT_TYPE matType, integer numberOfEigenvalues);
+/* Symmetric and symmetric tridiagonal matrices have real eigenvalues and eigenvectors. */
 
 autoMatrix SVD_to_Matrix (SVD me, integer from, integer to);
 

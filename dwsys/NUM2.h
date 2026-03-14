@@ -2,7 +2,7 @@
 #define _NUM2_h_
 /* NUM2.h
  *
- * Copyright (C) 1997-2025 David Weenink
+ * Copyright (C) 1997-2025, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "MAT_numerics.h"
 #include "NUMsorting.h"
 #include "NUMFourier.h"
+
 /*
 	A typical iteration goes like
 	do {
@@ -30,7 +31,7 @@
 	while (fabs (current - previous) > fabs (NUMeps * current);
 	Because of floating point arithmetic we have a rounding differences which are large or equal to the
 	machine precision eps = 2.2...e-16. To have an escape if fabs (current - previous) e<= eps we choose
-	NUMeps just a little larger than eps. 
+	NUMeps just a little larger than eps.
 */
 #define NUMeps 2.3e-16
 

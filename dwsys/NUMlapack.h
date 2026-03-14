@@ -2,7 +2,7 @@
 #define _NUMlapack_h_
 /* NUMlapack.h
  *
- * Copyright (C) 2020-2024 David Weenink
+ * Copyright (C) 2020-2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -749,12 +749,12 @@ static inline int NUMlapack_dhseqr_ (const char *job, const char *compz, integer
 
 static inline int NUMlapack_dstevr (const char *jobz, const char *range, integer n,
 	double inout_d [], double inout_e [], double vl, double vu, integer il, integer iu,
-	double abstol, integer *numberOfEigenvaluesFound, double eigenvaluesFound [],
+	double abstol, integer *numberOfEigenvaluesFound, double inout_eigenvalues [],
 	double out_eigenvectors [], integer ldz, integer isuppz [], double work [],
 	integer lwork, integer iwork [], integer liwork, integer *info)
 {
 	return dstevr_ (jobz, range, & n, inout_d, inout_e, & vl, & vu, & il, & iu, & abstol, numberOfEigenvaluesFound,
-		eigenvaluesFound, out_eigenvectors, & ldz, isuppz, work, 
+		inout_eigenvalues, out_eigenvectors, & ldz, isuppz, work, 
 		& lwork, iwork,  & liwork, info);
 }
 /*

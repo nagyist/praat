@@ -2,7 +2,7 @@
 #define _NUMcomplex_h_
 /* NUMcomplex.h
  *
- * Copyright (C) 2017-2020 David Weenink
+ * Copyright (C) 2017-2020, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
  */
 
 #include "NUM2.h"
+
+void NUMextrema (constCOMPVEC const& v, double *min_re, double *max_re, double *min_im, double *max_im);
 
 /* Gamma [alpha,x] = integral{x, infty, t^(alpha-1)exp(-t)dt}, Gamma [alpha]= Gamma [alpha,0]
  * alpha and x are complex numbers with Re(alpha) > 0

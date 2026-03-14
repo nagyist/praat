@@ -18,18 +18,32 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+	Eigen represents the eigenvalues and eigenvectors of a square matrix.
+	If the matrix is symmetric, the eigenvalues and corresponding eigenvectors
+	are sorted in descending order.
+ */
+
 #include "Collection.h"
-#include "Graphics.h"
 
 #include "Eigen_def.h"
+#include "Graphics.h"
 
-autoEigen Eigen_create (integer numberOfEigenvalues, integer dimension);
+#include "MAT_numerics.h"
 
 void Eigen_init (Eigen me, integer numberOfEigenvalues, integer dimension);
 
+void Eigen_initImaginaryParts (Eigen me);
+
+autoEigen Eigen_create (integer numberOfEigenvalues, integer dimension);
+
+autoEigen Eigen_createFromSquareRoot (constMATVU const& mat, integer numberOfEigenvalues);
+
+autoEigen Eigen_createFromMAT (constMAT const& mat, kMAT_TYPE matType, integer numberOfEigenvalues);
+
 void Eigen_initFromSymmetricMatrix (Eigen me, constMATVU const& a);
 
-void Eigen_initFromSymmetricTridiagonal (Eigen, constVEC const& diagonal, constVEC const& offDiagonal);
+void Eigen_fromSymmetricTridiagonal (Eigen, constVEC const& diagonal, constVEC const& offDiagonal);
 
 void Eigen_initFromSquareRoot (Eigen me, constMATVU const& a);
 /*
@@ -62,12 +76,19 @@ autoVEC Eigen_getEigenvector (Eigen me, integer ivec);
 double Eigen_getSumOfEigenvalues (Eigen me, integer from, integer to);
 
 
-void Eigen_sort (Eigen me);
+void Eigen_sort (Eigen me, bool sortAscending);
 /*
-	Sort eigenvalues and corresponding eigenvectors in decreasing order.
+	Sort eigenvalues and corresponding eigenvectors.
+	All eigenvalues have to be real!
 */
 
-void Eigen_invertEigenvector (Eigen me, integer ivec);
+void Eigen_sort_special (Eigen me, bool sortAscending);
+/*
+	Precondition: eigenvalues are sorted.
+	Postcondition: eigenvalues are ascending or descending.
+*/
+
+void Eigen_invertEigenvector (Eigen me, integer ivec); // TODO djmw complex?
 
 void Eigen_drawEigenvalues (Eigen me, Graphics g, integer first, integer last, double ymin, double ymax,
 	bool fractionOfTotal, bool cumulative, double size_mm, conststring32 mark, bool garnish);
@@ -86,7 +107,7 @@ void Eigens_alignEigenvectors (OrderedOf<structEigen>* me);
 
 double Eigens_getAngleBetweenEigenplanes_degrees (Eigen me, Eigen thee);
 /*
-	Get angle between the eigenplanes, spanned by the first two eigenvectors, .
+	Get angle between the eigenplanes, spanned by the first two eigenvectors.
 */
 
 #endif /* _Eigen_h_ */

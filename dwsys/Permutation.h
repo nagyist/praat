@@ -2,7 +2,7 @@
 #define _Permutation_h_
 /* Permutation.h
  *
- * Copyright (C) 2005-2022, 2025 David Weenink
+ * Copyright (C) 2005-2022, 2025-2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ void Permutation_sort (Permutation me);
 integer Permutation_getNumberOfInversions (Permutation me);
 /*
 	Count the number of times when i < j && p [i] >  p [j].
-	E.g. {1,2,3} -> 0 iversions; {3,2,1} -> 3; {1,3,2} -> 1.
+	E.g. {1,2,3} -> 0 inversions; {3,2,1} -> 3; {1,3,2} -> 1 inversion.
  */
 
 autoINTVEC Permutation_getRandomInversionIndices (Permutation me, integer maxNumberOfRandomInversions);
