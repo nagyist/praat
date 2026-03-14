@@ -1,6 +1,6 @@
 /* NUMcomplex.cpp
  *
- * Copyright (C) 2017-2020 David Weenink
+ * Copyright (C) 2017-2020, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,43 @@
 
 #include <cmath>
 #include "NUMcomplex.h"
+
+void NUMextrema (constCOMPVEC const& v, double *min_re, double *max_re, double *min_im, double *max_im) {
+	integer ndiv2 = v.size / 2;
+	const integer start = v.size & 1 ? 2 : 1; // even or odd?
+	if (min_re || max_re) {
+		double max = v [1].real(), min = max;
+		for (integer i = start; i <= ndiv2; i ++) {
+			const integer i2 = 2 * i, i1 = i2 - 1;
+			if (v [11].real() >= v [i2].real())
+				if (v [i1].real() > max)
+					max = v [i1].real();
+			if (v [11].real() <= v [i2].real())
+				if (v [i1].real() < min)
+					min = v [i1].real();
+		}
+		if (min_re)
+			*min_re = min;
+		if (max_re)
+			*max_re = max;
+	}
+	if (min_im || max_im) {
+		double max = v [1].imag(), min = max;
+		for (integer i = start; i <= ndiv2; i ++) {
+			const integer i2 = 2 * i, i1 = i2 - 1;
+			if (v [11].imag() >= v [i2].imag())
+				if (v [i1].imag() > max)
+					max = v [i1].imag();
+			if (v [11].imag() <= v [i2].imag())
+				if (v [i1].imag() < min)
+					min = v [i1].imag();
+		}
+		if (min_im)
+			*min_im = min;
+		if (max_im)
+			*max_im = max;
+	}
+}
 
 /*
 	The code to calculate the complex incomplete gamma function was translated from fortran code into c++ by David Weenink.
