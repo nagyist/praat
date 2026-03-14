@@ -1,7 +1,7 @@
 #pragma once
 /* MAT_numerics.h
  *
- * Copyright (C) 2018-2019 David Weenink
+ * Copyright (C) 2018-2019, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,12 @@
  */
 
 #include "melder.h"
+#include "MATTypes_enums.h"
+#include "Eigen.h"
+
+autoEigen MAT_to_Eigen (constMAT const& mat, kMAT_TYPE matType, integer numberOfEigenvalues);
+
+void MAT_into_Eigen (constMAT const& mat, kMAT_TYPE matType, Eigen me);
 
 void MAT_getEigenSystemFromSymmetricMatrix (constMAT a, autoMAT *out_eigenvectors, autoVEC *out_eigenvalues, bool sortAscending);
 /*

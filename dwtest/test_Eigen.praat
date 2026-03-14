@@ -1,18 +1,38 @@
 # test_Eigen.praat
-# djmw 20161116, 20180829, 20210609
+# djmw 20161116, 20180829, 20210609, 20260314
 
 appendInfoLine: "test_Eigen.praat"
 
+@testOlderFormats
+include readingAndWritingOfObjects.praat
+@testReadAndWrite
+
 @testInterface
 eps = 1e-7
+@testDiagonals: 10
 
-for i to 10
-	@testDiagonal: i
-endfor
 
 @test2by2
 @test3by3
 @testgeneralSquare
+
+procedure testOlderFormats
+	appendInfo: tab$, "test older formats:"
+	.eigen = Read from file: "3x3s_version0.Eigen"
+	.eigenvalues# = {11, 2, 1}
+	.eigenvectors## = {{0, 0.4472135954999579,0.8944271909999159},
+		... {1, 0, 0},
+		... {0, -0.8944271909999159, 0.4472135954999579}}
+	@testeigen: .eigen, 3, .eigenvalues#, .eigenvectors##, 1e-10
+	removeObject: .eigen
+	appendInfoLine: " OK" 
+endproc
+
+procedure testReadAndWrite
+	.eigen = Read from file: "3x3s_version0.Eigen"
+	@testReadingAndWritingOfObject: .eigen, "Eigen",
+	removeObject: .eigen
+endproc
 
 procedure appendInterfaceName: .i, .text$
 	if  .i = 1
@@ -21,7 +41,7 @@ procedure appendInterfaceName: .i, .text$
 endproc
 
 procedure testInterface
-	appendInfoLine: tab$, "interface test"
+	appendInfoLine: tab$, "interface test:"
 	for .i to 5
 		.numberOfColumns = randomInteger (3, 12)
 		.tableofreal = Create TableOfReal: "t", 100, .numberOfColumns
@@ -66,7 +86,7 @@ procedure testInterface
 		endfor
 		removeObject: .tableofreal, .pca, .eigen
 	endfor
-	appendInfoLine: tab$, "interface test OK"
+	appendInfoLine: tab$, "interface test: OK"
 endproc
 
 procedure assertApproximatelyEqual: .val1, .val2, .eps, .comment$
@@ -82,63 +102,60 @@ endproc
 
 procedure test2by2
 	.dim = 2
-	.mat = Create simple Matrix: "2x2s", .dim, .dim, "1"
-	Set value: 1, 1, 2
-	Set value: 2, 2, 2
+	.mat## = {{2, 1},
+	...			  {1, 2}}
+	.mat = Create simple Matrix: "2x2s", .dim, .dim, ~ .mat##[row,col]
 	.eigenvalues# = {3, 1}
-# 20180829 clumsy because we cannot yet do mat##={{},{}}
-	.eigenvec1# = {1/sqrt (2), 1/sqrt (2)}
-	.eigenvec2# = {-1/sqrt (2), 1/sqrt (2)}
-	.eigenvectors## = zero## (.dim, .dim)
-	for .j to .dim
-		.eigenvectors## [1, .j] = .eigenvec1# [.j]
-		.eigenvectors## [2, .j] = .eigenvec2# [.j]
-	endfor
+	.eigenvectors## = {{ 1/sqrt (2), 1/sqrt (2)},
+		...						   {-1/sqrt (2), 1/sqrt (2)}}
 	.eigen = To Eigen
-	appendInfoLine: tab$, "2x2 symmetrical"
-	@testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##
+	appendInfo: tab$, "2x2 symmetrical"
+	@testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##, eps
+	appendInfoLine: " OK"
 	removeObject: .mat, .eigen
 endproc
 
-procedure testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##
+procedure testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##, .eps
 	selectObject: .eigen
 	.numberOfEigenvalues = Get number of eigenvalues
 	assert .numberOfEigenvalues == .dim
 	for .i to .dim
 		.eval = Get eigenvalue: .i
 		.comment$ = string$ (.dim) + " eigenvalue" + string$ (.i)
-		@assertApproximatelyEqual: .eval, .eigenvalues# [.i], eps, .comment$
+		@assertApproximatelyEqual: .eval, .eigenvalues# [.i], .eps, .comment$
 		for .j to .dim
 			.evecj = Get eigenvector element: .i, .j
 			.comment$ = "eigenvector[" + string$ (.i) + "] [" +string$ (.j) + "]"
 			.val = .eigenvectors## [.i,.j]
-			@assertApproximatelyEqual: .evecj, .val, eps, .comment$
+			@assertApproximatelyEqual: .evecj, .val, .eps, .comment$
 		endfor
 	endfor
 endproc
 
 procedure test3by3
 	.dim = 3
-	.mat = Create simple Matrix: "3x3s", .dim, .dim, "0"
-	Set value: 1, 1, 2
-	Set value: 2, 2, 3
-	Set value: 2, 3, 4
-	Set value: 3, 2, 4
-	Set value: 3, 3, 9
+	.mat## = {{2, 0, 0},
+		...		  {0, 3, 4},
+		...		  {0, 4, 9}}
+	.mat = Create simple Matrix: "3x3s", .dim, .dim, ~ .mat##[row,col]
 	.eigenvalues# = {11, 2 , 1}
-	.eigenvec1# = {0, 1/sqrt (5), 2/sqrt (5)}
-	.eigenvec2# = {1, 0, 0}
-	.eigenvec3# = {0, -2/sqrt (5), 1/sqrt (5)}
-	.eigenvectors## = zero## (.dim, .dim)
-	for .j to .dim
-		.eigenvectors## [1, .j] = .eigenvec1# [.j]
-		.eigenvectors## [2, .j] = .eigenvec2# [.j]
-		.eigenvectors## [3, .j] = .eigenvec3# [.j]
-	endfor
+	.eigenvectors## = {{0, 1/sqrt (5), 2/sqrt (5)},
+		... 						 {1,          0,          0},
+		...							 {0, -2/sqrt (5), 1/sqrt (5)}}
 	.eigen = To Eigen
-	appendInfoLine: tab$, "3x3 symmetrical"
-	@testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##
+	appendInfo: tab$, "3x3 symmetrical: eigenvalues and eigenvectors:"
+	@testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##, 1e-10
+	appendInfoLine: " OK"
 	removeObject: .mat, .eigen
+endproc
+
+procedure testDiagonals: .maxdim
+	.text$ = tab$ + "test diagonals from 1 to " + string$ (.maxdim) + ":"
+	appendInfoLine: .text$
+	for .i to .maxdim
+		@testDiagonal: .i
+	endfor
+	appendInfoLine: .text$ + " OK"
 endproc
 
 procedure diagonalData: .dim
@@ -158,19 +175,21 @@ procedure testDiagonal: .dim
 	@diagonalData: .dim
 	.matname$ = selected$ ("Matrix")
 	.eigen = To Eigen
-	appendInfoLine: tab$, .matname$ +" diagonal"
-	@testeigen: .eigen, .dim, diagonalData.eigenvalues#, diagonalData.eigenvectors##
+	appendInfo: tab$, tab$, .matname$ +" diagonal"
+	@testeigen: .eigen, .dim, diagonalData.eigenvalues#, diagonalData.eigenvectors##, eps
 	removeObject: .eigen, diagonalData.mat
+	appendInfoLine: " OK"
 endproc
 
 procedure testgeneralSquare
-	appendInfoLine: tab$, "3x3 general "
+	appendInfo: tab$, "3x3 general "
 	.dim = 3
 	.name$ = "3x3square"
-	.mat = Create simple Matrix: .name$, .dim, .dim, "0"
-	Set value: 1, 2, 1
-	Set value: 2, 3, 1
-	Set value: 3, 1, 1
+	.mat## = {{0, 1, 0},
+		...			{0, 0, 1},
+		...			{1, 0, 0}}
+	.mat = Create simple Matrix: .name$, .dim, .dim, ~ .mat## [row,col]
+	# one of the eigenvalues is real (1) the other two are complex
 	.given_re# = {1, -1/2, -1/2}
 	.given_im# = {0, 0.5*sqrt(3), -0.5*sqrt(3)}
 	Eigen (complex)
@@ -180,8 +199,8 @@ procedure testgeneralSquare
 	.nrow = Get number of rows
 	assert .nrow = 3
 	# lite version of equality: check for occurrence
-	# the eigenvalues of a real square matrix are not "sorted". We only know that complex conjugate eigenvalues
-	# have the one with positive imaginary part first.
+	# the eigenvalues of a real square matrix are not "sorted". We only know that complex conjugate 
+	# eigenvalues have the one with positive imaginary part first.
 	.eval_re# = {object [.eigenvalues, 1, 1], object [.eigenvalues, 2, 1],object [.eigenvalues, 3, 1]}
 	.eval_im# = {object [.eigenvalues, 1, 2], object [.eigenvalues, 2, 2],object [.eigenvalues, 3, 2]}
 	if .eval_re# [1] > 1-eps and .eval_re# [1] < 1+eps
@@ -196,6 +215,77 @@ procedure testgeneralSquare
 	.ncol = Get number of columns
 	assert .ncol = 6	
 	removeObject: .mat, .eigenvectors, .eigenvalues
+	appendInfoLine: " OK"
+endproc
+
+procedure testWNKMatrices
+	.test$ = "test W__n_(k) matrices"
+	appendInfoLine: tab$, .test$
+	for .n from 6 to 20
+			@testEigenvaluesOfOneWNKMatrix: .n
+	endfor
+	appendInfoLine: tab$, .test$, " OK"
+endproc
+
+procedure testEigenvaluesOfOneWNKMatrix: .n
+	# The special symmetric tridiagonal nxn matrices W__n_[k] are defined as
+	# W__n_[k]: diagonal [i]      = k,                   i = 1,...,n
+	#           offDiagonal [i]   = sqrt(i*(2*n-1-i)/4), i = 1,...,n-2
+	#           offDiagonal [n-1] = sqrt (n*(n-1)/2)
+	# The eigenvalues of W_n_(n+1) are {2*n, ..., 4, 2}.
+	# The eigenvalues of the principal (n-1)x(n-1) submatrix (without last column and row)
+	# are {2*n-1, ..., 5, 3}.
+	# .n = 6
+	.k = .n + 1
+	appendInfo: tab$, tab$, "test W_" + string$(.n) + "(" + string$(.k) + "):"
+	.wn = Create simple Matrix: "Wn", .n, .n, ~ 0.0
+	.bnm1 = sqrt(0.5*.n*(.n-1))
+	Formula: ~ if row = col then .k else 
+	... if row = col+1 then if row < .n then 0.5*sqrt(col*(2*.n-1-col)) else .bnm1 fi else
+	... if col = row+1 then if col < .n then 0.5*sqrt(row*(2*.n-1-row)) else .bnm1 fi else 
+	... 0.0 fi fi fi
+	.wneigen = To Eigen (special): "symmetric tridiagonal", .n
+	for .ival to 	.n
+		.eval = Get eigenvalue: .ival
+		assert abs (.eval / (2 * (.n + 1 -.ival)) - 1.0) < 1.0e-7
+	endfor
+	# Create the principal submatrix
+	.wnps = Create simple Matrix: "Wns", .n-1, .n-1, ~ object[.wn, row, col]
+	.wnpseigen = To Eigen (special): "symmetric tridiagonal", .n-1
+	for .ival to 	.n-1
+		.eval = Get eigenvalue: .ival
+		assert abs (.eval / (2 * (.n + 1 -.ival) - 1) - 1.0) < 1.0e-7
+	endfor
+	removeObject: .wn, .wneigen, .wnps, .wnpseigen
+	appendInfoLine: " OK"
+endproc
+
+procedure testKacSylvesterMatrices
+	.test$ = "test Kac-Sylvester(n) matrices"
+	appendInfoLine: tab$, .test$
+	for .n from 6 to 20
+			@testEigenvaluesOfOneKacSylvesterMatrix: .n
+	endfor
+	appendInfoLine: tab$, .test$, " OK"
+endproc
+
+procedure testEigenvaluesOfOneKacSylvesterMatrix: .n
+	# The (n+1)x(n+1) Kac-Sylvester matrix KS has
+	# KS(n): diagonal[i]       = 0,     for i =1...n+1
+	#        upperDiagonal [i] = n+1-i, for i = 1,...,n
+	#        lowerDiagonal [i] = i,     for i = 1,...,n
+	# The eigenvalues are {2*k-n} for k = 1,...,n
+	# .n = 5
+	appendInfo: tab$, tab$, "test KacSylvester (" + string$(.n) + "):"
+	.ks = Create simple Matrix: "Kn", .n+1, .n+1, ~ 
+	... if row = col+1 then col else
+	... if col = row+1 then .n+1-row else 0 fi fi
+	.eigen = To Eigen (special): "symmetric", .n
+	for .ival to 	.n
+		.eval = Get eigenvalue: .ival
+		assert abs (.eval / (2 * .ival - .n) - 1.0) < 1.0e-7
+	endfor
+	appendInfoLine: " OK"	
 endproc
 
 appendInfoLine: "test_Eigen.praat OK"	
