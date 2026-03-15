@@ -66,6 +66,6 @@ void praat_SpeechRecognizer_init () {
 		praat_addAction1 (classSpeechRecognizer, 1, U"Get language name", nullptr, 1,
 				QUERY_ONE_FOR_STRING__SpeechRecognizer_getLanguageName);
 
-	praat_addAction2 (classSpeechRecognizer, 1, classSound, 1, U"Recognize sound", nullptr, 0,
+	praat_addAction2 (classSpeechRecognizer, 1, classSound, 1, U"Transcribe", nullptr, 0,
 			QUERY_ONE_AND_ONE_FOR_STRING__SpeechRecognizer_Sound_recognize);
 }
