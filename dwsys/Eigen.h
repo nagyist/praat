@@ -77,10 +77,15 @@ integer Eigen_getDimensionOfFraction (Eigen me, double fraction);
 
 double Eigen_getEigenvectorElement (Eigen me, integer ivec, integer element);
 
+autoVEC Eigen_listEigenvalues (Eigen me);
+
 autoVEC Eigen_getEigenvector (Eigen me, integer ivec);
 
 double Eigen_getSumOfEigenvalues (Eigen me, integer from, integer to);
 
+inline bool Eigen_areAllEigenvaluesReal (Eigen me) {
+	return my onlyReals;
+}
 
 void Eigen_sort (Eigen me, bool sortAscending);
 /*

@@ -1244,7 +1244,7 @@ DO
 		Melder_require (eigenvalueNumber <= my eigen -> numberOfEigenvalues, 
 			U"Eigenvalue number should be smaller than ", my eigen -> numberOfEigenvalues + 1);
 		const double result = my eigen -> eigenvalues [eigenvalueNumber];
-	QUERY_ONE_FOR_REAL_END (U" (eigenvalue [)", eigenvalueNumber, U"])")
+	QUERY_ONE_FOR_REAL_END (U" (eigenvalue [", eigenvalueNumber, U"])")
 }
 
 FORM (QUERY_ONE_FOR_REAL__Discriminant_getSumOfEigenvalues, U"Discriminant:Get sum of eigenvalues", U"Eigen: Get sum of eigenvalues...") {
@@ -2287,6 +2287,12 @@ DO
 	QUERY_ONE_FOR_REAL_END (U" (eigenvalue [", eigenvalueNumber, U"])")
 }
 
+DIRECT (QUERY_ONE_FOR_REAL_VECTOR__Eigen_listEigenvalues) {
+	QUERY_ONE_FOR_REAL_VECTOR (Eigen)
+		autoVEC result = Eigen_listEigenvalues (me);
+	QUERY_ONE_FOR_REAL_VECTOR_END
+}
+
 FORM (QUERY_ONE_FOR_REAL__Eigen_getSumOfEigenvalues, U"Eigen: Get sum of eigenvalues", U"Eigen: Get sum of eigenvalues...") {
 	INTEGER (fromEigenvalue, U"left Eigenvalue range",  U"1")
 	INTEGER (toEigenvalue, U"right Eigenvalue range", U"0 (=all)")
@@ -2316,6 +2322,12 @@ DO
 	QUERY_ONE_FOR_REAL_VECTOR (Eigen)
 		autoVEC result = Eigen_getEigenvector (me, eigenvectorNumber);
 	QUERY_ONE_FOR_REAL_VECTOR_END
+}
+
+DIRECT (QUERY_ONE_FOR_BOOLEAN__Eigen_areAllEigenvaluesReal) {
+	QUERY_ONE_FOR_BOOLEAN (Eigen)
+		const integer result = Eigen_areAllEigenvaluesReal (me);
+	QUERY_ONE_FOR_BOOLEAN_END (result ? U" (all eigenvalues are real)" : U" (not all eigenvalues are real)")
 }
 
 FORM (MODIFY_Eigen_invertEigenvector, U"Eigen: Invert eigenvector", nullptr) {
@@ -9648,6 +9660,8 @@ void praat_David_init () {
 			QUERY_ONE_FOR_INTEGER__Eigen_getNumberOfEigenvalues);
 		praat_addAction1 (classEigen, 1, U"Get eigenvalue...", nullptr, 1, 
 				QUERY_ONE_FOR_REAL__Eigen_getEigenvalue);
+		praat_addAction1 (classEigen, 1, U"List eigenvalues", nullptr, 1, 
+				QUERY_ONE_FOR_REAL_VECTOR__Eigen_listEigenvalues);
 		praat_addAction1 (classEigen, 1, U"Get sum of eigenvalues...", nullptr, 1,
 				QUERY_ONE_FOR_REAL__Eigen_getSumOfEigenvalues);
 	praat_addAction1 (classEigen, 1, U"-- eigenvectors --", nullptr, 1, 0);
@@ -9659,6 +9673,8 @@ void praat_David_init () {
 				QUERY_ONE_FOR_REAL__Eigen_getEigenvectorElement);
 		praat_addAction1 (classEigen, 1, U"Get eigenvector...", nullptr, 1,
 				QUERY_ONE_FOR_REAL_VECTOR__Eigen_getEigenvector);
+		praat_addAction1 (classEigen, 1, U"Are all eigenvalues real?", nullptr, 1,
+				QUERY_ONE_FOR_BOOLEAN__Eigen_areAllEigenvaluesReal);
 	praat_addAction1 (classEigen, 0, U"Modify -", nullptr, 0, nullptr);
 		praat_addAction1 (classEigen, 1, U"Invert eigenvector...", nullptr, 1,
 				MODIFY_Eigen_invertEigenvector);
