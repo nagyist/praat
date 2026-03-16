@@ -16,26 +16,6 @@
  * along with this work. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- djmw 20010719
- djmw 20020402 GPL header.
- djmw 20030701 Modified sorting in Eigen_initFromSquareRootPair.
- djmw 20030703 Added Eigens_alignEigenvectors.
- djmw 20030708 Corrected syntax error in Eigens_alignEigenvectors.
- djmw 20030812 Corrected memory bug in Eigen_initFromSymmetricMatrix.
- djmw 20030825 Removed praat_USE_LAPACK external variable.
- djmw 20031101 Documentation
- djmw 20031107 Moved NUMdmatrix_transpose to NUM2.c
- djmw 20031210 Added rowLabels to Eigen_drawEigenvector and Eigen_Strings_drawEigenvector
- djmw 20030322 Extra test in Eigen_initFromSquareRootPair.
- djmw 20040329 Added fractionOfTotal  and cumulative parameters in Eigen_drawEigenvalues_scree.
- djmw 20040622 Less horizontal labels in Eigen_drawEigenvector.
- djmw 20050706 Shortened horizontal offsets in Eigen_drawEigenvalues from 1 to 0.5
- djmw 20051204 Eigen_initFromSquareRoot adapted for nrows < ncols
- djmw 20071012 Added: oo_CAN_WRITE_AS_ENCODING.h
- djmw 20110304 Thing_new
-*/
-
 #include "Eigen.h"
 #include "MAT_numerics.h"
 #include "NUMmachar.h"
@@ -140,7 +120,15 @@ autoEigen Eigen_create (integer numberOfEigenvalues, integer dimension) {
 	}
 }
 
-autoEigen Eigen_createFromMAT (constMAT const& mat, kMAT_TYPE matType, integer numberOfEigenvalues) {
+void Eigen_initFromSquareMAT (Eigen me, constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues) {
+	Melder_assert (mat.nrow == mat.ncol);
+	Melder_assert (my dimension == mat.ncol);
+	Melder_assert (numberOfEigenvalues >=1 && numberOfEigenvalues <= mat.nrow);
+	Eigen_init (me, numberOfEigenvalues, mat.ncol);
+	MAT_into_Eigen (mat, matType, me);
+}
+
+autoEigen Eigen_createFromSquareMAT (constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues) {
 	try {
 		const integer dimension = mat.ncol;
 		Melder_require (mat.nrow == dimension,
@@ -149,8 +137,8 @@ autoEigen Eigen_createFromMAT (constMAT const& mat, kMAT_TYPE matType, integer n
 			numberOfEigenvalues = dimension;
 		Melder_require (numberOfEigenvalues <= dimension,
 			U"The number of eigenvalues is too large. It should be in the interval from 1 to ", dimension, U".");
-		autoEigen me = Eigen_create (numberOfEigenvalues, dimension);
-		MAT_into_Eigen (mat, matType, me.get());
+		autoEigen me = Thing_new (Eigen);
+		Eigen_initFromSquareMAT (me.get(), mat, matType, numberOfEigenvalues);
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"Cannot create Eigen from ", kMAT_TYPE_getText (matType), U" matrix.");
@@ -331,6 +319,14 @@ double Eigen_getEigenvectorElement (Eigen me, integer ivec, integer element) {
 	return my eigenvectors [ivec] [element];
 }
 
+autoVEC Eigen_listEigenvalues (Eigen me) {
+	try {
+		return copy_VEC (my eigenvalues.get());
+	} catch (MelderError) {
+		Melder_throw (me, U": cannot list eigenvalues.");
+	}
+}
+
 autoVEC Eigen_getEigenvector (Eigen me, integer ivec) {
 	try {
 		Melder_require (ivec >= 1 and ivec <= my numberOfEigenvalues,
@@ -348,9 +344,9 @@ autoCOMPVEC Eigen_getEigenvector_complex (Eigen me, integer ivec) {
 			U"The eigenvector number should be in the interval from 1 to ", my numberOfEigenvalues, U".");
 		autoCOMPVEC eigenvector = zero_COMPVEC (my dimension);
 		for (integer i = 1; i <= my dimension; i ++) {
-			eigenvector [i].real(my eigenvectors [ivec] [i]);
+			eigenvector [i].real (my eigenvectors [ivec] [i]);
 			if (! my onlyReals)
-				eigenvector [i].imag(my eigenvectors_im [ivec] [i]);
+				eigenvector [i].imag (my eigenvectors_im [ivec] [i]);
 		}
 		return eigenvector;
 	} catch (MelderError) {

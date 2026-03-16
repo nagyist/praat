@@ -550,7 +550,8 @@ autoEigen Matrix_to_Eigen_special (Matrix me, kMAT_TYPE matType, integer numberO
 		U"The number of rows and the number of columns should be equal.");
 	if (numberOfEigenvalues < 1 || numberOfEigenvalues > my ny)
 		numberOfEigenvalues = my ny;
-	return MAT_to_Eigen (my z.get(), matType, numberOfEigenvalues);
+	autoEigen eigen = Eigen_createFromSquareMAT  (my z.get(), matType, numberOfEigenvalues);
+	return eigen;
 }
 
 void Matrix_Eigen_complex (Matrix me, autoMatrix *out_eigenvectors, autoMatrix *out_eigenvalues) {

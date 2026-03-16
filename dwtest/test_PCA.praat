@@ -3,15 +3,18 @@
 
 appendInfoLine: "test_PCA.praat"
 
+@testOlderFormats
+
 call test_pca_simple
 @test_projections
-@testOlderFormats
 
 appendInfoLine: "test_PCA.praat OK"
 
 procedure testOlderFormats
-	appendInfo: tab$, "test older formats"
-	.pca = Read from file: "pols1973_version0.PCA"
+	.test$ = tab$ + "test older PCA formats:"
+	appendInfoLine: .test$
+	appendInfo: tab$, tab$, "format 0:"
+	.pca = Read from file: "pols1973_format0.PCA"
 	.n = Get number of eigenvectors
 	.evals# = {239588.24623428631, 65532.75420378206, 18892.8604411748}
 	assert .n = 3
@@ -21,7 +24,8 @@ procedure testOlderFormats
 		assert .r < 1e-10
 	endfor
 	removeObject: .pca
-	appendInfoLine: " OK" 	
+	appendInfoLine: " OK"
+	appendInfoLine: .test$ + " OK" 	
 endproc
 
 procedure create_reference_TableOfReal 

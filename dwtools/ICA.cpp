@@ -1,6 +1,6 @@
 /* ICA.cpp
  *
- * Copyright (C) 2010-2023 David Weenink
+ * Copyright (C) 2010-2023, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -210,7 +210,7 @@ static void Diagonalizer_CrossCorrelationTable_qdiag (Diagonalizer me, CrossCorr
 		const CrossCorrelationTable c0 = thy at [1];
 		const integer dimension = c0 -> numberOfColumns;
 
-		autoEigen eigen = Thing_new (Eigen);
+		autoEigen eigen = Eigen_createFromSquareMAT (c0 -> data.get(), kMAT_TYPE::SYMMETRIC, dimension);
 		autoCrossCorrelationTableList ccts = Data_copy (thee);
 		autoMAT d = zero_MAT (dimension, dimension);
 		autoMAT pinv = raw_MAT (dimension, dimension);
@@ -230,7 +230,6 @@ static void Diagonalizer_CrossCorrelationTable_qdiag (Diagonalizer me, CrossCorr
 		// scale eigenvectors for sphering
 		// [vb,db] = eig(C0);
 		// P = db^(-1/2)*vb';
-		Eigen_initFromSymmetricMatrix (eigen.get(), c0 -> data.get());
 		
 		for (integer i = 1; i <= dimension; i ++) {
 			Melder_require (eigen -> eigenvalues [i] >= 0.0,
@@ -277,9 +276,9 @@ static void Diagonalizer_CrossCorrelationTable_qdiag (Diagonalizer me, CrossCorr
 
 					update_one_column (ccts.get(), d.get(), cweights, wvec.get(), -1.0, mvec.get());
 
-					Eigen_initFromSymmetricMatrix (eigen.get(), d.get());
+					MAT_into_Eigen (d.get(), kMAT_TYPE::SYMMETRIC, eigen.get());
 
-					// Eigenvalues already sorted; get eigenvector of smallest !
+					// Eigenvalues sorted from high to low; get eigenvector of smallest !
 					wnew.all()  <<=  eigen -> eigenvectors.row (dimension);
 
 					update_one_column (ccts.get(), d.get(), cweights, wnew.get(), 1.0, mvec.get());

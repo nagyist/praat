@@ -1,6 +1,6 @@
 /* Discriminant.cpp
  *
- * Copyright (C) 1993-2019 David Weenink
+ * Copyright (C) 1993-2019, 2026 David Weenink
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@
 #include "oo_DESCRIPTION.h"
 #include "Discriminant_def.h"
 
-Thing_implement (Discriminant, Daata, 1);
+Thing_implement (Discriminant, Daata, 2);
 
 void structDiscriminant :: v1_info () {
 	structDaata :: v1_info ();
