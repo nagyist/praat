@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# generate/silero/convert-silero-vad-to-ggml.sh
+# Anastasia Shchupak, 16 March 2026
+#
+# Shell script that installs an original Silero VAD v6.2.0 model and converts it to GGML binary format,
+# using the python script convert-silero-vad-to-ggml.py.
+#
+# Usage: convert-silero-vad-to-ggml.sh <silero-vad-version>
+# Example: convert-silero-vad-to-ggml.sh v6.2.0
+
 set -e  # stop if any command fails
 
 # check if a version is provided
