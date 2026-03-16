@@ -126,10 +126,10 @@ void PCA_getEqualityOfEigenvalues (PCA me, integer from, integer to, int conserv
 }
 
 /* the low level routines 
- * 
+ *
  * The matrix M [numberOfRows, numberOfColumns] is interpreted as 'numberOfRows' vectors of dimension 'numberOfColumns'
  * The eigenstructure of the M'M will be calculated
- * 
+ *
  */
 
 autoEigen PCA_to_Eigen (PCA me) {
