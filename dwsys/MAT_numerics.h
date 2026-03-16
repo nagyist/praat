@@ -21,9 +21,7 @@
 #include "MATTypes_enums.h"
 #include "Eigen.h"
 
-autoEigen MAT_to_Eigen (constMAT const& mat, kMAT_TYPE matType, integer numberOfEigenvalues);
-
-void MAT_into_Eigen (constMAT const& mat, kMAT_TYPE matType, Eigen me);
+void MAT_into_Eigen (constMATVU const& mat, kMAT_TYPE matType, Eigen me);
 
 void MAT_getEigenSystemFromSymmetricMatrix (constMAT a, autoMAT *out_eigenvectors, autoVEC *out_eigenvalues, bool sortAscending);
 /*

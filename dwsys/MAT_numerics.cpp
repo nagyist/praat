@@ -98,8 +98,7 @@ void squareRoot_into_Eigen (MAT const& mat, Eigen me) {
 	
 }
 
-
-void MAT_into_Eigen (constMAT const& mat, kMAT_TYPE matType, Eigen me) {
+void MAT_into_Eigen (constMATVU const& mat, kMAT_TYPE matType, Eigen me) {
 	Melder_assert (mat.nrow == mat.ncol);
 	Melder_assert (my dimension == mat.ncol);
 	try {
