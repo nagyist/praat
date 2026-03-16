@@ -25,6 +25,7 @@ void manual_spectrum_init (ManPages me);
 void manual_formant_init (ManPages me);
 void manual_pointProcess_init (ManPages me);
 void manual_annotation_init (ManPages me);
+void manual_SpeechRecognizer_init (ManPages me);
 
 void manual_Fon_init (ManPages me);
 void manual_Fon_init (ManPages me) {
@@ -36,6 +37,7 @@ manual_spectrum_init (me);
 manual_formant_init (me);
 manual_pointProcess_init (me);
 manual_annotation_init (me);
+manual_SpeechRecognizer_init (me);
 
 
 MAN_PAGES_BEGIN

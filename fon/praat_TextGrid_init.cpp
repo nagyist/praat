@@ -555,7 +555,7 @@ DIRECT (MODIFY_TextGrid_Sound_scaleTimes) {
 	MODIFY_FIRST_OF_ONE_AND_ONE_END
 }
 
-FORM (MODIFY_TextGrid_Sound_transcribeInterval, U"TextGrid & Sound: Transcribe interval", nullptr) {
+FORM (MODIFY_TextGrid_Sound_transcribeInterval, U"TextGrid & Sound: Transcribe interval", U"TextGrid & Sound: Transcribe interval") {
 	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
 	NATURAL (intervalNumber, STRING_INTERVAL_NUMBER, U"1")
 	BOOLEAN (includeWords, U"Include words", true)

@@ -4448,9 +4448,6 @@ INTRO (U"An old command; the same as @@Sound: To TextGrid (speech activity, LTSF
 NORMAL (U"The name changed in Praat 6.4.62, because there is also @@Sound: To TextGrid (speech activity, Silero)...@.")
 MAN_END
 
-MAN_BEGIN (U"Sound: To TextGrid (speech activity, Silero)...", U"djmw", 20260313)
-INTRO (U"This page will be available in Praat 6.4.63.")
-MAN_END
 
 MAN_BEGIN (U"Sound: To TextGrid (speech activity, LTSF)...", U"djmw", 20231209)
 INTRO (U"A command that creates a @@TextGrid@ for the selected @@Sound@ in which the non-speech intervals and the "
