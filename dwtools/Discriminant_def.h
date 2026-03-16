@@ -19,9 +19,7 @@
 
 #define ooSTRUCT Discriminant
 oo_DEFINE_CLASS (Discriminant, Daata)
-	oo_FROM (1)
-		oo_OBJECT (Eigen, 0, eigen)
-	oo_ENDFROM
+
 	#if oo_READING
 		oo_VERSION_UNTIL (1)
 			eigen = Thing_new (Eigen);
@@ -29,7 +27,14 @@ oo_DEFINE_CLASS (Discriminant, Daata)
 			oo_INTEGER (eigen -> dimension)
 			oo_VEC (eigen -> eigenvalues, eigen -> numberOfEigenvalues)
 			oo_MAT (eigen -> eigenvectors, eigen -> numberOfEigenvalues, eigen -> dimension)
+			eigen -> onlyReals = true;
+		oo_VERSION_ELSE_UNTIL (2)
+			oo_OBJECT (Eigen, 0, eigen)
+		oo_VERSION_ELSE
+			oo_OBJECT (Eigen, 1, eigen)
 		oo_VERSION_END
+	#else
+		oo_OBJECT (Eigen, 1, eigen)
 	#endif
 
 	oo_INTEGER (numberOfGroups)
@@ -45,5 +50,6 @@ oo_DEFINE_CLASS (Discriminant, Daata)
 
 oo_END_CLASS (Discriminant)	
 #undef ooSTRUCT
+
 
 /* End of file Discriminant_def.h */	

@@ -13,7 +13,7 @@ appendInfoLine: "test_CCA.praat: OK"
 
 procedure testOlderFormats
 	appendInfo: tab$, "test older formats:"
-	.cca = Read from file: "pols1973_version0.CCA"
+	.cca = Read from file: "pols1973_format0.CCA"
 	.numberOfCoefficients = 3
 	.numberOfCorrelation = 3
 	.numberOfObservations = 600

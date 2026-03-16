@@ -1,7 +1,7 @@
 # test_Eigen.praat
 # djmw 20161116, 20180829, 20210609, 20260314
 
-appendInfoLine: "test_Eigen.praat"
+appendInfoLine: "test_Eigen.praat:"
 
 @testOlderFormats
 include readingAndWritingOfObjects.praat
@@ -11,25 +11,32 @@ include readingAndWritingOfObjects.praat
 eps = 1e-7
 @testDiagonals: 10
 
-
 @test2by2
 @test3by3
 @testgeneralSquare
 
+appendInfoLine: "test_Eigen.praat: OK"	
+
 procedure testOlderFormats
-	appendInfo: tab$, "test older formats:"
-	.eigen = Read from file: "3x3s_version0.Eigen"
+	.test$ = tab$ + "test older formats:"
+	appendInfoLine: .test$
+
+	appendInfo: tab$, tab$, "format 0:"
+	.eigen = Read from file: "3x3s_format0.Eigen"
 	.eigenvalues# = {11, 2, 1}
 	.eigenvectors## = {{0, 0.4472135954999579,0.8944271909999159},
 		... {1, 0, 0},
 		... {0, -0.8944271909999159, 0.4472135954999579}}
 	@testeigen: .eigen, 3, .eigenvalues#, .eigenvectors##, 1e-10
 	removeObject: .eigen
-	appendInfoLine: " OK" 
+	appendInfoLine: " OK"
+
+	appendInfoLine: .test$ + " OK"
+
 endproc
 
 procedure testReadAndWrite
-	.eigen = Read from file: "3x3s_version0.Eigen"
+	.eigen = Read from file: "3x3s_format0.Eigen"
 	@testReadingAndWritingOfObject: .eigen, "Eigen",
 	removeObject: .eigen
 endproc
@@ -287,6 +294,4 @@ procedure testEigenvaluesOfOneKacSylvesterMatrix: .n
 	endfor
 	appendInfoLine: " OK"	
 endproc
-
-appendInfoLine: "test_Eigen.praat OK"	
 
