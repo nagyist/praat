@@ -1,0 +1,57 @@
+File type = "ooTextFile"
+Object class = "CCA"
+
+numberOfCoefficients = 3 
+numberOfObservations = 600 
+yLabels? <exists> 
+numberOfStrings = 3 
+strings []: 
+    strings [1] = "F1" 
+    strings [2] = "F2" 
+    strings [3] = "F3" 
+xLabels? <exists> 
+numberOfStrings = 3 
+strings []: 
+    strings [1] = "L1" 
+    strings [2] = "L2" 
+    strings [3] = "L3" 
+y? <exists> 
+numberOfEigenvalues = 3 
+dimension = 3 
+eigenvalues []: 
+    eigenvalues [1] = 0.7393986722343528 
+    eigenvalues [2] = 0.2824835479782281 
+    eigenvalues [3] = 0.004919960158429784 
+eigenvectors [] []: 
+    eigenvectors [1]:
+        eigenvectors [1] [1] = 0.3155152007563197 
+        eigenvectors [1] [2] = -0.8697738275229139 
+        eigenvectors [1] [3] = 0.379399060420344 
+    eigenvectors [2]:
+        eigenvectors [2] [1] = -0.9837631163897218 
+        eigenvectors [2] [2] = -0.15631923156932576 
+        eigenvectors [2] [3] = 0.08817272068365749 
+    eigenvectors [3]:
+        eigenvectors [3] [1] = 0.26449262646305166 
+        eigenvectors [3] [2] = 0.009934374714488691 
+        eigenvectors [3] [3] = -0.9643365381160817 
+x? <exists> 
+numberOfEigenvalues = 3 
+dimension = 3 
+eigenvalues []: 
+    eigenvalues [1] = 0.7393986722343528 
+    eigenvalues [2] = 0.2824835479782281 
+    eigenvalues [3] = 0.004919960158429784 
+eigenvectors [] []: 
+    eigenvectors [1]:
+        eigenvectors [1] [1] = 0.22304360144463128 
+        eigenvectors [1] [2] = -0.7407387645509602 
+        eigenvectors [1] [3] = 0.6336857537818926 
+    eigenvectors [2]:
+        eigenvectors [2] [1] = -0.9115297876705033 
+        eigenvectors [2] [2] = 0.23629304872671428 
+        eigenvectors [2] [3] = 0.33656951928658313 
+    eigenvectors [3]:
+        eigenvectors [3] [1] = -0.9324448545680767 
+        eigenvectors [3] [2] = -0.3153098751372484 
+        eigenvectors [3] [3] = -0.17642640343908605 

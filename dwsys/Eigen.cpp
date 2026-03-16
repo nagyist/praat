@@ -319,6 +319,14 @@ double Eigen_getEigenvectorElement (Eigen me, integer ivec, integer element) {
 	return my eigenvectors [ivec] [element];
 }
 
+autoVEC Eigen_listEigenvalues (Eigen me) {
+	try {
+		return copy_VEC (my eigenvalues.get());
+	} catch (MelderError) {
+		Melder_throw (me, U": cannot list eigenvalues.");
+	}
+}
+
 autoVEC Eigen_getEigenvector (Eigen me, integer ivec) {
 	try {
 		Melder_require (ivec >= 1 and ivec <= my numberOfEigenvalues,
