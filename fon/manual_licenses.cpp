@@ -77,8 +77,10 @@ We included the following freely available software libraries in Praat (sometime
 , Regular expressions by Henry Spencer, Mark Edel, Christopher Conrad, Eddy De Greef (@@General Public License, version 2|GPL 2@ or later).
 , Unicode Character Database by Unicode Inc., version 16.0 of August 2024 (@@Unicode Inc. license agreement@).
 , Quickselect and Median of ninthers, by Andrei Alexandrescu 2016 (@@Boost Software License 1.0@).
-, GGML (version 0.9.7) and Whisper.cpp (version 1.8.3), by Georgi Gerganov and many others (@@MIT License@),
-	using separately installed Whisper models by OpenAI (also MIT License).
+, GGML (version 0.9.7) and Whisper.cpp (version 1.8.3), by Georgi Gerganov and many others (@@GGML and whisper.cpp MIT License@),
+	using separately installed Whisper models by OpenAI (@@Whisper OpenAI MIT License@).
+, Silero VAD: Voice Activity Detection model (version 6.2.0) by the Silero Team,
+    embedded in GGML format (@@Silero VAD MIT License@).
 
 Our own parts of the source code of Praat are distributed either under the
 @@General Public License, version 2@ or later, or under the @@General Public License, version 3@ or later.
@@ -124,8 +126,8 @@ See @Acknowledgments for details on the licenses of software libraries by others
 that are included in Praat.
 
 ################################################################################
-"MIT License"
-© 2023–2024 the ggml authors; introductory paragraph Paul Boersma 2025
+"GGML and whisper.cpp MIT License"
+© 2023–2024 the ggml authors; introductory paragraph by Paul Boersma 2025
 
 The Praat source code contains a copy of the Whisper.cpp software (see @Acknowledgments).
 Here is its license text:
@@ -153,8 +155,70 @@ Here is its license text:
 	SOFTWARE.
 `
 ################################################################################
+"Whisper OpenAI MIT License"
+© 2022 OpenAI; introductory paragraph by Anastasia Shchupak 2025
+
+Praat uses separately installed Whisper speech recognition models by OpenAI (see @Acknowledgments).
+Whisper.cpp, which is included in Praat, is a C/C++ port of OpenAI's Whisper.
+Here is the OpenAI Whisper license text:
+
+`
+	MIT License
+
+	Copyright (c) 2022 OpenAI
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+`
+################################################################################
+"Silero VAD MIT License"
+© 2020-present Silero Team; introductory paragraph by Anastasia Shchupak 2026
+
+Praat contains an embedded copy of the Silero VAD model for Voice Activity Detection (see @Acknowledgments).
+The original model by the Silero Team was converted to GGML format and embedded as a C data array.
+Here is the Silero VAD license text:
+
+`
+	MIT License
+
+	Copyright (c) 2020-present Silero Team
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+`
+################################################################################
 "FLAC BSD 3-clause license"
-© Xiph.org and others 2001–2016; introductory paragraph Paul Boersma 2021
+© Xiph.org and others 2001–2016; introductory paragraph by Paul Boersma 2021
 
 The Praat source code contains a copy of the FLAC software (see @Acknowledgments).
 Here is the FLAC license text:

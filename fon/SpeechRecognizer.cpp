@@ -200,8 +200,8 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, 
 	params.token_timestamps = true;   // must be true to use t0 and t1 (non-DTW) token timestamps
 	if (useVad) {
 		params.vad = true;   // enable Silero VAD (Voice Activity Detection used to chop away the silences)
-		params.vad_model_data = ggml_silero_v6_2_0_bin;   // set up either params.vad_model_data or params.vad_model_path
-		params.vad_model_data_size = ggml_silero_v6_2_0_bin_len;
+		params.vad_model_data = ggml_silero_bin;   // set up either params.vad_model_data or params.vad_model_path
+		params.vad_model_data_size = ggml_silero_bin_len;
 		params.vad_params = whisper_vad_default_params();
 	}
 	if (whisper_is_multilingual (my whisperContext.get ())) {
@@ -263,7 +263,7 @@ autovector <WhisperSegment> doSileroVad (constSound sound, const double speechPr
 		*/
 		whisper_vad_context_params vad_ctx_params = whisper_vad_default_context_params();
 		autoWhisperVadContext vad_ctx = whisper_vad_init_from_memory_with_params (
-				ggml_silero_v6_2_0_bin, ggml_silero_v6_2_0_bin_len, vad_ctx_params);
+				ggml_silero_bin, ggml_silero_bin_len, vad_ctx_params);
 		if (! vad_ctx.get())
 			Melder_throw (U"Failed to initialize VAD context.");
 

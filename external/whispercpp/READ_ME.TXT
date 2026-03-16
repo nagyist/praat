@@ -210,5 +210,5 @@ The result is `ggml-silero-v6.2.0.bin`, which is a C-compatible binary file, whi
 
 We then convert this binary to a C header using `xxd` and copy it to external/whispercpp directory:
 ```
-xxd -i whisper.cpp/models/ggml-silero-v6.2.0.bin > praat/external/whispercpp/ggml-silero-vad-model-data.h
+xxd -i -n ggml_silero_bin -n whisper.cpp/models/ggml-silero-v6.2.0.bin > praat/external/whispercpp/ggml-silero-vad-model-data.h
 ```
