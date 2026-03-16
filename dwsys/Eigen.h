@@ -21,7 +21,11 @@
 /*
 	Eigen represents the eigenvalues and eigenvectors of a square matrix.
 	If the matrix is symmetric, the eigenvalues and corresponding eigenvectors
-	are sorted in descending order.
+	are real and sorted in descending order.
+	If the square matrix is not symmetric than some of the eigenvalues and
+	eigenvectors are complex. The complex eigenvalues always occur in pairs
+	a + i b and a - i b, where the eigenvalue with the positive imaginary part always
+	occurs before the other one in the list.
  */
 
 #include "Collection.h"
@@ -39,7 +43,9 @@ autoEigen Eigen_create (integer numberOfEigenvalues, integer dimension);
 
 autoEigen Eigen_createFromSquareRoot (constMATVU const& mat, integer numberOfEigenvalues);
 
-autoEigen Eigen_createFromMAT (constMAT const& mat, kMAT_TYPE matType, integer numberOfEigenvalues);
+void Eigen_initFromSquareMAT (Eigen me, constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues);
+autoEigen Eigen_createFromSquareMAT (constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues);
+
 
 void Eigen_initFromSymmetricMatrix (Eigen me, constMATVU const& a);
 
