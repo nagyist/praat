@@ -352,4 +352,17 @@ autoMAT newMATpseudoInverse (constMATVU const& mat, double tolerance) {
 	return result;
 }
 
+autoMAT MAT_createKacSylvester (integer dimension) {
+	try {
+		autoMAT m = zero_MAT (dimension, dimension);
+		for (integer i = 1; i <= dimension - 1; i ++) {
+			m [i] [i+1] = dimension - i;
+			m [i+1] [i] = i;
+		}
+		return m;
+	} catch (MelderError) {
+		Melder_throw (U"KacSylvester not created.");
+	}
+}
+
 /* End of file MAT_numerics.cpp */

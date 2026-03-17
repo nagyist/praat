@@ -13,6 +13,7 @@ eps = 1e-7
 
 @test2by2
 @test3by3
+@test4by4
 @testgeneralSquare
 
 appendInfoLine: "test_Eigen.praat: OK"	
@@ -27,7 +28,8 @@ procedure testOlderFormats
 	.eigenvectors## = {{0, 0.4472135954999579,0.8944271909999159},
 		... {1, 0, 0},
 		... {0, -0.8944271909999159, 0.4472135954999579}}
-	@testeigen: .eigen, 3, .eigenvalues#, .eigenvectors##, 1e-10
+	@testEqualityOfEigenvalues: .eigen, .eigenvalues#
+	@testEqualityOfEigenvectors: .eigen, .eigenvectors##
 	removeObject: .eigen
 	appendInfoLine: " OK"
 
@@ -108,52 +110,97 @@ procedure assertApproximatelyEqual: .val1, .val2, .eps, .comment$
 endproc
 
 procedure test2by2
+	.test$ = tab$ + "2x2 symmetrical:"
+	appendInfoLine: .test$
 	.dim = 2
 	.mat## = {{2, 1},
 	...			  {1, 2}}
-	.mat = Create simple Matrix: "2x2s", .dim, .dim, ~ .mat##[row,col]
 	.eigenvalues# = {3, 1}
-	.eigenvectors## = {{ 1/sqrt (2), 1/sqrt (2)},
-		...						   {-1/sqrt (2), 1/sqrt (2)}}
+	.mat = Create simple Matrix: "2x2s", .dim, .dim, ~ .mat##[row,col]
+	# (2-z)^2 - 1 = 0 => eigenvalues z are 3 and 1
+	# |2 1| |x|   |2x+y|      |x|  z = 3 => y =  x  (= 1/sqrt(2))
+	# |1 2| |y| = |x+2y| =  z |y|  z=1   => y = -x
+	.eigenvalues# = {3, 1}
 	.eigen = To Eigen
-	appendInfo: tab$, "2x2 symmetrical"
-	@testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##, eps
-	appendInfoLine: " OK"
+	@testEqualityOfEigenvalues: .eigen, .eigenvalues#
+	@testOrthogonalityOfEigenvectors: .eigen
 	removeObject: .mat, .eigen
-endproc
-
-procedure testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##, .eps
-	selectObject: .eigen
-	.numberOfEigenvalues = Get number of eigenvalues
-	assert .numberOfEigenvalues == .dim
-	for .i to .dim
-		.eval = Get eigenvalue: .i
-		.comment$ = string$ (.dim) + " eigenvalue" + string$ (.i)
-		@assertApproximatelyEqual: .eval, .eigenvalues# [.i], .eps, .comment$
-		for .j to .dim
-			.evecj = Get eigenvector element: .i, .j
-			.comment$ = "eigenvector[" + string$ (.i) + "] [" +string$ (.j) + "]"
-			.val = .eigenvectors## [.i,.j]
-			@assertApproximatelyEqual: .evecj, .val, .eps, .comment$
-		endfor
-	endfor
+	appendInfoLine: .test$, " OK"
 endproc
 
 procedure test3by3
+	.test$ = tab$ + "3x3 symmetrical:"
+	appendInfoLine: .test$
 	.dim = 3
 	.mat## = {{2, 0, 0},
 		...		  {0, 3, 4},
 		...		  {0, 4, 9}}
-	.mat = Create simple Matrix: "3x3s", .dim, .dim, ~ .mat##[row,col]
 	.eigenvalues# = {11, 2 , 1}
-	.eigenvectors## = {{0, 1/sqrt (5), 2/sqrt (5)},
-		... 						 {1,          0,          0},
-		...							 {0, -2/sqrt (5), 1/sqrt (5)}}
+	.mat = Create simple Matrix: "3x3s", .dim, .dim, ~ .mat##[row,col]
 	.eigen = To Eigen
-	appendInfo: tab$, "3x3 symmetrical: eigenvalues and eigenvectors:"
-	@testeigen: .eigen, .dim, .eigenvalues#, .eigenvectors##, 1e-10
-	appendInfoLine: " OK"
+	@testEqualityOfEigenvalues: .eigen, .eigenvalues#
+	@testOrthogonalityOfEigenvectors: .eigen
 	removeObject: .mat, .eigen
+	appendInfoLine: .test$, " OK"
+endproc
+
+procedure test4by4
+	.test$ = tab$ + "4x4 symmetrical:"
+	appendInfoLine: .test$
+	.dim = 4
+	.mat## = {{1, 2, 3, 4},
+	...			  {2, 3, 4, 6},
+	...				{3, 4, 6, 5},
+	...				{4, 6, 5, 7}}
+	.eigenvalues# =	{17.333479094364993, 1.758549986173555, -0.24923615375564823, -1.8427929267829193}
+	.mat = Create simple Matrix: "4x4s", .dim, .dim, ~ .mat##[row,col]
+	.eigen = To Eigen (special): "symmetric", 0
+	@testEqualityOfEigenvalues: .eigen, .eigenvalues#
+	@testOrthogonalityOfEigenvectors: .eigen
+	removeObject: .mat, .eigen
+	appendInfoLine: .test$, " OK"
+endproc
+
+procedure testEqualityOfEigenvalues: .eigen, .givenValues#
+	appendInfo: tab$, tab$, tab$, "equality of eigenvalues:"
+	selectObject: .eigen
+	.eigenvalues# = List eigenvalues
+	assert size (.eigenvalues#) = size (.givenValues#)
+	for .ival to size (.eigenvalues#)
+		@assertApproximatelyEqual: .eigenvalues# [.ival], .givenValues# [.ival], 1e-13, "testEqualityOfEigenvalues"
+	endfor
+	appendInfoLine: " OK"	
+endproc
+
+procedure testEqualityOfEigenvectors: .eigen, .givenValues##
+	appendInfo: tab$, tab$, tab$, "equality of eigenvectors:"
+	selectObject: .eigen
+	.numberOfEigenvalues = Get number of eigenvalues
+	.dimension = Get eigenvector dimension
+	assert numberOfRows (.givenValues##) = .numberOfEigenvalues
+	assert numberOfColumns (.givenValues##) = .dimension
+	for .ivec to .numberOfEigenvalues
+		.evec# = Get eigenvector: .ivec
+		.given# = row# (.givenValues##, .ivec)
+		for .index to .dimension
+			@assertApproximatelyEqual: .evec# [.index], .given# [.index], 1e-13, "testEqualityOfEigenvectors"
+		endfor
+	appendInfoLine: " OK"
+endproc
+
+procedure testOrthogonalityOfEigenvectors: .eigen
+	appendInfo: tab$, tab$, tab$, "orhogonality of eigenvectors:"
+	selectObject: .eigen
+	.numberOfEigenvalues = Get number of eigenvalues
+	for .ivec to .numberOfEigenvalues
+		.eveci# = Get eigenvector: .ivec
+		for .jvec from .ivec+1 to .numberOfEigenvalues
+			.evecj# = Get eigenvector: .jvec
+			.zero = inner (.eveci#, .evecj#)
+			assert abs (.zero) < 1e-13 ; '.ivec' '.jvec' : '.zero'
+		endfor
+	endfor
+	appendInfoLine: " OK"
 endproc
 
 procedure testDiagonals: .maxdim
@@ -181,11 +228,13 @@ endproc
 procedure testDiagonal: .dim
 	@diagonalData: .dim
 	.matname$ = selected$ ("Matrix")
+	.test$ = tab$ + tab$ + .matname$ + " diagonal:"
+	appendInfoLine: .test$
 	.eigen = To Eigen
-	appendInfo: tab$, tab$, .matname$ +" diagonal"
-	@testeigen: .eigen, .dim, diagonalData.eigenvalues#, diagonalData.eigenvectors##, eps
+	@testEqualityOfEigenvalues: .eigen, diagonalData.eigenvalues#
+	@testEqualityOfEigenvectors: .eigen, diagonalData.eigenvectors##
 	removeObject: .eigen, diagonalData.mat
-	appendInfoLine: " OK"
+	appendInfoLine: .test$, " OK"
 endproc
 
 procedure testgeneralSquare
