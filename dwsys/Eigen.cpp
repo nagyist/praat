@@ -121,8 +121,6 @@ autoEigen Eigen_create (integer numberOfEigenvalues, integer dimension) {
 }
 
 void Eigen_initFromSquareMAT (Eigen me, constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues) {
-	Melder_assert (mat.nrow == mat.ncol);
-	Melder_assert (my dimension == mat.ncol);
 	Melder_assert (numberOfEigenvalues >=1 && numberOfEigenvalues <= mat.nrow);
 	Eigen_init (me, numberOfEigenvalues, mat.ncol);
 	MAT_into_Eigen (mat, matType, me);

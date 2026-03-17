@@ -2330,7 +2330,17 @@ DIRECT (QUERY_ONE_FOR_BOOLEAN__Eigen_areAllEigenvaluesReal) {
 	QUERY_ONE_FOR_BOOLEAN_END (result ? U" (all eigenvalues are real)" : U" (not all eigenvalues are real)")
 }
 
-FORM (MODIFY_Eigen_invertEigenvector, U"Eigen: Invert eigenvector", nullptr) {
+FORM (MODIFY__Eigen_sort, U"Eigen: Sort...", U"Eigen: Sort...") {
+	COMMENT (U"Sort eigenvalues and corresponding eigenvectors")
+	BOOLEAN (sortAscending, U"Sort ascending", true)
+	OK
+DO
+	MODIFY_EACH (Eigen)
+		Eigen_sort_special (me, sortAscending);
+	MODIFY_EACH_END
+}
+
+FORM (MODIFY__Eigen_invertEigenvector, U"Eigen: Invert eigenvector", nullptr) {
 	NATURAL (eigenvectorNumber, U"Eigenvector number", U"1")
 	OK
 DO
@@ -2339,7 +2349,7 @@ DO
 	MODIFY_EACH_END
 }
 
-DIRECT (MODIFY_ALL_Eigens_alignEigenvectors) {
+DIRECT (MODIFY_ALL__Eigens_alignEigenvectors) {
 	MODIFY_ALL (Eigen)
 		Eigens_alignEigenvectors (& list);
 	MODIFY_ALL_END
@@ -9429,7 +9439,7 @@ void praat_David_init () {
 	praat_addAction1 (classDiscriminant, 1, U"Invert eigenvector...", nullptr, 1,
 			MODIFY_Discriminant_invertEigenvector);
 	praat_addAction1 (classDiscriminant, 0, U"Align eigenvectors", nullptr, 1,
-			MODIFY_ALL_Eigens_alignEigenvectors);
+			MODIFY_ALL__Eigens_alignEigenvectors);
 
 	praat_addAction1 (classDiscriminant, 0, U"Extract -", nullptr, 0, 0);
 		praat_addAction1 (classDiscriminant, 0, U"Extract pooled within-groups SSCP", nullptr, 1,
@@ -9676,8 +9686,10 @@ void praat_David_init () {
 		praat_addAction1 (classEigen, 1, U"Are all eigenvalues real?", nullptr, 1,
 				QUERY_ONE_FOR_BOOLEAN__Eigen_areAllEigenvaluesReal);
 	praat_addAction1 (classEigen, 0, U"Modify -", nullptr, 0, nullptr);
+		praat_addAction1 (classEigen, 1, U"Sort...", nullptr, 1,
+				MODIFY__Eigen_sort);
 		praat_addAction1 (classEigen, 1, U"Invert eigenvector...", nullptr, 1,
-				MODIFY_Eigen_invertEigenvector);
+				MODIFY__Eigen_invertEigenvector);
 	praat_addAction1 (classExcitation, 0, U"Synthesize", U"To Formant...", 0, 0);
 	praat_addAction1 (classExcitation, 0, U"To ExcitationList", U"Synthesize", 0,
 			COMBINE_ALL_TO_ONE__Excitations_to_ExcitationList);
@@ -9997,7 +10009,7 @@ void praat_David_init () {
 	praat_addAction1 (classPCA, 1, U"Invert eigenvector...", nullptr, 1,
 			MODIFY_PCA_invertEigenvector);
 	praat_addAction1 (classPCA, 0, U"Align eigenvectors", nullptr, 1,
-			MODIFY_ALL_Eigens_alignEigenvectors);
+			MODIFY_ALL__Eigens_alignEigenvectors);
 	praat_addAction1 (classPCA, 0, U"Extract -", nullptr, 0, 0);
 		praat_addAction1 (classPCA, 0, U"Extract eigenvector...", nullptr, 1,
 				CONVERT_EACH_TO_ONE__PCA_extractEigenvector);

@@ -2181,10 +2181,16 @@ INTRO (U"A command available in the dynamic menu if an @@EditDistanceTable@ and 
 NORMAL (U"New accumulated cost values will be calculated and a new path based on these values will be calculated.")
 MAN_END
 
-MAN_BEGIN (U"Eigen", U"djmw", 19981102)
-INTRO (U"One of the @@types of objects@ in Praat.")
-NORMAL (U"An object of type Eigen represents the eigen structure of "
-	"a matrix whose eigenvalues and eigenvectors are real.")
+MAN_BEGIN (U"Eigen", U"djmw", 20260317)
+INTRO (U"One of the @@types of objects@ in Praat. "
+	"An object of type #Eigen represents the eigen structure of a square matrix, i.e. it contains "
+	"the eigenvalues and their corresponding eigenvectors.")
+NORMAL (U"If the eigenvalues are real, which is mostly the case, the eigenvalues and their corresponding eigenvectors "
+	"are always sorted. The default sorting order is descending, i.e. from large to small. The sorting order can be "
+	"changed to ascending order by using the @@Eigen: Sort...|Sort@ command. ")
+NORMAL (U"For complex eigenvalues there is no preferred sorting order. However, because "
+	"complex eigenvalues always occur in pairs with equal real and opposite imaginary parts, i.e. %a + %i %b and %a - %i %b, "
+	"the one with positive imaginary value always occurs first. ")
 ENTRY (U"Inside an Eigen")
 NORMAL (U"With @Inspect you will see the following attributes:")
 TERM (U"%numberOfEigenvalues")
@@ -2192,9 +2198,15 @@ DEFINITION (U"the number of eigenvalues and eigenvectors")
 TERM (U"%dimension")
 DEFINITION (U"the dimension of an eigenvector.")
 TERM (U"%eigenvalues[1..%numberOfEigenvalues]")
-DEFINITION (U"the real eigenvalues.")
+DEFINITION (U"the real part of the eigenvalues.")
 TERM (U"%eigenvectors[1..%numberOfEigenvalues] [1..%dimension]")
-DEFINITION (U"the real eigenvectors, stored by row.")
+DEFINITION (U"the real parts of the eigenvectors, stored by row.")
+TERM (U"%onlyReals")
+DEFINITION (U"is %true if all eigenvalues are real and %false if not.")
+TERM (U"%eigenvalues\\_ im[1..%numberOfEigenvalues]")
+DEFINITION (U"the imaginary part of the eigenvalues.")
+TERM (U"%eigenvectors\\_ im[1..%numberOfEigenvalues] [1..%dimension]")
+DEFINITION (U"the imaginary parts of the eigenvectors, stored by row.")
 MAN_END
 
 MAN_BEGIN (U"Eigen: Draw eigenvalues...", U"djmw", 20040407)
@@ -2262,6 +2274,15 @@ MAN_END
 
 MAN_BEGIN (U"Eigen: Get eigenvector...", U"djmw", 20260228)
 INTRO (U"A command to query the selected @Eigen for one of its eigenvectors.")
+MAN_END
+
+MAN_BEGIN (U"Eigen: Sort...", U"djmw", 20260317)
+INTRO (U"A command to sort the eigenvalues and corresponding eigenvectors of the selected @Eigen.")
+NORMAL (U"If some of the eigenvalues are complex this command is ineffective.")
+ENTRY (U"Settings")
+TERM (U"##Sort ascending")
+DEFINITION (U"determines the sorting order: if %true the sorting is in ascending order, "
+	"if %false the sorting is in descending order.")
 MAN_END
 
 MAN_BEGIN (U"Eigen: Extract eigenvector...", U"djmw", 20160617)
