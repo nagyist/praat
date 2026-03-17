@@ -1,5 +1,5 @@
 # meson.build of the library "fon"
-# David Weenink & Paul Boersma, 28 December 2025
+# David Weenink & Paul Boersma, 17 March 2026
 
 sources = '''
 	Transition.cpp Distributions_and_Transition.cpp
@@ -32,6 +32,7 @@ sources = '''
 	manual_glossary.cpp manual_Sampling.cpp manual_exampleSound.cpp
 	manual_sound.cpp manual_pitch.cpp manual_spectrum.cpp manual_formant.cpp
 	manual_pointProcess.cpp manual_annotation.cpp
+	manual_SpeechRecognizer.cpp
 	praat_SpeechRecognizer.cpp
 	praat_TimeFunction.cpp praat_TimeTier.cpp praat_TimeFrameSampled.cpp
 	praat_Sound.cpp praat_Matrix.cpp praat_Tiers.cpp praat_TextGrid_init.cpp praat_uvafon_init.cpp'''.split()
