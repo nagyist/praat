@@ -11,18 +11,18 @@ include readingAndWritingOfObjects.praat
 eps = 1e-7
 @testDiagonals: 10
 
-@test2by2
-@test3by3
-@test4by4
-@testgeneralSquare
+@testSymmetric_2by2
+@testSymmetric_3by3
+@testSymmetric_4by4
+@testGeneral_3by3
 
 appendInfoLine: "test_Eigen.praat: OK"	
 
 procedure testOlderFormats
 	.test$ = tab$ + "test older formats:"
 	appendInfoLine: .test$
-
-	appendInfo: tab$, tab$, "format 0:"
+	.test2$ = tab$ + tab$ + "format 0:"
+	appendInfoLine: .test2$
 	.eigen = Read from file: "3x3s_format0.Eigen"
 	.eigenvalues# = {11, 2, 1}
 	.eigenvectors## = {{0, 0.4472135954999579,0.8944271909999159},
@@ -31,8 +31,7 @@ procedure testOlderFormats
 	@testEqualityOfEigenvalues: .eigen, .eigenvalues#
 	@testEqualityOfEigenvectors: .eigen, .eigenvectors##
 	removeObject: .eigen
-	appendInfoLine: " OK"
-
+	appendInfoLine: .test2$, " OK"
 	appendInfoLine: .test$ + " OK"
 
 endproc
@@ -109,7 +108,7 @@ procedure assertApproximatelyEqual: .val1, .val2, .eps, .comment$
 	endif
 endproc
 
-procedure test2by2
+procedure testSymmetric_2by2
 	.test$ = tab$ + "2x2 symmetrical:"
 	appendInfoLine: .test$
 	.dim = 2
@@ -128,7 +127,7 @@ procedure test2by2
 	appendInfoLine: .test$, " OK"
 endproc
 
-procedure test3by3
+procedure testSymmetric_3by3
 	.test$ = tab$ + "3x3 symmetrical:"
 	appendInfoLine: .test$
 	.dim = 3
@@ -144,7 +143,7 @@ procedure test3by3
 	appendInfoLine: .test$, " OK"
 endproc
 
-procedure test4by4
+procedure testSymmetric_4by4
 	.test$ = tab$ + "4x4 symmetrical:"
 	appendInfoLine: .test$
 	.dim = 4
@@ -159,6 +158,17 @@ procedure test4by4
 	@testOrthogonalityOfEigenvectors: .eigen
 	removeObject: .mat, .eigen
 	appendInfoLine: .test$, " OK"
+endproc
+
+procedure testEqualityOfEigenvalues_im: .eigen, .givenValues#
+	appendInfo: tab$, tab$, tab$, "equality of eigenvalues (imag):"
+	selectObject: .eigen
+	.eigenvalues# = List eigenvalues (imag)
+	assert size (.eigenvalues#) = size (.givenValues#)
+	for .ival to size (.eigenvalues#)
+		@assertApproximatelyEqual: .eigenvalues# [.ival], .givenValues# [.ival], 1e-13, "testEqualityOfEigenvalues (imag)"
+	endfor
+	appendInfoLine: " OK"	
 endproc
 
 procedure testEqualityOfEigenvalues: .eigen, .givenValues#
@@ -237,8 +247,9 @@ procedure testDiagonal: .dim
 	appendInfoLine: .test$, " OK"
 endproc
 
-procedure testgeneralSquare
-	appendInfo: tab$, "3x3 general "
+procedure testGeneral_3by3
+	.test$ = tab$ + "3x3 general "
+	appendInfoLine: .test$
 	.dim = 3
 	.name$ = "3x3square"
 	.mat## = {{0, 1, 0},
@@ -246,32 +257,20 @@ procedure testgeneralSquare
 		...			{1, 0, 0}}
 	.mat = Create simple Matrix: .name$, .dim, .dim, ~ .mat## [row,col]
 	# one of the eigenvalues is real (1) the other two are complex
-	.given_re# = {1, -1/2, -1/2}
-	.given_im# = {0, 0.5*sqrt(3), -0.5*sqrt(3)}
+	.givenValues_re# = {-1/2, -1/2, 1}
+	.givenValues_im# = {0.5*sqrt(3), -0.5*sqrt(3), 0}
+	.eigen = To Eigen (special): "general", .dim
+	.eigenvalues_re# = List eigenvalues
+	.eigenvalues_im# = List eigenvalues (imag)
+	@testEqualityOfEigenvalues: .eigen, .givenValues_re#
+	@testEqualityOfEigenvalues_im: .eigen, .givenValues_im#
+	selectObject: .mat
 	Eigen (complex)
 	.eigenvectors = selected ("Matrix", 1)
 	.eigenvalues = selected ("Matrix", 2)
-	selectObject: .eigenvalues
-	.nrow = Get number of rows
-	assert .nrow = 3
-	# lite version of equality: check for occurrence
-	# the eigenvalues of a real square matrix are not "sorted". We only know that complex conjugate 
-	# eigenvalues have the one with positive imaginary part first.
-	.eval_re# = {object [.eigenvalues, 1, 1], object [.eigenvalues, 2, 1],object [.eigenvalues, 3, 1]}
-	.eval_im# = {object [.eigenvalues, 1, 2], object [.eigenvalues, 2, 2],object [.eigenvalues, 3, 2]}
-	if .eval_re# [1] > 1-eps and .eval_re# [1] < 1+eps
-		assert .eval_re# [2] / .given_re# [2] > 1-eps and .eval_re# [2] / .given_re# [2] < 1+eps
-		assert .eval_re# [3] / .given_re# [3] > 1-eps and .eval_re# [3] / .given_re# [3] < 1+eps	
-	else
-		assert .eval_re# [1] / .given_re# [2] > 1-eps and .eval_re# [1] / .given_re# [2] < 1+eps
-		assert .eval_re# [2] / .given_re# [3] > 1-eps and .eval_re# [2] / .given_re# [3] < 1+eps	
-		assert .eval_re# [3] > 1-eps and .eval_re# [3] < 1+eps and .eval_im# [3] == 0		
-	endif
-	selectObject: .eigenvectors
-	.ncol = Get number of columns
-	assert .ncol = 6	
+
 	removeObject: .mat, .eigenvectors, .eigenvalues
-	appendInfoLine: " OK"
+	appendInfoLine: .test$, " OK"
 endproc
 
 procedure testWNKMatrices
