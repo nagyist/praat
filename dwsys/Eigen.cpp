@@ -325,11 +325,38 @@ autoVEC Eigen_listEigenvalues (Eigen me) {
 	}
 }
 
+autoVEC Eigen_listEigenvalues_imag (Eigen me) {
+	try {
+		autoVEC eigenvalues;
+		if (my onlyReals)
+			eigenvalues = zero_VEC (my dimension);
+		else
+			eigenvalues = copy_VEC (my eigenvalues_im.get());
+		return eigenvalues;
+	} catch (MelderError) {
+		Melder_throw (me, U": cannot list imaginary part of eigenvalues.");
+	}
+}
+
 autoVEC Eigen_getEigenvector (Eigen me, integer ivec) {
 	try {
 		Melder_require (ivec >= 1 and ivec <= my numberOfEigenvalues,
 			U"The eigenvector number should be in the interval from 1 to ", my numberOfEigenvalues, U".");
 		autoVEC eigenvector = copy_VEC (my eigenvectors.row (ivec));
+		return eigenvector;
+	} catch (MelderError) {
+		Melder_throw (me, U": cannot get eigenvector.");
+	}
+}
+autoVEC Eigen_getEigenvector_imag (Eigen me, integer ivec) {
+	try {
+		Melder_require (ivec >= 1 and ivec <= my numberOfEigenvalues,
+			U"The eigenvector number should be in the interval from 1 to ", my numberOfEigenvalues, U".");
+		autoVEC eigenvector;
+		if (my onlyReals)
+			eigenvector = zero_VEC (my dimension);
+		else
+			eigenvector = copy_VEC (my eigenvectors.row (ivec));
 		return eigenvector;
 	} catch (MelderError) {
 		Melder_throw (me, U": cannot get eigenvector.");

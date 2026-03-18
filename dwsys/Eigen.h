@@ -78,8 +78,10 @@ integer Eigen_getDimensionOfFraction (Eigen me, double fraction);
 double Eigen_getEigenvectorElement (Eigen me, integer ivec, integer element);
 
 autoVEC Eigen_listEigenvalues (Eigen me);
+autoVEC Eigen_listEigenvalues_imag (Eigen me);
 
 autoVEC Eigen_getEigenvector (Eigen me, integer ivec);
+autoVEC Eigen_getEigenvector_imag (Eigen me, integer ivec);
 
 double Eigen_getSumOfEigenvalues (Eigen me, integer from, integer to);
 

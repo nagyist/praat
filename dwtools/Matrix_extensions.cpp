@@ -537,8 +537,7 @@ autoEigen Matrix_to_Eigen (Matrix me) {
 			U"The Matrix should be square.");
 		Melder_require (NUMisSymmetric (my z.get()),
 			U"The Matrix should be symmetric.");
-		autoEigen thee = Eigen_create (my nx, my nx);
-		Eigen_initFromSymmetricMatrix (thee.get(), my z.get());
+		autoEigen thee = Eigen_createFromSquareMAT (my z.get(), kMAT_TYPE::SYMMETRIC, my nx);
 		return thee;
 	} catch (MelderError) {
 		Melder_throw (U"Cannot create Eigen from Matrix.");
@@ -555,6 +554,38 @@ autoEigen Matrix_to_Eigen_special (Matrix me, kMAT_TYPE matType, integer numberO
 }
 
 void Matrix_Eigen_complex (Matrix me, autoMatrix *out_eigenvectors, autoMatrix *out_eigenvalues) {
+	try {
+		Melder_require (my nx == my ny,
+			U"The Matrix should be square.");
+		Melder_require ((out_eigenvectors || out_eigenvalues),
+			U"You should want either eigenvalues or eigenvectors or both to be calculated.");
+		
+		autoEigen eigen = Eigen_createFromSquareMAT (my z.get(), kMAT_TYPE::GENERAL, my nx);
+	
+		if (out_eigenvectors) {
+			autoMatrix eigenvectors = Matrix_createSimple (my ny, 2 * my ny);
+			for (integer ivec = 1; ivec <= my ny; ivec ++) {
+				for (long irow = 1; irow <= my ny; irow ++) {
+					eigenvectors -> z [irow] [2 * ivec - 1] = eigen -> eigenvectors [irow] [ivec];
+					eigenvectors -> z [irow] [2 * ivec    ] = eigen -> eigenvectors_im [irow] [ivec];
+				}
+			}
+			*out_eigenvectors = eigenvectors.move();
+		}
+		if (out_eigenvalues) {
+			autoMatrix eigenvalues = Matrix_createSimple (my ny, 2);
+			for (long i = 1; i <= my ny; i ++) {
+				eigenvalues -> z [i] [1] = eigen -> eigenvalues [i];
+				eigenvalues -> z [i] [2] = eigen -> eigenvalues_im [i];
+			}
+			*out_eigenvalues = eigenvalues.move();	
+		}
+	} catch (MelderError) {
+		Melder_throw (U"Cannot create Eigenvalues from Matrix.");
+	}
+}
+
+void Matrix_Eigen_complex_old (Matrix me, autoMatrix *out_eigenvectors, autoMatrix *out_eigenvalues) {
 	try {
 		Melder_require (my nx == my ny,
 			U"The Matrix should be square.");
@@ -589,7 +620,6 @@ void Matrix_Eigen_complex (Matrix me, autoMatrix *out_eigenvectors, autoMatrix *
 		Melder_throw (U"Cannot create Eigenvalues from Matrix.");
 	}
 }
-
 autoCOMPVEC Matrix_listEigenvalues (Matrix me) {
 	Melder_require (my nx == my ny,
 		U"The Matrix should be square.");
