@@ -2293,6 +2293,12 @@ DIRECT (QUERY_ONE_FOR_REAL_VECTOR__Eigen_listEigenvalues) {
 	QUERY_ONE_FOR_REAL_VECTOR_END
 }
 
+DIRECT (QUERY_ONE_FOR_REAL_VECTOR__Eigen_listEigenvalues_imag) {
+	QUERY_ONE_FOR_REAL_VECTOR (Eigen)
+		autoVEC result = Eigen_listEigenvalues_imag (me);
+	QUERY_ONE_FOR_REAL_VECTOR_END
+}
+
 FORM (QUERY_ONE_FOR_REAL__Eigen_getSumOfEigenvalues, U"Eigen: Get sum of eigenvalues", U"Eigen: Get sum of eigenvalues...") {
 	INTEGER (fromEigenvalue, U"left Eigenvalue range",  U"1")
 	INTEGER (toEigenvalue, U"right Eigenvalue range", U"0 (=all)")
@@ -2321,6 +2327,15 @@ FORM (QUERY_ONE_FOR_REAL_VECTOR__Eigen_getEigenvector, U"Eigen: Get eigenvector"
 DO
 	QUERY_ONE_FOR_REAL_VECTOR (Eigen)
 		autoVEC result = Eigen_getEigenvector (me, eigenvectorNumber);
+	QUERY_ONE_FOR_REAL_VECTOR_END
+}
+
+FORM (QUERY_ONE_FOR_REAL_VECTOR__Eigen_getEigenvector_imag, U"Eigen: Get eigenvector (imag)", U"Eigen: Get eigenvector...") {
+	NATURAL (eigenvectorNumber, U"Eigenvector number", U"1")
+	OK
+DO
+	QUERY_ONE_FOR_REAL_VECTOR (Eigen)
+		autoVEC result = Eigen_getEigenvector_imag (me, eigenvectorNumber);
 	QUERY_ONE_FOR_REAL_VECTOR_END
 }
 
@@ -3616,13 +3631,6 @@ DO
 		const double result = NUMnorm (my z.all(), power);
 	QUERY_ONE_FOR_REAL_END (U" (norm with power = ", power, U")")
 }
-
-/*
-DIRECT (COMPVEC_Matrix_listEigenvalues) {
-	NUMCOMPVEC_ONE (Matrix)
-		autoCOMPVEC result = Matrix_listEigenvalues (me);
-	NUMCOMPVEC_ONE_END (U"")
-}*/
 
 FORM (MODIFY_Matrix_scale, U"Matrix: Scale", nullptr) {
 	COMMENT (U"self[row, col] := self[row, col] / `Scale factor'")
@@ -9683,8 +9691,13 @@ void praat_David_init () {
 				QUERY_ONE_FOR_REAL__Eigen_getEigenvectorElement);
 		praat_addAction1 (classEigen, 1, U"Get eigenvector...", nullptr, 1,
 				QUERY_ONE_FOR_REAL_VECTOR__Eigen_getEigenvector);
+		praat_addAction1 (classMatrix, 1, U"-- imaginary part --", nullptr, 1, nullptr);
 		praat_addAction1 (classEigen, 1, U"Are all eigenvalues real?", nullptr, 1,
 				QUERY_ONE_FOR_BOOLEAN__Eigen_areAllEigenvaluesReal);
+		praat_addAction1 (classEigen, 1, U"Get eigenvector (imag)...", nullptr, 1,
+				QUERY_ONE_FOR_REAL_VECTOR__Eigen_getEigenvector_imag);
+		praat_addAction1 (classEigen, 1, U"List eigenvalues (imag)", nullptr, 1,
+				QUERY_ONE_FOR_REAL_VECTOR__Eigen_listEigenvalues_imag);
 	praat_addAction1 (classEigen, 0, U"Modify -", nullptr, 0, nullptr);
 		praat_addAction1 (classEigen, 1, U"Sort...", nullptr, 1,
 				MODIFY__Eigen_sort);
