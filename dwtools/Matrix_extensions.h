@@ -79,7 +79,6 @@ autoEigen Matrix_to_Eigen_special (Matrix me, kMAT_TYPE matType, integer numberO
 
 autoMatrix SVD_to_Matrix (SVD me, integer from, integer to);
 
-autoCOMPVEC Matrix_listEigenvalues (Matrix me);
 void Matrix_Eigen_complex (Matrix me, autoMatrix *out_eigenvectors, autoMatrix *out_eigenvalues);
 /* General square matrix */
 
