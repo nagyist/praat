@@ -558,7 +558,7 @@ autoPCA SSCP_to_PCA (SSCP me) {
 		else
 			Melder_throw (me, U": the SSCP has the wrong dimensions.");
 		autoPCA thee = PCA_create (my numberOfColumns, my numberOfColumns);
-		Eigen_initFromSymmetricMatrix (thee.get(), mat.get());
+		Eigen_initFromSquareMAT (thee.get(), mat.get(), kMAT_TYPE::SYMMETRIC, my numberOfColumns, false);
 		thy centroid.all()  <<=  my centroid.all();
 		PCA_setNumberOfObservations (thee.get(), Melder_ifloor (my numberOfObservations));
 		thy labels.all()  <<=  my columnLabels.all();
