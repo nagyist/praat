@@ -656,8 +656,7 @@ void Matrix_eigen (const constMatrix me, autoMatrix *out_eigenvectors, autoMatri
 			U"The number of rows (here ", my ny, U") should be equal to the number of columns (here ", my nx, U").");
 		Melder_require (isSymmetric (me),
 			U"The matrix should be symmetric.");
-		autoEigen eigen = Thing_new (Eigen);
-		Eigen_initFromSymmetricMatrix (eigen.get(), my z.get());
+		autoEigen eigen = Eigen_createFromSquareMAT (my z.get(), kMAT_TYPE::SYMMETRIC, 0, false);
 		autoMatrix eigenvectors = Data_copy (me);
 		autoMatrix eigenvalues = Matrix_create (1.0, 1.0, 1, 1.0, 1.0, my ymin, my ymax, my ny, my dy, my y1);
 		for (integer i = 1; i <= my nx; i ++) {
