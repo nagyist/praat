@@ -3726,10 +3726,11 @@ DIRECT (CONVERT_EACH_TO_ONE__Matrix_to_Eigen) {
 FORM (CONVERT_EACH_TO_ONE__Matrix_to_Eigen_special, U"Matrix: To Eigen", U"Matrix: To Eigen") {
 	OPTIONMENU_ENUM (kMAT_TYPE, matType, U"Matrix type", kMAT_TYPE::SYMMETRIC)
 	INTEGER (numberOfEigenvalues, U"Number of eigenvalues", U"0 (=all)")
+	BOOLEAN (sortAscending, U"Sort ascending", 0)
 	OK
 DO
 	CONVERT_EACH_TO_ONE (Matrix)
-		autoEigen result = Matrix_to_Eigen_special (me, matType, numberOfEigenvalues);
+		autoEigen result = Matrix_to_Eigen_special (me, matType, numberOfEigenvalues, sortAscending);
 	CONVERT_EACH_TO_ONE_END (my name.get())
 }
 
@@ -9691,7 +9692,7 @@ void praat_David_init () {
 				QUERY_ONE_FOR_REAL__Eigen_getEigenvectorElement);
 		praat_addAction1 (classEigen, 1, U"Get eigenvector...", nullptr, 1,
 				QUERY_ONE_FOR_REAL_VECTOR__Eigen_getEigenvector);
-		praat_addAction1 (classMatrix, 1, U"-- imaginary part --", nullptr, 1, nullptr);
+		praat_addAction1 (classEigen, 1, U"-- imaginary part --", nullptr, 1, nullptr);
 		praat_addAction1 (classEigen, 1, U"Are all eigenvalues real?", nullptr, 1,
 				QUERY_ONE_FOR_BOOLEAN__Eigen_areAllEigenvaluesReal);
 		praat_addAction1 (classEigen, 1, U"Get eigenvector (imag)...", nullptr, 1,
