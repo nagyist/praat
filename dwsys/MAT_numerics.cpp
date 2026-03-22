@@ -31,7 +31,7 @@ autoEigen MAT_to_Eigen (constMAT const& mat, kMAT_TYPE matType, integer numberOf
 		Melder_assert (mat.nrow == mat.ncol);
 		Melder_assert (numberOfEigenvalues>= 1 && numberOfEigenvalues <= mat.ncol);
 		autoEigen me = Eigen_create (numberOfEigenvalues, mat.ncol);
-		MAT_into_Eigen (mat, matType, me.get());
+		MAT_into_Eigen (mat, matType, me.get(), false);
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"MAT_to_Eigen did not succeed.");
@@ -98,11 +98,15 @@ void squareRoot_into_Eigen (MAT const& mat, Eigen me) {
 	
 }
 
-void MAT_into_Eigen (constMATVU const& mat, kMAT_TYPE matType, Eigen me) {
+void MAT_into_Eigen (constMATVU const& mat, kMAT_TYPE matType, Eigen me, bool sortAscending) {
 	Melder_assert (mat.nrow == mat.ncol);
 	Melder_assert (my dimension == mat.ncol);
 	try {
-		integer info;
+		integer info, ilow = 1, iup = my numberOfEigenvalues;
+		if (! sortAscending) {
+			ilow = mat.ncol - my numberOfEigenvalues + 1;
+			iup = ilow + my numberOfEigenvalues - 1;
+		}
 		const bool sortAscending = false;
 		if (matType == kMAT_TYPE::SYMMETRIC) {
 			const integer lwork = 3 * my dimension;
@@ -115,7 +119,7 @@ void MAT_into_Eigen (constMATVU const& mat, kMAT_TYPE matType, Eigen me) {
 				& work [1], lwork, & info);
 			Melder_require (info == 0,
 				U"NUMlapack_dsyev fails with code ", info, U".");
-			my eigenvectors.part (1, my numberOfEigenvalues, 1, mat.ncol)  <<= matCopy.part (1, my numberOfEigenvalues, 1, mat.ncol);
+			my eigenvectors.part (1, my numberOfEigenvalues, 1, mat.ncol)  <<= matCopy.part (ilow, iup, 1, mat.ncol);
 			Eigen_sort_special (me, sortAscending);
 		} else if (matType == kMAT_TYPE::SYMMETRIC_TRIDIAGONAL) {
 			autoVEC diagonal = raw_VEC (my dimension);
@@ -124,28 +128,7 @@ void MAT_into_Eigen (constMATVU const& mat, kMAT_TYPE matType, Eigen me) {
 				diagonal [i] = mat [i] [i];
 			for (integer i = 1; i < my dimension; i ++)
 				offDiagonal [i] = mat [i] [i + 1];
-			symmetricTridiagonal_into_Eigen (diagonal.get(), offDiagonal.get(), me);
-			const char *jobz = "V", *safe = "S";
-			const char *range = ( my numberOfEigenvalues < my dimension ? "I" : "A" );
-			const integer il = 1, iu = my numberOfEigenvalues, evLeadingDimension = my dimension;
-			const integer lwork = 20 * my dimension, liwork = 10 * my dimension;
-			const double vl = 0.0, vu = 0.0, abstol = 2.0 * dlamch_ (safe);
-			autoVEC work = raw_VEC (lwork);
-			autoINTVEC iwork = raw_INTVEC (liwork), isuppz = raw_INTVEC (2 * my numberOfEigenvalues);
-			/*
-				Eigenvalues are returned in ascending order.
-			*/
-			integer numberOfEigenvaluesFound;
-			(void) NUMlapack_dstevr (jobz, range, my dimension, & diagonal [1], & offDiagonal [1],
-				vl, vu, il, iu, abstol, & numberOfEigenvaluesFound, & my eigenvalues [1],
-				& my eigenvectors [1][1], evLeadingDimension, & isuppz [1], & work [1], lwork,
-				& iwork [1], liwork, & info);
-			Melder_require (info == 0,
-				U"NUMlapack_dstevr fails with code ", info, U".");
-			Melder_require (numberOfEigenvaluesFound == my numberOfEigenvalues,
-				U"The number of eigenvalues found (", numberOfEigenvaluesFound, U") differs from the number "
-				"of eigenvalues wanted (", my numberOfEigenvalues, U").");
-			Eigen_sort_special (me, sortAscending);
+			Eigen_initFromSymmetricTridiagonal (me, diagonal.get(), offDiagonal.get(), sortAscending);
 		} else if (matType == kMAT_TYPE::GENERAL) {
 			Eigen_initImaginaryParts (me);
 			/*
@@ -247,71 +230,6 @@ void MAT_getEigenSystemFromSymmetricMatrix (constMAT a, autoMAT *out_eigenvector
 		*out_eigenvectors = eigenvectors.move ();
 	if (out_eigenvalues)
 		*out_eigenvalues = eigenvalues.move ();
-}
-
-void MAT_getEigenSystemFromGeneralSquareMatrix (constMAT const& data, autoCOMPVEC *out_eigenvalues, automatrix<dcomplex> *out_eigenvectors) {
-	if (! (out_eigenvalues || out_eigenvectors))
-		return;
-	Melder_assert (data.nrow == data.ncol);
-	autoMAT a = transpose_MAT (data);   // lapack needs column major layout
-	autoVEC eigenvalues_re = raw_VEC (a.nrow);
-	autoVEC eigenvalues_im = raw_VEC (a.nrow);
-	autoMAT eigenvectors_right;
-	double *p_evec_right = nullptr;
-	if (out_eigenvectors) {
-		eigenvectors_right = raw_MAT (a.nrow, a.nrow);
-		p_evec_right = & eigenvectors_right [1] [1];
-	}
-
-	double wtmp [3];
-	integer lwork = -1, info;
-	const char *jobvr = ( out_eigenvectors ? "V" : "N" );
-	NUMlapack_dgeev_ ("N", jobvr, a.nrow, & a [1] [1], a.nrow, & eigenvalues_re [1], & eigenvalues_im [1],
-		nullptr, a.nrow, p_evec_right, a.nrow, & wtmp [1], lwork, & info);
-	Melder_require (info == 0,
-		U"NUMlapack_dgeev_ query returns error ", info, U".");
-	
-	lwork = Melder_iceiling (wtmp [1]);
-	autoVEC work = raw_VEC (lwork);
-	NUMlapack_dgeev_ ("N", jobvr, a.nrow, & a [1] [1], a.nrow, & eigenvalues_re [1], & eigenvalues_im [1],
-		nullptr, a.nrow, p_evec_right, a.nrow, & work [1], lwork, & info);
-	integer numberOfEigenvalues = a.nrow, istart = 0;
-	if (info > 0)
-		istart = info; // only evals [info+1: a.nrow], no eigenvectors
-		
-	if (out_eigenvalues) {
-		numberOfEigenvalues -= istart;
-		autoCOMPVEC eigenvalues = raw_COMPVEC (numberOfEigenvalues); // vec in column
-		for (integer ival = 1; ival <= numberOfEigenvalues; ival ++) {
-			eigenvalues [ival] .real (eigenvalues_re [istart + ival]);
-			eigenvalues [ival] .imag (eigenvalues_im [istart + ival]);
-		}
-		*out_eigenvalues = eigenvalues.move();
-	}
-	if (out_eigenvectors && istart == 0) {
-		automatrix<dcomplex> evecs = newmatrixzero<dcomplex> (numberOfEigenvalues, a.nrow);
-		constvector<dcomplex> evals = (*out_eigenvalues).get();
-		/*
-			The following processing is based on the fact that the eigenvalues
-			are either real or occur in pairs (a+ib, a-ib).
-		*/
-		integer ivec = 1;
-		while (ivec <= numberOfEigenvalues) {
-			for (integer icol = 1; icol <= a.nrow; icol ++)
-				evecs [ivec] [icol] .real (eigenvectors_right [icol] [ivec]);
-			// imaginary part is zero by initialisation
-			if (evals [ivec].imag() != 0.0) {
-				for (integer icol = 1; icol <= a.nrow; icol ++) {
-					evecs [ivec    ] [icol] .imag ( eigenvectors_right [icol] [ivec + 1]);
-					evecs [ivec + 1] [icol] .real ( eigenvectors_right [icol] [ivec    ]);
-					evecs [ivec + 1] [icol] .imag (-eigenvectors_right [icol] [ivec + 1]);
-				}
-				ivec ++;
-			}
-			ivec ++;
-		}
-		*out_eigenvectors = evecs.move();
-	}
 }
 
 void MAT_asPrincipalComponents_preallocated (MATVU result, constMATVU const& m, integer numberOfComponents) {

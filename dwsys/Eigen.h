@@ -41,15 +41,15 @@ void Eigen_initImaginaryParts (Eigen me);
 
 autoEigen Eigen_create (integer numberOfEigenvalues, integer dimension);
 
-autoEigen Eigen_createFromSquareRoot (constMATVU const& mat, integer numberOfEigenvalues);
+autoEigen Eigen_createFromSquareRoot (constMATVU const& mat, integer numberOfEigenvalues, bool sortAscending);
 
-void Eigen_initFromSquareMAT (Eigen me, constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues);
-autoEigen Eigen_createFromSquareMAT (constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues);
+void Eigen_initFromSquareMAT (Eigen me, constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues, bool sortAscending);
+autoEigen Eigen_createFromSquareMAT (constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues, bool sortAscending);
 
 
 void Eigen_initFromSymmetricMatrix (Eigen me, constMATVU const& a);
 
-void Eigen_fromSymmetricTridiagonal (Eigen, constVEC const& diagonal, constVEC const& offDiagonal);
+void Eigen_initFromSymmetricTridiagonal (Eigen me, constVEC const& diagonal, constVEC const& offDiagonal, bool sortAscending);
 
 void Eigen_initFromSquareRoot (Eigen me, constMATVU const& a);
 /*

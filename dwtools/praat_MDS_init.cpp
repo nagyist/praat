@@ -1217,6 +1217,25 @@ DO
 	GRAPHICS_EACH_END
 }
 
+/************************* ScalarProducts ***************************************/
+
+FORM (CONVERT_ALL_TO_MULTIPLE__ScalarProducts_to_Configuration_ytl, U"ScalarProducts: To Configuration (ytl)", U"") {
+	NATURAL (numberOfDimensions, U"Number of dimensions", U"2")
+	BOOLEAN (wantSalience, U"Want Salience", false)
+	OK	
+DO
+	CONVERT_ALL_TO_MULTIPLE (ScalarProduct)
+		autoConfiguration configuration;
+		autoSalience salience;
+		Melder_require (list.size > 1,
+			U"There should me more than one ScalarProduct selected.");
+		ScalarProductList_to_Configuration_ytl ((ScalarProductList)& list, numberOfDimensions, & configuration, & salience);
+		praat_new (configuration.move(), U"ytl");
+		if (wantSalience)
+			praat_new (salience.move(), U"ytl");
+	CONVERT_ALL_TO_MULTIPLE_END
+}
+
 /************************* COVARIANCE & CONFIGURATION  ********************/
 
 FORM (CONVERT_EACH_TO_ONE__Covariance_to_Configuration, U"Covariance: To Configuration", nullptr) {
@@ -1569,6 +1588,8 @@ void praat_MDS_actions_init () {
 
 	praat_TableOfReal_init2 (classScalarProduct);
 	praat_TableOfReal_extras (classScalarProduct);
+	praat_addAction1 (classScalarProduct, 0, U"To Configuration (ytl)...", nullptr, 1,
+		CONVERT_ALL_TO_MULTIPLE__ScalarProducts_to_Configuration_ytl);
 
 	praat_TableOfReal_extras (classTableOfReal);
 	praat_addAction1 (classTableOfReal, 1, U"Centre rows", U"Normalize table...", 1,

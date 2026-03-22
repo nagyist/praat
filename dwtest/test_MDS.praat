@@ -1,4 +1,5 @@
 # test_MDS.praat
+# djmw 2002,2016
 
 appendInfoLine: "test_MDS.praat"
 
@@ -10,6 +11,8 @@ appendInfoLine: "test_MDS.praat"
 
 @testDissimilarityToConfiguration: 5
 
+@testScalarProduct
+
 @testCarrolWishExample
 
 @testProcrustes
@@ -17,7 +20,7 @@ appendInfoLine: "test_MDS.praat"
 appendInfoLine: "test_MDS.praat OK"
 
 procedure testLetterRExample
-	appendInfoLine: tab$, "test Dissimilarity letter R"
+	appendInfo: tab$, "test Dissimilarity letter R"
 	.dissimilarity = Create letter R example: 0
 	.numberOfRows = Get number of rows
 	.numberOfColumns = Get number of columns
@@ -49,11 +52,11 @@ procedure testLetterRExample
 	assert abs (.additiveConstant -153.74)/ 153.74 < 1e-6
 
 	removeObject: .dissimilarity
-	appendInfoLine: tab$, "test Dissimilarity letter R OK"
+	appendInfoLine: " OK"
 endproc
 
 procedure testProcrustes
-	appendInfoLine: tab$, "Procrustes: Configuration & Configuration"
+	appendInfo: tab$, "Procrustes: Configuration & Configuration"
 	.dissimilarity1 = Create letter R example: 0.4
 	.configuration1 = To Configuration (monotone mds): 2, "Primary approach", 1e-5, 50, 1
 	.dissimilarity2 = Create letter R example: 0.5
@@ -66,7 +69,7 @@ procedure testProcrustes
 	.procrustes2 = To Procrustes: "no"
 	@check_if_identity_transform: .procrustes2
 	removeObject: .procrustes1, .procrustes2, .ct1,.dissimilarity1, .dissimilarity2, .configuration1, .configuration2
-	appendInfoLine: tab$, "Procrustes: Configuration & Configuration OK"
+	appendInfoLine: " OK"
 endproc
 
 procedure check_if_identity_transform:  .p
@@ -88,7 +91,7 @@ procedure check_if_identity_transform:  .p
 endproc
 
 procedure testDissimilarityToConfiguration: .numberOfTries
-	appendInfoLine: tab$, "Dissimilarity to Configuration"
+	appendInfo: tab$, "Dissimilarity to Configuration"
 	.mdsToConfigurationCommands$# = {"To Configuration (monotone mds): 2, ""Primary approach"", 1e-5, 2, 1",
 	...	 "To Configuration (i-spline mds): 2, 1, 1, 1e-5, 2, 1",
 	...	"To Configuration (interval mds): 2, 1e-5, 2, 1", 
@@ -129,7 +132,7 @@ procedure testDissimilarityToConfiguration: .numberOfTries
 		endfor
 		removeObject: .dissimilarity
 	endfor
-	appendInfoLine: tab$, "Dissimilarity to Configuration OK"
+	appendInfoLine: " OK"
 endproc
 
 procedure testDissimilarityInterface
@@ -228,43 +231,43 @@ procedure testDissimilarityInterface
 	appendInfoLine: tab$, "test interface OK"
 endproc
 
+procedure testScalarProduct
+	appendInfo: tab$, "ScalarProduct:"
+	.dissimilarities# = Create INDSCAL Carroll Wish example: 0.0
+	.distances# = To Distance: "yes"
+	.scalarproducts# = To ScalarProduct: "yes"
+
+	removeObject: .dissimilarities#, .distances#, .scalarproducts#
+	appendInfoLine: tab$, " OK"
+endproc
+
 procedure testCarrolWishExample
-	appendInfoLine: tab$, "INDSCAL Carroll Wish example"
-	Create INDSCAL Carroll Wish example: 0.0
-	.dissimilarities# = selected# ("Dissimilarity")
-	To Distance: "yes"
-	.distances# = selected# ("Distance")
+	appendInfo: tab$, "INDSCAL Carroll Wish example"
+	.dissimilarities# = Create INDSCAL Carroll Wish example: 0.0
+	.distances# = To Distance: "yes"
 	To Configuration (indscal): 2, "no", 1e-5, 100, 1, "yes", "no"
 	.conf = selected ("Configuration")
 	.salience = selected ("Salience")
-	selectObject: .dissimilarities# [1], .distances# [1]
-	for .i from 2 to size (.dissimilarities#)
-		plusObject: 	.dissimilarities# [.i], .distances# [.i]
-	endfor
-	plusObject: .salience, .conf
-	Remove
-	appendInfoLine: tab$, "INDSCAL Carroll Wish example OK"
+	removeObject: .salience, .conf, .dissimilarities#, .distances#
+	appendInfoLine: " OK"
 endproc
 
 procedure test_additiveConstant
+	appendInfo: tab$ + "additive constant: "
 	# create table 18.1 Borg & Groenen (1997): Modern MDS
 	# Check with top of table 18.3 where a value of 1.291 is given
-
-	.distance = Create TableOfReal: "18.1", 4, 4
-	.row1# = {0,    pi,     pi/4,   pi/2}
-	.row2# = {pi,   0,      3*pi/4, pi/2}
-	.row3# = {pi/4, 3*pi/4, 0,      3*pi/4}
-	.row4# = {pi/2, pi/2,   3*pi/4, 0}
-	for .icol to 4
-		for .irow to 4
-		Set value: .irow, .icol, .row'.irow'# [.icol]
-		endfor
-	endfor
+	.bg181## = {{0,        pi,   pi/4,   pi/2},
+		...				{pi,        0, 3*pi/4,   pi/2},
+		...				{pi/4, 3*pi/4,      0, 3*pi/4},
+		...				{pi/2,   pi/2, 3*pi/4,      0}}
+	.distance = Create TableOfReal: "bg18_1", 4, 4
+	Formula: ~ .bg181## [row,col]
 	.dissimilarity = To Dissimilarity
 	.additiveConstant = Get additive constant
 	.additiveConstant_rounded = number (fixed$ (.additiveConstant, 3))
 	assert .additiveConstant_rounded  = 1.291; '.additiveConstant_rounded'
 	removeObject: .dissimilarity, .distance
+	appendInfoLine: " OK"
 endproc
 
 

@@ -537,19 +537,19 @@ autoEigen Matrix_to_Eigen (Matrix me) {
 			U"The Matrix should be square.");
 		Melder_require (NUMisSymmetric (my z.get()),
 			U"The Matrix should be symmetric.");
-		autoEigen thee = Eigen_createFromSquareMAT (my z.get(), kMAT_TYPE::SYMMETRIC, my nx);
+		autoEigen thee = Eigen_createFromSquareMAT (my z.get(), kMAT_TYPE::SYMMETRIC, my nx, false);
 		return thee;
 	} catch (MelderError) {
 		Melder_throw (U"Cannot create Eigen from Matrix.");
 	}
 }
 
-autoEigen Matrix_to_Eigen_special (Matrix me, kMAT_TYPE matType, integer numberOfEigenvalues) {
+autoEigen Matrix_to_Eigen_special (Matrix me, kMAT_TYPE matType, integer numberOfEigenvalues, bool sortAcending) {
 	Melder_require (my nx == my ny,
 		U"The number of rows and the number of columns should be equal.");
 	if (numberOfEigenvalues < 1 || numberOfEigenvalues > my ny)
 		numberOfEigenvalues = my ny;
-	autoEigen eigen = Eigen_createFromSquareMAT  (my z.get(), matType, numberOfEigenvalues);
+	autoEigen eigen = Eigen_createFromSquareMAT  (my z.get(), matType, numberOfEigenvalues, sortAcending);
 	return eigen;
 }
 
@@ -560,7 +560,7 @@ void Matrix_Eigen_complex (Matrix me, autoMatrix *out_eigenvectors, autoMatrix *
 		Melder_require ((out_eigenvectors || out_eigenvalues),
 			U"You should want either eigenvalues or eigenvectors or both to be calculated.");
 		
-		autoEigen eigen = Eigen_createFromSquareMAT (my z.get(), kMAT_TYPE::GENERAL, my nx);
+		autoEigen eigen = Eigen_createFromSquareMAT (my z.get(), kMAT_TYPE::GENERAL, my nx, false);
 	
 		if (out_eigenvectors) {
 			autoMatrix eigenvectors = Matrix_createSimple (my ny, 2 * my ny);

@@ -158,9 +158,8 @@ static void Transition_transpose (Transition me) {
 void Transition_eigen (Transition me, autoMatrix *out_eigenvectors, autoMatrix *out_eigenvalues) {
 	bool transposed = false;
 	try {
-		autoEigen eigen = Thing_new (Eigen);
 		Transition_transpose (me);
-		Eigen_initFromSymmetricMatrix (eigen.get(), my data.get());
+		autoEigen eigen = Eigen_createFromSquareMAT (my data.get(), kMAT_TYPE::SYMMETRIC, 0, false);
 		Transition_transpose (me);
 		transposed = true;
 		autoMatrix eigenvectors = Matrix_createSimple (my numberOfStates, my numberOfStates);

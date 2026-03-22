@@ -1,11 +1,14 @@
 # test_PCA.praat
-# djmw 20110525, 20211128
+# djmw 20110525, 20211128, 20260322
 
 appendInfoLine: "test_PCA.praat"
 
 @testOlderFormats
 
-call test_pca_simple
+@test_pca_simple
+
+@testConvertsFromXToPCA
+
 @test_projections
 
 appendInfoLine: "test_PCA.praat OK"
@@ -26,6 +29,35 @@ procedure testOlderFormats
 	removeObject: .pca
 	appendInfoLine: " OK"
 	appendInfoLine: .test$ + " OK" 	
+endproc
+
+procedure testConvertsFromXToPCA
+	.test$ = tab$ + "test converts from X to PCA:"
+	appendInfoLine: .test$ 
+	.pols = Create TableOfReal (Pols 1973): "yes"
+	.covar = To Covariance
+	appendInfo: tab$, tab$, "Covariance to PCA:"
+	.pcacovar = To PCA
+	appendInfoLine: " OK"
+	selectObject: .covar
+	.cor = To Correlation
+	appendInfo: tab$, tab$, "Correlation to PCA:"
+	.pcacor = To PCA
+	appendInfoLine: " OK"
+	selectObject: .pols
+	.sscp = To SSCP: 0,0,0,0
+	appendInfo: tab$, tab$, "SSCP to PCA:"
+	.pcasscp = To PCA
+	appendInfoLine: " OK"
+	selectObject: .pols
+	.gm = To GaussianMixture (row labels): "Diagonals"
+	appendInfo: tab$, tab$, "GaussianMixture to PCA:"
+	.pcagm = To PCA
+	appendInfoLine: " OK"
+	
+	removeObject: .pols, .covar, .pcacovar, .cor, .pcacor, .sscp, .pcasscp
+	removeObject: .gm, .pcagm
+	appendInfoLine: .test$, " OK"
 endproc
 
 procedure create_reference_TableOfReal 
@@ -152,7 +184,6 @@ procedure test_projections
 	... .reconstruction,  .columns3, .toomanyColumns
 	
 	appendInfoLine:  tab$, "test PCA & TableOfReal projections OK"
-
 endproc
 
 

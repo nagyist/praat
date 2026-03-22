@@ -111,14 +111,12 @@ double Dissimilarity_getAdditiveConstant (Dissimilarity me) {
 			d'[i][j] = d [i][j] + c have an euclidean representation.
 			A positive semi-definite matrix has all eigenvalues larger than or equal to zero.
 		*/
-		autoVEC eigenvalues_wd;
-		MAT_getEigenSystemFromSymmetricMatrix (wd.get(), nullptr, & eigenvalues_wd, true);
-		
-		if (eigenvalues_wd [1] >= 0.0)
+		autoEigen eigen_wd = Eigen_createFromSquareMAT (wd.get(), kMAT_TYPE::SYMMETRIC, 0, false);
+		if (eigen_wd -> eigenvalues [nPoints] >= 0.0)
 			return 0.0;
 		
 		/*
-			Calculate the B matrix according to eq. 6
+			Set up the B matrix according to eq. 6 in Calliez.
 		*/
 		autoMAT b = zero_MAT (nPoints2, nPoints2);
 		b.part (1, nPoints, nPoints + 1, nPoints2)  <<=  2.0  *  wd.get();
@@ -127,8 +125,7 @@ double Dissimilarity_getAdditiveConstant (Dissimilarity me) {
 		/*
 			Get eigenvalues of B
 		*/
-		autoCOMPVEC eigenvalues;
-		MAT_getEigenSystemFromGeneralSquareMatrix (b.get(), & eigenvalues, nullptr);
+		autoEigen eigen = Eigen_createFromSquareMAT (b.get(), kMAT_TYPE::GENERAL, 0, false);
 		/*
 			Get largest real eigenvalue. This value needs to be larger than or equal to zero,
 			therefore we left-clip against zero. 
@@ -136,8 +133,8 @@ double Dissimilarity_getAdditiveConstant (Dissimilarity me) {
 		*/
 		double largestRealEigenvalue = 0.0;
 		for (integer i = 1; i <= nPoints2; i ++)
-			if (eigenvalues [i].imag() == 0.0 && eigenvalues [i].real() > largestRealEigenvalue)
-				largestRealEigenvalue = eigenvalues [i].real();
+			if (eigen -> eigenvalues_im [i] == 0.0 && eigen -> eigenvalues [i] > largestRealEigenvalue)
+				largestRealEigenvalue = eigen -> eigenvalues [i];
 		return largestRealEigenvalue;
 	} catch (MelderError) {
 		Melder_throw (U"Additive constant not calculated.");
