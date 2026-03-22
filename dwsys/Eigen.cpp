@@ -120,13 +120,13 @@ autoEigen Eigen_create (integer numberOfEigenvalues, integer dimension) {
 	}
 }
 
-void Eigen_initFromSquareMAT (Eigen me, constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues) {
+void Eigen_initFromSquareMAT (Eigen me, constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues, bool sortAscending) {
 	Melder_assert (numberOfEigenvalues >=1 && numberOfEigenvalues <= mat.nrow);
 	Eigen_init (me, numberOfEigenvalues, mat.ncol);
-	MAT_into_Eigen (mat, matType, me);
+	MAT_into_Eigen (mat, matType, me, sortAscending);
 }
 
-autoEigen Eigen_createFromSquareMAT (constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues) {
+autoEigen Eigen_createFromSquareMAT (constMATVU const& mat, kMAT_TYPE matType, integer numberOfEigenvalues, bool sortAscending) {
 	try {
 		const integer dimension = mat.ncol;
 		Melder_require (mat.nrow == dimension,
@@ -136,7 +136,7 @@ autoEigen Eigen_createFromSquareMAT (constMATVU const& mat, kMAT_TYPE matType, i
 		Melder_require (numberOfEigenvalues <= dimension,
 			U"The number of eigenvalues is too large. It should be in the interval from 1 to ", dimension, U".");
 		autoEigen me = Thing_new (Eigen);
-		Eigen_initFromSquareMAT (me.get(), mat, matType, numberOfEigenvalues);
+		Eigen_initFromSquareMAT (me.get(), mat, matType, numberOfEigenvalues, sortAscending);
 		return me;
 	} catch (MelderError) {
 		Melder_throw (U"Cannot create Eigen from ", kMAT_TYPE_getText (matType), U" matrix.");
@@ -284,20 +284,31 @@ void Eigen_initFromSymmetricMatrix (Eigen me, constMATVU const& a) {
 	MAT_getEigenSystemFromSymmetricMatrix_preallocated (my eigenvectors.get(), my eigenvalues.get(), a, false);
 }
 
-void Eigen_fromSymmetricTridiagonal (Eigen me, constVEC const& diagonal, constVEC const& offDiagonal) {
+void Eigen_initFromSymmetricTridiagonal (Eigen me, constVEC const& diagonal, constVEC const& offDiagonal, bool sortAscending) {
+	
 	Melder_assert (diagonal.size == my dimension);
 	Melder_assert (offDiagonal.size >= my dimension - 1);
 	const char *jobz = "V", *safe = "S";
 	const char *range = ( my numberOfEigenvalues < my dimension ? "I" : "A" );
-	const integer il = 1, iu = my numberOfEigenvalues, evLeadingDimension = my dimension;
+	const integer evLeadingDimension = my dimension;
 	const integer lwork = 20 * my dimension, liwork = 10 * my dimension;
 	const double vl = 0.0, vu = 0.0, abstol = 2.0 * dlamch_ (safe);
 	autoVEC work = raw_VEC (lwork);
 	autoINTVEC iwork = raw_INTVEC (liwork), isuppz = raw_INTVEC (2 * my numberOfEigenvalues);
 	autoVEC diagonalCopy = copy_VEC (diagonal), offDiagonalCopy = copy_VEC (offDiagonal);
 	integer numberOfEigenvaluesFound, info = 0;
+	/*
+		Eigenvalues from dstevr are returned in ascending order.
+		If (numberOfEigenvalues < dimension) && ! sortAscending
+			get the last part of the eigenvalues instead of the first part!
+	*/
+	integer ilow = 1, iup = my numberOfEigenvalues;
+	if (! sortAscending) {
+		ilow = my dimension - my numberOfEigenvalues + 1;
+		iup = ilow + my numberOfEigenvalues - 1;
+	}
 	(void) NUMlapack_dstevr (jobz, range, my dimension, & diagonalCopy [1], & offDiagonalCopy [1],
-		vl, vu, il, iu, abstol, & numberOfEigenvaluesFound, & my eigenvalues [1],
+		vl, vu, ilow, iup, abstol, & numberOfEigenvaluesFound, & my eigenvalues [1],
 		& my eigenvectors [1][1], evLeadingDimension, & isuppz [1], & work [1], lwork,
 		& iwork [1], liwork, & info);
 	Melder_require (info == 0,
@@ -305,6 +316,7 @@ void Eigen_fromSymmetricTridiagonal (Eigen me, constVEC const& diagonal, constVE
 	Melder_require (numberOfEigenvaluesFound == my numberOfEigenvalues,
 		U"The number of eigenvalues found (", numberOfEigenvaluesFound, U") differs from the number "
 		"of eigenvalues wanted (", my numberOfEigenvalues, U").");
+	Eigen_sort_special (me, sortAscending);
 }
 
 integer Eigen_getNumberOfEigenvectors (Eigen me) {

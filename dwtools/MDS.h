@@ -4,7 +4,7 @@
  *
  * Multi Dimensional Scaling
  *
- * Copyright (C) 1993-2020 David Weenink, 2015,2017,2018 Paul Boersma
+ * Copyright (C) 1993-2020, 2026 David Weenink, 2015,2017,2018 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,10 +85,7 @@ Collection_define (ScalarProductList, OrderedOf, ScalarProduct) {
 	}
 };
 
-
 #pragma mark - class Dissimilarity
-
-
 
 #pragma mark - class Transformator
 

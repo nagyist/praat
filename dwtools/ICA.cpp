@@ -210,7 +210,7 @@ static void Diagonalizer_CrossCorrelationTable_qdiag (Diagonalizer me, CrossCorr
 		const CrossCorrelationTable c0 = thy at [1];
 		const integer dimension = c0 -> numberOfColumns;
 
-		autoEigen eigen = Eigen_createFromSquareMAT (c0 -> data.get(), kMAT_TYPE::SYMMETRIC, dimension);
+		autoEigen eigen = Eigen_createFromSquareMAT (c0 -> data.get(), kMAT_TYPE::SYMMETRIC, dimension, false);
 		autoCrossCorrelationTableList ccts = Data_copy (thee);
 		autoMAT d = zero_MAT (dimension, dimension);
 		autoMAT pinv = raw_MAT (dimension, dimension);
@@ -276,7 +276,7 @@ static void Diagonalizer_CrossCorrelationTable_qdiag (Diagonalizer me, CrossCorr
 
 					update_one_column (ccts.get(), d.get(), cweights, wvec.get(), -1.0, mvec.get());
 
-					MAT_into_Eigen (d.get(), kMAT_TYPE::SYMMETRIC, eigen.get());
+					MAT_into_Eigen (d.get(), kMAT_TYPE::SYMMETRIC, eigen.get(), false);
 
 					// Eigenvalues sorted from high to low; get eigenvector of smallest !
 					wnew.all()  <<=  eigen -> eigenvectors.row (dimension);

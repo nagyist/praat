@@ -1,6 +1,6 @@
 /* MDS.cpp
  *
- * Copyright (C) 1993-2020 David Weenink, 2015,2017 Paul Boersma
+ * Copyright (C) 1993-2020, 2026 David Weenink, 2015,2017 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1089,7 +1089,7 @@ void ScalarProductList_to_Configuration_ytl (ScalarProductList me, integer numbe
 		}
 		
 		autoMAT evec;
-		
+
 		MAT_getEigenSystemFromSymmetricMatrix (a.get(), & evec, nullptr, false);
 		
 		autoMAT cl = zero_MAT (numberOfDimensions, numberOfDimensions);

@@ -21,7 +21,7 @@
 #include "MATTypes_enums.h"
 #include "Eigen.h"
 
-void MAT_into_Eigen (constMATVU const& mat, kMAT_TYPE matType, Eigen me);
+void MAT_into_Eigen (constMATVU const& mat, kMAT_TYPE matType, Eigen me, bool sortAscending);
 
 void MAT_getEigenSystemFromSymmetricMatrix (constMAT a, autoMAT *out_eigenvectors, autoVEC *out_eigenvalues, bool sortAscending);
 /*
@@ -46,21 +46,6 @@ void MAT_getEigenSystemFromSymmetricMatrix_preallocated (MAT eigenvectors, VEC e
 	Output:
 		eigenvectors, stored row-wise
 		eigenvalues, eigenvalues sorted according to sortAscending
-*/
-
-void MAT_getEigenSystemFromGeneralSquareMatrix (constMAT const& inout_a, autoCOMPVEC *out_eigenvalues, automatrix<dcomplex> *out_eigenvectors);
-/* no standard sorting with complex numbers.
-	Compute eigenvalues of general nxn matrix with right eigenvectors.
-	There is no standard sorting with complex numbers.
-	Input:
-	Output:
-		inout_a has been overwriten
-		out_eigenvalues
-			the eigenvalues.
-			Complex conjugate pairs of eigenvalues appear consecutively
-            with the eigenvalue having the positive imaginary part first.
-		out_eigenvectors
-			the eigenvectors (stored row-wise!)
 */
 
 void MAT_asPrincipalComponents_preallocated (MATVU pc, constMATVU const& m, integer numberOfComponents);

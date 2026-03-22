@@ -153,7 +153,7 @@ procedure testSymmetric_4by4
 	...				{4, 6, 5, 7}}
 	.eigenvalues# =	{17.333479094364993, 1.758549986173555, -0.24923615375564823, -1.8427929267829193}
 	.mat = Create simple Matrix: "4x4s", .dim, .dim, ~ .mat##[row,col]
-	.eigen = To Eigen (special): "symmetric", 0
+	.eigen = To Eigen (special): "symmetric", 0, "no"
 	@testEqualityOfEigenvalues: .eigen, .eigenvalues#
 	@testOrthogonalityOfEigenvectors: .eigen
 	removeObject: .mat, .eigen
@@ -259,7 +259,7 @@ procedure testGeneral_3by3
 	# one of the eigenvalues is real (1) the other two are complex
 	.givenValues_re# = {-1/2, -1/2, 1}
 	.givenValues_im# = {0.5*sqrt(3), -0.5*sqrt(3), 0}
-	.eigen = To Eigen (special): "general", .dim
+	.eigen = To Eigen (special): "general", .dim, "no"
 	.eigenvalues_re# = List eigenvalues
 	.eigenvalues_im# = List eigenvalues (imag)
 	@testEqualityOfEigenvalues: .eigen, .givenValues_re#
@@ -299,14 +299,14 @@ procedure testEigenvaluesOfOneWNKMatrix: .n
 	... if row = col+1 then if row < .n then 0.5*sqrt(col*(2*.n-1-col)) else .bnm1 fi else
 	... if col = row+1 then if col < .n then 0.5*sqrt(row*(2*.n-1-row)) else .bnm1 fi else 
 	... 0.0 fi fi fi
-	.wneigen = To Eigen (special): "symmetric tridiagonal", .n
+	.wneigen = To Eigen (special): "symmetric tridiagonal", .n, "no"
 	for .ival to 	.n
 		.eval = Get eigenvalue: .ival
 		assert abs (.eval / (2 * (.n + 1 -.ival)) - 1.0) < 1.0e-7
 	endfor
 	# Create the principal submatrix
 	.wnps = Create simple Matrix: "Wns", .n-1, .n-1, ~ object[.wn, row, col]
-	.wnpseigen = To Eigen (special): "symmetric tridiagonal", .n-1
+	.wnpseigen = To Eigen (special): "symmetric tridiagonal", .n-1, "no"
 	for .ival to 	.n-1
 		.eval = Get eigenvalue: .ival
 		assert abs (.eval / (2 * (.n + 1 -.ival) - 1) - 1.0) < 1.0e-7
@@ -335,7 +335,7 @@ procedure testEigenvaluesOfOneKacSylvesterMatrix: .n
 	.ks = Create simple Matrix: "Kn", .n+1, .n+1, ~ 
 	... if row = col+1 then col else
 	... if col = row+1 then .n+1-row else 0 fi fi
-	.eigen = To Eigen (special): "symmetric", .n
+	.eigen = To Eigen (special): "symmetric", .n, "no"
 	for .ival to 	.n
 		.eval = Get eigenvalue: .ival
 		assert abs (.eval / (2 * .ival - .n) - 1.0) < 1.0e-7
