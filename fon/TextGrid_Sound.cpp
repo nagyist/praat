@@ -414,7 +414,8 @@ void TextGrid_Sound_transcribeInterval (
 	const TextGrid me, const Sound sound,
 	const integer tierNumber, const integer intervalNumber,
 	const conststring32 modelName, const conststring32 languageName,
-	const bool includeWords, const bool useVad
+	const bool includeWords, const bool useVad, const double speechProbabilityThreshold,
+	const double minNonSpeechDuration, const double minSpeechDuration, const double speechPad
 ) {
 	try {
 		//TRACE
@@ -432,8 +433,14 @@ void TextGrid_Sound_transcribeInterval (
 		autoSound soundPart = Sound_extractPart (sound, original_tmin, original_tmax,
 			kSound_windowShape::RECTANGULAR, 1.0, false);
 		autoSpeechRecognizer speechRecognizer = SpeechRecognizer_create (modelName, languageName);
+		SileroVadParams sileroVadParams;
+		sileroVadParams.speechProbabilityThreshold = speechProbabilityThreshold;
+		sileroVadParams.minSpeechDuration = minSpeechDuration;
+		sileroVadParams.minNonSpeechDuration = minNonSpeechDuration;
+		sileroVadParams.speechPad = speechPad;
+		trace(U"speechPad = ", speechPad);
 		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (
-			speechRecognizer.get(), soundPart.get(), useVad);
+				speechRecognizer.get(), soundPart.get(), useVad, sileroVadParams);
 
 		/*
 			Create one interval per utterance in the head tier.

@@ -35,6 +35,7 @@
 #include "SpectrumEditor.h"
 #include "TextGrid_Sound.h"
 #include "mp3.h"
+#include "SpeechRecognizer.h"
 
 #include "praat_Sound.h"
 
@@ -1890,17 +1891,17 @@ FORM (CONVERT_EACH_TO_ONE__Sound_to_TextGrid_speechActivity_silero,
 	U"Sound: To TextGrid (speech activity, Silero)",
 	U"Sound: To TextGrid (speech activity, Silero)...")
 {
-	POSITIVE (speechProbabilityThreshold, U"Speech probability threshold (0 - 1)", U"0.5")
-	POSITIVE (minNonSpeechDuration, U"Min. non-speech interval (s)", U"0.1")
-	POSITIVE (minSpeechDuration, U"Min. speech interval (s)", U"0.25")
-	POSITIVE (speechPad, U"Padding around speech segments (s)", U"0.03")
-	WORD (nonSpeechLabel, U"Non-speech interval label", U"non-speech")
-	WORD (speechLabel, U"Speech interval label", U"speech")
+	POSITIVE (speechProbabilityThreshold, U"Speech probability threshold (0 - 1)", theVadDefaultThresholdStr)
+	POSITIVE (minNonSpeechDuration, U"Min. non-speech interval (s)", theVadDefaultMinNonSpeechDurationStr)
+	POSITIVE (minSpeechDuration, U"Min. speech interval (s)", theVadDefaultMinSpeechDurationStr)
+	POSITIVE (speechPad, U"Padding around speech segments (s)", theVadDefaultSpeechPadStr)
+	WORD (nonSpeechLabel, U"Non-speech interval label", theVadDefaultNonSpeechLabel)
+	WORD (speechLabel, U"Speech interval label", theVadDefaultSpeechLabel)
 	OK
 DO
 	CONVERT_EACH_TO_ONE (Sound)
-		autoTextGrid result = Sound_to_TextGrid_speechActivity_silero (
-				me, speechProbabilityThreshold, minSpeechDuration, minNonSpeechDuration, speechPad, speechLabel, nonSpeechLabel);
+		autoTextGrid result = Sound_to_TextGrid_speechActivity_silero (me, speechProbabilityThreshold,
+				minNonSpeechDuration, minSpeechDuration, speechPad, nonSpeechLabel, speechLabel);
 	CONVERT_EACH_TO_ONE_END (my name.get())
 }
 

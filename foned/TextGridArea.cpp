@@ -1445,16 +1445,24 @@ static void menu_cb_TranscribeInterval (TextGridArea me, EDITOR_ARGS) {
 		const autoMelderProgressOff noprogress;
 		FunctionArea_save (me, U"Transcribe interval");
 		TextGrid_Sound_transcribeInterval (my textGrid(), my borrowedSoundArea -> sound(), my selectedTier, intervalNumber,
-				my instancePref_transcribe_model(), my instancePref_transcribe_language(), my instancePref_transcribe_includeWords (),
-				my instancePref_transcribe_useVad ());
+				my instancePref_transcribe_model(), my instancePref_transcribe_language(), my instancePref_transcribe_includeWords(),
+				my instancePref_transcribe_useVad(), my instancePref_transcribe_vadThreshold(), my instancePref_transcribe_vadMinNonSpeech(),
+				my instancePref_transcribe_vadMinSpeech(), my instancePref_transcribe_vadPadding());
 	}
 	FunctionArea_broadcastDataChanged (me);
 }
 
 static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Transcription settings", nullptr)
-		BOOLEAN (includeWords, U"Include words", my default_transcribe_includeWords ())
-		BOOLEAN (useVad, U"Allow silences", my default_transcribe_useVad ())
+		HEADING (U"Textgrid...")
+		BOOLEAN (includeWords, U"Include words", my default_transcribe_includeWords())
+		HEADING (U"Speech activity detection...")
+		BOOLEAN (useVad, U"Allow silences", my default_transcribe_useVad())
+		POSITIVE (speechProbabilityThreshold, U"Speech probability threshold (0 - 1)", my default_transcribe_vadThreshold())
+		POSITIVE (minNonSpeechDuration, U"Min. non-speech interval (s)", my default_transcribe_vadMinNonSpeech())
+		POSITIVE (minSpeechDuration, U"Min. speech interval (s)", my default_transcribe_vadMinSpeech())
+		POSITIVE (speechPad, U"Padding around speech segments (s)", my default_transcribe_vadPadding())
+		HEADING (U"Transcription...")
 		LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
 		LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
 	EDITOR_OK
@@ -1468,6 +1476,10 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 
 		SET_BOOLEAN (includeWords, my instancePref_transcribe_includeWords())
 		SET_BOOLEAN (useVad, my instancePref_transcribe_useVad())
+		SET_REAL (speechProbabilityThreshold, my instancePref_transcribe_vadThreshold())
+		SET_REAL (minNonSpeechDuration, my instancePref_transcribe_vadMinNonSpeech())
+		SET_REAL (minSpeechDuration, my instancePref_transcribe_vadMinSpeech())
+		SET_REAL (speechPad, my instancePref_transcribe_vadPadding())
 
 		integer prefModel = NUMfindFirst (modelNames.get (), my instancePref_transcribe_model());
 		if (prefModel == 0)
@@ -1486,6 +1498,10 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 		my setInstancePref_transcribe_language (languageName);
 		my setInstancePref_transcribe_includeWords (includeWords);
 		my setInstancePref_transcribe_useVad (useVad);
+		my setInstancePref_transcribe_vadThreshold (speechProbabilityThreshold);
+		my setInstancePref_transcribe_vadMinNonSpeech (minNonSpeechDuration);
+		my setInstancePref_transcribe_vadMinSpeech (minSpeechDuration);
+		my setInstancePref_transcribe_vadPadding (speechPad);
 	EDITOR_END
 }
 

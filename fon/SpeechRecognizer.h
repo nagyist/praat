@@ -24,6 +24,26 @@ struct whisper_context;
 struct whisper_vad_context;
 struct whisper_vad_segments;
 
+/*
+	Default Whisper model parameters.
+*/
+inline conststring32 theSpeechRecognizerDefaultModelName = U"ggml-base.bin";
+inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect language";
+
+/*
+	Default Silero-VAD parameters.
+*/
+inline constexpr double theVadDefaultThreshold = 0.5;
+inline conststring32 theVadDefaultThresholdStr = U"0.5";   // for UI
+inline constexpr double theVadDefaultMinSpeechDuration = 0.25;
+inline conststring32 theVadDefaultMinSpeechDurationStr = U"0.25";   // for UI
+inline constexpr double theVadDefaultMinNonSpeechDuration = 0.1;
+inline conststring32 theVadDefaultMinNonSpeechDurationStr = U"0.1";   // for UI
+inline constexpr double theVadDefaultSpeechPad = 0.03;
+inline conststring32 theVadDefaultSpeechPadStr = U"0.03";   // for UI
+inline conststring32 theVadDefaultSpeechLabel = U"speech";   // for UI
+inline conststring32 theVadDefaultNonSpeechLabel = U"non-speech";   // for UI
+
 struct autoWhisperContext {
 	whisper_context *ptr;
 
@@ -78,6 +98,12 @@ struct autoWhisperVadSegments {
 	whisper_vad_segments * get () const { return ptr; }
 };
 
+struct SileroVadParams {
+	double speechProbabilityThreshold = theVadDefaultThreshold;   // probability threshold to decide that sound is speech
+	double minSpeechDuration = theVadDefaultMinSpeechDuration;   // min duration of a speech segment
+	double minNonSpeechDuration = theVadDefaultMinNonSpeechDuration;   // min duration of a non-speech segment
+	double speechPad = theVadDefaultSpeechPad;   // padding added before and after each speech segment
+};
 
 struct WhisperSegment {
 	autostring32 text;
@@ -100,23 +126,17 @@ constSTRVEC theCurrentSpeechRecognizerModelNames ();
 constSTRVEC theSpeechRecognizerLanguageNames ();
 
 /*
-	Default model parameters.
-*/
-inline conststring32 theSpeechRecognizerDefaultModelName = U"ggml-base.bin";
-inline conststring32 theSpeechRecognizerDefaultLanguageName = U"Autodetect language";
-
-/*
 	Class SpeechRecognizer functions.
 */
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName);
-WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound, bool useVad);
+WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound,
+		bool useVad, const SileroVadParams &sileroVadParams);
 
 /*
-	SileroVAD functions.
+	Silero-VAD functions.
 */
-autovector <WhisperSegment> doSileroVad (constSound sound, const double speechProbabilityThreshold,
-	const double minSpeechDuration, const double minNonSpeechDuration, const double speechPad,
-	conststring32 speechLabel, conststring32 nonSpeechLabel);
+autovector <WhisperSegment> doSileroVad (constSound sound, const SileroVadParams &sileroVadParams,
+		conststring32 nonSpeechLabel, conststring32 speechLabel);
 
 /* End of file SpeechRecognizer.h */
 #endif
