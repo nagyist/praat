@@ -40,11 +40,11 @@ The following people contributed source code to Praat:
 	@@feedforward neural networks@, @@principal component analysis@, @@multidimensional scaling@, @@discriminant analysis@, @LPC,
 	@@KlattGrid|Acoustic synthesis (Klatt)@, automatic alignment, @VowelEditor, @FormantPath,
 	and adaptation of GSL, LAPACK, fftpack, regular expressions, eSpeak, Ogg Vorbis, Opus and LAME.
-, Anastasia Shchupak: speech recognition, automatic orthographic transcription and alignment,
-	and adaptation of Whisper.cpp.
+, Anastasia Shchupak: automatic speech recognition with word-level timestamps, automatic speaker diarization,
+	and adaptation of Whisper.cpp, Silero VAD and Pyannote.
+, Erez Volk: adaptation of FLAC and MAD.
 , Stefan de Konink and Franz Brauße: major help in port to GTK.
 , Tom Naughton: major help in port to Cocoa.
-, Erez Volk: adaptation of FLAC and MAD.
 , Ola Söder: kNN classifiers, k-means clustering.
 , Rafael Laboissière: adaptation of XIPA, audio bug fixes for Linux.
 , Darryl Purnell created the first version of audio for Praat for Linux.
@@ -81,6 +81,7 @@ We included the following freely available software libraries in Praat (sometime
 	using separately installed Whisper models by OpenAI (@@Whisper OpenAI MIT License@).
 , Silero VAD: Voice Activity Detection model (version 6.2.0) by the Silero Team,
     embedded in GGML format (@@Silero VAD MIT License@).
+, Pyannote: automatic speaker diarization by Hervé Bredin, version 4.0.4 of February 2026.
 
 Our own parts of the source code of Praat are distributed either under the
 @@General Public License, version 2@ or later, or under the @@General Public License, version 3@ or later.

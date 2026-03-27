@@ -21,10 +21,12 @@
 //#include "../external/gsl/gsl_blas.h"
 
 #ifdef macintosh
+	#include "macport_on.h"
 	#include <Accelerate/Accelerate.h>
 	#undef trace
 	#import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 	#include <OpenCL/opencl.h>
+	#include "macport_off.h"
 #endif
 
 void centreEachColumn_MAT_inout (MATVU const& x) noexcept {
