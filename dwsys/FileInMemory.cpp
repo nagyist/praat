@@ -102,7 +102,7 @@ void FileInMemory_showAsCode (FileInMemory me, conststring32 name, integer numbe
 		const unsigned char number = my d_data [i];
 		MelderInfo_write (( i % numberOfBytesPerLine == 1 ? U"\"\n\"" : U"" ), U"\\x", Melder_hexadecimal (number, 2));
 	}
-	MelderInfo_writeLine (U"\"\n;");
+	MelderInfo_writeLine (U"\"\n\t\t;");
 	MelderInfo_write (U"\t\tautoFileInMemory ", name, U" = FileInMemory_createWithData (");
 	MelderInfo_writeLine (my d_numberOfBytes, U", ", name, U"_data, true, U\"", my string.get(), U"\");");
 }
