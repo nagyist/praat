@@ -556,10 +556,17 @@ DIRECT (MODIFY_TextGrid_Sound_scaleTimes) {
 }
 
 FORM (MODIFY_TextGrid_Sound_transcribeInterval, U"TextGrid & Sound: Transcribe interval", U"TextGrid & Sound: Transcribe interval") {
+	HEADING (U"Textgrid...")
 	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
 	NATURAL (intervalNumber, STRING_INTERVAL_NUMBER, U"1")
 	BOOLEAN (includeWords, U"Include words", true)
+	HEADING (U"Speech activity detection...")
 	BOOLEAN (useVad, U"Allow silences", true)
+	POSITIVE (speechProbabilityThreshold, U"Speech probability threshold (0 - 1)", U"0.5")
+	POSITIVE (minNonSpeechDuration, U"Min. non-speech interval (s)", U"0.1")
+	POSITIVE (minSpeechDuration, U"Min. speech interval (s)", U"0.25")
+	POSITIVE (speechPad, U"Padding around speech segments (s)", U"0.03")
+	HEADING (U"Transcription...")
 	LISTNUMSTR (modelIndex, modelName, U"Whisper model", constSTRVEC(), 1)
 	LISTNUMSTR (languageIndex, languageName, U"Language", constSTRVEC(), 1)
 OK
@@ -576,7 +583,8 @@ OK
 		NUMfindFirst (theSpeechRecognizerLanguageNames(), theSpeechRecognizerDefaultLanguageName))
 DO
 	MODIFY_FIRST_OF_ONE_AND_ONE (TextGrid, Sound)
-		TextGrid_Sound_transcribeInterval (me, you, tierNumber, intervalNumber, modelName, languageName, includeWords, useVad);
+		TextGrid_Sound_transcribeInterval (me, you, tierNumber, intervalNumber, modelName, languageName, includeWords,
+				useVad, speechProbabilityThreshold, minNonSpeechDuration, minSpeechDuration, speechPad);
 	MODIFY_FIRST_OF_ONE_AND_ONE_END
 }
 

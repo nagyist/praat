@@ -187,7 +187,8 @@ static std::vector <float> resampleForWhisper (constSound sound) {
 	return samples32;
 }
 
-static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, bool useVad) {
+static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound,
+		bool useVad, const SileroVadParams &sileroVadParams) {
 	/*
 		Prepare sound for Whispercpp.
 	*/
@@ -203,6 +204,10 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound, 
 		params.vad_model_data = ggml_silero_bin;   // set up either params.vad_model_data or params.vad_model_path
 		params.vad_model_data_size = ggml_silero_bin_len;
 		params.vad_params = whisper_vad_default_params();
+		params.vad_params.threshold = sileroVadParams.speechProbabilityThreshold;
+		params.vad_params.min_speech_duration_ms = sileroVadParams.minSpeechDuration * 1000.0;
+		params.vad_params.min_silence_duration_ms = sileroVadParams.minNonSpeechDuration * 1000.0;
+		params.vad_params.speech_pad_ms = sileroVadParams.speechPad * 1000.0;
 	}
 	if (whisper_is_multilingual (my whisperContext.get ())) {
 		if (my d_languageName && ! str32str (my d_languageName.get(), U"Autodetect")) {
@@ -242,10 +247,8 @@ static bool endsWithPunctuation(conststring32 token) {
 	return ! Melder_isAlphanumeric (last_char) && last_char != U' ';
 }
 
-autovector <WhisperSegment> doSileroVad (constSound sound, const double speechProbabilityThreshold,
-	const double minSpeechDuration, const double minNonSpeechDuration, const double speechPad,
-	conststring32 speechLabel, conststring32 nonSpeechLabel
-) {
+autovector <WhisperSegment> doSileroVad (constSound sound, const SileroVadParams &sileroVadParams,
+		conststring32 nonSpeechLabel, conststring32 speechLabel) {
 	try {
 		//TRACE
 		trace (U"Sound xmin = ", sound -> xmin, U", sound xmax = ", sound -> xmax);
@@ -271,10 +274,10 @@ autovector <WhisperSegment> doSileroVad (constSound sound, const double speechPr
 			Set VAD parameters and run Silero VAD.
 		*/
 		whisper_vad_params vad_params = whisper_vad_default_params();
-		vad_params.threshold = speechProbabilityThreshold;
-		vad_params.min_speech_duration_ms = minSpeechDuration * 1000.0;
-		vad_params.min_silence_duration_ms = minNonSpeechDuration * 1000.0;
-		vad_params.speech_pad_ms = speechPad * 1000.0;
+		vad_params.threshold = sileroVadParams.speechProbabilityThreshold;
+		vad_params.min_speech_duration_ms = sileroVadParams.minSpeechDuration * 1000.0;
+		vad_params.min_silence_duration_ms = sileroVadParams.minNonSpeechDuration * 1000.0;
+		vad_params.speech_pad_ms = sileroVadParams.speechPad * 1000.0;
 		autoWhisperVadSegments vad_segments = whisper_vad_segments_from_samples(
 			vad_ctx.get(), vad_params, samples32.data(), static_cast <int> (samples32.size()));
 		if (!vad_segments.get()) {
@@ -339,14 +342,15 @@ autovector <WhisperSegment> doSileroVad (constSound sound, const double speechPr
 	}
 }
 
-WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound, bool useVad) {
+WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound,
+		bool useVad, const SileroVadParams &sileroVadParams) {
 	try {
 		//TRACE
 		trace (U"Sound xmin = ", sound -> xmin, U", sound xmax = ", sound -> xmax);
 		/*
 			Run Whisper and control for blank audio.
 		*/
-		SpeechRecognizer_runWhisper (me, sound, useVad);
+		SpeechRecognizer_runWhisper (me, sound, useVad, sileroVadParams);
 		const int n_segments = whisper_full_n_segments (my whisperContext.get());
 		if (! n_segments) {
 			WhisperTranscription transcription;

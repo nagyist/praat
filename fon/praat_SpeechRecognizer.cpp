@@ -1,3 +1,21 @@
+/* praat_SpeechRecognizer.cpp
+*
+ * Copyright (C) 2025 Anastasia Shchupak
+ *
+ * This code is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * This code is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this work. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "praat_SpeechRecognizer.h"
 #include "SpeechRecognizer.h"
 #include "praatM.h"
@@ -43,7 +61,9 @@ DIRECT (QUERY_ONE_FOR_STRING__SpeechRecognizer_getLanguageName) {
 
 DIRECT (QUERY_ONE_AND_ONE_FOR_STRING__SpeechRecognizer_Sound_recognize) {
 	QUERY_ONE_AND_ONE_FOR_STRING (SpeechRecognizer, Sound)
-		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (me, you, true);
+		bool useVad = true;
+		SileroVadParams sileroVadParams;   // use default VAD parameters
+		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (me, you, useVad, sileroVadParams);
 		conststring32 result = whisperTranscription.fullTranscription.text.get();
 	QUERY_ONE_AND_ONE_FOR_STRING_END
 }
