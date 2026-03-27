@@ -1,5 +1,5 @@
 "How to integrate eSpeak into Praat"
-© 2012,2015,2017,2021,2023 David Weenink, 2024,2025 Paul Boersma
+© 2012,2015,2017,2021,2023 David Weenink, 2024-2026 Paul Boersma
 
 This script is `generate/espeak/GENERATE.praat` in the Praat source distribution.
 It looks like a Praat %notebook and can indeed be dry-run as such,
@@ -149,6 +149,12 @@ Create FileInMemory objects for the 117 dictionary files, with 23,013,656 bytes 
 	Create FileInMemorySet from directory contents: "dicts", generationDataFolder$, "*_dict"
 	numberOfDicts = Get number of files
 	assert numberOfDicts = 117
+}
+Save these.
+{;
+	@defineDataFolders
+	selectObject: "FileInMemorySet dicts"
+	@saveFileInMemorySetAsCppFile: "espeak_praat_FileInMemorySet_addDicts"
 }
 In order to ensure compilability with 32-bit compilers, split this set up into Russian, Faroese, and the rest.
 {;

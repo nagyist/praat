@@ -298,9 +298,7 @@ FileInMemorySet theEspeakPraatFileInMemorySet() {
 	if (! me) {
 		me = FileInMemorySet_create ();
 		espeak_praat_FileInMemorySet_addPhon (me.get());
-		espeak_praat_FileInMemorySet_addRussianDict (me.get());
-		espeak_praat_FileInMemorySet_addFaroeseDict (me.get());
-		espeak_praat_FileInMemorySet_addOtherDicts (me.get());
+		espeak_praat_FileInMemorySet_addDicts (me.get());
 		espeak_praat_FileInMemorySet_addLanguages (me.get());
 		espeak_praat_FileInMemorySet_addVoices (me.get());
 		if (nativeIsBigEndian ())   // OPTIMIZATION: 1 ms less start-up time
