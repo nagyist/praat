@@ -1,5 +1,5 @@
 "How to integrate eSpeak into Praat"
-© 2012,2015,2017,2021,2023 David Weenink, 2024,2025 Paul Boersma
+© 2012,2015,2017,2021,2023 David Weenink, 2024-2026 Paul Boersma
 
 This script is `generate/espeak/GENERATE.praat` in the Praat source distribution.
 It looks like a Praat %notebook and can indeed be dry-run as such,
@@ -93,7 +93,7 @@ procedure saveFileInMemorySetAsCppFile: .name$
 	... " *" + newline$ +
 	... " * Copyright (C) 2005-2014 Jonathan Duddington (for eSpeak)" + newline$ +
 	... " * Copyright (C) 2015-2023 Reese Dunn (for eSpeak-NG)" + newline$ +
-	... " * Copyright (C) 2012-2024 David Weenink, 2024 Paul Boersma (for Praat)" + newline$ +
+	... " * Copyright (C) 2012-2024 David Weenink, 2024,2026 Paul Boersma (for Praat)" + newline$ +
 	... " *" + newline$ +
 	... " * This program is free software; you can redistribute it and/or modify " + newline$ +
 	... " * it under the terms of the GNU General Public License as published by" + newline$ +
@@ -150,26 +150,8 @@ Create FileInMemory objects for the 117 dictionary files, with 23,013,656 bytes 
 	numberOfDicts = Get number of files
 	assert numberOfDicts = 117
 }
-In order to ensure compilability with 32-bit compilers, split this set up into Russian, Faroese, and the rest.
-{;
-	Remove files: "contains", "/ru_dict"   ; this extracts the removed dicts!!
-	Rename: "russianDict"
-	numberOfRussianDicts = Get number of files
-	assert numberOfRussianDicts = 1
-
-	selectObject: "FileInMemorySet dicts"
-	Remove files: "contains", "/fo_dict"   ; this extracts the removed dicts!!
-	Rename: "faroeseDict"
-	numberOfFaroeseDicts = Get number of files
-	assert numberOfFaroeseDicts = 1
-
-	selectObject: "FileInMemorySet dicts"
-	Rename: "remainingDicts"
-	numberOfRemainingDicts = Get number of files
-	assert numberOfRemainingDicts = 115
-}
-Create FileInMemory objects for the 134 language files. Three language files are at the top level
-of the `lang` folder:
+Create FileInMemory objects for the 134 language files. Three language files (eu, ko, qu)
+are at the top level of the `lang` folder:
 {;
 	@defineDataFolders
 	Create FileInMemorySet from directory contents: "languages", generationLanguageFolder$, "*"
@@ -205,12 +187,8 @@ We safely save these into the generation folder:
 	@defineDataFolders
 	selectObject: "FileInMemorySet phon"
 	@saveFileInMemorySetAsCppFile: "espeak_praat_FileInMemorySet_addPhon"
-	selectObject: "FileInMemorySet russianDict"
-	@saveFileInMemorySetAsCppFile: "espeak_praat_FileInMemorySet_addRussianDict"
-	selectObject: "FileInMemorySet faroeseDict"
-	@saveFileInMemorySetAsCppFile: "espeak_praat_FileInMemorySet_addFaroeseDict"
-	selectObject: "FileInMemorySet remainingDicts"
-	@saveFileInMemorySetAsCppFile: "espeak_praat_FileInMemorySet_addOtherDicts"
+	selectObject: "FileInMemorySet dicts"
+	@saveFileInMemorySetAsCppFile: "espeak_praat_FileInMemorySet_addDicts"
 	selectObject: "FileInMemorySet languages"
 	@saveFileInMemorySetAsCppFile: "espeak_praat_FileInMemorySet_addLanguages"
 	selectObject: "FileInMemorySet voices"

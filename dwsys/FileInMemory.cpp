@@ -1,6 +1,6 @@
 /* FileInMemory.cpp
  *
- * Copyright (C) 2012-2021 David Weenink, 2017,2024,2025 Paul Boersma
+ * Copyright (C) 2012-2021 David Weenink, 2017,2024-2026 Paul Boersma
  *
  * This code is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,12 +97,12 @@ void FileInMemory_showAsCode (FileInMemory me, conststring32 name, integer numbe
 	if (numberOfBytesPerLine < 1)
 		numberOfBytesPerLine = 20;
 
-	MelderInfo_write (U"\t\tstatic uint8 ", name, U"_data[", my d_numberOfBytes+1, U"] = {");
+	MelderInfo_write (U"\t\tstatic unsigned char ", name, U"_data[", my d_numberOfBytes+1, U"] = \"");
 	for (integer i = 1; i <= my d_numberOfBytes; i ++) {
 		const unsigned char number = my d_data [i];
-		MelderInfo_write (( i % numberOfBytesPerLine == 1 ? U"\n\t\t\t" : U"" ), number, U",");
+		MelderInfo_write (( i % numberOfBytesPerLine == 1 ? U"\"\n\"" : U"" ), U"\\x", Melder_hexadecimal (number, 2));
 	}
-	MelderInfo_writeLine (U"0};");
+	MelderInfo_writeLine (U"\"\n\t\t;");
 	MelderInfo_write (U"\t\tautoFileInMemory ", name, U" = FileInMemory_createWithData (");
 	MelderInfo_writeLine (my d_numberOfBytes, U", ", name, U"_data, true, U\"", my string.get(), U"\");");
 }

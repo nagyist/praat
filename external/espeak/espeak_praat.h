@@ -1,7 +1,7 @@
 #ifndef _espeak_praat_h_
 #define _espeak_praat_h_
 /* espeak_praat.h
- * Copyright (C) 2017-2024 David Weenink, 2024,2025 Paul Boersma
+ * Copyright (C) 2017-2024 David Weenink, 2024-2026 Paul Boersma
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,7 @@ FileInMemorySet theEspeakPraatFileInMemorySet();   // accessor to a singleton, w
 	Had they been smaller, they would have been included as local functions in espeak_praat.cpp.
 */
 void espeak_praat_FileInMemorySet_addPhon (FileInMemorySet me);
-void espeak_praat_FileInMemorySet_addRussianDict (FileInMemorySet me);
-void espeak_praat_FileInMemorySet_addFaroeseDict (FileInMemorySet me);
-void espeak_praat_FileInMemorySet_addOtherDicts (FileInMemorySet me);
+void espeak_praat_FileInMemorySet_addDicts (FileInMemorySet me);
 void espeak_praat_FileInMemorySet_addLanguages (FileInMemorySet me);
 void espeak_praat_FileInMemorySet_addVoices (FileInMemorySet me);
 
