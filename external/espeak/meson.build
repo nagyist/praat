@@ -1,5 +1,5 @@
 # meson.build of the external library "espeak"
-# David Weenink, 5 September 2024
+# David Weenink, 28 March 2026
 
 sources = '''
 	case.cpp categories.cpp common.cpp compiledict.cpp
@@ -11,8 +11,7 @@ sources = '''
 	ssml.cpp synthdata.cpp synthesize.cpp
 	tr_languages.cpp translate.cpp translateword.cpp voices.cpp wavegen.cpp
 	espeak_praat_FileInMemorySet_addLanguages.cpp espeak_praat_FileInMemorySet_addVoices.cpp
-	espeak_praat_FileInMemorySet_addRussianDict.cpp espeak_praat_FileInMemorySet_addFaroeseDict.cpp
-	espeak_praat_FileInMemorySet_addOtherDicts.cpp espeak_praat_FileInMemorySet_addPhon.cpp
+	espeak_praat_FileInMemorySet_addDicts.cpp espeak_praat_FileInMemorySet_addPhon.cpp
 	espeak_praat.cpp'''.split()
 
 libespeak = static_library (
