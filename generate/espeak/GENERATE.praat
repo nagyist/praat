@@ -109,7 +109,7 @@ procedure saveFileInMemorySetAsCppFile: .name$
 	... " * along with this program; if not, see: <http://www.gnu.org/licenses/>." + newline$ +
 	... " */" + newline$ + newline$ +
 	... “#include "espeak_praat.h"” + newline$
-	.code$ = Show as code: .name$, 30
+	.code$ = Show as code: .name$, 100
 	.tail$ = "/* End of file " + .fileName$ + " */" + newline$
 	writeFile: .fileName$, .head$, .code$, .tail$
 endproc
