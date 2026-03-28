@@ -115,7 +115,7 @@ void FileInMemory_showAsCode (FileInMemory me, conststring32 name, integer numbe
 				MelderInfo_write (buffer);
 			}
 		} else if (number >= 14) {
-			if (nextNumber >= '0' && nextNumber <= '7')
+			if (nextNumber >= '0' && nextNumber <= '7' && i % numberOfBytesPerLine != 0)
 				MelderInfo_write (U"\\0", number / 8, number % 8);
 			else
 				MelderInfo_write (U"\\", number / 8, number % 8);
