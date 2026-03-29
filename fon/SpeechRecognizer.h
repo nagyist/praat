@@ -105,6 +105,13 @@ struct SileroVadParams {
 	double speechPad = theVadDefaultSpeechPad;   // padding added before and after each speech segment
 };
 
+/*
+	This should be extended, and also store the default labels above.
+*/
+struct DiarizationParams {
+	float segmentDuration = 10.0f;
+};
+
 struct WhisperSegment {
 	autostring32 text;
 	double tmin;
@@ -115,6 +122,7 @@ struct WhisperTranscription {
 	WhisperSegment fullTranscription;
 	autovector <WhisperSegment> words;
 	autovector <WhisperSegment> sentences;
+	autovector <autovector <WhisperSegment>> speakers;
 };
 
 #include "SpeechRecognizer_def.h"
@@ -130,13 +138,18 @@ constSTRVEC theSpeechRecognizerLanguageNames ();
 */
 autoSpeechRecognizer SpeechRecognizer_create (conststring32 modelName, conststring32 languageName);
 WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound,
-		bool useVad, const SileroVadParams &sileroVadParams);
+		bool useVad, const SileroVadParams &sileroVadParams, bool diarize);
 
 /*
 	Silero-VAD functions.
 */
 autovector <WhisperSegment> doSileroVad (constSound sound, const SileroVadParams &sileroVadParams,
 		conststring32 nonSpeechLabel, conststring32 speechLabel);
+
+/*
+	Diarization functions.
+*/
+autovector <autovector <WhisperSegment>> doDiarization (constSound sound);
 
 /* End of file SpeechRecognizer.h */
 #endif

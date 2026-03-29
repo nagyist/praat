@@ -1445,7 +1445,8 @@ static void menu_cb_TranscribeInterval (TextGridArea me, EDITOR_ARGS) {
 		const autoMelderProgressOff noprogress;
 		FunctionArea_save (me, U"Transcribe interval");
 		TextGrid_Sound_transcribeInterval (my textGrid(), my borrowedSoundArea -> sound(), my selectedTier, intervalNumber,
-				my instancePref_transcribe_model(), my instancePref_transcribe_language(), my instancePref_transcribe_includeWords(),
+				my instancePref_transcribe_model(), my instancePref_transcribe_language(),
+				my instancePref_transcribe_includeWords(), my instancePref_transcribe_includeDiarization(),
 				my instancePref_transcribe_useVad(), my instancePref_transcribe_vadThreshold(), my instancePref_transcribe_vadMinNonSpeech(),
 				my instancePref_transcribe_vadMinSpeech(), my instancePref_transcribe_vadPadding());
 	}
@@ -1456,6 +1457,7 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 	EDITOR_FORM (U"Transcription settings", nullptr)
 		HEADING (U"Textgrid...")
 		BOOLEAN (includeWords, U"Include words", my default_transcribe_includeWords())
+		BOOLEAN (includeDiarization, U"Include diarization", true)
 		HEADING (U"Speech activity detection...")
 		BOOLEAN (useVad, U"Allow silences", my default_transcribe_useVad())
 		POSITIVE (speechProbabilityThreshold, U"Speech probability threshold (0 - 1)", my default_transcribe_vadThreshold())
@@ -1475,6 +1477,7 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 		);
 
 		SET_BOOLEAN (includeWords, my instancePref_transcribe_includeWords())
+		SET_BOOLEAN (includeDiarization, my instancePref_transcribe_includeDiarization())
 		SET_BOOLEAN (useVad, my instancePref_transcribe_useVad())
 		SET_REAL (speechProbabilityThreshold, my instancePref_transcribe_vadThreshold())
 		SET_REAL (minNonSpeechDuration, my instancePref_transcribe_vadMinNonSpeech())
@@ -1497,6 +1500,7 @@ static void menu_cb_TranscriptionSettings (TextGridArea me, EDITOR_ARGS) {
 		my setInstancePref_transcribe_model (modelName);
 		my setInstancePref_transcribe_language (languageName);
 		my setInstancePref_transcribe_includeWords (includeWords);
+		my setInstancePref_transcribe_includeDiarization (includeDiarization);
 		my setInstancePref_transcribe_useVad (useVad);
 		my setInstancePref_transcribe_vadThreshold (speechProbabilityThreshold);
 		my setInstancePref_transcribe_vadMinNonSpeech (minNonSpeechDuration);

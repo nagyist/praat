@@ -19,6 +19,7 @@
 #include "SpeechRecognizer.h"
 #include "Sound.h"
 #include "whisper.h"
+#include "diarize.h"
 #include "melder.h"
 #include "ggml-silero-vad-model-data.h"
 
@@ -40,6 +41,11 @@
 #include "SpeechRecognizer_def.h"
 #include "oo_DESCRIPTION.h"
 #include "SpeechRecognizer_def.h"
+
+extern unsigned char model_ggml_segmentation_data[];
+extern unsigned int model_ggml_segmentation_length;
+extern unsigned char model_ggml_embedding_data[];
+extern unsigned int model_ggml_embedding_length;
 
 autoWhisperContext :: ~autoWhisperContext () { whisper_free (ptr); }
 autoWhisperContext& autoWhisperContext :: operator= (autoWhisperContext&& other) noexcept {
@@ -342,8 +348,70 @@ autovector <WhisperSegment> doSileroVad (constSound sound, const SileroVadParams
 	}
 }
 
+autovector <autovector <WhisperSegment>> doDiarization (constSound sound) {
+	//TRACE
+	std::vector <float> samples32 = resampleForWhisper (sound);
+	diarize_context * diarizeContext = diarize_init_from_memory (
+		model_ggml_segmentation_data, model_ggml_segmentation_length,
+		model_ggml_embedding_data, model_ggml_embedding_length
+		);
+
+	diarize_params diarizeParams = diarize_default_params();
+	if (diarize_full(diarizeContext, diarizeParams, samples32.data(), static_cast <int> (samples32.size())) != 0) {
+		diarize_free(diarizeContext);
+		Melder_throw (U"Diarization failed");
+	}
+	const int n_diarization_segments = diarize_n_segments(diarizeContext);
+	const int n_speakers = diarize_n_speakers(diarizeContext);
+
+	trace(U"Speakers:", n_speakers, U", Segments: ", n_diarization_segments);
+
+	autovector <autovector <WhisperSegment>> speakers = newvectorzero <autovector <WhisperSegment>> (n_speakers);
+	/*
+		Collect segments for each speaker.
+	*/
+	for (int i = 1; i <= n_speakers; ++i) {
+		double currentIntervalStart = sound -> xmin;
+
+		for (int segment = 0; segment < n_diarization_segments; ++ segment) {
+			if (diarize_segment_speaker(diarizeContext, segment) + 1 != i)   // this segment is from a different speaker
+				continue;
+
+			const double tmin = diarize_segment_t0(diarizeContext, segment);
+			const double tmax = diarize_segment_t1(diarizeContext, segment);
+
+			if (tmin > currentIntervalStart) {
+				WhisperSegment *gap = speakers [i].append();
+				gap -> text = Melder_dup (U"");
+				gap -> tmin = currentIntervalStart;
+				gap -> tmax = tmin;
+			}
+
+			WhisperSegment *speakerSegment = speakers [i].append();
+			speakerSegment -> text = Melder_dup (Melder_cat (U"SPEAKER_", Melder_integer (i)));
+			speakerSegment -> tmin = tmin;
+			speakerSegment -> tmax = tmax;
+
+			trace (U"Diarization: [ ", speakerSegment -> tmin, U" - ", speakerSegment -> tmax, U" ] \"",
+					speakerSegment -> text.get(), U"\"");
+
+			currentIntervalStart = tmax;
+		}
+
+		if (currentIntervalStart < sound -> xmax) {
+			WhisperSegment *gap = speakers [i].append();
+			gap -> text = Melder_dup (U"");
+			gap -> tmin = currentIntervalStart;
+			gap -> tmax = sound -> xmax;
+		}
+	}
+
+	diarize_free(diarizeContext);
+	return speakers;
+}
+
 WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound sound,
-		bool useVad, const SileroVadParams &sileroVadParams) {
+		bool useVad, const SileroVadParams &sileroVadParams, bool diarize) {
 	try {
 		//TRACE
 		trace (U"Sound xmin = ", sound -> xmin, U", sound xmax = ", sound -> xmax);
@@ -595,6 +663,11 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				U" [ ", transcription.fullTranscription.tmin, U" - ",
 				transcription.fullTranscription.tmax, U" ]", transcription.fullTranscription.text.get());
 
+		if (diarize) {
+			transcription.speakers = doDiarization(sound).move();
+		} else {
+			transcription.speakers = newvectorzero <autovector <WhisperSegment>> (0);
+		}
 		return transcription;
 
 	} catch (MelderError) {
