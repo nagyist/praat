@@ -108,6 +108,10 @@ static void read_safe(diarize_model_loader * loader, T & dest) {
 	BYTESWAP_VALUE(dest);
 }
 
+static void trace(...) {
+	// Nothing (for now)
+}
+
 // ============================================================================
 // Segmentation: Model structs
 // ============================================================================
@@ -222,7 +226,7 @@ static bool segmentation_load_model(diarize_model_loader * loader, segmentation_
 	uint32_t magic;
 	read_safe(loader, magic);
 	if (magic != GGML_FILE_MAGIC) {
-		fprintf(stderr, "%s: bad magic\n", __func__);
+		trace(__func__, U": bad magic");
 		return false;
 	}
 
@@ -242,10 +246,10 @@ static bool segmentation_load_model(diarize_model_loader * loader, segmentation_
     read_safe(loader, hp.linear_layers);
 	read_safe(loader, hp.n_classes);
 
-    fprintf(stderr, "%s: sincnet=%d/%d/%d lstm=%dx%d(bidir=%d) linear=%dx%d classes=%d\n",
-            __func__, hp.sincnet_filters_0, hp.sincnet_kernel_0, hp.sincnet_stride_0,
-            hp.lstm_layers, hp.lstm_hidden_size, hp.lstm_bidirectional,
-            hp.linear_layers, hp.linear_hidden, hp.n_classes);
+    trace(__func__, U": sincnet=", hp.sincnet_filters_0, U"/", hp.sincnet_kernel_0, U"/", hp.sincnet_stride_0,
+    		U" lstm=", hp.lstm_layers, U"x", hp.lstm_hidden_size, U"(bidir=", hp.lstm_bidirectional,
+    		U") linear=", hp.linear_layers, U"x", hp.linear_hidden,
+    		U" classes=", hp.n_classes, U"");
 
     const int nsp = hp.n_sinc_params();
 	const int hk = hp.half_kernel();
@@ -365,7 +369,7 @@ static bool segmentation_load_model(diarize_model_loader * loader, segmentation_
 
 		auto it = model.tensors.find(name);
 		if (it == model.tensors.end()) {
-			fprintf(stderr, "%s: unknown tensor '%s'\n", __func__, name.c_str());
+			trace(__func__, U": unknown tensor '", name.c_str(), U"'");
 			return false;
 		}
 
@@ -385,7 +389,7 @@ static bool segmentation_load_model(diarize_model_loader * loader, segmentation_
 		model.n_loaded++;
 	}
 
-    fprintf(stderr, "%s: loaded %d/%zu tensors\n", __func__, model.n_loaded, model.tensors.size());
+    trace(__func__, U": loaded ", model.n_loaded, U"/", model.tensors.size(), U" tensors");
     return model.n_loaded == static_cast<int>(model.tensors.size());
 }
 
@@ -398,11 +402,11 @@ static std::vector<float> compute_sinc_filters(const segmentation_model & model)
 	const int hk = hp.half_kernel();
 	const int ks = hp.sincnet_kernel_0;
 	const int nf = hp.n_filters();
-	
+
     const float mlh = 50.f;
-	const float mbh = 50.f; 
+	const float mbh = 50.f;
 	const float sr = 16000.f;
-	
+
     const float *lh = (const float*)model.sincnet_low_hz->data;
     const float *bh = (const float*)model.sincnet_band_hz->data;
     const float *w  = (const float*)model.sincnet_window->data;
@@ -674,7 +678,7 @@ static bool segmentation_forward(segmentation_context & sctx, const float * samp
     if (!sincnet_forward(sctx, samples, n_samples, sincnet_out, sn_time, sn_ch)) {
         return false;
     }
-    fprintf(stderr, "%s: SincNet output: [%d, %d]\n", __func__, sn_time, sn_ch);
+    trace(__func__, U": SincNet output: [", sn_time, U", ", sn_ch, U"]");
 
     // SincNet output is [ne0=time, ne1=ch] in GGML memory order.
     // This is the same as [ch, time] in PyTorch.
@@ -691,7 +695,7 @@ static bool segmentation_forward(segmentation_context & sctx, const float * samp
 
     // 2. LSTM (plain C++)
     const auto lstm_out = lstm_forward(model, lstm_in.data(), T);
-    fprintf(stderr, "%s: LSTM output: [%d, %d]\n", __func__, T, hp.lstm_output_size());
+    trace(__func__, U": LSTM output: [", T, U", ", hp.lstm_output_size(), U"]");
 
     // 3. Linear layers
     const float * cur = lstm_out.data();
@@ -730,8 +734,8 @@ static bool segmentation_init(segmentation_context & sctx, diarize_model_loader 
 	sctx.sinc_filters = compute_sinc_filters(sctx.model);
     sctx.backend = ggml_backend_cpu_init();
 
-    fprintf(stderr, "%s: initialized (%d sinc filters, %d kernel)\n",
-            __func__, sctx.model.hparams.n_filters(), sctx.model.hparams.sincnet_kernel_0);
+    trace(__func__, U": initialized (", sctx.model.hparams.n_filters(),
+    		U" sinc filters, ", sctx.model.hparams.sincnet_kernel_0, U" kernel)");
     return true;
 }
 
@@ -790,7 +794,7 @@ static bool embedding_load_model(diarize_model_loader * loader, embedding_model 
 	uint32_t magic;
 	read_safe(loader, magic);
 	if (magic != GGML_FILE_MAGIC) {
-		fprintf(stderr, "%s: bad magic\n", __func__);
+		trace(__func__, U": bad magic");
 		return false;
 	}
 
@@ -802,10 +806,9 @@ static bool embedding_load_model(diarize_model_loader * loader, embedding_model 
     	read_safe(loader, hp.num_blocks[i]);
     read_safe(loader, hp.two_emb_layer);
 
-    fprintf(stderr, "%s: m_ch=%d feat=%d embed=%d blocks=[%d,%d,%d,%d] two_emb=%d\n",
-            __func__, hp.m_channels, hp.feat_dim, hp.embed_dim,
-            hp.num_blocks[0], hp.num_blocks[1], hp.num_blocks[2], hp.num_blocks[3],
-            hp.two_emb_layer);
+    trace(__func__, U": m_ch=", hp.m_channels, U" feat=", hp.feat_dim, U" embed=", hp.embed_dim,
+    		U" blocks=[", hp.num_blocks[0], U",", hp.num_blocks[1], U",", hp.num_blocks[2], U",", hp.num_blocks[3],
+    		U"] two_emb=", hp.two_emb_layer);
 
     // Count tensors
     int total_blocks = hp.num_blocks[0] + hp.num_blocks[1] + hp.num_blocks[2] + hp.num_blocks[3];
@@ -922,7 +925,7 @@ static bool embedding_load_model(diarize_model_loader * loader, embedding_model 
 
         auto it = model.tensors.find(name);
         if (it == model.tensors.end()) {
-	        fprintf(stderr, "%s: unknown tensor '%s'\n", __func__, name.c_str());
+	        trace(__func__, U": unknown tensor '", name.c_str(), U"'");
         	return false;
         }
 
@@ -941,7 +944,7 @@ static bool embedding_load_model(diarize_model_loader * loader, embedding_model 
     	}
     	model.n_loaded++;
     }
-    fprintf(stderr, "%s: loaded %d/%zu tensors\n", __func__, model.n_loaded, model.tensors.size());
+    trace(__func__, U": loaded ", model.n_loaded, U"/", model.tensors.size(), U" tensors");
     return model.n_loaded == (int)model.tensors.size();
 }
 
@@ -1256,10 +1259,10 @@ static bool embedding_forward(embedding_context & ectx,
     int num_frames;
     compute_fbank(samples, n_samples, fbank, num_frames);
     if (num_frames == 0) {
-        fprintf(stderr, "%s: audio too short for fbank\n", __func__);
+        trace(__func__, U": audio too short for fbank");
         return false;
     }
-    fprintf(stderr, "%s: fbank: (%d, %d)\n", __func__, num_frames, hp.feat_dim);
+    trace(__func__, U": fbank: (", num_frames, U", ", hp.feat_dim, U")");
 
     // 2. Prepare input: transpose (T, F) -> (1, 1, F, T)
     int N = 1, C = 1, H = hp.feat_dim, W = num_frames;
@@ -1278,25 +1281,25 @@ static bool embedding_forward(embedding_context & ectx,
         relu_inplace(conv_out.data(), conv_out.size());
         cur = conv_out; C = OC; H = OH; W = OW;
     }
-    fprintf(stderr, "%s: stem: (%d, %d, %d, %d)\n", __func__, N, C, H, W);
+    trace(__func__, U": stem: (", N, U", ", C, U", ", H, U", ", W, U")");
 
     // 4. ResNet layers 1-4
     for (int layer = 1; layer <= 4; layer++) {
         if (!run_layer(ectx.backend, model, layer, cur, N, C, H, W)) return false;
-        fprintf(stderr, "%s: layer%d: (%d, %d, %d, %d)\n", __func__, layer, N, C, H, W);
+        trace(__func__, U": layer", layer, U": (", N, U", ", C, U", ", H, U", ", W, U")");
     }
 
     // 5. TSTP pooling
     std::vector<float> pool;
     tstp_pooling(cur.data(), N, C, H, W, pool);
-    fprintf(stderr, "%s: pool: (%d, %d)\n", __func__, N, (int)pool.size() / N);
+    trace(__func__, U": pool: (", N, U", ", (int)pool.size() / N, U")");
 
     // 6. seg_1 linear
     linear_forward(pool.data(), N, (int)pool.size() / N,
                    (float*)model.tensors["resnet.seg_1.weight"]->data,
                    (float*)model.tensors["resnet.seg_1.bias"]->data,
                    hp.embed_dim, embedding_out);
-    fprintf(stderr, "%s: embedding: (%d, %d)\n", __func__, N, hp.embed_dim);
+    trace(__func__, U": embedding: (", N, U", ", hp.embed_dim, U")");
 
     return true;
 }
@@ -1310,7 +1313,7 @@ static bool embedding_init(embedding_context & ectx, diarize_model_loader * load
 
 	ectx.backend = ggml_backend_cpu_init();
 
-	fprintf(stderr, "%s: initialized (%d tensors)\n", __func__, ectx.model.n_loaded);
+	trace(__func__, U": initialized (", ectx.model.n_loaded, U" tensors)");
     return true;
 }
 
@@ -1889,8 +1892,8 @@ static diarization_result run_diarization_pipeline(
     int total_frames = (num_chunks - 1) * step_frames + num_frames;
     float frame_step = params.seg_duration / num_frames;
 
-    fprintf(stderr, "diarize: %d chunks, %d frames/chunk, step=%d, total=%d frames\n",
-            num_chunks, num_frames, step_frames, total_frames);
+    trace(U"diarize: ", num_chunks, U" chunks, ", num_frames, U" frames/chunk, step=",
+    		step_frames, U", total=", total_frames, U" frames");
 
     // --- Convert powerset logits -> soft multilabel for reconstruct ---
     // pyannote's Inference (with skip_conversion=False) returns soft multilabel
@@ -1913,7 +1916,7 @@ static diarization_result run_diarization_pipeline(
     // Check if any speaker is ever active
     int max_count = *std::max_element(spk_count.begin(), spk_count.end());
     if (max_count == 0) {
-        fprintf(stderr, "diarize: no speakers detected\n");
+        trace(U"diarize: no speakers detected");
         return {{}, 0};
     }
 
@@ -1921,11 +1924,10 @@ static diarization_result run_diarization_pipeline(
     auto filt = filter_embeddings(embeddings, binarized_segmentations,
                                    num_chunks, num_frames, num_speakers, emb_dim,
                                    params.min_active_ratio);
-    fprintf(stderr, "diarize: %d/%d embeddings pass filter\n",
-            filt.num_filtered, num_chunks * num_speakers);
+    trace(U"diarize: ", filt.num_filtered, U"/", num_chunks * num_speakers, U" embeddings pass filter");
 
     if (filt.num_filtered < 2) {
-        fprintf(stderr, "diarize: too few embeddings, single speaker\n");
+        trace(U"diarize: too few embeddings, single speaker");
         // Single speaker fallback — all frames assigned to speaker 0
         diarization_result result;
         result.num_speakers = 1;
@@ -1939,7 +1941,7 @@ static diarization_result run_diarization_pipeline(
         params.cluster_threshold, params.cluster_min_size);
 
     int num_clusters = *std::max_element(train_clusters.begin(), train_clusters.end()) + 1;
-    fprintf(stderr, "diarize: %d clusters\n", num_clusters);
+    trace(U"diarize: ", num_clusters, U" clusters");
 
     // --- Assign all embeddings ---
     auto asgn = assign_embeddings(embeddings, num_chunks, num_speakers, emb_dim,
@@ -1967,8 +1969,7 @@ static diarization_result run_diarization_pipeline(
     // from powerset to soft multilabel by the Powerset module in Inference.infer()).
     auto recon = reconstruct(soft_segmentations.data(), hard.data(),
                               num_chunks, num_frames, num_speakers);
-    fprintf(stderr, "diarize: %d global speakers in reconstruction\n",
-            recon.num_global_speakers);
+    trace(U"diarize: ", recon.num_global_speakers, U" global speakers in reconstruction");
 
     // --- Aggregate ---
     auto aggregated = aggregate_overlapping(recon.clustered.data(), recon.nan_mask.data(),
@@ -1987,8 +1988,7 @@ static diarization_result run_diarization_pipeline(
     result.segments = segs;
     result.num_speakers = recon.num_global_speakers;
 
-    fprintf(stderr, "diarize: %zu segments, %d speakers\n",
-            segs.size(), result.num_speakers);
+    trace(U"diarize: ", segs.size(), U" segments, ", result.num_speakers, U" speakers");
 
     return result;
 }
@@ -2039,20 +2039,20 @@ struct diarize_context * diarize_init(struct diarize_model_loader * seg_loader, 
 	ctx->models_loaded = false;
 
 	if (!segmentation_init(ctx->seg_ctx, seg_loader)) {
-		fprintf(stderr, "diarize_init: failed to load segmentation model\n");
+		trace(U"diarize_init: failed to load segmentation model");
 		delete ctx;
 		return nullptr;
 	}
 
 	if (!embedding_init(ctx->emb_ctx, emb_loader)) {
-		fprintf(stderr, "diarize_init: failed to load embedding model\n");
+		trace(U"diarize_init: failed to load embedding model");
 		segmentation_free(ctx->seg_ctx);
 		delete ctx;
 		return nullptr;
 	}
 
 	ctx->models_loaded = true;
-	fprintf(stderr, "diarize_init: models loaded\n");
+	trace(U"diarize_init: models loaded");
 	return ctx;
 }
 
@@ -2082,14 +2082,14 @@ static diarize_model_loader create_file_loader(std::ifstream * fin) {
 struct diarize_context * diarize_init_from_file(const char * seg_model_path, const char * emb_model_path) {
 	auto * seg_fin = new std::ifstream(seg_model_path, std::ios::binary);
 	if (!seg_fin->is_open()) {
-		fprintf(stderr, "%s: failed to open '%s'\n", __func__, seg_model_path);
+		trace(__func__, U": failed to open '", seg_model_path, U"'");
 		delete seg_fin;
 		return nullptr;
 	}
 
 	auto * emb_fin = new std::ifstream(emb_model_path, std::ios::binary);
 	if (!emb_fin->is_open()) {
-		fprintf(stderr, "%s: failed to open '%s'\n", __func__, emb_model_path);
+		trace(__func__, U": failed to open '", emb_model_path, U"'");
 		delete seg_fin;
 		delete emb_fin;
 		return nullptr;
@@ -2176,7 +2176,7 @@ int diarize_full(
     const int step_samples  = (int)(dp.seg_duration * dp.seg_step_ratio * sample_rate);
 
     float duration = (float)n_samples / sample_rate;
-    fprintf(stderr, "diarize_full: %.3fs audio (%d samples)\n", duration, n_samples);
+    trace(U"diarize_full: ", duration, U"s audio (", n_samples, U" samples)");
 
     // --- Step 1: Sliding window segmentation ---
     int num_chunks = 0;
@@ -2199,7 +2199,7 @@ int diarize_full(
         std::vector<float> seg_out;
         int nf, nc;
         if (!segmentation_forward(ctx->seg_ctx, chunk.data(), chunk_samples, seg_out, nf, nc)) {
-            fprintf(stderr, "diarize_full: segmentation failed on chunk %d\n", c);
+            trace(U"diarize_full: segmentation failed on chunk ",c);
             return -1;
         }
 
@@ -2216,8 +2216,7 @@ int diarize_full(
 
     int num_speakers = dp.seg_num_speakers;  // 3
 
-    fprintf(stderr, "diarize_full: %d chunks, %d frames, %d powerset classes\n",
-            num_chunks, num_frames, num_classes);
+    trace(U"diarize_full: ", num_chunks, U" chunks, ", num_frames, U" frames, ", num_classes, U" powerset classes");
 
     // --- Step 2: Powerset -> multilabel (hard binarization) ---
     std::vector<float> all_binarized(num_chunks * num_frames * num_speakers);
@@ -2279,7 +2278,7 @@ int diarize_full(
         }
 
         if ((c + 1) % 10 == 0 || c == num_chunks - 1) {
-            fprintf(stderr, "diarize_full: embeddings %d/%d\n", c + 1, num_chunks);
+            trace(U"diarize_full: embeddings ", c + 1, U"/", num_chunks);
         }
     }
 
@@ -2291,8 +2290,7 @@ int diarize_full(
         num_chunks, num_frames, num_classes, num_speakers, emb_dim,
         dp, params.max_speakers);
 
-    fprintf(stderr, "diarize_full: %d speakers, %zu segments\n",
-            ctx->result.num_speakers, ctx->result.segments.size());
+    trace(U"diarize_full: ", ctx->result.num_speakers, U" speakers, ", ctx->result.segments.size(), U" segments");
 
     return 0;
 }
@@ -2323,189 +2321,3 @@ int diarize_segment_speaker(struct diarize_context * ctx, int i_segment) {
 }
 
 } // extern "C"
-
-// ============================================================================
-// Standalone test main
-// ============================================================================
-#ifdef DIARIZE_MAIN
-// Simple WAV file reader — supports PCM 16-bit and 32-bit float, mono/stereo
-// Outputs: mono float32 samples normalized to [-1, 1], resampled to 16kHz if needed
-static bool load_audio_wav(const char * path, std::vector<float> & samples_out) {
-    std::ifstream f(path, std::ios::binary);
-    if (!f.is_open()) {
-        fprintf(stderr, "load_audio_wav: cannot open %s\n", path);
-        return false;
-    }
-
-    // Read RIFF header
-    char riff[4]; f.read(riff, 4);
-    if (std::memcmp(riff, "RIFF", 4) != 0) {
-        fprintf(stderr, "load_audio_wav: not a WAV file (no RIFF header)\n");
-        return false;
-    }
-
-    uint32_t file_size; f.read((char*)&file_size, 4);
-
-    char wave[4]; f.read(wave, 4);
-    if (std::memcmp(wave, "WAVE", 4) != 0) {
-        fprintf(stderr, "load_audio_wav: not a WAV file (no WAVE marker)\n");
-        return false;
-    }
-
-    // Find fmt and data chunks
-    uint16_t audio_format = 0, num_channels = 0, bits_per_sample = 0;
-    uint32_t sample_rate = 0, data_size = 0;
-    bool found_fmt = false, found_data = false;
-
-    while (!f.eof() && !found_data) {
-        char chunk_id[4]; f.read(chunk_id, 4);
-        uint32_t chunk_size; f.read((char*)&chunk_size, 4);
-        if (f.fail()) break;
-
-        if (std::memcmp(chunk_id, "fmt ", 4) == 0) {
-            f.read((char*)&audio_format, 2);
-            f.read((char*)&num_channels, 2);
-            f.read((char*)&sample_rate, 4);
-            uint32_t byte_rate; f.read((char*)&byte_rate, 4);
-            uint16_t block_align; f.read((char*)&block_align, 2);
-            f.read((char*)&bits_per_sample, 2);
-            // Skip any extra fmt bytes
-            if (chunk_size > 16) {
-                f.seekg(chunk_size - 16, std::ios::cur);
-            }
-            found_fmt = true;
-        } else if (std::memcmp(chunk_id, "data", 4) == 0) {
-            data_size = chunk_size;
-            found_data = true;
-        } else {
-            // Skip unknown chunk
-            f.seekg(chunk_size, std::ios::cur);
-        }
-    }
-
-    if (!found_fmt || !found_data) {
-        fprintf(stderr, "load_audio_wav: missing fmt or data chunk\n");
-        return false;
-    }
-
-    fprintf(stderr, "load_audio_wav: format=%d, channels=%d, rate=%d, bits=%d, data=%d bytes\n",
-            audio_format, num_channels, sample_rate, bits_per_sample, data_size);
-
-    // Read raw audio data
-    std::vector<char> raw(data_size);
-    f.read(raw.data(), data_size);
-
-    // Convert to mono float32
-    std::vector<float> mono;
-
-    if (audio_format == 1 && bits_per_sample == 16) {
-        // PCM 16-bit
-        int n_samples_total = data_size / 2;
-        int n_frames = n_samples_total / num_channels;
-        mono.resize(n_frames);
-        const int16_t * pcm = (const int16_t *)raw.data();
-        for (int i = 0; i < n_frames; i++) {
-            float sum = 0.0f;
-            for (int ch = 0; ch < num_channels; ch++) {
-                sum += (float)pcm[i * num_channels + ch] / 32768.0f;
-            }
-            mono[i] = sum / num_channels;
-        }
-    } else if (audio_format == 3 && bits_per_sample == 32) {
-        // IEEE float 32-bit
-        int n_samples_total = data_size / 4;
-        int n_frames = n_samples_total / num_channels;
-        mono.resize(n_frames);
-        const float * flt = (const float *)raw.data();
-        for (int i = 0; i < n_frames; i++) {
-            float sum = 0.0f;
-            for (int ch = 0; ch < num_channels; ch++) {
-                sum += flt[i * num_channels + ch];
-            }
-            mono[i] = sum / num_channels;
-        }
-    } else if (audio_format == 1 && bits_per_sample == 32) {
-        // PCM 32-bit int
-        int n_samples_total = data_size / 4;
-        int n_frames = n_samples_total / num_channels;
-        mono.resize(n_frames);
-        const int32_t * pcm = (const int32_t *)raw.data();
-        for (int i = 0; i < n_frames; i++) {
-            float sum = 0.0f;
-            for (int ch = 0; ch < num_channels; ch++) {
-                sum += (float)pcm[i * num_channels + ch] / 2147483648.0f;
-            }
-            mono[i] = sum / num_channels;
-        }
-    } else {
-        fprintf(stderr, "load_audio_wav: unsupported format=%d bits=%d\n",
-                audio_format, bits_per_sample);
-        return false;
-    }
-
-    // Resample to 16kHz if needed (simple linear interpolation)
-    if (sample_rate != 16000) {
-        int out_len = (int)((int64_t)mono.size() * 16000 / sample_rate);
-        std::vector<float> resampled(out_len);
-        double ratio = (double)sample_rate / 16000.0;
-        for (int i = 0; i < out_len; i++) {
-            double src_pos = i * ratio;
-            int idx = (int)src_pos;
-            double frac = src_pos - idx;
-            if (idx + 1 < (int)mono.size()) {
-                resampled[i] = (float)((1.0 - frac) * mono[idx] + frac * mono[idx + 1]);
-            } else {
-                resampled[i] = mono[std::min(idx, (int)mono.size() - 1)];
-            }
-        }
-        mono = resampled;
-        fprintf(stderr, "load_audio_wav: resampled %d -> 16000 Hz (%zu samples)\n",
-                sample_rate, mono.size());
-    }
-
-    samples_out = std::move(mono);
-    return true;
-}
-
-int main(int argc, char ** argv) {
-    if (argc < 4) {
-        fprintf(stderr, "Usage: %s <seg_model.bin> <emb_model.bin> <audio.wav>\n", argv[0]);
-        return 1;
-    }
-
-    // Load audio
-    std::vector<float> samples;
-    if (!load_audio_wav(argv[3], samples)) {
-        return 1;
-    }
-    fprintf(stderr, "Audio: %zu samples, %.3fs\n", samples.size(), samples.size() / 16000.0f);
-
-    // Init
-    struct diarize_context * ctx = diarize_init_from_file(argv[1], argv[2]);
-    if (!ctx) return 1;
-
-    // Run
-    struct diarize_params params = diarize_default_params();
-    int rc = diarize_full(ctx, params, samples.data(), (int)samples.size());
-    if (rc != 0) {
-        fprintf(stderr, "diarize_full failed\n");
-        diarize_free(ctx);
-        return 1;
-    }
-
-    // Print results
-    int n_seg = diarize_n_segments(ctx);
-    int n_spk = diarize_n_speakers(ctx);
-    printf("Speakers: %d, Segments: %d\n", n_spk, n_seg);
-    for (int i = 0; i < n_seg; i++) {
-        printf("[%.3fs - %.3fs] SPEAKER_%02d\n",
-               diarize_segment_t0(ctx, i),
-               diarize_segment_t1(ctx, i),
-               diarize_segment_speaker(ctx, i));
-    }
-
-    diarize_free(ctx);
-    return 0;
-}
-
-#endif // DIARIZE_MAIN
