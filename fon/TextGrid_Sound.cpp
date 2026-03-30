@@ -414,7 +414,7 @@ void TextGrid_Sound_transcribeInterval (
 	const TextGrid me, const Sound sound,
 	const integer tierNumber, const integer intervalNumber,
 	const conststring32 modelName, const conststring32 languageName,
-	const bool includeWords, const bool useVad, const double speechProbabilityThreshold,
+	const bool includeWords, const bool diarize, const bool useVad, const double speechProbabilityThreshold,
 	const double minNonSpeechDuration, const double minSpeechDuration, const double speechPad
 ) {
 	try {
@@ -440,7 +440,7 @@ void TextGrid_Sound_transcribeInterval (
 		sileroVadParams.speechPad = speechPad;
 		trace(U"speechPad = ", speechPad);
 		WhisperTranscription whisperTranscription = SpeechRecognizer_recognize (
-				speechRecognizer.get(), soundPart.get(), useVad, sileroVadParams);
+				speechRecognizer.get(), soundPart.get(), useVad, sileroVadParams, diarize);
 
 		/*
 			Create one interval per utterance in the head tier.
@@ -485,6 +485,35 @@ void TextGrid_Sound_transcribeInterval (
 			*/
 			autovector<WhisperSegment> wordSegments = whisperTranscription.words.move();
 			splitIntervalIntoWhisperSegments (wordTier, wordTierNumber, original_tmin, original_tmax, wordSegments);
+		}
+
+		if (diarize) {
+			int n_speakers = whisperTranscription.speakers.size;
+
+			for (integer i = 1; i <= n_speakers; i ++) {
+				/*
+					Create a new tier for speaker i.
+				*/
+				integer speakerTierNumber = 0;
+				autoIntervalTier newSpeakerTier = IntervalTier_create (my xmin, my xmax);
+				autoMelderString newSpeakerTierName;
+				MelderString_copy (& newSpeakerTierName, headTier -> name.get(), U"/sp", i);
+				Thing_setName (newSpeakerTier.get(), newSpeakerTierName.string);
+				my tiers -> addItemAtPosition_move (newSpeakerTier.move(), speakerTierNumber = tierNumber + i);
+				Melder_assert (speakerTierNumber >= 1 && speakerTierNumber <= my tiers -> size);
+				IntervalTier speakerTier = dynamic_cast <IntervalTier> (my tiers -> at [speakerTierNumber]);
+
+				/*
+					Make sure that the speaker tier has boundaries at the edges of the original interval.
+				*/
+				IntervalTier_insertIntervalDestructively (speakerTier, original_tmin, original_tmax);
+
+				/*
+					Split this big interval into the set of intervals, one interval per word.
+				*/
+				autovector<WhisperSegment> speakerSegments = whisperTranscription.speakers [i].move();
+				splitIntervalIntoWhisperSegments (speakerTier, speakerTierNumber, original_tmin, original_tmax, speakerSegments);
+			}
 		}
 	} catch (MelderError) {
 		Melder_throw (me, U" & ", sound, U": interval not transcribed.");

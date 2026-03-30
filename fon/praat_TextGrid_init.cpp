@@ -560,6 +560,7 @@ FORM (MODIFY_TextGrid_Sound_transcribeInterval, U"TextGrid & Sound: Transcribe i
 	INTEGER (tierNumber, STRING_TIER_NUMBER, U"1")
 	NATURAL (intervalNumber, STRING_INTERVAL_NUMBER, U"1")
 	BOOLEAN (includeWords, U"Include words", true)
+	BOOLEAN (includeDiarization, U"Include diarization", true)
 	HEADING (U"Speech activity detection...")
 	BOOLEAN (useVad, U"Allow silences", true)
 	POSITIVE (speechProbabilityThreshold, U"Speech probability threshold (0 - 1)", U"0.5")
@@ -584,7 +585,7 @@ OK
 DO
 	MODIFY_FIRST_OF_ONE_AND_ONE (TextGrid, Sound)
 		TextGrid_Sound_transcribeInterval (me, you, tierNumber, intervalNumber, modelName, languageName, includeWords,
-				useVad, speechProbabilityThreshold, minNonSpeechDuration, minSpeechDuration, speechPad);
+				includeDiarization, useVad, speechProbabilityThreshold, minNonSpeechDuration, minSpeechDuration, speechPad);
 	MODIFY_FIRST_OF_ONE_AND_ONE_END
 }
 
