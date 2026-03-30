@@ -4,7 +4,7 @@
  * by the script `generate/espeak/GENERATE.praat` in the Praat source distribution.
  *
  * eSpeak NG version: 1.52-dev, downloaded 2024-08-24T19:38Z from https://github.com/espeak-ng/espeak-ng
- * File creation date: Sat Mar 28 16:37:40 2026
+ * File creation date: Mon Mar 30 10:08:24 2026
  *
  * Copyright (C) 2005-2014 Jonathan Duddington (for eSpeak)
  * Copyright (C) 2015-2023 Reese Dunn (for eSpeak-NG)
@@ -449,7 +449,7 @@ void espeak_praat_FileInMemorySet_addLanguages (FileInMemorySet me) {
 "name Armenian (West Armenia)\nlanguage hyw\nlanguage hy-arevmda\nlanguage hy  8\n\ndictionary hy\ndictrule"
 "s 1\n\nphonemes hy\n\n// change consonants for West Armenian pronunciation\nreplace 00 b  p#\nreplace 00 d"
 "  t#\nreplace 00 dz ts#\nreplace 00 dZ tS#\nreplace 00 g  k#\n\nreplace 00 p  b\nreplace 00 t  d\nreplace 0"
-"0 ts dz\nreplace 00 tS dZ\nreplace 00 k  g\n\nreplace 00 R2 R  // ??\n"
+"0 ts dz\nreplace 00 tS dZ\nreplace 00 k  g\n\nreplace 00 R2 R  // ?\?\n"
 		;
 		autoFileInMemory fim65 = FileInMemory_createWithData (365, fim65_data, true, U"./data/lang/ine/hyw");
 		my addItem_move (fim65.move());
