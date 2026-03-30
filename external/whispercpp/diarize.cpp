@@ -2300,7 +2300,7 @@ int diarize_full_n_segments(struct diarize_context * ctx) {
     return (int)ctx->result.segments.size();
 }
 
-int diarize_n_speakers(struct diarize_context * ctx) {
+int diarize_full_n_speakers(struct diarize_context * ctx) {
     if (!ctx) return 0;
     return ctx->result.num_speakers;
 }

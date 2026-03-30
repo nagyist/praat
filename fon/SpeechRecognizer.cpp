@@ -362,7 +362,7 @@ autovector <autovector <WhisperSegment>> doDiarization (constSound sound) {
 		Melder_throw (U"Diarization failed");
 	}
 	const int n_diarization_segments = diarize_full_n_segments(diarizeContext);
-	const int n_speakers = diarize_n_speakers(diarizeContext);
+	const int n_speakers = diarize_full_n_speakers(diarizeContext);
 
 	trace(U"Speakers:", n_speakers, U", Segments: ", n_diarization_segments);
 
