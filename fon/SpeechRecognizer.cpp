@@ -361,7 +361,7 @@ autovector <autovector <WhisperSegment>> doDiarization (constSound sound) {
 		diarize_free(diarizeContext);
 		Melder_throw (U"Diarization failed");
 	}
-	const int n_diarization_segments = diarize_n_segments(diarizeContext);
+	const int n_diarization_segments = diarize_full_n_segments(diarizeContext);
 	const int n_speakers = diarize_n_speakers(diarizeContext);
 
 	trace(U"Speakers:", n_speakers, U", Segments: ", n_diarization_segments);
@@ -374,11 +374,11 @@ autovector <autovector <WhisperSegment>> doDiarization (constSound sound) {
 		double currentIntervalStart = sound -> xmin;
 
 		for (int segment = 0; segment < n_diarization_segments; ++ segment) {
-			if (diarize_segment_speaker(diarizeContext, segment) + 1 != i)   // this segment is from a different speaker
+			if (diarize_full_get_segment_speaker(diarizeContext, segment) + 1 != i)   // this segment is from a different speaker
 				continue;
 
-			const double tmin = diarize_segment_t0(diarizeContext, segment);
-			const double tmax = diarize_segment_t1(diarizeContext, segment);
+			const double tmin = diarize_full_get_segment_t0(diarizeContext, segment);
+			const double tmax = diarize_full_get_segment_t1(diarizeContext, segment);
 
 			if (tmin > currentIntervalStart) {
 				WhisperSegment *gap = speakers [i].append();

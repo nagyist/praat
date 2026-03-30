@@ -2295,7 +2295,7 @@ int diarize_full(
     return 0;
 }
 
-int diarize_n_segments(struct diarize_context * ctx) {
+int diarize_full_n_segments(struct diarize_context * ctx) {
     if (!ctx) return 0;
     return (int)ctx->result.segments.size();
 }
@@ -2305,17 +2305,17 @@ int diarize_n_speakers(struct diarize_context * ctx) {
     return ctx->result.num_speakers;
 }
 
-float diarize_segment_t0(struct diarize_context * ctx, int i_segment) {
+float diarize_full_get_segment_t0(struct diarize_context * ctx, int i_segment) {
     if (!ctx || i_segment < 0 || i_segment >= (int)ctx->result.segments.size()) return 0.0f;
     return ctx->result.segments[i_segment].start;
 }
 
-float diarize_segment_t1(struct diarize_context * ctx, int i_segment) {
+float diarize_full_get_segment_t1(struct diarize_context * ctx, int i_segment) {
     if (!ctx || i_segment < 0 || i_segment >= (int)ctx->result.segments.size()) return 0.0f;
     return ctx->result.segments[i_segment].end;
 }
 
-int diarize_segment_speaker(struct diarize_context * ctx, int i_segment) {
+int diarize_full_get_segment_speaker(struct diarize_context * ctx, int i_segment) {
     if (!ctx || i_segment < 0 || i_segment >= (int)ctx->result.segments.size()) return -1;
     return ctx->result.segments[i_segment].speaker;
 }

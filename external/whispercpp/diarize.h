@@ -1,28 +1,28 @@
+/* diarize.h
+*
+ * Copyright (C) 2026 Anastasia Shchupak
+ *
+ * This code is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * This code is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this work. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*
- * diarize.h — Speaker diarization API for Praat integration
+ *  Speaker diarization API for Praat integration
  *
  * Provides a C API following the same pattern as whisper.h:
  *   - Context init/free (loads segmentation + embedding models)
  *   - diarize_full() runs the entire pipeline on audio samples
  *   - Accessor functions to read results (segments with speaker labels)
- *
- * The output is a list of time-stamped segments, each with a speaker ID.
- * Praat maps these to a TextGrid with one interval tier per speaker.
- *
- * Models:
- *   - ggml-segmentation.bin  (pyannote/segmentation-3.0, converted to GGML)
- *   - ggml-embedding.bin     (pyannote/wespeaker-voxceleb-resnet34-LM, converted to GGML)
- *
- * Usage:
- *   struct diarize_context * ctx = diarize_init("seg.bin", "emb.bin");
- *   diarize_full(ctx, samples, n_samples);
- *   int n = diarize_n_segments(ctx);
- *   for (int i = 0; i < n; i++) {
- *       float t0 = diarize_segment_t0(ctx, i);
- *       float t1 = diarize_segment_t1(ctx, i);
- *       int   sp = diarize_segment_speaker(ctx, i);
- *   }
- *   diarize_free(ctx);
  */
 
 #ifndef DIARIZE_H
@@ -88,19 +88,19 @@ int diarize_full(
 // --- Result accessors ---
 
 // Number of segments in the last result
-int diarize_n_segments(struct diarize_context * ctx);
+int diarize_full_n_segments(struct diarize_context * ctx);
 
 // Number of speakers detected in the last result
-int diarize_n_speakers(struct diarize_context * ctx);
+int diarize_full_n_speakers(struct diarize_context * ctx);
 
 // Get start time (seconds) of segment i
-float diarize_segment_t0(struct diarize_context * ctx, int i_segment);
+float diarize_full_get_segment_t0(struct diarize_context * ctx, int i_segment);
 
 // Get end time (seconds) of segment i
-float diarize_segment_t1(struct diarize_context * ctx, int i_segment);
+float diarize_full_get_segment_t1(struct diarize_context * ctx, int i_segment);
 
 // Get speaker ID (0-indexed) of segment i
-int diarize_segment_speaker(struct diarize_context * ctx, int i_segment);
+int diarize_full_get_segment_speaker(struct diarize_context * ctx, int i_segment);
 
 #ifdef __cplusplus
 }
