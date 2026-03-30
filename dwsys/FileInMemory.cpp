@@ -100,6 +100,7 @@ void FileInMemory_showAsCode (FileInMemory me, conststring32 name, integer numbe
 	MelderInfo_write (U"\t\tstatic unsigned char ", name, U"_data[", my d_numberOfBytes+1, U"] = \n\"");
 	for (integer i = 1; i <= my d_numberOfBytes; i ++) {
 		const unsigned char number = my d_data [i];
+		const unsigned char previousNumber = ( i > 1 ? my d_data [i - 1] : '\0' );
 		const unsigned char nextNumber = ( i < my d_numberOfBytes ? my d_data [i + 1] : '\0' );
 		if (i % numberOfBytesPerLine == 1 && i > 1)
 			MelderInfo_write (U"\"\n\"");
@@ -110,7 +111,12 @@ void FileInMemory_showAsCode (FileInMemory me, conststring32 name, integer numbe
 				MelderInfo_write (U"\\\"");   // two characters: \" ...
 			else if (number == '\\')
 				MelderInfo_write (U"\\\\");   // two characters: \\ ...
-			else {
+			else if (number == '?') {
+				if (previousNumber == '?')   // prevent trigraphs
+					MelderInfo_write (U"\\?");   // two characters: \? ...
+				else
+					MelderInfo_write (U"?");
+			} else {
 				char32 buffer [2] = { number, U'\0' };
 				MelderInfo_write (buffer);
 			}
