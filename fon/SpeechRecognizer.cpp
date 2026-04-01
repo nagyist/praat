@@ -562,8 +562,8 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 		autovector <WhisperSegment> words = newvectorzero <WhisperSegment> (0);
 		autovector <WhisperSegment> sentences = newvectorzero <WhisperSegment> (0);
 
-		double token_tmin = 0.0;   // default for first token
-		double sentence_tmin = 0.0;   // default for first sentence
+		double token_tmin = sound -> xmin;   // default for first token
+		double sentence_tmin = sound -> xmin;   // default for first sentence
 		bool isFirstTokenInSentence = true;
 		bool isFirstSentence = true;
 
@@ -605,7 +605,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			bool isLastTokenInSentence = false;
 			if (endsWithTerminalPunctuation (token_text))
 				isLastTokenInSentence = true;
-			else if (isPunctuationToken) {   // if punctuation is not terminal, divide it's interval between the right and left neighbours
+			if (isPunctuationToken) {   // for any punctuation (terminal or not), divide it's interval between the right and left neighbours
 				token_tmax = (token_tmax + token_tmin) / 2;
 				allTokens [i]. tmax = token_tmax;
 			}
@@ -619,18 +619,23 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			/*
 				Create word-level segment (making sure there are no zero-length word segments).
 			*/
+			if (isNewWord && token_tmin == token_tmax && words.size > 0) {
+				double prev_tmax = (words [words.size] .tmin + token_tmin) / 2;   // steal half of the previous interval
+				words [words.size] .tmax = prev_tmax;
+				token_tmin = prev_tmax;
+			}
 			Melder_assert (token_tmax >= token_tmin);
 			if ((isNewWord || words.size == 0) && token_tmax > token_tmin) {   // new word
 				WhisperSegment *word = words.append();
 				word -> text = Melder_dup (token_text);
 				word -> tmin = token_tmin;
 				word -> tmax = token_tmax;
-				trace (U"Word ", words.size, U": [ ", word -> tmin, U" - ", word -> tmax, U" ]", word -> text.get());
+				trace (U"Word ", words.size, U": \"", word -> text.get(), U"\" [ ", word -> tmin, U" - ", word -> tmax, U" ]");
 			} else if (words.size > 0) {   // continuation token: merge into last word
 				WhisperSegment & word = words [words.size];
 				word.text = Melder_dup (Melder_cat (word.text.get(), token_text));
 				word.tmax = token_tmax;
-				trace (U"Word ", words.size, U": [ ", word. tmin, U" - ", word. tmax, U" ]", word. text.get());
+				trace (U"Word ", words.size, U": \"", word . text.get(), U"\" [ ", word . tmin, U" - ", word . tmax, U" ]");
 			}
 
 			/*
@@ -642,7 +647,7 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				sentence -> text = Melder_dup (sentence_text.string);
 				sentence -> tmin = sentence_tmin;
 				sentence -> tmax = token_tmax;
-				trace (U"Sentence: [ ", sentence -> tmin, U" - ", sentence -> tmax, U" ] \"",	sentence -> text.get(), U"\"");
+				trace (U"Sentence: ", sentences.size, U": \"", sentence -> text.get(), U"\" [ ", sentence -> tmin, U" - ", sentence -> tmax, U" ]");
 				MelderString_empty (& sentence_text);
 				isFirstTokenInSentence = true;   // current sentence is finalized, start with the new one on the next iteration
 				if (isFirstSentence && ! isSilentToken)
