@@ -634,6 +634,7 @@ void TextGrid_Sound_transcribeInterval (
 				const double subsentence_tmin = original_tmin + wordsWithContext [i_firstWordInSubsentence] .whisperSegment -> tmin;
 				const double subsentence_tmax = original_tmin + wordsWithContext [i_lastWordInSubsentence] .whisperSegment -> tmax;
 				IntervalTier speakerSubsentenceTier = speakerSentenceTiers [subsentenceSpeaker];
+				Melder_assert (subsentence_tmin < subsentence_tmax);
 				IntervalTier_insertIntervalDestructively (speakerSubsentenceTier, subsentence_tmin, subsentence_tmax);
 				integer subsentenceIntervalNumber = IntervalTier_hasTime (speakerSubsentenceTier, subsentence_tmin);
 
@@ -732,8 +733,9 @@ void TextGrid_Sound_transcribeInterval (
 					double tmax = original_tmin + wordsWithContext [s] .whisperSegment -> tmax;
 					conststring32 text = wordsWithContext [s] .whisperSegment -> text.get();
 
-					IntervalTier_insertIntervalDestructively (speakerWordTiers [resolvedSpeaker], original_tmin + tmin, original_tmin + tmax);
-					integer wordIntervalNumber = IntervalTier_hasTime (speakerWordTiers [resolvedSpeaker], original_tmin + tmin);
+					Melder_assert (tmin < tmax);
+					IntervalTier_insertIntervalDestructively (speakerWordTiers [resolvedSpeaker], tmin, tmax);
+					integer wordIntervalNumber = IntervalTier_hasTime (speakerWordTiers [resolvedSpeaker], tmin);
 					TextInterval_setText (speakerWordTiers [resolvedSpeaker] -> intervals .at [wordIntervalNumber], text);
 				}
 			}
