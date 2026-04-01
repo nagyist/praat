@@ -617,13 +617,14 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			}
 
 			/*
-				Create word-level segment (making sure there are no zero-length word segments).
+				Create word-level segment.
 			*/
-			if (isNewWord && token_tmin == token_tmax && words.size > 0) {
-				double prev_tmax = (words [words.size] .tmin + token_tmin) / 2;   // steal half of the previous interval
-				words [words.size] .tmax = prev_tmax;
-				token_tmin = prev_tmax;
-			}
+			// (making sure there are no zero-length word segments) - this creates problems
+			// if (isNewWord && token_tmin == token_tmax && words.size > 0) {
+			// 	double prev_tmax = (words [words.size] .tmin + token_tmin) / 2;   // steal half of the previous interval
+			// 	words [words.size] .tmax = prev_tmax;
+			// 	token_tmin = prev_tmax;
+			// }
 			Melder_assert (token_tmax >= token_tmin);
 			if ((isNewWord || words.size == 0) && token_tmax > token_tmin) {   // new word
 				WhisperSegment *word = words.append();
@@ -631,7 +632,12 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				word -> tmin = token_tmin;
 				word -> tmax = token_tmax;
 				trace (U"Word ", words.size, U": \"", word -> text.get(), U"\" [ ", word -> tmin, U" - ", word -> tmax, U" ]");
-			} else if (words.size > 0) {   // continuation token: merge into last word
+			} else if (isNewWord && token_tmax == token_tmin && words.size > 0) {   // zero-length new word: append to previous with a space
+				WhisperSegment & word = words [words.size];
+				word.text = Melder_dup (Melder_cat (word.text.get(), U" ", token_text));
+				word.tmax = token_tmax;
+				trace (U"Word ", words.size, U": \"", word . text.get(), U"\" [ ", word . tmin, U" - ", word . tmax, U" ] (appended zero-length)");
+			} else if (words.size > 0) {   // continuation token: append to the last word
 				WhisperSegment & word = words [words.size];
 				word.text = Melder_dup (Melder_cat (word.text.get(), token_text));
 				word.tmax = token_tmax;
