@@ -198,6 +198,35 @@ Thing_implement (GuiDrawingArea, GuiControl, 0);
 			}
 		}
 	}
+	#if 0   // GTK 3
+		static void _guiGtkDrawingArea_zoomCallback (GtkGestureZoom *w, gdouble scale, gpointer void_me) {
+			iam (GuiDrawingArea);
+			TRACE
+			trace (1);
+			if (! my d_zoomCallback)
+				return;
+			trace (3);
+			const double zoomDelta = (scale - 1.0) * 100.0;
+			if (zoomDelta != 0.0) {
+				trace (5);
+				_guiGtkDrawingArea_handleZoom (w, zoomDelta);
+				trace (6);
+			}
+		}
+	#elif 0   // GTK 4
+		static gboolean _guiGtkDrawingArea_pinchCallback (GuiObject w, GdkEventTouchpadPinch *event, gpointer void_me) {
+			iam (GuiDrawingArea);
+			TRACE
+			trace (1);
+			if (my d_zoomCallback) {
+				if (event -> phase == GDK_TOUCHPAD_GESTURE_PHASE_UPDATE) {
+					const double zoomDelta = (event -> scale - 1.0) * 100.0;
+					if (zoomDelta != 0.0)
+						_guiGtkDrawingArea_handleZoom (w, zoomDelta);
+				}
+			}
+		}
+	#endif
 	static gboolean _guiGtkDrawingArea_swipeCallback (GuiObject w, GdkEventScroll *event, gpointer void_me) {
 		iam (GuiDrawingArea);
 		trace (U"_guiGtkDrawingArea_swipeCallback ", Melder_pointer (my d_horizontalScrollBar), Melder_pointer (my d_verticalScrollBar));
@@ -809,6 +838,16 @@ void GuiDrawingArea_setSwipable (GuiDrawingArea me, GuiScrollBar horizontalScrol
 	#if gtk
 		gtk_widget_add_events (GTK_WIDGET (my d_widget), GDK_SCROLL_MASK);
 		g_signal_connect (G_OBJECT (my d_widget), "scroll-event", G_CALLBACK (_guiGtkDrawingArea_swipeCallback), me);
+		#if 0   // GTK 3
+			GtkGesture *zoom = gtk_gesture_zoom_new (GTK_WIDGET (my d_widget));
+			g_object_ref (zoom);
+			g_signal_connect (zoom, "scale-changed", G_CALLBACK (_guiGtkDrawingArea_zoomCallback), me);
+		#elif 0
+			gtk_widget_add_events (GTK_WIDGET (my d_widget), GDK_TOUCHPAD_GESTURE_MASK | GDK_SMOOTH_SCROLL_MASK);
+			g_signal_connect (G_OBJECT (my d_widget), "event", G_CALLBACK (_guiGtkDrawingArea_genericEventCallback), me);
+		#elif 0   // GTK 4
+			g_signal_connect (G_OBJECT (my d_widget), "touchpad-pinch", G_CALLBACK (_guiGtkDrawingArea_pinchCallback), me);
+		#endif
 	#endif
 }
 

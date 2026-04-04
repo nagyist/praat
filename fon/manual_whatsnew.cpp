@@ -29,6 +29,10 @@ R"~~~(
 
 Latest changes in Praat.
 
+##6.4.63# (4 April 2026)
+• Speaker diarization in ##Transcribe interval# (if Whisper models installed).
+• Mac: Command-mousewheel zooming (as on Windows).
+
 ##6.4.62# (13 March 2026)
 • @@Sound: To TextGrid (speech activity, Silero)...@: “voice activity detection” by AI.
 • TextGrid window: fixed a bug from 2013 or earlier that could cause Praat to crash during interval alignment.
