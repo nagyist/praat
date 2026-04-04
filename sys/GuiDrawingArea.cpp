@@ -540,13 +540,40 @@ Thing_implement (GuiDrawingArea, GuiControl, 0);
 	- (void) scrollWheel: (NSEvent *) nsEvent {
 		GuiDrawingArea me = (GuiDrawingArea) self -> userData;
 		if (me && (my d_horizontalScrollBar || my d_verticalScrollBar)) {
-			if (my d_horizontalScrollBar) {
-				GuiCocoaScrollBar *cocoaScrollBar = (GuiCocoaScrollBar *) my d_horizontalScrollBar -> d_widget;
-				[cocoaScrollBar scrollBy: [nsEvent scrollingDeltaX]];
-			}
-			if (my d_verticalScrollBar) {
-				GuiCocoaScrollBar *cocoaScrollBar = (GuiCocoaScrollBar *) my d_verticalScrollBar -> d_widget;
-				[cocoaScrollBar scrollBy: [nsEvent scrollingDeltaY]];
+			/*
+				Automatically implemented by macOS: Shift-Wheel means horizontal scrolling.
+
+				To implement here:
+					- Command-Wheel means zooming.
+					- Wheel means horizontal scrolling if there is no vertical scrollbar.
+			*/
+			const bool commandKeyPressed = ( ([nsEvent modifierFlags] & NSEventModifierFlagCommand) != 0 );
+			const CGFloat deltaX = [nsEvent scrollingDeltaX];
+			const CGFloat deltaY = [nsEvent scrollingDeltaY];
+			const CGFloat biggestDelta = ( fabs (deltaX) > fabs (deltaY) ? deltaX : deltaY );
+			if (commandKeyPressed) {
+				/*
+					Implement zooming.
+				*/
+				const CGFloat relativeSpeed = 0.01;
+				if (my d_horizontalScrollBar && my d_verticalScrollBar) {
+					[(GuiCocoaScrollBar *) my d_horizontalScrollBar -> d_widget  magnifyBy: deltaX * relativeSpeed];
+					[(GuiCocoaScrollBar *) my d_verticalScrollBar -> d_widget  magnifyBy: deltaY * relativeSpeed];
+				} else if (my d_horizontalScrollBar)
+					[(GuiCocoaScrollBar *) my d_horizontalScrollBar -> d_widget  magnifyBy: biggestDelta * relativeSpeed];
+				else
+					[(GuiCocoaScrollBar *) my d_verticalScrollBar -> d_widget  magnifyBy: biggestDelta * relativeSpeed];
+			} else {
+				/*
+					Implement scrolling.
+				 */
+				if (my d_horizontalScrollBar && my d_verticalScrollBar) {
+					[(GuiCocoaScrollBar *) my d_horizontalScrollBar -> d_widget   scrollBy: deltaX];
+					[(GuiCocoaScrollBar *) my d_verticalScrollBar -> d_widget   scrollBy: deltaY];
+				} else if (my d_horizontalScrollBar)
+					[(GuiCocoaScrollBar *) my d_horizontalScrollBar -> d_widget   scrollBy: biggestDelta];
+				else
+					[(GuiCocoaScrollBar *) my d_verticalScrollBar -> d_widget   scrollBy: biggestDelta];
 			}
 		} else {
 			[super scrollWheel: nsEvent];
