@@ -2390,28 +2390,16 @@ void praat_run () {
 		and check here at runtime that they have the correct value.
 	*/
 	#if ! defined (__BYTE_ORDER__) || ! defined (__ORDER_BIG_ENDIAN__) || ! defined (__ORDER_LITTLE_ENDIAN__)
-		#error __BYTE_ORDER__, __ORDER_BIG_ENDIAN__ and __ORDER_LITTLE_ENDIAN__ should be #defined
-	#endif
-	#if ! defined (WORDS_BIGENDIAN)   // FLAC, MAD, Lame
-		#error WORDS_BIGENDIAN should be #defined
-	#endif
-	#if ! defined (PA_BIG_ENDIAN) && ! defined (PA_LITTLE_ENDIAN)   // PortAudio
-		#error PA_BIG_ENDIAN or PA_LITTLE_ENDIAN should be #defined
-	#endif
-	#if defined (PA_BIG_ENDIAN) && defined (PA_LITTLE_ENDIAN)
-		#error PA_BIG_ENDIAN and PA_LITTLE_ENDIAN shouldn't both be #defined
-	#endif
-	if (Melder_integersAreBigEndian()) {
-		Melder_assert (WORDS_BIGENDIAN == 1);
-		#if ! defined (PA_BIG_ENDIAN)
-			Melder_assert ("PA_BIG_ENDIAN should be #defined" && 0);
+		#if defined (_MSC_VER)
+			#error On MSVC, define __ORDER_BIG_ENDIAN__=4321, __ORDER_LITTLE_ENDIAN__=1234, and __BYTE_ORDER__=1234
+		#else
+			#error __BYTE_ORDER__, __ORDER_BIG_ENDIAN__ and __ORDER_LITTLE_ENDIAN__ should be #defined
 		#endif
-	} else {
-		Melder_assert (WORDS_BIGENDIAN == 0);
-		#if ! defined (PA_LITTLE_ENDIAN)
-			Melder_assert ("PA_LITTLE_ENDIAN should be #defined" && 0);
-		#endif
-	}
+	#endif
+	if (Melder_integersAreBigEndian())
+		Melder_assert (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__);
+	else
+		Melder_assert (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__);
 
 	/*
 		The type "integer" is defined as intptr_t, analogously to uinteger as uintptr_t
