@@ -739,34 +739,6 @@ void TextGrid_Sound_transcribeInterval (
 					TextInterval_setText (speakerWordTiers [resolvedSpeaker] -> intervals .at [wordIntervalNumber], text);
 				}
 			}
-
-			// DIARIZATION TIERS
-///////////////////////////////////////////////
-			for (integer i = 1; i <= n_speakers; i ++) {
-				/*
-					Create a new tier for speaker i.
-				*/
-				integer speakerTierNumber = 0;
-				autoIntervalTier newSpeakerTier = IntervalTier_create (my xmin, my xmax);
-				autoMelderString newSpeakerTierName;
-				MelderString_copy (& newSpeakerTierName, headTier -> name.get(), U"/s", i);
-				Thing_setName (newSpeakerTier.get(), newSpeakerTierName.string);
-				my tiers -> addItemAtPosition_move (newSpeakerTier.move(), speakerTierNumber = tierNumber + 2*n_speakers + i);
-				Melder_assert (speakerTierNumber >= 1 && speakerTierNumber <= my tiers -> size);
-				IntervalTier speakerTier = dynamic_cast <IntervalTier> (my tiers -> at [speakerTierNumber]);
-
-				/*
-					Make sure that the speaker tier has boundaries at the edges of the original interval.
-				*/
-				IntervalTier_insertIntervalDestructively (speakerTier, original_tmin, original_tmax);
-
-				/*
-					Split this big interval into the set of intervals, one interval per word.
-				*/
-				splitIntervalIntoWhisperSegments (speakerTier, speakerTierNumber, original_tmin, original_tmax, speakerSegments [i]);
-			}
-///////////////////////////////////////////////
-
 		}
 	} catch (MelderError) {
 		Melder_throw (me, U" & ", sound, U": interval not transcribed.");

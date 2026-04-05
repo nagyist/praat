@@ -1546,6 +1546,9 @@ struct ggml_context * ggml_init(struct ggml_init_params params) {
 
     struct ggml_context * ctx = GGML_MALLOC(sizeof(struct ggml_context));
 
+	GGML_LOG_INFO("ggml_init: asked to allocate %u bytes, mem_buffer = %p\n",
+			(unsigned)params.mem_size, (void *)params.mem_buffer);
+
     // allow to call ggml_init with 0 size
     if (params.mem_size == 0) {
         params.mem_size = GGML_MEM_ALIGN;
@@ -1562,6 +1565,8 @@ struct ggml_context * ggml_init(struct ggml_init_params params) {
         /*.objects_begin      =*/ NULL,
         /*.objects_end        =*/ NULL,
     };
+	GGML_LOG_INFO("ggml_init: going to allocate %u bytes, mem_buffer = %p\n",
+			(unsigned)ctx->mem_size, (void *)ctx->mem_buffer);
 
     GGML_ASSERT(ctx->mem_buffer != NULL);
 
