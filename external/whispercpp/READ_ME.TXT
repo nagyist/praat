@@ -199,6 +199,16 @@ is changed to these lines:
 		}
 ```
 
+2.2.5. Endianness
+-----------------
+Replace any occurrences of
+```
+	#if defined(WHISPER_BIG_ENDIAN)
+```
+with
+```
+	#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+```
 
 3. Bringing Silero-VAD model to Praat source code.
 --------------------------------------------------
