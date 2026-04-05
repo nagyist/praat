@@ -38,7 +38,7 @@
 #include <codecvt>
 #endif
 
-#if defined(WHISPER_BIG_ENDIAN)
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 template<typename T>
 static T byteswap(T value) {
     T value_swapped;

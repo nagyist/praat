@@ -2389,6 +2389,9 @@ void praat_run () {
 		Check here at compile time that these are #defined,
 		and check here at runtime that they have the correct value.
 	*/
+	#if ! defined (__BYTE_ORDER__) || ! defined (__ORDER_BIG_ENDIAN__) || ! defined (__ORDER_LITTLE_ENDIAN__)
+		#error __BYTE_ORDER__, __ORDER_BIG_ENDIAN__ and __ORDER_LITTLE_ENDIAN__ should be #defined
+	#endif
 	#if ! defined (WORDS_BIGENDIAN)   // FLAC, MAD, Lame
 		#error WORDS_BIGENDIAN should be #defined
 	#endif

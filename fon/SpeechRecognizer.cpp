@@ -203,7 +203,7 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound,
 	/*
 		Set Whisper parameters.
 	*/
-	whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_GREEDY);
+	whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_BEAM_SEARCH);
 	params.token_timestamps = true;   // must be true to use t0 and t1 (non-DTW) token timestamps
 	if (useVad) {
 		params.vad = true;   // enable Silero VAD (Voice Activity Detection used to chop away the silences)
