@@ -613,9 +613,8 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				token_tmax = (token_tmax + token_tmin) / 2;
 				allTokens [i]. tmax = token_tmax;
 			}
-			if (endsWithPunctuation (token_text)) {   // if ends with any punctuation, strip it
-				integer length_token_text = Melder_length (token_text);
-				Melder_assert (length_token_text > 0);
+			integer length_token_text = Melder_length (token_text);
+			while (length_token_text > 0 && endsWithPunctuation (token_text)) {   // strip ALL trailing punctuation (e.g., all dots in ...)
 				token_text [length_token_text - 1] = U'\0';
 				-- length_token_text;
 			}
@@ -623,12 +622,6 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			/*
 				Create word-level segment.
 			*/
-			// (making sure there are no zero-length word segments) - this creates problems
-			// if (isNewWord && token_tmin == token_tmax && words.size > 0) {
-			// 	double prev_tmax = (words [words.size] .tmin + token_tmin) / 2;   // steal half of the previous interval
-			// 	words [words.size] .tmax = prev_tmax;
-			// 	token_tmin = prev_tmax;
-			// }
 			Melder_assert (token_tmax >= token_tmin);
 			if ((isNewWord || words.size == 0) && token_tmax > token_tmin) {   // new word
 				WhisperSegment *word = words.append();
