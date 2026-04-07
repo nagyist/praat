@@ -91,7 +91,8 @@ the behaviour of Praat will temporarily change in the following ways:
 181: read and write native-endian real64
 900: use DG Meta Serif Science instead of Palatino
 1264: Mac: Sound_record_fixedTime uses microphone "FW Solo (1264)"
-2001: trace timing for Whispercpp
+2001: trace timing for whisper.cpp
+2002: use greedy sampling strategy for whisper.cpp (instead of the beam search)
 
 (negative values are for David)
 

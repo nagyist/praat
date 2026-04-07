@@ -195,6 +195,7 @@ static std::vector <float> resampleForWhisper (constSound sound) {
 
 static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound,
 		bool useVad, const SileroVadParams &sileroVadParams) {
+	//TRACE
 	/*
 		Prepare sound for Whispercpp.
 	*/
@@ -203,7 +204,10 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound,
 	/*
 		Set Whisper parameters.
 	*/
-	whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_BEAM_SEARCH);
+	whisper_sampling_strategy sampling_strategy =
+			Melder_debug == 2002 ? WHISPER_SAMPLING_GREEDY : WHISPER_SAMPLING_BEAM_SEARCH;
+	trace (U"Sampling strategy = ", sampling_strategy == WHISPER_SAMPLING_GREEDY ? U"greedy" : U"beam search");
+	whisper_full_params params = whisper_full_default_params (sampling_strategy);
 	params.token_timestamps = true;   // must be true to use t0 and t1 (non-DTW) token timestamps
 	if (useVad) {
 		params.vad = true;   // enable Silero VAD (Voice Activity Detection used to chop away the silences)
@@ -609,9 +613,8 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 				token_tmax = (token_tmax + token_tmin) / 2;
 				allTokens [i]. tmax = token_tmax;
 			}
-			if (endsWithPunctuation (token_text)) {   // if ends with any punctuation, strip it
-				integer length_token_text = Melder_length (token_text);
-				Melder_assert (length_token_text > 0);
+			integer length_token_text = Melder_length (token_text);
+			while (length_token_text > 0 && endsWithPunctuation (token_text)) {   // strip ALL trailing punctuation (e.g., all dots in ...)
 				token_text [length_token_text - 1] = U'\0';
 				-- length_token_text;
 			}
@@ -619,12 +622,6 @@ WhisperTranscription SpeechRecognizer_recognize (SpeechRecognizer me, constSound
 			/*
 				Create word-level segment.
 			*/
-			// (making sure there are no zero-length word segments) - this creates problems
-			// if (isNewWord && token_tmin == token_tmax && words.size > 0) {
-			// 	double prev_tmax = (words [words.size] .tmin + token_tmin) / 2;   // steal half of the previous interval
-			// 	words [words.size] .tmax = prev_tmax;
-			// 	token_tmin = prev_tmax;
-			// }
 			Melder_assert (token_tmax >= token_tmin);
 			if ((isNewWord || words.size == 0) && token_tmax > token_tmin) {   // new word
 				WhisperSegment *word = words.append();

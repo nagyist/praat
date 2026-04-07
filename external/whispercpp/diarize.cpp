@@ -62,10 +62,21 @@
 
 #define GGML_FILE_MAGIC 0x67676d6c
 
+/*
+	Maximum size for GGML computation graphs.
+	sincnet_forward builds a graph with 58 nodes (44 nodes and 14 leafs).
+	conv2d_forward builds a graph with 9 nodes (7 nodes and 2 leafs).
+	These numbers were found out by including the following print after ggml_build_forward_expand():
+		GGML_LOG_INFO("sincnet_forward: graph nodes = %d, leafs = %d\n", ggml_graph_n_nodes(gf), gf->n_leafs);
+	These number of nodes are rounded up to the next power of 2.
+*/
+#define SINCNET_MAX_NODES 64
+#define CONV2D_MAX_NODES 16
+
 // ============================================================================
 // Big-endian support
 // ============================================================================
-#if defined(DIARIZE_BIG_ENDIAN)
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 template<typename T>
 static T byteswap(T value) {
 	T swapped;
@@ -464,8 +475,8 @@ static bool sincnet_forward(segmentation_context & sctx,
     auto & model = sctx.model;
     auto & hp = model.hparams;
 
-    ggml_init_params ctx_params = {
-	    512 * 1024 * 1024,
+	ggml_init_params ctx_params = {
+	    ggml_tensor_overhead() * SINCNET_MAX_NODES + ggml_graph_overhead(),
     	nullptr,
     	true
     };
@@ -515,8 +526,9 @@ static bool sincnet_forward(segmentation_context & sctx,
     ggml_set_output(cur);
 
     // Build and compute
-    ggml_cgraph * gf = ggml_new_graph_custom(ctx0, 8192, false);
+    ggml_cgraph * gf = ggml_new_graph_custom(ctx0, SINCNET_MAX_NODES, false);
     ggml_build_forward_expand(gf, cur);
+	//GGML_LOG_INFO("sincnet_forward: graph nodes = %d, leafs = %d\n", ggml_graph_n_nodes(gf), gf->n_leafs);
 
     ggml_gallocr_t galloc = ggml_gallocr_new(ggml_backend_get_default_buffer_type(sctx.backend));
     ggml_gallocr_alloc_graph(galloc, gf);
@@ -1098,7 +1110,8 @@ static bool conv2d_forward(ggml_backend_t backend, ggml_tensor * weight,
     OH = (IH + 2*padding - (int)weight->ne[1]) / stride + 1;
     OW = (IW + 2*padding - (int)weight->ne[0]) / stride + 1;
 
-    ggml_init_params ctx_params = { 256 * 1024 * 1024, nullptr, true };
+    ggml_init_params ctx_params = { ggml_tensor_overhead() * CONV2D_MAX_NODES + ggml_graph_overhead(),
+    		nullptr, true };
     ggml_context * ctx0 = ggml_init(ctx_params);
 
     ggml_tensor * inp = ggml_new_tensor_4d(ctx0, GGML_TYPE_F32, IW, IH, IC, N);
@@ -1106,8 +1119,9 @@ static bool conv2d_forward(ggml_backend_t backend, ggml_tensor * weight,
     ggml_tensor * conv_out = ggml_conv_2d(ctx0, weight, inp, stride, stride, padding, padding, 1, 1);
     ggml_set_name(conv_out, "conv_out"); ggml_set_output(conv_out);
 
-    ggml_cgraph * gf = ggml_new_graph_custom(ctx0, 4096, false);
+    ggml_cgraph * gf = ggml_new_graph_custom(ctx0, CONV2D_MAX_NODES, false);
     ggml_build_forward_expand(gf, conv_out);
+	//GGML_LOG_INFO("conv2d_forward: graph nodes = %d, leafs = %d\n", ggml_graph_n_nodes(gf), gf->n_leafs);
     ggml_gallocr_t galloc = ggml_gallocr_new(ggml_backend_get_default_buffer_type(backend));
     ggml_gallocr_alloc_graph(galloc, gf);
     ggml_backend_tensor_set(inp, input, 0, N * IC * IH * IW * sizeof(float));
