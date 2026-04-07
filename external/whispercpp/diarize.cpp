@@ -76,7 +76,7 @@
 // ============================================================================
 // Big-endian support
 // ============================================================================
-#if defined(DIARIZE_BIG_ENDIAN)
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 template<typename T>
 static T byteswap(T value) {
 	T swapped;
