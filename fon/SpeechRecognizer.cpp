@@ -195,6 +195,7 @@ static std::vector <float> resampleForWhisper (constSound sound) {
 
 static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound,
 		bool useVad, const SileroVadParams &sileroVadParams) {
+	//TRACE
 	/*
 		Prepare sound for Whispercpp.
 	*/
@@ -203,7 +204,10 @@ static void SpeechRecognizer_runWhisper (SpeechRecognizer me, constSound sound,
 	/*
 		Set Whisper parameters.
 	*/
-	whisper_full_params params = whisper_full_default_params (WHISPER_SAMPLING_BEAM_SEARCH);
+	whisper_sampling_strategy sampling_strategy =
+			Melder_debug == 2002 ? WHISPER_SAMPLING_GREEDY : WHISPER_SAMPLING_BEAM_SEARCH;
+	trace (U"Sampling strategy = ", sampling_strategy == WHISPER_SAMPLING_GREEDY ? U"greedy" : U"beam search");
+	whisper_full_params params = whisper_full_default_params (sampling_strategy);
 	params.token_timestamps = true;   // must be true to use t0 and t1 (non-DTW) token timestamps
 	if (useVad) {
 		params.vad = true;   // enable Silero VAD (Voice Activity Detection used to chop away the silences)
