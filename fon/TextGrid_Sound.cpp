@@ -486,11 +486,6 @@ void TextGrid_Sound_transcribeInterval (
 			Melder_throw (U"Interval ", intervalNumber, U" does not exist.");
 		if (str32str (headTier -> name.get(), U"/"))
 			Melder_throw (U"The current tier already has a slash (\"/\") in its name. Cannot create a word tier from it.");
-		if (diarize && original_tmax - original_tmin < 10.0) {
-			Melder_warning (U"Sound too short for diarization (", Melder_fixed (original_tmax - original_tmin, 2),
-						U" seconds). At least 10 seconds required. Skipping diarization.");
-			diarize = false;
-		}
 
 		trace (U"tier ", headTierNumber, U" interval ", intervalNumber,	U" (", original_tmin, U" .. ", original_tmax, U")");
 		autoSound soundPart = Sound_extractPart (sound, original_tmin, original_tmax,
