@@ -4459,7 +4459,7 @@ static void do_runScriptWithForm () {
 		Melder_throw (U"Cannot call runScriptWithForm() more than ", MAXIMUM_NUMBER_OF_LEVELS, U" levels deep.");
 	}
 	try {
-		praat_runScriptWithForm (fileName->getString());
+		praat_runScriptWithForm (fileName->getString(), false);   // TODO: inherit trust
 		theLevel -= 1;
 	} catch (MelderError) {
 		theLevel -= 1;
