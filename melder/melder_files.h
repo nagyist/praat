@@ -73,7 +73,7 @@ bool MelderFolder_isNull (MelderFolder folder);
 void MelderFolder_getFile (MelderFolder parent, conststring32 fileName, MelderFile file);
 void MelderFolder_relativePathToFile (MelderFolder folder, conststring32 path, MelderFile file);
 void MelderFile_getParentFolder (MelderFile file, MelderFolder parent);
-void MelderFolder_getParentFolder (MelderFolder file, MelderFolder parent);
+void MelderFolder_getParentFolder (MelderFolder subfolder, MelderFolder parent);
 bool MelderFolder_isDesktop (MelderFolder folder);
 void MelderFolder_getSubfolder (MelderFolder parentFolder, conststring32 subfolderName, MelderFolder subfolder);
 void Melder_rememberShellDirectory ();
