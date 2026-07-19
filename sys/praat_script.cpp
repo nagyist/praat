@@ -858,11 +858,11 @@ static void secondPassThroughScript (UiForm sendingForm, integer /* narg */, Sta
 	Interpreter_getArgumentsFromDialog (interpreter.get(), sendingForm);
 	autoPraatBackground background;
 	interpreterStack -> emptyAll ();
-	Interpreter_rememberScript (interpreter.get(), & file, false);
+	Interpreter_rememberScript (interpreter.get(), & file, false);   // will be OR-ed
 	interpreterStack -> runDown (interpreter.move(), text.move(), false);
 }
 
-static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterOwningEditor, EditorCommand optionalCommand) {
+static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterOwningEditor, EditorCommand optionalCommand, bool fullTrust) {
 	static autoInterpreterStack interpreterStack;
 	//UiPause_cleanUp ();   // TODO: needed?
 	try {
@@ -893,7 +893,7 @@ static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterO
 			optionalInterpreterOwningEditor,
 			file   // so that callee-relative file names can be used inside the script
 		);
-		Interpreter_rememberScript (interpreter.get(), file, false);   // this is early, but possible here because the name of the script cannot change
+		Interpreter_rememberScript (interpreter.get(), file, fullTrust);   // this is early, but possible here because the name of the script cannot change (and NEEDED for "passing" to second pass)
 
 		const integer numberOfParameters = Interpreter_readParameters (interpreter.get(), text.get());
 		if (numberOfParameters > 0) {
@@ -911,7 +911,7 @@ static void firstPassThroughScript (MelderFile file, Editor optionalInterpreterO
 			{// scope
 				autoPraatBackground background;
 				interpreterStack -> emptyAll ();
-				Interpreter_rememberScript (interpreter.get(), file, false);
+				//Interpreter_rememberScript (interpreter.get(), file, false);
 				interpreterStack -> runDown (interpreter.move(), text.move(), false);
 			}
 		}
@@ -926,13 +926,13 @@ void DO_RunTheScriptFromAnyAddedMenuCommand (UiForm /* sendingForm_dummy */, int
 {
 	structMelderFile file { };
 	Melder_relativePathToFile (scriptPath, & file);
-	firstPassThroughScript (& file, optionalInterpreterOwningEditor, nullptr);
+	firstPassThroughScript (& file, optionalInterpreterOwningEditor, nullptr, false);
 }
 
-void praat_runScriptWithForm (conststring32 fileName) {
+void praat_runScriptWithForm (conststring32 fileName, bool fullTrust) {
 	structMelderFile file { };
 	Melder_relativePathToFile (fileName, & file);
-	firstPassThroughScript (& file, nullptr, nullptr);
+	firstPassThroughScript (& file, nullptr, nullptr, fullTrust);
 }
 
 void praat_executeScriptFromEditorCommand (Editor interpreterOwningEditor, EditorCommand command, conststring32 scriptPath) {
@@ -941,7 +941,7 @@ void praat_executeScriptFromEditorCommand (Editor interpreterOwningEditor, Edito
 	Melder_assert (command -> d_editor == interpreterOwningEditor);
 	structMelderFile file { };
 	Melder_relativePathToFile (scriptPath, & file);
-	firstPassThroughScript (& file, interpreterOwningEditor, command);
+	firstPassThroughScript (& file, interpreterOwningEditor, command, false);
 }
 
 /* End of file praat_script.cpp */

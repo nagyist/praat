@@ -2720,7 +2720,7 @@ void praat_run () {
 			*/
 			autoPraatBackground background;   // to e.g. make audio synchronous
 			try {
-				praat_runScriptWithForm (theCurrentPraatApplication -> batchName.string);
+				praat_runScriptWithForm (theCurrentPraatApplication -> batchName.string, praatP.fullTrust);
 			} catch (MelderError) {
 				Melder_flushError ();
 			}
