@@ -2867,6 +2867,18 @@ DO
 	CREATE_MULTIPLE_END
 }
 
+FORM (NEW_Sound_readWithAdjacentAnnotationFiles_cgn, U"Read with adjacent annotations (CGN)", U"Read with adjacent annotation files (CGN)...") {
+	INFILE (soundFileName, U"Sound file name", U"/Volumes/CGN/comp-a/vl/fv400061.wav")
+	OK
+DO
+	CREATE_MULTIPLE
+		autoTextGrid textgrid;
+		autoSound sound = Sound_readWithAdjacentAnnotationFiles_cgn (soundFileName, & textgrid);
+		praat_new (sound.move());
+		praat_new (textgrid.move());
+	CREATE_MULTIPLE_END
+}
+
 // MARK: - TRANSITION
 
 DIRECT (NEW_Transition_conflate) {
@@ -3123,6 +3135,8 @@ void praat_uvafon_init () {
 				nullptr, 1, NEW_Sound_readWithAdjacentAnnotationFiles_buckeye);
 		praat_addMenuCommand (U"Objects", U"Open", U"Read Sound with adjacent annotation files (TIMIT)...",
 				nullptr, 1, NEW_Sound_readWithAdjacentAnnotationFiles_timit);
+		praat_addMenuCommand (U"Objects", U"Open", U"Read Sound with adjacent annotation files (Corpus Gesproken Nederlands)...",
+				nullptr, 1, NEW_Sound_readWithAdjacentAnnotationFiles_cgn);
 
 	praat_addMenuCommand (U"Objects", U"ApplicationHelp", U"Praat Intro", nullptr, '?', HELP_PraatIntro);
 	#ifndef macintosh
