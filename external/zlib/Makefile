@@ -1,10 +1,10 @@
 # Makefile of the library "external/zlib"
-# Paul Boersma, 18 July 2026
+# Paul Boersma, 19 July 2026
 
 CPPFLAGS += -I ../../melder
 
 OBJECTS = adler32.o crc32.o gzread.o gzlib.o gzclose.o \
-	inflate.o inffast.o inftrees.co zutil.o
+	inflate.o inffast.o inftrees.o zutil.o
 
 .PHONY: all clean
 
