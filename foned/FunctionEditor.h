@@ -116,6 +116,17 @@ Thing_define (FunctionEditor, Editor) {
 		);
 		Graphics_setWindow (our graphics.get(), 0.0, 1.0, 0.0, 1.0);
 	}
+	double functionViewerRight_WC () const {
+		double x1WC_old, x2WC_old, y1WC_old, y2WC_old;
+		Graphics_inqWindow (our graphics.get(), & x1WC_old, & x2WC_old, & y1WC_old, & y2WC_old);
+		Graphics_setWindow (our graphics.get(), our dataLeft_pxlt(), our dataRight_pxlt(), 0.0, 1.0);
+		integer xDC_viewerRight, yDC_dummy;
+		Graphics_WCtoDC (our graphics.get(), our _functionViewerRight, 0.0, & xDC_viewerRight, & yDC_dummy);
+		Graphics_setWindow (our graphics.get(), x1WC_old, x2WC_old, y1WC_old, y2WC_old);
+		double xright, yright_dummy;
+		Graphics_DCtoWC (our graphics.get(), xDC_viewerRight, yDC_dummy, & xright, & yright_dummy);
+		return xright;
+	}
 
 	GuiText textArea;   // optional text at top
 	bool clickWasModifiedByShiftKey, clickWasModifiedByOptionKey, clickWasModifiedByCommandKey;   // information for drag-and-drop and for start of play

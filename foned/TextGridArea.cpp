@@ -441,6 +441,7 @@ void structTextGridArea :: v_drawInside () {
 	const enum kGraphics_font oldFont = Graphics_inqFont (our graphics());
 	const double oldFontSize = Graphics_inqFontSize (our graphics());
 	Graphics_setWindow (our graphics(), our startWindow(), our endWindow(), 0.0, 1.0);
+	const double xright = our functionViewerRight_WC();
 	for (integer itier = 1; itier <= numberOfTiers; itier ++) {
 		const Function anyTier = our textGrid() -> tiers->at [itier];
 		const bool tierIsSelected = ( itier == our selectedTier );
@@ -463,19 +464,21 @@ void structTextGridArea :: v_drawInside () {
 		Graphics_text (our graphics(), our startWindow(), 0.5,   tierIsSelected ? U"☞ " : U"", itier);
 		Graphics_setFontSize (our graphics(), oldFontSize);
 		if (anyTier -> name && anyTier -> name [0]) {
-			Graphics_setTextAlignment (our graphics(), Graphics_LEFT,
-					our instancePref_showNumberOf() == kTextGridArea_showNumberOf::NOTHING ? Graphics_HALF : Graphics_BOTTOM);
-			Graphics_text (our graphics(), our endWindow(), 0.5, anyTier -> name.get());
+			Graphics_setTextAlignment (our graphics(), Graphics_LEFT, Graphics_HALF);
+			Graphics_rectangleText_maximalFit (our graphics(), our endWindow(), xright, 0.05, 0.5,
+					our instancePref_showNumberOf() == kTextGridArea_showNumberOf::NOTHING ? 0.0 : 0.5, 1.0, 0.01, 0.1, anyTier -> name.get());
 		}
 		if (our instancePref_showNumberOf() != kTextGridArea_showNumberOf::NOTHING) {
-			Graphics_setTextAlignment (our graphics(), Graphics_LEFT, Graphics_TOP);
+			Graphics_setTextAlignment (our graphics(), Graphics_LEFT, Graphics_HALF);
 			if (our instancePref_showNumberOf() == kTextGridArea_showNumberOf::INTERVALS_OR_POINTS) {
 				const integer count = ( isIntervalTier ? ((IntervalTier) anyTier) -> intervals.size : ((TextTier) anyTier) -> points.size );
 				const integer position = ( itier == our selectedTier ? ( isIntervalTier ? getSelectedInterval (this) : getSelectedPoint (this) ) : 0 );
 				if (position)
-					Graphics_text (our graphics(), our endWindow(), 0.5,   U"(", position, U"/", count, U")");
+					Graphics_rectangleText_maximalFit (our graphics(), our endWindow(), xright, 0.05, 0.5,
+							0.0, 0.5, 0.01, 0.1, Melder_cat (U"(", position, U"/", count, U")"));
 				else
-					Graphics_text (our graphics(), our endWindow(), 0.5,   U"(", count, U")");
+					Graphics_rectangleText_maximalFit (our graphics(), our endWindow(), xright, 0.05, 0.5,
+							0.0, 0.5, 0.01, 0.1, Melder_cat (U"(", count, U")"));
 			} else {
 				Melder_assert (our instancePref_showNumberOf() == kTextGridArea_showNumberOf::NONEMPTY_INTERVALS_OR_POINTS);
 				integer count = 0;
@@ -496,7 +499,8 @@ void structTextGridArea :: v_drawInside () {
 							count ++;
 					}
 				}
-				Graphics_text (our graphics(), our endWindow(), 0.5,   U"(##", count, U"#)");
+				Graphics_rectangleText_maximalFit (our graphics(), our endWindow(), xright, 0.05, 0.5,
+						0.0, 0.5, 0.01, 0.1, Melder_cat (U"(##", count, U"#)"));
 			}
 		}
 
